@@ -1,0 +1,67 @@
+.sidebar {
+  background: #FFFFFF;
+  width: 256px;
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid #E5E7EB;
+  transition: width 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.closed {
+  width: 64px;
+}
+
+.navList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  flex: 1;
+}
+
+.navItem {
+  margin: 0;
+}
+
+.navLink {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: #374151;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.navLink:hover {
+  background-color: #F3F4F6;
+  color: #1F2937;
+}
+
+.navLink.active {
+  background-color: #EEF2FF;
+  color: #4F46E5;
+}
+
+.toggle {
+  margin: 16px;
+  padding: 10px;
+  background: #F9FAFB;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  align-self: center;
+  transition: transform 0.3s;
+}
+
+.toggle:hover {
+  background: #F3F4F6;
+}
+
+.closed + .toggle,
+.toggle + .closed & {
+  transform: rotate(180deg);
+}
