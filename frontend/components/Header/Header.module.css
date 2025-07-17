@@ -1,0 +1,108 @@
+/* frontend/components/Header/Header.module.css */
+.header {
+  background-color: #ffffff;
+  padding: 24px; /* p-6 */
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom-left-radius: 24px; /* rounded-bl-3xl */
+  flex-shrink: 0; /* Garante que o header não encolha */
+}
+
+.searchBar {
+  position: relative;
+  flex-grow: 1;
+  max-width: 448px; /* max-w-md */
+  margin-left: 24px; /* Adiciona margem à esquerda */
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px; /* left-3 */
+  top: 50%;
+  transform: translateY(-50%); /* -translate-y-1/2 */
+  color: #9ca3af; /* gray-400 */
+}
+
+.searchInput {
+  width: 100%;
+  padding-left: 40px; /* pl-10 */
+  padding-right: 16px; /* pr-4 */
+  padding-top: 8px; /* py-2 */
+  padding-bottom: 8px; /* py-2 */
+  border-radius: 12px; /* rounded-xl */
+  background-color: #f3f4f6; /* gray-100 */
+  border: 1px solid #e5e7eb; /* border border-gray-200 */
+  outline: none;
+}
+
+.searchInput:focus {
+  box-shadow: 0 0 0 2px #6366f1; /* focus:ring-2 focus:ring-indigo-500 */
+}
+
+.headerActions {
+  display: flex;
+  align-items: center;
+  gap: 16px; /* gap-4 */
+  margin-left: auto; /* Empurra para a direita */
+}
+
+.createButton {
+  background-color: #4f46e5; /* indigo-600 */
+  color: #ffffff;
+  padding-left: 20px; /* px-5 */
+  padding-right: 20px; /* px-5 */
+  padding-top: 8px; /* py-2 */
+  padding-bottom: 8px; /* py-2 */
+  border-radius: 12px; /* rounded-xl */
+  font-size: 14px; /* text-sm */
+  font-weight: 500; /* font-medium */
+  display: flex;
+  align-items: center;
+  gap: 8px; /* gap-2 */
+  transition: all 200ms ease-in-out; /* transition-colors duration-200 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  border: none;
+  cursor: pointer;
+}
+
+.createButton:hover {
+  background-color: #4338ca; /* indigo-700 */
+}
+
+.iconButton {
+  padding: 12px; /* p-3 */
+  border-radius: 12px; /* rounded-xl */
+  background-color: #f3f4f6; /* gray-100 */
+  color: #4b5563; /* gray-600 */
+  transition: all 200ms ease-in-out; /* transition-colors duration-200 */
+  border: none;
+  cursor: pointer;
+}
+
+.iconButton:hover {
+  background-color: #e5e7eb; /* gray-200 */
+}
+
+.userAvatar {
+  width: 40px; /* w-10 */
+  height: 40px; /* h-10 */
+  border-radius: 9999px; /* rounded-full */
+  object-fit: cover;
+  border: 2px solid #6366f1; /* border-2 border-indigo-500 */
+}
+
+.sidebarToggleButton { /* Novo botão para toggle da sidebar */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 8px;
+  color: #4b5563;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.sidebarToggleButton:hover {
+  background-color: #e5e7eb;
+}

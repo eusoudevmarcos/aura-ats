@@ -1,0 +1,171 @@
+/* frontend/components/Sidebar/Sidebar.module.css */
+.sidebar {
+  width: 256px; /* w-64 */
+  background-color: #1f2937; /* gray-800 */
+  color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  padding: 24px; /* p-6 */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
+  border-top-right-radius: 24px; /* rounded-r-3xl */
+  border-bottom-right-radius: 24px; /* rounded-r-3xl */
+  transition: width 0.3s ease-in-out; /* Transição para recolher/expandir */
+  flex-shrink: 0; /* Garante que não encolha por padrão */
+}
+
+.sidebarCollapsed {
+  width: 80px; /* Largura quando recolhida */
+  align-items: center;
+}
+
+.sidebarLogo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 40px; /* mb-10 */
+  width: 100%; /* Para centralizar o conteúdo dentro da largura */
+}
+
+.sidebarCollapsed .sidebarLogo {
+  justify-content: center;
+}
+
+.sidebarLogo img {
+  border-radius: 9999px; /* rounded-full */
+  margin-right: 12px; /* mr-3 */
+  flex-shrink: 0; /* Garante que a imagem não encolha */
+}
+
+.sidebarCollapsed .sidebarLogo img {
+  margin-right: 0; /* Remove margem quando recolhida */
+}
+
+.sidebarLogoText {
+  font-size: 28px; /* text-2xl */
+  font-weight: 700; /* font-bold */
+  color: #6366f1; /* indigo-400 */
+  white-space: nowrap; /* Evita quebra de linha */
+  overflow: hidden; /* Esconde texto transbordante */
+  transition: opacity 0.3s ease-in-out;
+}
+
+.sidebarCollapsed .sidebarLogoText {
+  opacity: 0;
+  width: 0; /* Esconde o texto da logo quando recolhida */
+}
+
+.sidebarNav {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px; /* space-y-2 */
+}
+
+.sidebarItem {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* gap-3 */
+  padding: 12px; /* p-3 */
+  border-radius: 8px; /* rounded-lg */
+  font-size: 14px; /* text-sm */
+  font-weight: 500; /* font-medium */
+  transition: all 200ms ease-in-out; /* transition-colors duration-200 */
+  width: 100%;
+  text-align: left;
+  background-color: transparent;
+  border: none;
+  cursor: pointer;
+}
+
+.sidebarCollapsed .sidebarItem {
+  justify-content: center; /* Centraliza ícone quando recolhida */
+  padding: 12px 0; /* Ajusta padding */
+}
+
+.sidebarItemActive {
+  background-color: #4f46e5; /* indigo-600 */
+  color: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+}
+
+.sidebarItem:not(.sidebarItemActive) {
+  color: #9ca3af; /* gray-400 */
+}
+
+.sidebarItem:not(.sidebarItemActive):hover {
+  background-color: #374151; /* gray-700 */
+  color: #ffffff;
+}
+
+.sidebarItem span {
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.sidebarCollapsed .sidebarItem span {
+  opacity: 0;
+  width: 0; /* Esconde o texto do item quando recolhida */
+}
+
+.sidebarFooter {
+  margin-top: auto;
+  padding-top: 24px; /* pt-6 */
+  border-top: 1px solid #374151; /* border-t border-gray-700 */
+}
+
+.sidebarCollapsed .sidebarFooter {
+  padding-top: 16px; /* Ajusta padding */
+  border-top: none; /* Remove borda para um visual mais limpo */
+}
+
+.sidebarUserCard {
+  display: flex;
+  align-items: center;
+  gap: 12px; /* gap-3 */
+  margin-top: 24px; /* mt-6 */
+  padding: 12px; /* p-3 */
+  border-radius: 8px; /* rounded-lg */
+  background-color: #374151; /* gray-700 */
+}
+
+.sidebarCollapsed .sidebarUserCard {
+  justify-content: center;
+  padding: 8px;
+  gap: 0;
+}
+
+.sidebarUserCard img {
+  width: 40px; /* w-10 */
+  height: 40px; /* h-10 */
+  border-radius: 9999px; /* rounded-full */
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.sidebarUserInfo {
+  flex-grow: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.sidebarCollapsed .sidebarUserInfo {
+  opacity: 0;
+  width: 0; /* Esconde info do usuário quando recolhida */
+}
+
+.sidebarCollapsed .chevronDownIcon { /* Esconde o ícone de seta quando recolhida */
+  display: none;
+}
+
+.icon { /* Estilo para os ícones dentro dos itens da sidebar */
+  width: 20px; /* w-5 */
+  height: 20px; /* h-5 */
+  flex-shrink: 0; /* Garante que o ícone não encolha */
+  color: currentColor; /* Usa a cor do texto do item */
+}
+
+.dropdownItem { /* Estilo para itens de dropdown, se implementado */
+  padding-left: 36px; /* Indentação para itens de dropdown */
+}

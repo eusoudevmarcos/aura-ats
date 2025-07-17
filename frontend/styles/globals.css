@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Nunito', sans-serif; /* Usando Nunito como fonte padrão */
+  background-color: #f3f4f6; /* Cor de fundo geral */
+  color: #1f2937; /* Cor de texto padrão */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Estilos para o container principal do dashboard */
+.dashboardContainer {
+  display: flex;
+  min-height: 100vh;
+  background-color: #f3f4f6;
+  color: #1f2937;
+}
+
+/* Estilo para garantir que o conteúdo principal ocupe o espaço restante */
+.mainContentArea {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Estilo para a área de conteúdo principal do dashboard */
+.dashboardMainContent {
+  flex: 1;
+  padding: 32px; /* p-8 */
+  overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
+  background-color: #f3f4f6; /* Fundo da área de conteúdo */
+}
+
+/* Título das seções */
+.sectionTitle {
+  font-size: 30px; /* text-3xl */
+  font-weight: 700; /* font-bold */
+  color: #1f2937; /* gray-800 */
+  margin-bottom: 32px; /* mb-8 */
+}

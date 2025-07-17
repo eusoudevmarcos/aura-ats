@@ -1,60 +1,101 @@
-/* styles/Login.module.css */
+/* frontend/styles/Login.module.css */
+
 .loginContainer {
   display: flex;
-  align-items: center;
   justify-content: center;
-  height: 100vh;
-  background: #f9fafb;
-  padding: 16px;
+  align-items: center;
+  min-height: 100vh;
+  background-color: #f3f4f6; /* Cor de fundo similar ao dashboard */
+  padding: 20px;
 }
 
 .loginBox {
-  background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  padding: 40px 32px;
+  background-color: #ffffff;
+  padding: 40px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 4px 10px -2px rgba(0, 0, 0, 0.04);
   width: 100%;
-  max-width: 400px;
-  text-align: center;
-}
-
-.logo {
-  width: 120px;
-  margin-bottom: 32px;
-}
-
-.form {
+  max-width: 400px; /* Largura máxima do formulário de login */
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  align-items: center; /* Centraliza o conteúdo horizontalmente */
 }
 
-.input {
-  padding: 12px 16px;
-  border: 1px solid #d1d5db;
+.loginLogo {
+  margin-bottom: 30px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.loginLogo img {
+  width: 80px; /* Tamanho da logo */
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.loginLogoText {
+  font-size: 28px;
+  font-weight: 700;
+  color: #6366f1; /* Cor do texto da logo */
+}
+
+.formGroup {
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.formLabel {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #4b5563; /* gray-700 */
+  margin-bottom: 8px;
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px;
   border-radius: 8px;
+  border: 1px solid #d1d5db; /* gray-300 */
   font-size: 16px;
-  transition: border 0.2s ease;
-}
-
-.input:focus {
+  color: #1f2937; /* gray-900 */
   outline: none;
-  border-color: #7c3aed;
-  box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.2);
+  transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
 }
 
-.button {
-  background-color: #5b21b6;
+.formInput:focus {
+  border-color: #4f46e5; /* indigo-500 */
+  box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.2); /* ring-indigo-200 */
+}
+
+.loginButton {
+  width: 100%;
+  padding: 12px;
+  border-radius: 8px;
+  background-color: #4f46e5; /* indigo-600 */
   color: #ffffff;
   font-size: 16px;
   font-weight: 600;
-  padding: 12px;
   border: none;
-  border-radius: 8px;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: background-color 0.2s ease-in-out;
+  margin-top: 20px;
 }
 
-.button:hover {
-  background-color: #4c1d95;
+.loginButton:hover {
+  background-color: #4338ca; /* indigo-700 */
+}
+
+.forgotPassword {
+  margin-top: 15px;
+  font-size: 14px;
+  color: #6366f1; /* indigo-600 */
+  text-decoration: none;
+}
+
+.forgotPassword:hover {
+  text-decoration: underline;
 }
