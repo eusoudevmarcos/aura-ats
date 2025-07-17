@@ -1,0 +1,120 @@
+/* src/modules/Home/ServicesSection/ServicesSection.module.css */
+.sectionContainer {
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: var(--secondary-color); /* Fundo branco para contraste */
+  color: var(--text-color-primary);
+}
+
+.sectionContainer h2 {
+  color: var(--primary-color);
+  font-size: var(--font-size-h2);
+  margin-bottom: var(--spacing-md);
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xxl);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.servicesGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 3 colunas em telas grandes, responsivo */
+  gap: var(--spacing-xl); /* Espaçamento entre os cards */
+  margin-top: var(--spacing-lg);
+}
+
+.serviceCard {
+  background-color: var(--bg-color-light); /* Fundo claro para o card */
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--box-shadow-sm);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.serviceCard:hover {
+  transform: translateY(-5px);
+  box-shadow: var(--box-shadow-md);
+}
+
+.iconWrapper {
+  font-size: var(--font-size-xxxl); /* Tamanho grande para o ícone */
+  color: var(--accent-color); /* Cor de destaque para os ícones */
+  margin-bottom: var(--spacing-md);
+}
+
+.serviceCard h3 {
+  font-size: var(--font-size-h4);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-sm);
+}
+
+.serviceCard p {
+  font-size: var(--font-size-md);
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+  margin-bottom: var(--spacing-md);
+  flex-grow: 1; /* Permite que o parágrafo ocupe o espaço restante */
+}
+
+.serviceCard ul {
+  list-style: none; /* Remove marcadores de lista padrão */
+  padding: 0;
+  text-align: left; /* Alinha os itens da lista à esquerda */
+  width: 100%;
+  margin-top: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+}
+
+.serviceCard ul li {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xxs);
+  display: flex; /* Para alinhar o ícone com o texto */
+  align-items: center;
+}
+
+.serviceCard ul li::before {
+  content: '✓'; /* Checkmark como marcador */
+  color: var(--primary-color); /* Cor do checkmark */
+  margin-right: var(--spacing-xs);
+  font-weight: bold;
+  flex-shrink: 0; /* Evita que o checkmark encolha */
+}
+
+.ctaButton {
+    margin-top: var(--spacing-xl);
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 992px) {
+  .servicesGrid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajusta para 2 colunas em tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  .sectionContainer {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  .sectionContainer h2 {
+    font-size: var(--font-size-h3);
+  }
+  .subtitle {
+    font-size: var(--font-size-md);
+  }
+  .servicesGrid {
+    grid-template-columns: 1fr; /* Uma única coluna em celulares */
+  }
+}

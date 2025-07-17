@@ -1,0 +1,77 @@
+/* src/components/Modal/Modal.module.css */
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.7);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000; /* Garante que o modal fique acima de tudo */
+  padding: var(--spacing-md); /* Padding para telas pequenas */
+}
+
+.modalContent {
+  background-color: var(--secondary-color);
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  position: relative;
+  max-width: 600px; /* Largura máxima do modal */
+  width: 100%;
+  box-shadow: var(--box-shadow-lg);
+  animation: fadeInScale 0.3s ease-out; /* Animação de entrada */
+}
+
+.closeButton {
+  position: absolute;
+  top: var(--spacing-sm);
+  right: var(--spacing-sm);
+  background: none;
+  border: none;
+  font-size: var(--font-size-xl);
+  color: var(--text-color-secondary);
+  cursor: pointer;
+  transition: color var(--transition-speed);
+}
+
+.closeButton:hover {
+  color: var(--primary-color);
+}
+
+.modalTitle {
+  font-size: var(--font-size-h4);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-color-primary);
+  text-align: center;
+}
+
+.modalBody {
+  /* Estilos para o conteúdo do modal */
+  max-height: 70vh; /* Limita a altura do conteúdo se for muito grande */
+  overflow-y: auto; /* Adiciona scroll se o conteúdo exceder a altura */
+  padding-right: var(--spacing-xxs); /* Para evitar que o scrollbar sobreponha o conteúdo */
+}
+
+/* Animação de entrada do modal */
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* Media Queries */
+@media (max-width: 600px) {
+  .modalContent {
+    padding: var(--spacing-md);
+  }
+  .modalTitle {
+    font-size: var(--font-size-h4);
+  }
+}
