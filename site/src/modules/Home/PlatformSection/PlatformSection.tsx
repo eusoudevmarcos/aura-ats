@@ -62,7 +62,7 @@ const PlatformSection: React.FC = () => {
       </div>
 
       {/* Modal do Vídeo Demonstrativo */}
-      <Modal isOpen={isVideoModalOpen} onClose={closeVideoModal} title="Plataforma Take It: Tour Completo">
+      <Modal isOpen={isVideoModalOpen} onClose={closeVideoModal} title="Plataforma Aura: Tour Completo">
         <div className={styles.videoModalContent}>
           {/* O iframe do YouTube ou Vimeo para o vídeo demonstrativo */}
           <div className={styles.videoWrapper}>
@@ -70,7 +70,7 @@ const PlatformSection: React.FC = () => {
               width="560"
               height="315"
               src="https://www.youtube.com/embed/SUA_Link_Do_Seu_Video_Aqui?autoplay=1" // Substitua pelo link real do seu vídeo e adicione ?autoplay=1
-              title="Vídeo Demonstrativo Plataforma Take It"
+              title="Vídeo Demonstrativo Plataforma Aura"
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
               allowFullScreen
@@ -86,7 +86,7 @@ const PlatformSection: React.FC = () => {
       </Modal>
 
       {/* Modal de Planos de Contratação */}
-      <Modal isOpen={isPlansModalOpen} onClose={closePlansModal} title="Escolha seu Plano Take It">
+      <Modal isOpen={isPlansModalOpen} onClose={closePlansModal} title="Escolha seu Plano Aura">
         <div className={styles.plansModalContent}>
           <p className={styles.modalDescription}>
             Selecione o plano que melhor se adapta às suas necessidades de busca por profissionais médicos.
