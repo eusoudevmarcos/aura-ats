@@ -9,7 +9,7 @@ import PlatformSection from '@/modules/Home/PlatformSection/PlatformSection';
 import AboutSection from '@/modules/Home/AboutSection/AboutSection';
 import ServicesSection from '@/modules/Home/ServicesSection/ServicesSection';
 import PricingSection from '@/modules/Home/PricingSection/PricingSection';
-import SuccessCasesSection from '@/modules/Home/SuccessCasesSection/SuccessCasesSection'; // <-- IMPORTE AQUI
+import SuccessCasesSection from '@/modules/Home/SuccessCasesSection/SuccessCasesSection'; 
 import ContactSection from '@/modules/Home/ContactSection/ContactSection';
 
 const HomePage: React.FC = () => {
@@ -18,7 +18,6 @@ const HomePage: React.FC = () => {
       <Head>
         <title>Take It - Recrutamento Especializado para Saúde, TI e Executivos</title>
         <meta name="description" content="Aura: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade." />
-        {/* Você pode adicionar mais meta tags para SEO aqui */}
       </Head>
 
       {/* As seções da sua Single Page Application, cada uma com um ID único */}

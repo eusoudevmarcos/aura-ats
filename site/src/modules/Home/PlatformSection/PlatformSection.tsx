@@ -36,7 +36,7 @@ const PlatformSection: React.FC = () => {
       <div className={styles.contentGrid}>
         <div className={styles.imageWrapper}>
           <Image
-            src="/images/platform-overview.jpg" // Crie uma imagem para a visão geral da plataforma
+            src="/images/platform-overview.png" // Crie uma imagem para a visão geral da plataforma
             alt="Visão geral da plataforma Take It de médicos"
             width={600}
             height={400}

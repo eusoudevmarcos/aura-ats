@@ -56,11 +56,11 @@ const Header: React.FC = () => {
         <div className={styles.logo}>
           <Link href="/" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'hero-section')}>
             <Image
-              src="../../images/auralogoh.svg"
-              alt="Aura Logo"
-              width={120}
-              height={40}
-              priority
+              src="/images/auralogoh.svg"
+              alt="Logo"
+              width={150}
+              height={50}
+              style={{ objectFit: 'contain' }}
             />
           </Link>
         </div>

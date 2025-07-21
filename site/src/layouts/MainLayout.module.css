@@ -57,3 +57,13 @@
     padding: var(--spacing-md);
   }
 }
+
+.container {
+  padding-top: var(--header-height); /* já está ok! */
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding-top: var(--header-height-mobile); /* já está ok! */
+  }
+}

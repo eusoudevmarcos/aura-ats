@@ -1,26 +1,27 @@
-/* src/components/Header/Header.module.css */
 .header {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   background-color: var(--secondary-color); 
-  padding: 0;
   z-index: 1000;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
-  box-shadow: var(--box-shadow-sm); /* Sombra suave padrão */
+  box-shadow: var(--box-shadow-sm);
+  transition: background-color 0.3s ease, box-shadow 0.3s ease;
+  height: 64px; /* altura fixa para facilitar offset */
+  display: flex;
+  align-items: center;
 }
 
 .header.scrolled {
-  background-color: var(--secondary-color); /* Pode manter o mesmo ou mudar levemente */
-  box-shadow: var(--box-shadow-md); /* Sombra um pouco mais forte ao rolar */
-  padding: var(--spacing-sm) 0;
+  background-color: var(--secondary-color);
+  box-shadow: var(--box-shadow-md);
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 var(--spacing-xl);
+  width: 100%;
+  padding: 0 var(--spacing-sm);
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -30,28 +31,31 @@
   display: flex;
   align-items: center;
   cursor: pointer;
-  padding: 0 20px 0 0;
 }
 
 .logo img {
+  padding-top: 5px;
   height: auto;
+  max-height: 150px;
+  object-fit: contain;
 }
 
 .nav ul {
   list-style: none;
   display: flex;
-  gap: var(--spacing-xl);
+  gap: var(--spacing-lg);
   margin: 0;
   padding: 0;
 }
 
 .nav a {
-  color: var(--text-color-primary); /* Links sempre escuros no header branco */
+  color: var(--text-color-primary);
   text-decoration: none;
   font-weight: 600;
-  font-size: var(--font-size-md);
-  transition: color 0.3s ease;
+  font-size: 1.1rem; /* 18px */
   position: relative;
+  padding: 10px 0;
+  display: block;
 }
 
 .nav a:hover {
@@ -63,7 +67,7 @@
   position: absolute;
   width: 0;
   height: 2px;
-  bottom: -5px;
+  bottom: 0;
   left: 0;
   background-color: var(--primary-color);
   transition: width 0.3s ease;
@@ -75,20 +79,23 @@
 
 .headerActions {
   display: flex;
-  align-items: center; /* Alinha o botão de WhatsApp e Entrar */
-  gap: var(--spacing-sm); /* Espaçamento entre os botões */
+  align-items: center;
+  gap: var(--spacing-sm);
 }
 
 .enterButton {
-    /* Estilos do botão Outlined */
-    background-color: transparent;
-    color: var(--primary-color); /* Cor do texto do botão Entrar (sempre visível) */
-    border: 2px solid var(--primary-color); /* Borda do botão Entrar */
+  background-color: transparent;
+  color: var(--primary-color);
+  border: 2px solid var(--primary-color);
+  padding: 6px 12px;
+  border-radius: var(--border-radius-sm);
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .enterButton:hover {
-    background-color: var(--primary-color);
-    color: var(--secondary-color);
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
 }
 
 .menuToggle {
@@ -96,34 +103,27 @@
   background: none;
   border: none;
   font-size: var(--font-size-xl);
-  color: var(--primary-color); 
+  color: var(--primary-color);
   cursor: pointer;
 }
-
-/* Não precisa mais de .header.scrolled .menuToggle */
 
 .navActionsMobile {
   display: none;
 }
 
-/* Media Queries para Responsividade */
+/* 👇 Responsividade */
 @media (max-width: 768px) {
-  .header {
-    padding: var(--spacing-sm) 0;
-  }
-
   .nav {
     display: none;
     flex-direction: column;
     position: absolute;
-    top: 100%;
+    top: 64px;
     left: 0;
     width: 100%;
     background-color: var(--secondary-color);
     box-shadow: var(--box-shadow-md);
-    padding: var(--spacing-lg) var(--spacing-xl);
-    border-bottom-left-radius: var(--border-radius-lg);
-    border-bottom-right-radius: var(--border-radius-lg);
+    padding: var(--spacing-lg);
+    border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
     max-height: 0;
     overflow: hidden;
     transition: max-height 0.3s ease-out;
@@ -131,25 +131,17 @@
 
   .nav.open {
     display: flex;
-    max-height: 350px; /* Ajuste se houver mais itens */
+    max-height: 350px;
   }
 
   .nav ul {
     flex-direction: column;
     gap: var(--spacing-sm);
-    margin-bottom: var(--spacing-md);
   }
 
   .nav a {
-    color: var(--text-color-primary);
     font-size: var(--font-size-lg);
     padding: var(--spacing-xs) 0;
-    display: block;
-  }
-
-  .nav a::after {
-    height: 1px;
-    bottom: 0;
   }
 
   .headerActions {
@@ -161,7 +153,7 @@
   }
 
   .navActionsMobile {
-    display: flex; /* Mostra os botões no mobile */
+    display: flex;
     flex-direction: column;
     gap: var(--spacing-md);
     width: 100%;
@@ -169,19 +161,18 @@
     border-top: 1px solid var(--border-color);
   }
 
-  .navActionsMobile a { /* Estilo para o link WhatsApp no mobile */
-      display: flex;
-      align-items: center;
-      justify-content: center; /* Centraliza o texto e ícone */
-      gap: var(--spacing-xs);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border: 2px solid var(--whatsapp-green);
-      border-radius: var(--border-radius-md);
-      background-color: var(--whatsapp-green);
-      color: var(--secondary-color);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: var(--font-size-md);
-      width: 100%; /* Ocupa a largura total */
+  .navActionsMobile a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 2px solid var(--whatsapp-green);
+    border-radius: var(--border-radius-md);
+    background-color: var(--whatsapp-green);
+    color: var(--secondary-color);
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    text-decoration: none;
   }
 }

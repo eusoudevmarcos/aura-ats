@@ -1,4 +1,3 @@
-// src/modules/Home/HeroSection/HeroSection.tsx
 import React from 'react';
 import Image from 'next/image';
 import styles from './HeroSection.module.css';
@@ -38,11 +37,7 @@ const heroSlides: SlideItem[] = [
   },
 ];
 
-interface HeroSectionProps {
-  // Se houver props específicas para a Hero Section
-}
-
-const HeroSection: React.FC<HeroSectionProps> = () => {
+const HeroSection: React.FC = () => {
   const scrollToSection = useScrollToSection();
 
   const handleContratarClick = () => {
@@ -52,16 +47,19 @@ const HeroSection: React.FC<HeroSectionProps> = () => {
   return (
     <section className={styles.hero} id="hero-section">
       <Slider slides={heroSlides} autoPlay interval={5000}>
-        {(slide) => (
-          <div key={slide.id} className={styles.slideContent}>
-            <Image
-              src={slide.imageSrc}
-              alt={slide.altText}
-              fill
-              // ALTERADO: Removido o estilo inline objectFit e zIndex
-              priority
-            />
-            <div className={styles.overlay}></div>
+        {(slide: SlideItem) => (
+          <div className={styles.slideContent} key={slide.id}>
+            <div className={styles.imageWrapper}>
+              <Image
+                src={slide.imageSrc}
+                alt={slide.altText}
+                fill
+                priority
+                sizes="100vw"
+                style={{ objectFit: 'cover' }}
+              />
+              <div className={styles.overlay}></div>
+            </div>
             <div className={styles.textContainer}>
               <h1>{slide.title}</h1>
               <p>{slide.description}</p>
