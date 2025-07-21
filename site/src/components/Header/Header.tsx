@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { useRouter } from 'next/router';
 import styles from './Header.module.css';
 import Button from '@/components/Button/Button';
 import { FaBars, FaTimes } from 'react-icons/fa';
@@ -10,8 +9,7 @@ import { FaBars, FaTimes } from 'react-icons/fa';
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-  const router = useRouter();
-
+  
   const whatsappNumber = '5561992483665';
   const whatsappMessage = encodeURIComponent('Olá, Aura! Gostaria de mais informações sobre seus serviços.');
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
