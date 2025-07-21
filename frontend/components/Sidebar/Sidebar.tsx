@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import SidebarItem from './SidebarItem';
-import styles from './Sidebar.module.css';
+import React from "react";
+import SidebarItem from "./SidebarItem";
+import styles from "./Sidebar.module.css";
 import {
   HomeIcon,
   BriefcaseIcon,
@@ -10,7 +10,8 @@ import {
   ClipboardCheckIcon,
   SettingsIcon,
   ChevronDownIcon,
-} from '../icons';
+} from "../icons";
+import Image from "next/image";
 
 interface SidebarProps {
   setActiveSection: (section: string) => void;
@@ -19,22 +20,37 @@ interface SidebarProps {
   toggleSidebar: () => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ setActiveSection, activeSection, isCollapsed, toggleSidebar }) => {
+const Sidebar: React.FC<SidebarProps> = ({
+  setActiveSection,
+  activeSection,
+  isCollapsed,
+  toggleSidebar,
+}) => {
+  console.log(toggleSidebar);
   const navItems = [
-    { icon: <HomeIcon className={styles.icon} />, label: 'Dashboard' }, // Renomeado para 'Dashboard'
-    { icon: <BriefcaseIcon className={styles.icon} />, label: 'Vagas' },
-    { icon: <UsersIcon className={styles.icon} />, label: 'Profissionais' },
-    { icon: <HandshakeIcon className={styles.icon} />, label: 'Clientes' },
-    { icon: <CalendarIcon className={styles.icon} />, label: 'Atividade' }, // 'Atividade' agora é um item de menu principal
-    { icon: <HandshakeIcon className={styles.icon} />, label: 'Entrevistas' }, // Pode ser um ícone diferente se tiver um específico para entrevistas
-    { icon: <ClipboardCheckIcon className={styles.icon} />, label: 'Testes' },
-    { icon: <SettingsIcon className={styles.icon} />, label: 'Configurações' },
+    { icon: <HomeIcon className={styles.icon} />, label: "Dashboard" }, // Renomeado para 'Dashboard'
+    { icon: <BriefcaseIcon className={styles.icon} />, label: "Vagas" },
+    { icon: <UsersIcon className={styles.icon} />, label: "Profissionais" },
+    { icon: <HandshakeIcon className={styles.icon} />, label: "Clientes" },
+    { icon: <CalendarIcon className={styles.icon} />, label: "Atividade" }, // 'Atividade' agora é um item de menu principal
+    { icon: <HandshakeIcon className={styles.icon} />, label: "Entrevistas" }, // Pode ser um ícone diferente se tiver um específico para entrevistas
+    { icon: <ClipboardCheckIcon className={styles.icon} />, label: "Testes" },
+    { icon: <SettingsIcon className={styles.icon} />, label: "Configurações" },
   ];
 
   return (
-    <aside className={`${styles.sidebar} ${isCollapsed ? styles.sidebarCollapsed : ''}`}>
+    <aside
+      className={`${styles.sidebar} ${
+        isCollapsed ? styles.sidebarCollapsed : ""
+      }`}
+    >
       <div className={styles.sidebarLogo}>
-        <img src="https://placehold.co/40x40/6366F1/ffffff?text=A" alt="Logo Aura" />
+        <Image
+          src="https://placehold.co/40x40/6366F1/ffffff?text=A"
+          width={40}
+          height={40}
+          alt="Logo Aura"
+        />
         <span className={styles.sidebarLogoText}>Aura ATS</span>
       </div>
 
@@ -52,8 +68,10 @@ const Sidebar: React.FC<SidebarProps> = ({ setActiveSection, activeSection, isCo
 
       <div className={styles.sidebarFooter}>
         <div className={styles.sidebarUserCard}>
-          <img
+          <Image
             src="https://placehold.co/40x40/FFD700/000000?text=JD"
+            width={40}
+            height={40}
             alt="User Avatar"
           />
           <div className={styles.sidebarUserInfo}>

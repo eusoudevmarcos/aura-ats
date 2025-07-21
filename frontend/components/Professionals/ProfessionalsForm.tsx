@@ -1,51 +1,156 @@
 // frontend/components/Professionals/ProfessionalsForm.tsx
-import React, { useState } from 'react';
-import styles from '../Cards/Cards.module.css'; // Reutiliza o módulo CSS de Cards
-import { PlusIcon } from '../icons'; // Ícone para o botão de adicionar, se necessário
+import React, { useState } from "react";
+import styles from "../Cards/Cards.module.css"; // Reutiliza o módulo CSS de Cards
 
 // Definição da estrutura de dados para Áreas, Profissões e Especialidades
 const AREAS_DATA = {
   Saúde: {
     Profissões: {
-      Médico: ['Endocrinologista', 'Obstetra', 'Ginecologista', 'Oncologista', 'Cardiologista', 'Pediatra', 'Dermatologista', 'Ortopedista', 'Psiquiatra', 'Neurologista'],
-      Enfermeiro: ['UTI', 'Emergência', 'Obstetrícia', 'Pediatria', 'Saúde Pública', 'Centro Cirúrgico', 'Oncologia'],
-      Fisioterapeuta: ['Ortopédica', 'Neurológica', 'Respiratória', 'Esportiva', 'Pediátrica'],
-      Nutricionista: ['Clínica', 'Esportiva', 'Saúde Pública', 'Gastronomia'],
-      Psicólogo: ['Clínica', 'Organizacional', 'Escolar', 'Hospitalar', 'Jurídica'],
+      Médico: [
+        "Endocrinologista",
+        "Obstetra",
+        "Ginecologista",
+        "Oncologista",
+        "Cardiologista",
+        "Pediatra",
+        "Dermatologista",
+        "Ortopedista",
+        "Psiquiatra",
+        "Neurologista",
+      ],
+      Enfermeiro: [
+        "UTI",
+        "Emergência",
+        "Obstetrícia",
+        "Pediatria",
+        "Saúde Pública",
+        "Centro Cirúrgico",
+        "Oncologia",
+      ],
+      Fisioterapeuta: [
+        "Ortopédica",
+        "Neurológica",
+        "Respiratória",
+        "Esportiva",
+        "Pediátrica",
+      ],
+      Nutricionista: ["Clínica", "Esportiva", "Saúde Pública", "Gastronomia"],
+      Psicólogo: [
+        "Clínica",
+        "Organizacional",
+        "Escolar",
+        "Hospitalar",
+        "Jurídica",
+      ],
     },
   },
   Tecnologia: {
     Profissões: {
-      'Desenvolvedor Frontend': ['React', 'Angular', 'Vue', 'Next.js', 'Svelte', 'JavaScript', 'TypeScript', 'HTML', 'CSS'],
-      'Desenvolvedor Backend': ['Node.js', 'Python (Django/Flask)', 'Java (Spring Boot)', 'C#', 'Go', 'PHP (Laravel)', 'Ruby on Rails'],
-      'Desenvolvedor Fullstack': ['React', 'Node.js', 'Python', 'Java', 'Next.js', 'Spring Boot', 'SQL', 'MongoDB'], // Exemplo de stacks combinadas
-      'DevOps Engineer': ['AWS', 'Azure', 'GCP', 'Docker', 'Kubernetes', 'CI/CD', 'Jenkins', 'GitLab CI'],
-      'QA Engineer': ['Testes Manuais', 'Automação (Selenium)', 'Cypress', 'Playwright', 'Performance'],
-      'Data Scientist': ['Python (Pandas, NumPy, Scikit-learn)', 'R', 'Machine Learning', 'Deep Learning', 'SQL'],
-      'Analista de Suporte': ['Redes', 'Hardware', 'Software', 'Atendimento ao Cliente'],
+      "Desenvolvedor Frontend": [
+        "React",
+        "Angular",
+        "Vue",
+        "Next.js",
+        "Svelte",
+        "JavaScript",
+        "TypeScript",
+        "HTML",
+        "CSS",
+      ],
+      "Desenvolvedor Backend": [
+        "Node.js",
+        "Python (Django/Flask)",
+        "Java (Spring Boot)",
+        "C#",
+        "Go",
+        "PHP (Laravel)",
+        "Ruby on Rails",
+      ],
+      "Desenvolvedor Fullstack": [
+        "React",
+        "Node.js",
+        "Python",
+        "Java",
+        "Next.js",
+        "Spring Boot",
+        "SQL",
+        "MongoDB",
+      ], // Exemplo de stacks combinadas
+      "DevOps Engineer": [
+        "AWS",
+        "Azure",
+        "GCP",
+        "Docker",
+        "Kubernetes",
+        "CI/CD",
+        "Jenkins",
+        "GitLab CI",
+      ],
+      "QA Engineer": [
+        "Testes Manuais",
+        "Automação (Selenium)",
+        "Cypress",
+        "Playwright",
+        "Performance",
+      ],
+      "Data Scientist": [
+        "Python (Pandas, NumPy, Scikit-learn)",
+        "R",
+        "Machine Learning",
+        "Deep Learning",
+        "SQL",
+      ],
+      "Analista de Suporte": [
+        "Redes",
+        "Hardware",
+        "Software",
+        "Atendimento ao Cliente",
+      ],
     },
   },
   Administrativa: {
     Profissões: {
-      'Assistente Administrativo': ['Rotinas de escritório', 'Organização', 'Atendimento'],
-      'Analista Financeiro': ['Contas a pagar/receber', 'Fluxo de caixa', 'Orçamento'],
-      'Recursos Humanos': ['Recrutamento e Seleção', 'Departamento Pessoal', 'Treinamento e Desenvolvimento'],
-      'Secretária Executiva': ['Agendamento', 'Comunicação', 'Organização de eventos'],
+      "Assistente Administrativo": [
+        "Rotinas de escritório",
+        "Organização",
+        "Atendimento",
+      ],
+      "Analista Financeiro": [
+        "Contas a pagar/receber",
+        "Fluxo de caixa",
+        "Orçamento",
+      ],
+      "Recursos Humanos": [
+        "Recrutamento e Seleção",
+        "Departamento Pessoal",
+        "Treinamento e Desenvolvimento",
+      ],
+      "Secretária Executiva": [
+        "Agendamento",
+        "Comunicação",
+        "Organização de eventos",
+      ],
     },
   },
   Comércio: {
     Profissões: {
-      Vendedor: ['Varejo', 'Atacado', 'Consultivo', 'Online'],
-      'Gerente de Loja': ['Gestão de equipe', 'Estoque', 'Vendas'],
-      'Atendente de Loja': ['Atendimento ao cliente', 'Organização'],
-      'Marketing Digital': ['SEO', 'SEM', 'Mídias Sociais', 'E-mail Marketing', 'Conteúdo'],
+      Vendedor: ["Varejo", "Atacado", "Consultivo", "Online"],
+      "Gerente de Loja": ["Gestão de equipe", "Estoque", "Vendas"],
+      "Atendente de Loja": ["Atendimento ao cliente", "Organização"],
+      "Marketing Digital": [
+        "SEO",
+        "SEM",
+        "Mídias Sociais",
+        "E-mail Marketing",
+        "Conteúdo",
+      ],
     },
   },
   Outras: {
     Profissões: {
-      Consultor: ['Gestão', 'TI', 'RH', 'Marketing', 'Financeiro'],
-      Educador: ['Ensino Fundamental', 'Médio', 'Superior', 'Cursos Livres'],
-      Artista: ['Música', 'Artes Visuais', 'Teatro', 'Dança'],
+      Consultor: ["Gestão", "TI", "RH", "Marketing", "Financeiro"],
+      Educador: ["Ensino Fundamental", "Médio", "Superior", "Cursos Livres"],
+      Artista: ["Música", "Artes Visuais", "Teatro", "Dança"],
     },
   },
 };
@@ -56,44 +161,56 @@ interface ProfessionalsFormProps {
 
 const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({
-    nome: '',
-    cpf: '',
-    endereco: '',
-    bairro: '',
-    cidade: '',
-    estado: '',
-    pais: '',
-    area: '',
-    profissao: '',
-    especialidade: '',
+    nome: "",
+    cpf: "",
+    endereco: "",
+    bairro: "",
+    cidade: "",
+    estado: "",
+    pais: "",
+    area: "",
+    profissao: "",
+    especialidade: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
 
     // Reset profissao and especialidade if area changes
-    if (name === 'area') {
-      setFormData(prev => ({ ...prev, profissao: '', especialidade: '' }));
+    if (name === "area") {
+      setFormData((prev) => ({ ...prev, profissao: "", especialidade: "" }));
     }
     // Reset especialidade if profissao changes
-    if (name === 'profissao') {
-      setFormData(prev => ({ ...prev, especialidade: '' }));
+    if (name === "profissao") {
+      setFormData((prev) => ({ ...prev, especialidade: "" }));
     }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do Profissional:', formData);
+    console.log("Dados do Profissional:", formData);
     // Aqui você faria a chamada para a API para cadastrar o profissional
     onClose(); // Fecha o modal após o envio
   };
 
   const areas = Object.keys(AREAS_DATA);
-  const professions = formData.area ? Object.keys(AREAS_DATA[formData.area as keyof typeof AREAS_DATA].Profissões) : [];
-  const specialties = (formData.area && formData.profissao)
-    ? AREAS_DATA[formData.area as keyof typeof AREAS_DATA].Profissões[formData.profissao as keyof typeof AREAS_DATA['Saúde']['Profissões']] || []
+  const professions = formData.area
+    ? Object.keys(
+        AREAS_DATA[formData.area as keyof typeof AREAS_DATA].Profissões
+      )
     : [];
+  // Correção da linha 208: garantir que o tipo de indexação está correto para qualquer área
+  //@ts-nocheck
+  const specialties =
+    formData.area && formData.profissao
+      ? (
+          AREAS_DATA[formData.area as keyof typeof AREAS_DATA]
+            .Profissões as Record<string, string[]>
+        )[formData.profissao] || []
+      : [];
 
   return (
     <div className={styles.modalOverlay}>
@@ -101,7 +218,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
         <h2 className={styles.cardTitle}>Cadastrar Novo Profissional</h2>
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="nome" className={styles.formLabel}>Nome:</label>
+            <label htmlFor="nome" className={styles.formLabel}>
+              Nome:
+            </label>
             <input
               type="text"
               id="nome"
@@ -114,7 +233,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="cpf" className={styles.formLabel}>CPF (Opcional):</label>
+            <label htmlFor="cpf" className={styles.formLabel}>
+              CPF (Opcional):
+            </label>
             <input
               type="text"
               id="cpf"
@@ -126,7 +247,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="endereco" className={styles.formLabel}>Endereço (Opcional):</label>
+            <label htmlFor="endereco" className={styles.formLabel}>
+              Endereço (Opcional):
+            </label>
             <input
               type="text"
               id="endereco"
@@ -138,7 +261,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="bairro" className={styles.formLabel}>Bairro:</label>
+            <label htmlFor="bairro" className={styles.formLabel}>
+              Bairro:
+            </label>
             <input
               type="text"
               id="bairro"
@@ -150,7 +275,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="cidade" className={styles.formLabel}>Cidade:</label>
+            <label htmlFor="cidade" className={styles.formLabel}>
+              Cidade:
+            </label>
             <input
               type="text"
               id="cidade"
@@ -162,7 +289,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="estado" className={styles.formLabel}>Estado:</label>
+            <label htmlFor="estado" className={styles.formLabel}>
+              Estado:
+            </label>
             <input
               type="text"
               id="estado"
@@ -174,7 +303,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="pais" className={styles.formLabel}>País:</label>
+            <label htmlFor="pais" className={styles.formLabel}>
+              País:
+            </label>
             <input
               type="text"
               id="pais"
@@ -186,7 +317,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="area" className={styles.formLabel}>Área:</label>
+            <label htmlFor="area" className={styles.formLabel}>
+              Área:
+            </label>
             <select
               id="area"
               name="area"
@@ -196,15 +329,19 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
               required
             >
               <option value="">Selecione a Área</option>
-              {areas.map(area => (
-                <option key={area} value={area}>{area}</option>
+              {areas.map((area) => (
+                <option key={area} value={area}>
+                  {area}
+                </option>
               ))}
             </select>
           </div>
 
           {formData.area && (
             <div className={styles.formGroup}>
-              <label htmlFor="profissao" className={styles.formLabel}>Profissão:</label>
+              <label htmlFor="profissao" className={styles.formLabel}>
+                Profissão:
+              </label>
               <select
                 id="profissao"
                 name="profissao"
@@ -214,8 +351,10 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
                 required
               >
                 <option value="">Selecione a Profissão</option>
-                {professions.map(prof => (
-                  <option key={prof} value={prof}>{prof}</option>
+                {professions.map((prof) => (
+                  <option key={prof} value={prof}>
+                    {prof}
+                  </option>
                 ))}
               </select>
             </div>
@@ -223,7 +362,9 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
 
           {formData.profissao && (
             <div className={styles.formGroup}>
-              <label htmlFor="especialidade" className={styles.formLabel}>Especialidade:</label>
+              <label htmlFor="especialidade" className={styles.formLabel}>
+                Especialidade:
+              </label>
               <select
                 id="especialidade"
                 name="especialidade"
@@ -233,16 +374,26 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
                 required
               >
                 <option value="">Selecione a Especialidade</option>
-                {specialties.map(spec => (
-                  <option key={spec} value={spec}>{spec}</option>
+                {specialties.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
                 ))}
               </select>
             </div>
           )}
 
           <div className={styles.formButtons}>
-            <button type="submit" className={styles.submitButton}>Cadastrar</button>
-            <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
+            <button type="submit" className={styles.submitButton}>
+              Cadastrar
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className={styles.cancelButton}
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </div>

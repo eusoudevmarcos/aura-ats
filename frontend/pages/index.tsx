@@ -1,8 +1,8 @@
 // frontend/pages/_app.tsx
 import type { AppProps } from "next/app";
-import "../styles/global.modules.css";
-function App({ Component, pageProps }: AppProps) {
+
+function Root({ Component, pageProps }: AppProps) {
   return <Component {...pageProps} />;
 }
 
-export default App;
+export default Root;

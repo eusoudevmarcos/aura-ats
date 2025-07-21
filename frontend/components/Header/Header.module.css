@@ -1,7 +1,7 @@
 /* frontend/components/Header/Header.module.css */
 .header {
   background-color: #ffffff;
-  padding: 24px; /* p-6 */
+  padding: 12px 24px; /* p-6 */
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
   display: flex;
   align-items: center;
@@ -62,7 +62,8 @@
   align-items: center;
   gap: 8px; /* gap-2 */
   transition: all 200ms ease-in-out; /* transition-colors duration-200 */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
   border: none;
   cursor: pointer;
 }
@@ -93,7 +94,8 @@
   border: 2px solid #6366f1; /* border-2 border-indigo-500 */
 }
 
-.sidebarToggleButton { /* Novo botão para toggle da sidebar */
+.sidebarToggleButton {
+  /* Novo botão para toggle da sidebar */
   background: none;
   border: none;
   cursor: pointer;

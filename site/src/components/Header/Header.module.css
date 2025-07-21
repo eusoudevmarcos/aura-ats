@@ -4,17 +4,12 @@
   top: 0;
   left: 0;
   width: 100%;
-  background-color: var(--secondary-color); 
-  padding: var(--spacing-md) 0;
+  background-color: var(--secondary-color);
   z-index: 1000;
-  transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease,
+    padding 0.3s ease;
   box-shadow: var(--box-shadow-sm); /* Sombra suave padrão */
-}
-
-.header.scrolled {
-  background-color: var(--secondary-color); /* Pode manter o mesmo ou mudar levemente */
-  box-shadow: var(--box-shadow-md); /* Sombra um pouco mais forte ao rolar */
-  padding: var(--spacing-sm) 0;
+  max-height: 80px;
 }
 
 .container {
@@ -54,13 +49,12 @@
   position: relative;
 }
 
-
 .nav a:hover {
   color: var(--primary-color);
 }
 
 .nav a::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 2px;
@@ -93,7 +87,8 @@
   text-decoration: none;
   font-weight: 600;
   font-size: var(--font-size-md);
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transition: background-color 0.3s ease, color 0.3s ease,
+    border-color 0.3s ease;
 }
 
 .whatsappButtonDesktop:hover {
@@ -112,17 +107,18 @@
     border-color: var(--whatsapp-green);
 } */
 
-
 .enterButton {
-    /* Estilos do botão Outlined */
-    background-color: transparent;
-    color: var(--primary-color); /* Cor do texto do botão Entrar (sempre visível) */
-    border: 2px solid var(--primary-color); /* Borda do botão Entrar */
+  /* Estilos do botão Outlined */
+  background-color: transparent;
+  color: var(
+    --primary-color
+  ); /* Cor do texto do botão Entrar (sempre visível) */
+  border: 2px solid var(--primary-color); /* Borda do botão Entrar */
 }
 
 .enterButton:hover {
-    background-color: var(--primary-color);
-    color: var(--secondary-color);
+  background-color: var(--primary-color);
+  color: var(--secondary-color);
 }
 
 .menuToggle {
@@ -130,7 +126,7 @@
   background: none;
   border: none;
   font-size: var(--font-size-xl);
-  color: var(--primary-color); 
+  color: var(--primary-color);
   cursor: pointer;
 }
 
@@ -203,19 +199,20 @@
     border-top: 1px solid var(--border-color);
   }
 
-  .navActionsMobile a { /* Estilo para o link WhatsApp no mobile */
-      display: flex;
-      align-items: center;
-      justify-content: center; /* Centraliza o texto e ícone */
-      gap: var(--spacing-xs);
-      padding: var(--spacing-sm) var(--spacing-md);
-      border: 2px solid var(--whatsapp-green);
-      border-radius: var(--border-radius-md);
-      background-color: var(--whatsapp-green);
-      color: var(--secondary-color);
-      text-decoration: none;
-      font-weight: 600;
-      font-size: var(--font-size-md);
-      width: 100%; /* Ocupa a largura total */
+  .navActionsMobile a {
+    /* Estilo para o link WhatsApp no mobile */
+    display: flex;
+    align-items: center;
+    justify-content: center; /* Centraliza o texto e ícone */
+    gap: var(--spacing-xs);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border: 2px solid var(--whatsapp-green);
+    border-radius: var(--border-radius-md);
+    background-color: var(--whatsapp-green);
+    color: var(--secondary-color);
+    text-decoration: none;
+    font-weight: 600;
+    font-size: var(--font-size-md);
+    width: 100%; /* Ocupa a largura total */
   }
 }

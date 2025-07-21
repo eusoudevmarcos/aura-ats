@@ -2,22 +2,22 @@
 .container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
+  min-height: 100vh;
 }
 
 .mainContent {
-  flex-grow: 1; 
-  
-  padding-top: calc(var(--header-height) + var(--spacing-lg)); 
+  flex-grow: 1;
 }
 
 :root {
-  --header-height: 60px; 
+  --header-height: 60px;
 }
 
 @media (max-width: 768px) {
   .mainContent {
-    padding-top: calc(var(--header-height-mobile) + var(--spacing-md)); /* Um padding menor para mobile */
+    padding-top: calc(
+      var(--header-height-mobile) + var(--spacing-md)
+    ); /* Um padding menor para mobile */
   }
   :root {
     --header-height-mobile: 60px; /* Altura aproximada do seu header em mobile */
