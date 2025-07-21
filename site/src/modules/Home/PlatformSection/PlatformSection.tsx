@@ -37,7 +37,7 @@ const PlatformSection: React.FC = () => {
         <div className={styles.imageWrapper}>
           <Image
             src="/images/platform-overview.png" // Crie uma imagem para a visão geral da plataforma
-            alt="Visão geral da plataforma Take It de médicos"
+            alt="Visão geral da plataforma Aura"
             width={600}
             height={400}
             layout="responsive" // Torna a imagem responsiva
@@ -45,18 +45,18 @@ const PlatformSection: React.FC = () => {
           />
         </div>
         <div className={styles.textWrapper}>
-          <h3>Agilidade e Precisão na sua Busca por Talentos Médicos</h3>
+          <h3>Agilidade e Precisão na sua Busca por Médicos e Especialistas na área da Saúde</h3>
           <p>
-            Nossa plataforma exclusiva foi desenvolvida para otimizar o seu processo de recrutamento de médicos.
+            Nossa plataforma exclusiva foi desenvolvida para otimizar o seu processo de recrutamento de Profissionais da área da Saúde e Médicos.
             Com filtros avançados e um algoritmo de "match perfeito", garantimos que você encontre o profissional ideal
             para a sua equipe em tempo recorde, sem burocracia e com a segurança que sua empresa merece.
           </p>
           <p>
-            Chega de buscas demoradas e candidatos desalinhados. Na Take It, a tecnologia trabalha a seu favor,
+            Chega de buscas demoradas e candidatos desalinhados, falta de opções para encontraros profissionáis necessários. Na Aura, a tecnologia trabalha a seu favor,
             proporcionando acesso a um banco de dados qualificado e atualizado de médicos em todo o Brasil.
           </p>
           <Button onClick={openVideoModal} variant="primary" size="large" className={styles.callToActionButton}>
-            Assista ao Vídeo Demonstrativo
+            8EM BREVE* Assista ao Vídeo Demonstrativo 
           </Button>
         </div>
       </div>
@@ -77,7 +77,7 @@ const PlatformSection: React.FC = () => {
             ></iframe>
           </div>
           <p className={styles.modalDescription}>
-            Explore todos os recursos da nossa plataforma de recrutamento médico e veja como é fácil encontrar o candidato perfeito.
+            Explore todos os recursos da nossa plataforma de recrutamento e veja como é fácil encontrar o Profissional perfeito.
           </p>
           <Button onClick={openPlansModal} variant="accent" size="medium" fullWidth>
             Quero Contratar a Plataforma Agora!
@@ -96,14 +96,14 @@ const PlatformSection: React.FC = () => {
             {/* Card do Plano Essencial */}
             <div className={styles.planCard}>
               <h3>Plano Essencial</h3>
-              <p className={styles.planPrice}>R$ 499,00/mês</p>
-              <p className={styles.planFeature}>Até **300 pesquisas** por mês</p>
+              <p className={styles.planPrice}>R$ 989,00/mês</p>
+              <p className={styles.planFeature}>Até **40 pesquisas** por mês</p>
               <ul>
                 <li>Acesso completo à base de médicos</li>
                 <li>Filtros de especialidade e localização</li>
                 <li>Suporte básico</li>
               </ul>
-              <Button onClick={() => handleSelectPlan('Plano Essencial', 'R$ 499,00')} variant="primary" fullWidth>
+              <Button onClick={() => handleSelectPlan('Plano Essencial', 'R$ 989,00')} variant="primary" fullWidth>
                 Selecionar Plano
               </Button>
             </div>
@@ -111,14 +111,14 @@ const PlatformSection: React.FC = () => {
             {/* Card do Plano Profissional */}
             <div className={styles.planCard}>
               <h3>Plano Profissional</h3>
-              <p className={styles.planPrice}>R$ 749,00/mês</p>
-              <p className={styles.planFeature}>Até **700 pesquisas** por mês</p>
+              <p className={styles.planPrice}>R$ 1949,00/mês</p>
+              <p className={styles.planFeature}>Até **100 pesquisas** por mês</p>
               <ul>
                 <li>Tudo do Plano Essencial</li>
                 <li>Suporte prioritário</li>
                 <li>Relatórios de atividade</li>
               </ul>
-              <Button onClick={() => handleSelectPlan('Plano Profissional', 'R$ 749,00')} variant="primary" fullWidth>
+              <Button onClick={() => handleSelectPlan('Plano Profissional', 'R$ 1949,00')} variant="primary" fullWidth>
                 Selecionar Plano
               </Button>
             </div>
@@ -126,14 +126,14 @@ const PlatformSection: React.FC = () => {
             {/* Card do Plano Premium */}
             <div className={styles.planCard}>
               <h3>Plano Premium</h3>
-              <p className={styles.planPrice}>R$ 899,00/mês</p>
-              <p className={styles.planFeature}>Até **1200 pesquisas** por mês</p>
+              <p className={styles.planPrice}>R$ 2499,00/mês</p>
+              <p className={styles.planFeature}>Até **150 pesquisas** por mês</p>
               <ul>
                 <li>Tudo do Plano Profissional</li>
                 <li>Consultoria especializada (1h/mês)</li>
                 <li>Recursos avançados de IA (futuro)</li>
               </ul>
-              <Button onClick={() => handleSelectPlan('Plano Premium', 'R$ 899,00')} variant="primary" fullWidth>
+              <Button onClick={() => handleSelectPlan('Plano Premium', 'R$ 2499,00')} variant="primary" fullWidth>
                 Selecionar Plano
               </Button>
             </div>
