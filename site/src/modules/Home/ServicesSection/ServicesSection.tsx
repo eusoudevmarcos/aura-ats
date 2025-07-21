@@ -1,7 +1,6 @@
 // src/modules/Home/ServicesSection/ServicesSection.tsx
 import React from 'react';
-import Image from 'next/image';
-import { FaUserMd, FaLaptopCode, FaBriefcase } from 'react-icons/fa'; // Ícones para os serviços
+import { FaUserMd, FaLaptopCode, FaBriefcase } from 'react-icons/fa'; 
 import styles from './ServicesSection.module.css';
 
 const ServicesSection: React.FC = () => {

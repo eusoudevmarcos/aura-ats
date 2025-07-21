@@ -2,7 +2,6 @@
 import React from 'react';
 import styles from './ContactSection.module.css';
 import Button from '@/components/Button/Button';
-import { FaWhatsapp } from 'react-icons/fa'; // Importe o ícone do WhatsApp
 
 const ContactSection: React.FC = () => {
   // Número de telefone para o WhatsApp (inclua o código do país, ex: 55 para Brasil)
