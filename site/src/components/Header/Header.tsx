@@ -10,9 +10,6 @@ const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   
-  const whatsappNumber = '5561992483665';
-  const whatsappMessage = encodeURIComponent('Olá, Aura! Gostaria de mais informações sobre seus serviços.');
-  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
