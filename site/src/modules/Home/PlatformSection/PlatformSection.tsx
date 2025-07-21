@@ -27,7 +27,7 @@ const PlatformSection: React.FC = () => {
   };
 
   return (
-    <section id="platform-section" className={styles.sectionContainer}>
+    <section id='platform-section' className={styles.sectionContainer}>
       <h2>Nossa Plataforma de Médicos: A Revolução no Recrutamento!</h2>
       <p className={styles.subtitle}>
         Conectamos você aos melhores talentos da área da saúde de forma rápida, eficiente e inteligente.
@@ -36,11 +36,11 @@ const PlatformSection: React.FC = () => {
       <div className={styles.contentGrid}>
         <div className={styles.imageWrapper}>
           <Image
-            src="/images/platform-overview.png" // Crie uma imagem para a visão geral da plataforma
-            alt="Visão geral da plataforma Aura"
+            src='/images/platform-overview.png' // Crie uma imagem para a visão geral da plataforma
+            alt='Visão geral da plataforma Aura'
             width={600}
             height={400}
-            layout="responsive" // Torna a imagem responsiva
+            layout='responsive' // Torna a imagem responsiva
             className={styles.platformImage}
           />
         </div>
@@ -48,45 +48,45 @@ const PlatformSection: React.FC = () => {
           <h3>Agilidade e Precisão na sua Busca por Médicos e Especialistas na área da Saúde</h3>
           <p>
             Nossa plataforma exclusiva foi desenvolvida para otimizar o seu processo de recrutamento de Profissionais da área da Saúde e Médicos.
-            Com filtros avançados e um algoritmo de "match perfeito", garantimos que você encontre o profissional ideal
+            Com filtros avançados e um algoritmo de 'match perfeito', garantimos que você encontre o profissional ideal
             para a sua equipe em tempo recorde, sem burocracia e com a segurança que sua empresa merece.
           </p>
           <p>
             Chega de buscas demoradas e candidatos desalinhados, falta de opções para encontraros profissionáis necessários. Na Aura, a tecnologia trabalha a seu favor,
             proporcionando acesso a um banco de dados qualificado e atualizado de médicos em todo o Brasil.
           </p>
-          <Button onClick={openVideoModal} variant="primary" size="large" className={styles.callToActionButton}>
+          <Button onClick={openVideoModal} variant='primary' size='large' className={styles.callToActionButton}>
             8EM BREVE* Assista ao Vídeo Demonstrativo 
           </Button>
         </div>
       </div>
 
       {/* Modal do Vídeo Demonstrativo */}
-      <Modal isOpen={isVideoModalOpen} onClose={closeVideoModal} title="Plataforma Aura: Tour Completo">
+      <Modal isOpen={isVideoModalOpen} onClose={closeVideoModal} title='Plataforma Aura: Tour Completo'>
         <div className={styles.videoModalContent}>
           {/* O iframe do YouTube ou Vimeo para o vídeo demonstrativo */}
           <div className={styles.videoWrapper}>
             <iframe
-              width="560"
-              height="315"
-              src="https://www.youtube.com/embed/SUA_Link_Do_Seu_Video_Aqui?autoplay=1" // Substitua pelo link real do seu vídeo e adicione ?autoplay=1
-              title="Vídeo Demonstrativo Plataforma Aura"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              width='560'
+              height='315'
+              src='https://www.youtube.com/embed/SUA_Link_Do_Seu_Video_Aqui?autoplay=1' // Substitua pelo link real do seu vídeo e adicione ?autoplay=1
+              title='Vídeo Demonstrativo Plataforma Aura'
+              frameBorder='0'
+              allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
               allowFullScreen
             ></iframe>
           </div>
           <p className={styles.modalDescription}>
             Explore todos os recursos da nossa plataforma de recrutamento e veja como é fácil encontrar o Profissional perfeito.
           </p>
-          <Button onClick={openPlansModal} variant="accent" size="medium" fullWidth>
+          <Button onClick={openPlansModal} variant='accent' size='medium' fullWidth>
             Quero Contratar a Plataforma Agora!
           </Button>
         </div>
       </Modal>
 
       {/* Modal de Planos de Contratação */}
-      <Modal isOpen={isPlansModalOpen} onClose={closePlansModal} title="Escolha seu Plano Aura">
+      <Modal isOpen={isPlansModalOpen} onClose={closePlansModal} title='Escolha seu Plano Aura'>
         <div className={styles.plansModalContent}>
           <p className={styles.modalDescription}>
             Selecione o plano que melhor se adapta às suas necessidades de busca por profissionais médicos.
@@ -103,7 +103,7 @@ const PlatformSection: React.FC = () => {
                 <li>Filtros de especialidade e localização</li>
                 <li>Suporte básico</li>
               </ul>
-              <Button onClick={() => handleSelectPlan('Plano Essencial', 'R$ 989,00')} variant="primary" fullWidth>
+              <Button onClick={() => handleSelectPlan('Plano Essencial', 'R$ 989,00')} variant='primary' fullWidth>
                 Selecionar Plano
               </Button>
             </div>
@@ -118,7 +118,7 @@ const PlatformSection: React.FC = () => {
                 <li>Suporte prioritário</li>
                 <li>Relatórios de atividade</li>
               </ul>
-              <Button onClick={() => handleSelectPlan('Plano Profissional', 'R$ 1949,00')} variant="primary" fullWidth>
+              <Button onClick={() => handleSelectPlan('Plano Profissional', 'R$ 1949,00')} variant='primary' fullWidth>
                 Selecionar Plano
               </Button>
             </div>
@@ -133,7 +133,7 @@ const PlatformSection: React.FC = () => {
                 <li>Consultoria especializada (1h/mês)</li>
                 <li>Recursos avançados de IA (futuro)</li>
               </ul>
-              <Button onClick={() => handleSelectPlan('Plano Premium', 'R$ 2499,00')} variant="primary" fullWidth>
+              <Button onClick={() => handleSelectPlan('Plano Premium', 'R$ 2499,00')} variant='primary' fullWidth>
                 Selecionar Plano
               </Button>
             </div>
