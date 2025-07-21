@@ -5,7 +5,7 @@
   left: 0;
   width: 100%;
   background-color: var(--secondary-color); 
-  padding: var(--spacing-md) 0;
+  padding: 0;
   z-index: 1000;
   transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
   box-shadow: var(--box-shadow-sm); /* Sombra suave padrão */
@@ -54,7 +54,6 @@
   position: relative;
 }
 
-
 .nav a:hover {
   color: var(--primary-color);
 }
@@ -79,39 +78,6 @@
   align-items: center; /* Alinha o botão de WhatsApp e Entrar */
   gap: var(--spacing-sm); /* Espaçamento entre os botões */
 }
-
-/* Botões do Desktop */
-.whatsappButtonDesktop {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xxs);
-  padding: var(--spacing-xs) var(--spacing-md);
-  border: 2px solid var(--whatsapp-green);
-  border-radius: var(--border-radius-md);
-  background-color: var(--whatsapp-green);
-  color: var(--secondary-color); /* Texto branco */
-  text-decoration: none;
-  font-weight: 600;
-  font-size: var(--font-size-md);
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
-}
-
-.whatsappButtonDesktop:hover {
-  background-color: var(--whatsapp-green-dark);
-  border-color: var(--whatsapp-green-dark);
-  color: var(--secondary-color);
-}
-
-/* Se quiser que a cor do botão WhatsApp mude ao rolar, ajuste aqui */
-/* .scrolledWhatsapp {
-    background-color: var(--whatsapp-green-dark);
-    border-color: var(--whatsapp-green-dark);
-}
-.scrolledWhatsapp:hover {
-    background-color: var(--whatsapp-green);
-    border-color: var(--whatsapp-green);
-} */
-
 
 .enterButton {
     /* Estilos do botão Outlined */

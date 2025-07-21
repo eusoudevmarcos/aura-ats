@@ -1,26 +1,31 @@
 /* src/modules/Home/HeroSection/HeroSection.module.css */
+
 .hero {
-  position: relative;
+  position: relative; /* Necessário se HeroSection for o contêiner pai de algo com position: absolute/fixed */
   width: 100%;
-  height: 80vh; /* Altura da Hero Section (ajuste conforme o design) */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden; /* Garante que o conteúdo do slider não vaze */
-  background-color: var(--bg-color-dark); /* Fundo fallback */
+  height: calc(100vh - var(--header-height)); /* Ajusta a altura da Hero Section para ser 100vh menos a altura do cabeçalho */
+  overflow: hidden; /* Garante que nada transborde */
+}
+
+@media (max-width: 768px) {
+  .hero {
+    height: calc(100vh - var(--header-height-mobile)); /* Ajusta para mobile */
+  }
 }
 
 .slideContent {
-  position: relative;
+  position: relative; /* ESSENCIAL para que Image com 'fill' funcione corretamente */
   width: 100%;
-  height: 100%;
+  height: 100%; /* Ocupa 100% da altura da .hero */
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  color: var(--secondary-color); /* Texto branco sobre a imagem */
-  padding: var(--spacing-xl);
+  color: var(--secondary-color); /* Para o texto sobre a imagem */
+}
+
+.slideContent :global(img) { /* Seleciona a tag <img> gerada pelo Next.js Image component */
+  object-fit: cover; /* Aplica o object-fit aqui no CSS */
+  /*z-index: -1; */ /* Remova o z-index negativo daqui, a camada de overlay resolverá isso */
 }
 
 .overlay {
@@ -29,63 +34,27 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.5); /* Camada escura para melhorar contraste do texto */
-  z-index: 0;
+  background-color: rgba(0, 0, 0, 0.5); /* Escurece a imagem para o texto ser legível */
+  z-index: 1; /* Garante que o overlay esteja acima da imagem */
 }
 
 .textContainer {
-  position: relative;
-  z-index: 1; /* Garante que o texto fique acima do overlay */
+  position: relative; /* Para que o texto fique acima do overlay */
+  z-index: 2; /* Garante que o texto esteja acima do overlay */
+  text-align: center;
   max-width: 800px;
-  margin: 0 auto;
+  padding: var(--spacing-md);
+  /* Adicione margens/padding para centralizar e dar espaço ao texto */
 }
 
 .textContainer h1 {
   font-size: var(--font-size-h1);
-  margin-bottom: var(--spacing-md);
-  color: var(--secondary-color);
-  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+  margin-bottom: var(--spacing-sm);
+  color: var(--secondary-color); /* Texto branco */
 }
 
 .textContainer p {
-  font-size: var(--font-size-lg);
-  margin-bottom: var(--spacing-xl);
-  color: var(--secondary-color);
-  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.3);
-}
-
-/* Estilos do botão - serão sobrescritos ou complementados pelo componente Button */
-.hero .textContainer button {
-  margin-top: var(--spacing-lg);
-  font-size: var(--font-size-lg);
-  padding: var(--spacing-md) var(--spacing-xl);
-}
-
-/* Media Queries para Responsividade */
-@media (max-width: 992px) {
-  .hero {
-    height: 70vh;
-  }
-  .textContainer h1 {
-    font-size: var(--font-size-h2);
-  }
-  .textContainer p {
-    font-size: var(--font-size-md);
-  }
-  .hero .textContainer button {
-    padding: var(--spacing-sm) var(--spacing-lg);
-    font-size: var(--font-size-md);
-  }
-}
-
-@media (max-width: 600px) {
-  .hero {
-    height: 60vh;
-  }
-  .textContainer {
-    padding: var(--spacing-md);
-  }
-  .textContainer h1 {
-    font-size: var(--font-size-h3);
-  }
+  font-size: var(--font-size-xl);
+  margin-bottom: var(--spacing-lg);
+  color: var(--bg-color-light); /* Um cinza claro para a descrição */
 }

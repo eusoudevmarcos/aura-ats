@@ -2,16 +2,18 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/router';
 import styles from './Header.module.css';
 import Button from '@/components/Button/Button';
-import { FaBars, FaTimes, FaWhatsapp } from 'react-icons/fa'; // Importe FaWhatsapp
+import { FaBars, FaTimes } from 'react-icons/fa';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const router = useRouter();
 
-  const whatsappNumber = '5561992483665'; // Seu número WhatsApp
-  const whatsappMessage = encodeURIComponent('Olá, Take It! Gostaria de mais informações sobre seus serviços.');
+  const whatsappNumber = '5561992483665';
+  const whatsappMessage = encodeURIComponent('Olá, Aura! Gostaria de mais informações sobre seus serviços.');
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
   const toggleMenu = () => {
@@ -42,13 +44,19 @@ const Header: React.FC = () => {
     }
   };
 
+  const handleLoginRedirect = () => {
+    setIsMenuOpen(false);
+    // ALTERADO: Redireciona para a URL completa da página de login no projeto 'frontend' (porta 3001)
+    window.location.href = 'http://localhost:3001/login';
+  };
+
   return (
     <header className={`${styles.header} ${isScrolled ? styles.scrolled : ''}`}>
       <div className={styles.container}>
         <div className={styles.logo}>
-          <Link href="/" onClick={(e) => scrollToSection(e, 'hero-section')}>
+          <Link href="/" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'hero-section')}>
             <Image
-              src="../../images/auralogoh.svg" 
+              src="../../images/auralogoh.svg"
               alt="Aura Logo"
               width={120}
               height={40}
@@ -63,26 +71,19 @@ const Header: React.FC = () => {
             <li><Link href="#about-section" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'about-section')}>Sobre Nós</Link></li>
             <li><Link href="#services-section" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'services-section')}>Serviços</Link></li>
             <li><Link href="#pricing-section" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'pricing-section')}>Preços</Link></li>
-            <li><Link href="#success-cases-section" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'success-cases-section')}>Cases</Link></li> {/* Adicionado link para Cases */}
+            <li><Link href="#success-cases-section" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'success-cases-section')}>Cases</Link></li>
             <li><Link href="#contact-section" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLAnchorElement>, 'contact-section')}>Contato</Link></li>
           </ul>
           <div className={styles.navActionsMobile}>
-            <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className={styles.whatsappButtonMobile}>
-              <FaWhatsapp /> WhatsApp
-            </a>
-            <Button variant="primary" size="medium" onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLButtonElement>, 'contact-section')}>Entrar</Button>
+            <Button variant="primary" size="medium" onClick={handleLoginRedirect}>Entrar</Button>
           </div>
         </nav>
 
         <div className={styles.headerActions}>
-          {/* Novo botão de WhatsApp no desktop */}
-          <a href={whatsappLink} target="_blank" rel="noopener noreferrer" className={`${styles.whatsappButtonDesktop} ${isScrolled ? styles.scrolledWhatsapp : ''}`}>
-            <FaWhatsapp /> WhatsApp
-          </a>
           <Button
             variant="outlined"
             size="medium"
-            onClick={(e) => scrollToSection(e as React.MouseEvent<HTMLButtonElement>, 'contact-section')}
+            onClick={handleLoginRedirect} // ALTERADO: Redireciona para a página de login
             className={`${styles.enterButton} ${isScrolled ? styles.scrolledEnter : ''}`}
           >
             Entrar

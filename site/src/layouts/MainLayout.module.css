@@ -1,25 +1,59 @@
 /* src/layouts/MainLayout.module.css */
+
 .container {
   display: flex;
   flex-direction: column;
-  min-height: 100vh; 
+  min-height: 100vh;
+  /* Garante que o conteúdo começa abaixo do header, se houver um header fixo */
+  padding-top: var(--header-height); 
+  background-color: var(--bg-color-light); /* Exemplo de uso de variável */
+}
+
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: var(--header-height); /* Usando a variável global definida em variables.css */
+  background-color: var(--primary-color);
+  color: var(--text-color-light);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--spacing-md);
+  box-shadow: var(--box-shadow-sm);
+  z-index: 1000; /* Garante que o cabeçalho fique sobre o conteúdo */
 }
 
 .mainContent {
-  flex-grow: 1; 
-  
-  padding-top: calc(var(--header-height) + var(--spacing-lg)); 
+  flex-grow: 1; /* Faz o conteúdo principal preencher o espaço restante */
+  padding: var(--spacing-lg);
+  max-width: 1200px; /* Largura máxima para o conteúdo central */
+  margin: 0 auto; /* Centraliza o conteúdo */
+  width: 100%; /* Garante que ocupe 100% da largura disponível até o max-width */
 }
 
-:root {
-  --header-height: 60px; 
+.footer {
+  width: 100%;
+  padding: var(--spacing-md);
+  background-color: var(--accent-color);
+  color: var(--text-color-light);
+  text-align: center;
+  margin-top: auto; /* Empurra o rodapé para o final do contêiner flex */
 }
 
+/* Exemplo de responsividade para mobile */
 @media (max-width: 768px) {
-  .mainContent {
-    padding-top: calc(var(--header-height-mobile) + var(--spacing-md)); /* Um padding menor para mobile */
+  .header {
+    height: var(--header-height-mobile); /* Usa a variável de altura para mobile */
+    padding: 0 var(--spacing-sm);
   }
-  :root {
-    --header-height-mobile: 60px; /* Altura aproximada do seu header em mobile */
+
+  .container {
+    padding-top: var(--header-height-mobile);
+  }
+
+  .mainContent {
+    padding: var(--spacing-md);
   }
 }

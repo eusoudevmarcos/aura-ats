@@ -22,7 +22,7 @@ const LoginPage: React.FC = () => {
     <div className={styles.loginContainer}>
       <div className={styles.loginBox}>
         <div className={styles.loginLogo}>
-          <img src="https://placehold.co/80x80/6366F1/ffffff?text=A" alt="Logo Aura" />
+          <img src="/Aura-icon.svg" alt="Logo Aura" />
           <span className={styles.loginLogoText}>Aura ATS</span>
         </div>
         <form onSubmit={handleSubmit} style={{ width: '100%' }}>

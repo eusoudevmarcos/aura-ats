@@ -17,7 +17,7 @@ const HomePage: React.FC = () => {
     <MainLayout>
       <Head>
         <title>Take It - Recrutamento Especializado para Saúde, TI e Executivos</title>
-        <meta name="description" content="Take It: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade." />
+        <meta name="description" content="Aura: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade." />
         {/* Você pode adicionar mais meta tags para SEO aqui */}
       </Head>
 

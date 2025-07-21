@@ -29,9 +29,9 @@ const AboutSection: React.FC = () => {
 
   return (
     <section id="about-section" className={styles.sectionContainer}>
-      <h2 className={styles.title}>Sobre a Take It: O Match Perfeito para o Seu Sucesso</h2>
+      <h2 className={styles.title}>Sobre a Aura: O Match Perfeito para o Seu Sucesso</h2>
       <p className={styles.introText}>
-        Na Take It, não apenas encontramos talentos, construímos o futuro do seu negócio. Com apenas 8 anos de mercado mas com profissionais que dominam o mercado com mais de 15 anos de experiência trabalhando com pessoas, somos especialistas em conectar empresas inovadoras a profissionais que impulsionam o sucesso. Nossa abordagem única combina a precisão da tecnologia com a intuição humana, garantindo resultados excepcionais em tempo recorde.
+        Na Aura, não apenas encontramos talentos, construímos o futuro do seu negócio. Com apenas 8 anos de mercado mas com profissionais que dominam o mercado com mais de 15 anos de experiência trabalhando com pessoas, somos especialistas em conectar empresas inovadoras a profissionais que impulsionam o sucesso. Nossa abordagem única combina a precisão da tecnologia com a intuição humana, garantindo resultados excepcionais em tempo recorde.
       </p>
 
       <div className={styles.mission}>
