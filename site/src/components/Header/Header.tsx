@@ -12,8 +12,7 @@ const Header: React.FC = () => {
   
   const whatsappNumber = '5561992483665';
   const whatsappMessage = encodeURIComponent('Olá, Aura! Gostaria de mais informações sobre seus serviços.');
-  const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
-
+  
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
   };
