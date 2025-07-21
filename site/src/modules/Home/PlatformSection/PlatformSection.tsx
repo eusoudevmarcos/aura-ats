@@ -56,7 +56,7 @@ const PlatformSection: React.FC = () => {
             proporcionando acesso a um banco de dados qualificado e atualizado de médicos em todo o Brasil.
           </p>
           <Button onClick={openVideoModal} variant='primary' size='large' className={styles.callToActionButton}>
-            8EM BREVE* Assista ao Vídeo Demonstrativo 
+            *EM BREVE* Assista ao Vídeo Demonstrativo 
           </Button>
         </div>
       </div>
