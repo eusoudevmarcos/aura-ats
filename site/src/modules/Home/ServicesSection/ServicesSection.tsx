@@ -8,7 +8,7 @@ const ServicesSection: React.FC = () => {
     <section id="services-section" className={styles.sectionContainer}>
       <h2>Nossos Serviços: O Match Perfeito para Cada Necessidade</h2>
       <p className={styles.subtitle}>
-        A Take It é especialista em encontrar os talentos certos para as posições mais estratégicas da sua empresa.
+        A Aura é especialista em encontrar os talentos certos para as posições mais estratégicas da sua empresa.
         Conheça nossas áreas de atuação e descubra como podemos impulsionar seu time.
       </p>
 
