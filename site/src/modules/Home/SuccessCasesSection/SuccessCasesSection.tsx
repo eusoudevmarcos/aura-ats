@@ -23,9 +23,9 @@ const SuccessCasesSection: React.FC = () => {
 
   return (
     <section id="success-cases-section" className={styles.sectionContainer}>
-      <h2>Nossos Cases de Sucesso: Empresas que Confiam na Take It</h2>
+      <h2>Nossos Cases de Sucesso: Empresas que Confiam na Aura</h2>
       <p className={styles.subtitle}>
-        Veja algumas das empresas que já impulsionaram seus resultados com o recrutamento estratégico da Take It.
+        Veja algumas das empresas que já impulsionaram seus resultados com o recrutamento estratégico da Aura.
       </p>
       <div className={styles.logosGrid}>
         {logos.map((logo, index) => (
