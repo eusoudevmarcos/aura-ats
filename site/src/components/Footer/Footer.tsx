@@ -17,7 +17,7 @@ const Footer: React.FC = () => {
             {/* Use a versão do logo que se encaixe melhor no footer, talvez uma branca ou monocromática */}
             <Image
               src="/images/auralogoh.svg" // Exemplo: se você tiver uma versão branca/clara do logo
-              alt="Take It Logo"
+              alt="Aura logo"
               width={100}
               height={50}
               priority
@@ -27,7 +27,7 @@ const Footer: React.FC = () => {
             Conectando talentos às empresas que transformam o futuro da saúde e tecnologia.
           </p>
           <div className={styles.socialIcons}>
-            <a href="https://www.linkedin.com/company/sua-empresa" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn da Aura">
+            <a href="https://www.linkedin.com/company/aurareslabs/posts/?feedView=all" target="_blank" rel="noopener noreferrer" aria-label="LinkedIn da Aura">
               <FaLinkedin />
             </a>
             <a href={whatsappLink} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp da Aura">
