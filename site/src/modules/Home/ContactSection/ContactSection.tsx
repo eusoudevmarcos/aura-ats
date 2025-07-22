@@ -5,7 +5,7 @@ import Button from '@/components/Button/Button';
 
 const ContactSection: React.FC = () => {
   // Número de telefone para o WhatsApp (inclua o código do país, ex: 55 para Brasil)
-  const whatsappNumber = '5511987654321'; // Exemplo: +55 11 98765-4321
+  const whatsappNumber = '5561992483665'; // Exemplo: +55 11 98765-4321
   const whatsappMessage = encodeURIComponent('Olá, Aura! Gostaria de mais informações sobre seus serviços.');
   const whatsappLink = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`;
 
