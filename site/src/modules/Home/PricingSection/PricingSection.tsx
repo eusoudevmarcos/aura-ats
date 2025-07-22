@@ -25,7 +25,7 @@ const PricingSection: React.FC = () => {
         <div className={styles.pricingCard}>
           <h3>Plano Essencial</h3>
           <p className={styles.tagline}>Ideal para primeiras contratações</p>
-          <p className={styles.price}>R$ 999<span>/vaga</span></p>
+          <p className={styles.price}>60%/Salário<span>/vaga</span></p>
           <ul className={styles.featuresList}>
             <li><FaCheckCircle className={styles.checkIcon} /> Publicação de vaga</li>
             <li><FaCheckCircle className={styles.checkIcon} /> Triagem inicial de currículos</li>
@@ -47,7 +47,7 @@ const PricingSection: React.FC = () => {
         <div className={styles.pricingCard}>
           <h3>Plano Profissional</h3>
           <p className={styles.tagline}>Para volume moderado de contratações</p>
-          <p className={styles.price}>R$ 1.799<span>/vaga</span></p>
+          <p className={styles.price}>80%/Salário<span>/vaga</span></p>
           <ul className={styles.featuresList}>
             <li><FaCheckCircle className={styles.checkIcon} /> Tudo do Plano Essencial</li>
             <li><FaCheckCircle className={styles.checkIcon} /> Avaliação de perfil comportamental</li>
@@ -91,7 +91,7 @@ const PricingSection: React.FC = () => {
       </div>
 
       <p className={styles.note}>
-        *Os valores são por vaga contratada. Para grandes volumes ou pacotes personalizados, entre em contato para uma proposta exclusiva.
+        *Os valores são sobre o salário mensal proposto por vaga contratada. Para grandes volumes ou pacotes personalizados, entre em contato para uma proposta exclusiva.
       </p>
     </section>
   );
