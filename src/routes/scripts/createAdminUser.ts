@@ -1,5 +1,5 @@
 import { getAuth } from 'firebase-admin/auth';
-import { db } from '../firebase/admin';
+import { db } from '../../firebase/admin';
 
 async function createAdmin() {
   const email = 'admin@admin.com';

@@ -8,6 +8,7 @@ const router = express.Router();
 router.post('/', async (req, res) => {
   try {
     const docRef = await db.collection('candidates').add(req.body);
+    console.log(docRef)
     res.status(201).json({ id: docRef.id });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar candidato' });

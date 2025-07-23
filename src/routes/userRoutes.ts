@@ -11,8 +11,9 @@ router.post('/', async (req, res) => {
     const { email, password, name, role } = req.body;
 
     const userRecord = await getAuth().createUser({ email, password, displayName: name });
-    await db.collection('users').doc(userRecord.uid).set({ email, name, role });
-
+    console.log(userRecord.uid)
+    const user = await db.collection('users').doc(userRecord.uid).set({ email, name, role });
+    console.log(user)
     res.status(201).json({ uid: userRecord.uid });
   } catch (error) {
     res.status(500).json({ error: 'Erro ao criar usuário', details: error });
