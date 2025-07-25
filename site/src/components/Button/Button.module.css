@@ -7,14 +7,16 @@
   border: none;
   border-radius: var(--border-radius-md);
   font-weight: 600;
-  transition: background-color var(--transition-speed), color var(--transition-speed), transform var(--transition-speed), box-shadow var(--transition-speed);
+  transition: background-color var(--transition-speed),
+    color var(--transition-speed), transform var(--transition-speed),
+    box-shadow var(--transition-speed);
   text-align: center;
   white-space: nowrap; /* Evita que o texto quebre linha */
 }
 
 /* Variantes de cor */
 .primary {
-  background-color: #252525;
+  background-color: #711cd3;
   color: var(--secondary-color);
 }
 .primary:hover {

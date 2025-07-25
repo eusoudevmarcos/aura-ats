@@ -3,11 +3,11 @@
   top: 0;
   left: 0;
   width: 100%;
-  background-color: var(--secondary-color); 
+  background-color: var(--secondary-color);
   z-index: 1000;
   box-shadow: var(--box-shadow-sm);
   transition: background-color 0.3s ease, box-shadow 0.3s ease;
-  height: 64px; /* altura fixa para facilitar offset */
+  height: 70px; /* altura fixa para facilitar offset */
   display: flex;
   align-items: center;
 }
@@ -18,7 +18,7 @@
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   width: 100%;
   padding: 0 var(--spacing-sm);
@@ -52,7 +52,7 @@
   color: var(--text-color-primary);
   text-decoration: none;
   font-weight: 600;
-  font-size: 1.1rem; /* 18px */
+  font-size: 1rem; /* 16px */
   position: relative;
   padding: 10px 0;
   display: block;
@@ -63,7 +63,7 @@
 }
 
 .nav a::after {
-  content: '';
+  content: "";
   position: absolute;
   width: 0;
   height: 2px;

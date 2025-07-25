@@ -1,7 +1,7 @@
 /* src/modules/Home/AboutSection/AboutSection.module.css */
 .sectionContainer {
   padding: var(--spacing-xxl) var(--spacing-xl);
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   text-align: center;
   background-color: var(--secondary-color);
@@ -34,27 +34,27 @@
 }
 
 .mission h3 {
-    font-size: var(--font-size-h3);
-    color: var(--primary-color);
-    margin-bottom: var(--spacing-md);
-    text-align: center;
+  font-size: var(--font-size-h3);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
+  text-align: center;
 }
 
 .mission p {
-    font-size: var(--font-size-md);
-    color: var(--text-color-secondary);
-    line-height: 1.6;
+  font-size: var(--font-size-md);
+  color: var(--text-color-secondary);
+  line-height: 1.6;
 }
 
 .valuesTitle {
-    margin-top: var(--spacing-xxl);
-    margin-bottom: var(--spacing-md);
+  margin-top: var(--spacing-xxl);
+  margin-bottom: var(--spacing-md);
 }
 
 .valuesTitle h3 {
-    font-size: var(--font-size-h3);
-    color: var(--primary-color);
-    margin-bottom: var(--spacing-md);
+  font-size: var(--font-size-h3);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-md);
 }
 
 .valuesGrid {
@@ -83,22 +83,24 @@
   box-shadow: var(--box-shadow-md); /* Sombra um pouco mais forte no hover */
 }
 
-.valueCard h4 { /* Título do card */
+.valueCard h4 {
+  /* Título do card */
   color: var(--primary-color); /* Cor do título principal */
   /* Mantenha as outras propriedades como font-size, margin-bottom, font-weight */
 }
 
-.valueCard p { /* Parágrafo do card */
+.valueCard p {
+  /* Parágrafo do card */
   color: var(--text-color-secondary); /* Cor do texto secundário */
   /* Mantenha as outras propriedades como font-size, line-height */
 }
 
 .iconWrapper {
-  font-size: var(--font-size-xxxxl); 
-  color: var(--accent-color); 
-  background-color: rgba(var(--accent-color-rgb), 0.1); 
-  width: 90px; 
-  height: 90px; 
+  font-size: var(--font-size-xxxxl);
+  color: var(--accent-color);
+  background-color: rgba(var(--accent-color-rgb), 0.1);
+  width: 90px;
+  height: 90px;
 }
 
 /* Media Queries para Responsividade */
@@ -121,7 +123,8 @@
   .valueCard {
     padding: var(--spacing-md);
   }
-  .valueCard h4 { /* Alterado para h4 */
+  .valueCard h4 {
+    /* Alterado para h4 */
     font-size: var(--font-size-lg);
   }
   .iconWrapper {

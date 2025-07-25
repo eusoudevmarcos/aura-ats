@@ -1,7 +1,7 @@
 /* src/modules/Home/ServicesSection/ServicesSection.module.css */
 .sectionContainer {
   padding: var(--spacing-xxl) var(--spacing-xl);
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   text-align: center;
   background-color: var(--secondary-color); /* Fundo branco para contraste */
@@ -25,7 +25,10 @@
 
 .servicesGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* 3 colunas em telas grandes, responsivo */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* 3 colunas em telas grandes, responsivo */
   gap: var(--spacing-xl); /* Espaçamento entre os cards */
   margin-top: var(--spacing-lg);
 }
@@ -86,7 +89,7 @@
 }
 
 .serviceCard ul li::before {
-  content: '✓'; /* Checkmark como marcador */
+  content: "✓"; /* Checkmark como marcador */
   color: var(--primary-color); /* Cor do checkmark */
   margin-right: var(--spacing-xs);
   font-weight: bold;
@@ -94,13 +97,16 @@
 }
 
 .ctaButton {
-    margin-top: var(--spacing-xl);
+  margin-top: var(--spacing-xl);
 }
 
 /* Media Queries para Responsividade */
 @media (max-width: 992px) {
   .servicesGrid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajusta para 2 colunas em tablets */
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    ); /* Ajusta para 2 colunas em tablets */
   }
 }
 

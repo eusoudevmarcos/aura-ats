@@ -8,7 +8,7 @@
 }
 
 .contentWrapper {
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(3, 1fr); /* 3 colunas para desktop */
@@ -29,8 +29,8 @@
 }
 
 .logoLink img {
-    filter: brightness(0) invert(1); /* Tenta transformar um logo escuro em branco se precisar */
-    height: auto;
+  filter: brightness(0) invert(1); /* Tenta transformar um logo escuro em branco se precisar */
+  height: auto;
 }
 
 .description {
@@ -97,7 +97,8 @@
     grid-template-columns: repeat(2, 1fr); /* 2 colunas em tablets */
     gap: var(--spacing-xl);
   }
-  .footerSection:last-child { /* Move a última seção para a segunda linha */
+  .footerSection:last-child {
+    /* Move a última seção para a segunda linha */
     grid-column: span 2;
     text-align: center;
   }

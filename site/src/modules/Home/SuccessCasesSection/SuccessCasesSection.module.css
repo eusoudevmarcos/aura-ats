@@ -1,7 +1,7 @@
 /* src/modules/Home/SuccessCasesSection/SuccessCasesSection.module.css */
 .sectionContainer {
   padding: var(--spacing-xxl) var(--spacing-xl);
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   text-align: center;
   background-color: var(--bg-color-light); /* Fundo suave para contraste */

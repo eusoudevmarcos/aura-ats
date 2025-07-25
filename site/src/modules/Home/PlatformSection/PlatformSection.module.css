@@ -1,10 +1,12 @@
 /* src/modules/Home/PlatformSection/PlatformSection.module.css */
 .sectionContainer {
   padding: var(--spacing-xxl) var(--spacing-xl);
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   text-align: center;
-  background-color: var(--secondary-color); /* Fundo branco para seções principais */
+  background-color: var(
+    --secondary-color
+  ); /* Fundo branco para seções principais */
 }
 
 .sectionContainer h2 {
@@ -100,14 +102,19 @@
 
 .planCardsContainer {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Colunas responsivas */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(280px, 1fr)
+  ); /* Colunas responsivas */
   gap: var(--spacing-lg);
   margin-top: var(--spacing-xl);
   margin-bottom: var(--spacing-xl);
 }
 
 .planCard {
-  background-color: var(--bg-color-light); /* Fundo claro para os cards de planos */
+  background-color: var(
+    --bg-color-light
+  ); /* Fundo claro para os cards de planos */
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--box-shadow-sm);
@@ -161,7 +168,7 @@
   justify-content: center; /* Centraliza o texto da lista */
 }
 .planCard ul li::before {
-  content: '✔'; /* Ícone de check */
+  content: "✔"; /* Ícone de check */
   color: var(--accent-color);
   margin-right: var(--spacing-xxs);
   font-weight: bold;

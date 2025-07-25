@@ -1,7 +1,7 @@
 /* src/modules/Home/PricingSection/PricingSection.module.css */
 .sectionContainer {
   padding: var(--spacing-xxl) var(--spacing-xl);
-  max-width: 1200px;
+  max-width: 1420px;
   margin: 0 auto;
   text-align: center;
   background-color: var(--bg-color-light); /* Fundo suave para contraste */
@@ -25,13 +25,18 @@
 
 .pricingGrid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Colunas responsivas */
+  grid-template-columns: repeat(
+    auto-fit,
+    minmax(300px, 1fr)
+  ); /* Colunas responsivas */
   gap: var(--spacing-xl); /* Espaçamento entre os cards */
   margin-top: var(--spacing-lg);
 }
 
 .pricingCard {
-  background-color: var(--secondary-color); /* Fundo branco para os cards de preço */
+  background-color: var(
+    --secondary-color
+  ); /* Fundo branco para os cards de preço */
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--box-shadow-md);
@@ -62,7 +67,7 @@
 }
 
 .price {
-  font-size: var(--font-size-h1); /* Tamanho grande para o preço */
+  font-size: var(--font-size-h4); /* Tamanho grande para o preço */
   font-weight: 700;
   color: var(--accent-color); /* Cor de destaque para o preço */
   margin-bottom: var(--spacing-lg);
@@ -113,7 +118,10 @@
 /* Media Queries para Responsividade */
 @media (max-width: 992px) {
   .pricingGrid {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajusta para 2 colunas em tablets */
+    grid-template-columns: repeat(
+      auto-fit,
+      minmax(280px, 1fr)
+    ); /* Ajusta para 2 colunas em tablets */
   }
 }
 

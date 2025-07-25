@@ -5,7 +5,7 @@
   flex-direction: column;
   min-height: 100vh;
   /* Garante que o conteúdo começa abaixo do header, se houver um header fixo */
-  padding-top: var(--header-height); 
+  padding-top: var(--header-height);
   background-color: var(--bg-color-light); /* Exemplo de uso de variável */
 }
 
@@ -14,7 +14,9 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: var(--header-height); /* Usando a variável global definida em variables.css */
+  height: var(
+    --header-height
+  ); /* Usando a variável global definida em variables.css */
   background-color: var(--primary-color);
   color: var(--text-color-light);
   display: flex;
@@ -27,8 +29,8 @@
 
 .mainContent {
   flex-grow: 1; /* Faz o conteúdo principal preencher o espaço restante */
-  padding: var(--spacing-lg);
-  max-width: 1200px; /* Largura máxima para o conteúdo central */
+  /* padding: var(--spacing-lg); */
+  /* max-width: 1200px; Largura máxima para o conteúdo central */
   margin: 0 auto; /* Centraliza o conteúdo */
   width: 100%; /* Garante que ocupe 100% da largura disponível até o max-width */
 }
@@ -45,7 +47,9 @@
 /* Exemplo de responsividade para mobile */
 @media (max-width: 768px) {
   .header {
-    height: var(--header-height-mobile); /* Usa a variável de altura para mobile */
+    height: var(
+      --header-height-mobile
+    ); /* Usa a variável de altura para mobile */
     padding: 0 var(--spacing-sm);
   }
 
