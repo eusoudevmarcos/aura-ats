@@ -1,0 +1,133 @@
+/* src/modules/Home/PricingSection/PricingSection.module.css */
+.sectionContainer {
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: var(--bg-color-light); /* Fundo suave para contraste */
+  color: var(--text-color-primary);
+}
+
+.sectionContainer h2 {
+  color: var(--primary-color);
+  font-size: var(--font-size-h2);
+  margin-bottom: var(--spacing-md);
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xxl);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.pricingGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); /* Colunas responsivas */
+  gap: var(--spacing-xl); /* Espaçamento entre os cards */
+  margin-top: var(--spacing-lg);
+}
+
+.pricingCard {
+  background-color: var(--secondary-color); /* Fundo branco para os cards de preço */
+  border-radius: var(--border-radius-lg);
+  padding: var(--spacing-xl);
+  box-shadow: var(--box-shadow-md);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  border: 1px solid var(--border-color);
+}
+
+.pricingCard:hover {
+  transform: translateY(-8px); /* Efeito de elevação maior */
+  box-shadow: var(--box-shadow-lg); /* Sombra mais forte no hover */
+}
+
+.pricingCard h3 {
+  font-size: var(--font-size-h3);
+  color: var(--primary-color);
+  margin-bottom: var(--spacing-xs);
+}
+
+.tagline {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-md);
+  min-height: 2em; /* Garante altura mínima para alinhar taglines */
+}
+
+.price {
+  font-size: var(--font-size-h1); /* Tamanho grande para o preço */
+  font-weight: 700;
+  color: var(--accent-color); /* Cor de destaque para o preço */
+  margin-bottom: var(--spacing-lg);
+}
+
+.price span {
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  color: var(--text-color-secondary);
+}
+
+.featuresList {
+  list-style: none;
+  padding: 0;
+  text-align: left;
+  width: 100%;
+  margin-bottom: var(--spacing-xl);
+  flex-grow: 1; /* Permite que a lista ocupe o espaço disponível */
+}
+
+.featuresList li {
+  font-size: var(--font-size-md);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xs);
+  display: flex;
+  align-items: flex-start; /* Alinha o ícone com o texto */
+  gap: var(--spacing-xs);
+}
+
+.checkIcon {
+  color: var(--primary-color); /* Cor do ícone de check */
+  font-size: var(--font-size-lg);
+  flex-shrink: 0; /* Impede que o ícone encolha */
+  margin-top: 3px; /* Pequeno ajuste visual */
+}
+
+.pricingCard button {
+  margin-top: auto; /* Empurra o botão para a parte inferior do card */
+}
+
+.note {
+  font-size: var(--font-size-sm);
+  color: var(--text-color-secondary);
+  margin-top: var(--spacing-xxl);
+  text-align: center;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 992px) {
+  .pricingGrid {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ajusta para 2 colunas em tablets */
+  }
+}
+
+@media (max-width: 768px) {
+  .sectionContainer {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  .sectionContainer h2 {
+    font-size: var(--font-size-h3);
+  }
+  .subtitle {
+    font-size: var(--font-size-md);
+  }
+  .pricingGrid {
+    grid-template-columns: 1fr; /* Uma única coluna em celulares */
+  }
+}

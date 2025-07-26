@@ -1,0 +1,54 @@
+/* src/modules/Home/ContactSection/ContactSection.module.css */
+.sectionContainer {
+  padding: var(--spacing-xxl) var(--spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  background-color: var(--secondary-color); /* Fundo branco para contraste */
+  color: var(--text-color-primary);
+}
+
+.sectionContainer h2 {
+  color: var(--primary-color);
+  font-size: var(--font-size-h2);
+  margin-bottom: var(--spacing-md);
+}
+
+.subtitle {
+  font-size: var(--font-size-lg);
+  color: var(--text-color-secondary);
+  margin-bottom: var(--spacing-xxl);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.contactActions {
+  display: flex;
+  flex-direction: column; /* Empilha em mobile */
+  align-items: center;
+  gap: var(--spacing-lg); /* Espaçamento entre o botão e o ícone */
+  margin-top: var(--spacing-xl);
+}
+
+.contactButton {
+  min-width: 280px; /* Largura mínima para o botão */
+}
+
+.whatsappIconLink:hover {
+  transform: scale(1.1);
+  color: var(--whatsapp-green-dark); /* Uma versão mais escura no hover */
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+  .sectionContainer {
+    padding: var(--spacing-xl) var(--spacing-md);
+  }
+  .sectionContainer h2 {
+    font-size: var(--font-size-h3);
+  }
+  .subtitle {
+    font-size: var(--font-size-md);
+  }
+}

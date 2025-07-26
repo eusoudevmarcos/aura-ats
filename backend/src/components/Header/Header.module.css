@@ -1,0 +1,221 @@
+/* src/components/Header/Header.module.css */
+.header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: var(--secondary-color); 
+  padding: var(--spacing-md) 0;
+  z-index: 1000;
+  transition: background-color 0.3s ease, box-shadow 0.3s ease, padding 0.3s ease;
+  box-shadow: var(--box-shadow-sm); /* Sombra suave padrão */
+}
+
+.header.scrolled {
+  background-color: var(--secondary-color); /* Pode manter o mesmo ou mudar levemente */
+  box-shadow: var(--box-shadow-md); /* Sombra um pouco mais forte ao rolar */
+  padding: var(--spacing-sm) 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 var(--spacing-xl);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 0 20px 0 0;
+}
+
+.logo img {
+  height: auto;
+}
+
+.nav ul {
+  list-style: none;
+  display: flex;
+  gap: var(--spacing-xl);
+  margin: 0;
+  padding: 0;
+}
+
+.nav a {
+  color: var(--text-color-primary); /* Links sempre escuros no header branco */
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+
+.nav a:hover {
+  color: var(--primary-color);
+}
+
+.nav a::after {
+  content: '';
+  position: absolute;
+  width: 0;
+  height: 2px;
+  bottom: -5px;
+  left: 0;
+  background-color: var(--primary-color);
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after {
+  width: 100%;
+}
+
+.headerActions {
+  display: flex;
+  align-items: center; /* Alinha o botão de WhatsApp e Entrar */
+  gap: var(--spacing-sm); /* Espaçamento entre os botões */
+}
+
+/* Botões do Desktop */
+.whatsappButtonDesktop {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xxs);
+  padding: var(--spacing-xs) var(--spacing-md);
+  border: 2px solid var(--whatsapp-green);
+  border-radius: var(--border-radius-md);
+  background-color: var(--whatsapp-green);
+  color: var(--secondary-color); /* Texto branco */
+  text-decoration: none;
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+
+.whatsappButtonDesktop:hover {
+  background-color: var(--whatsapp-green-dark);
+  border-color: var(--whatsapp-green-dark);
+  color: var(--secondary-color);
+}
+
+/* Se quiser que a cor do botão WhatsApp mude ao rolar, ajuste aqui */
+/* .scrolledWhatsapp {
+    background-color: var(--whatsapp-green-dark);
+    border-color: var(--whatsapp-green-dark);
+}
+.scrolledWhatsapp:hover {
+    background-color: var(--whatsapp-green);
+    border-color: var(--whatsapp-green);
+} */
+
+
+.enterButton {
+    /* Estilos do botão Outlined */
+    background-color: transparent;
+    color: var(--primary-color); /* Cor do texto do botão Entrar (sempre visível) */
+    border: 2px solid var(--primary-color); /* Borda do botão Entrar */
+}
+
+.enterButton:hover {
+    background-color: var(--primary-color);
+    color: var(--secondary-color);
+}
+
+.menuToggle {
+  display: none;
+  background: none;
+  border: none;
+  font-size: var(--font-size-xl);
+  color: var(--primary-color); 
+  cursor: pointer;
+}
+
+/* Não precisa mais de .header.scrolled .menuToggle */
+
+.navActionsMobile {
+  display: none;
+}
+
+/* Media Queries para Responsividade */
+@media (max-width: 768px) {
+  .header {
+    padding: var(--spacing-sm) 0;
+  }
+
+  .nav {
+    display: none;
+    flex-direction: column;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 100%;
+    background-color: var(--secondary-color);
+    box-shadow: var(--box-shadow-md);
+    padding: var(--spacing-lg) var(--spacing-xl);
+    border-bottom-left-radius: var(--border-radius-lg);
+    border-bottom-right-radius: var(--border-radius-lg);
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease-out;
+  }
+
+  .nav.open {
+    display: flex;
+    max-height: 350px; /* Ajuste se houver mais itens */
+  }
+
+  .nav ul {
+    flex-direction: column;
+    gap: var(--spacing-sm);
+    margin-bottom: var(--spacing-md);
+  }
+
+  .nav a {
+    color: var(--text-color-primary);
+    font-size: var(--font-size-lg);
+    padding: var(--spacing-xs) 0;
+    display: block;
+  }
+
+  .nav a::after {
+    height: 1px;
+    bottom: 0;
+  }
+
+  .headerActions {
+    display: none;
+  }
+
+  .menuToggle {
+    display: block;
+  }
+
+  .navActionsMobile {
+    display: flex; /* Mostra os botões no mobile */
+    flex-direction: column;
+    gap: var(--spacing-md);
+    width: 100%;
+    padding-top: var(--spacing-md);
+    border-top: 1px solid var(--border-color);
+  }
+
+  .navActionsMobile a { /* Estilo para o link WhatsApp no mobile */
+      display: flex;
+      align-items: center;
+      justify-content: center; /* Centraliza o texto e ícone */
+      gap: var(--spacing-xs);
+      padding: var(--spacing-sm) var(--spacing-md);
+      border: 2px solid var(--whatsapp-green);
+      border-radius: var(--border-radius-md);
+      background-color: var(--whatsapp-green);
+      color: var(--secondary-color);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: var(--font-size-md);
+      width: 100%; /* Ocupa a largura total */
+  }
+}
