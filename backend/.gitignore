@@ -1,0 +1,20 @@
+# Ignorar node_modules (NUNCA deve ser comitado)
+node_modules/
+
+# Ignorar arquivos de configuração do Firebase Admin SDK
+firebase-adminsdk.json
+
+# Ignorar arquivos de variáveis de ambiente
+.env
+
+# Ignorar logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Ignorar diretórios do TypeScript
+dist/
+build/
+
+# Ignorar arquivos do sistema operacional (opcional)
+.DS_Store
