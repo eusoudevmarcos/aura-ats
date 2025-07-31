@@ -2,6 +2,25 @@ import React, { useState } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header"; // Importa o componente Header
 import DashboardContent from "../components/DashboardContent/DashboardContent"; // Importa o componente de conteúdo dinâmico
+import { GetServerSideProps } from "next";
+import { verify } from "jsonwebtoken";
+import nookies from "nookies";
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const cookies = nookies.get(ctx);
+
+  try {
+    const user = verify(cookies.token, "sua_chave_secreta_jwt");
+    return { props: { user } };
+  } catch {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+};
 
 const DashboardPage: React.FC = () => {
   const [activeSection, setActiveSection] = useState("Dashboard");
