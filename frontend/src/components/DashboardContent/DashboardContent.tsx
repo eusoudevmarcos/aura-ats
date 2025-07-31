@@ -8,7 +8,6 @@ import ActivitySection from "../Activity/ActivitySection"; // Esta é a seção 
 import ClientList from "../Clients/ClientList";
 import ClientForms from "../Clients/ClientForms";
 import ProfessionalsList from "../Professionals/ProfessionalsList";
-import ProfessionalsForm from "../Professionals/ProfessionalsForm";
 import VagasList from "../Vagas/VagasList";
 import VagasForm from "../Vagas/VagasForm";
 

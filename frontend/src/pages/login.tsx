@@ -1,33 +1,32 @@
 // frontend/pages/login.tsx
-import React, { useState } from 'react';
-import styles from '../styles/Login.module.css'; // Importa o módulo CSS para o login
-import { useRouter } from 'next/router'; // Importa useRouter para redirecionamento
+import React, { useState } from "react";
+import styles from "../styles/Login.module.css";
+import { useRouter } from "next/router";
+import Image from "next/image";
 
 const LoginPage: React.FC = () => {
-  const [username, setUsername] = useState('');
-  const [password, setPassword] = useState('');
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
   const router = useRouter();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Login attempt:', { username, password });
-    // Lógica de autenticação aqui
-    // Ex: Chamar uma API de login
-    // Se sucesso, redirecionar para o dashboard
-    // Por enquanto, apenas redireciona para o dashboard
-    router.push('/dashboard');
+    console.log("Login attempt:", { username, password });
+    router.push("/dashboard");
   };
 
   return (
     <div className={styles.loginContainer}>
       <div className={styles.loginBox}>
         <div className={styles.loginLogo}>
-          <img src="/Aura-icon.svg" alt="Logo Aura" />
+          <Image src="/Aura-icon.svg" width={30} height={30} alt="Logo Aura" />
           <span className={styles.loginLogoText}>Aura ATS</span>
         </div>
-        <form onSubmit={handleSubmit} style={{ width: '100%' }}>
+        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
           <div className={styles.formGroup}>
-            <label htmlFor="username" className={styles.formLabel}>Usuário:</label>
+            <label htmlFor="username" className={styles.formLabel}>
+              Usuário:
+            </label>
             <input
               type="text"
               id="username"
@@ -39,7 +38,9 @@ const LoginPage: React.FC = () => {
             />
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="password" className={styles.formLabel}>Senha:</label>
+            <label htmlFor="password" className={styles.formLabel}>
+              Senha:
+            </label>
             <input
               type="password"
               id="password"
@@ -50,9 +51,13 @@ const LoginPage: React.FC = () => {
               required
             />
           </div>
-          <button type="submit" className={styles.loginButton}>Entrar</button>
+          <button type="submit" className={styles.loginButton}>
+            Entrar
+          </button>
         </form>
-        <a href="#" className={styles.forgotPassword}>Esqueceu a senha?</a>
+        <a href="#" className={styles.forgotPassword}>
+          Esqueceu a senha?
+        </a>
       </div>
     </div>
   );
