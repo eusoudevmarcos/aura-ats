@@ -63,7 +63,7 @@ export default function TakeitLayout({ children, fit }: Props) {
         padding: "16px",
       }}
     >
-      <h1 className={`text-center ${styles.h1}`}>Tike it</h1>
+      <h1 className={`text-center ${styles.h1}`}>TAKE IT</h1>
       <div
         className={`${styles.container} shadow-md`}
         style={{ marginBottom: "20px", padding: "16px" }}
