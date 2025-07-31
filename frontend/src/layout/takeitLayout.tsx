@@ -1,6 +1,6 @@
 import { Children, useState } from "react";
 import { searchApi } from "@/axios/searchApi";
-import SearchForm from "@/components/take-it/SearchForm";
+import SearchForm from "@/components/takeit/SearchForm";
 import styles from "@/styles/takeit.module.scss";
 
 type TypeColumns = "persons" | "companies";

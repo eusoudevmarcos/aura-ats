@@ -1,5 +1,5 @@
 import React from "react";
-import Card from "@/components/take-it/Card";
+import Card from "@/components/takeit/Card";
 import { searchApi } from "@/axios/searchApi";
 import { useRouter } from "next/router";
 import Link from "next/link";
@@ -228,7 +228,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
             <Card title="Endereços">
               {data.addresses && data.addresses.length > 0 ? (
                 <div className="space-y-2">
-                  {data.addresses.map((addr, idx) => (
+                  {data.addresses.map((addr: any, idx: any) => (
                     <div
                       key={idx}
                       className="border-b last:border-b-0 pb-2 last:pb-0"
@@ -270,7 +270,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
             <Card title="Telefones Celulares">
               {data.mobile_phones && data.mobile_phones.length > 0 ? (
                 <div className="space-y-2">
-                  {data.mobile_phones.map((phone, idx) => (
+                  {data.mobile_phones.map((phone: any, idx: any) => (
                     <div
                       key={idx}
                       className="border-b last:border-b-0 pb-2 last:pb-0"
@@ -312,7 +312,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
             <Card title="Telefones Fixos">
               {data.land_lines && data.land_lines.length > 0 ? (
                 <div className="space-y-2">
-                  {data.land_lines.map((phone, idx) => (
+                  {data.land_lines.map((phone: any, idx: any) => (
                     <div
                       key={idx}
                       className="border-b last:border-b-0 pb-2 last:pb-0"
@@ -354,7 +354,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
             <Card title="E-mails">
               {data.emails && data.emails.length > 0 ? (
                 <div className="space-y-2">
-                  {data.emails.map((email, idx) => (
+                  {data.emails.map((email: any, idx: any) => (
                     <div
                       key={idx}
                       className="border-b last:border-b-0 pb-2 last:pb-0"
@@ -379,7 +379,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
             <Card title="Familiares">
               {data.family_datas && data.family_datas.length > 0 ? (
                 <div className="space-y-2">
-                  {data.family_datas.map((fam, idx) => (
+                  {data.family_datas.map((fam: any, idx: any) => (
                     <div
                       key={idx}
                       className="border-b last:border-b-0 pb-2 last:pb-0"
@@ -407,7 +407,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
             <Card title="Empresas Relacionadas">
               {data.related_companies && data.related_companies.length > 0 ? (
                 <div className="space-y-2">
-                  {data.related_companies.map((company, idx) => (
+                  {data.related_companies.map((company: any, idx: any) => (
                     <div
                       key={idx}
                       className="border-b last:border-b-0 pb-2 last:pb-0"

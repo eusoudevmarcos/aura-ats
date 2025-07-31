@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/router";
-import Card from "@/components/take-it/Card";
+import Card from "@/components/takeit/Card";
 import { searchApi } from "@/axios/searchApi";
 
 interface Company {

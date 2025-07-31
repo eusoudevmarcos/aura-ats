@@ -1,7 +1,7 @@
 // frontend/src/App.tsx
 import React, { useState } from "react";
-import Table from "@/components/take-it/Table";
-import PersonDetailsModal from "@/components/take-it/PersonDetailsModal";
+import Table from "@/components/takeit/Table";
+import PersonDetailsModal from "@/components/takeit/PersonDetailsModal";
 import { useRouter } from "next/router";
 import styles from "@/styles/takeit.module.scss";
 import TakeitLayout from "@/layout/takeitLayout";
