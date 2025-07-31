@@ -15,7 +15,7 @@ export async function searchApi(input, typeColumns, options = {}) {
 
   const inputUnmask = unmask(input);
 
-  const URL = "http://localhost:3001/api/search";
+  const URL = "https://takeitapi.onrender.com/api/search";
 
   const params = {
     query: inputUnmask,
