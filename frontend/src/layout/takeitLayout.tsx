@@ -2,6 +2,7 @@ import { Children, useState } from "react";
 import { searchApi } from "@/axios/searchApi";
 import SearchForm from "@/components/takeit/SearchForm";
 import styles from "@/styles/takeit.module.scss";
+import { HomeIcon } from "@/components/icons";
 
 type TypeColumns = "persons" | "companies";
 
@@ -63,7 +64,14 @@ export default function TakeitLayout({ children, fit }: Props) {
         padding: "16px",
       }}
     >
-      <h1 className={`text-center ${styles.h1}`}>TAKE IT</h1>
+      <div className="flex justify-between items-center">
+        <a href="/dashboard" className="buttonPrimary text-nowrap">
+          <HomeIcon />
+          Aura ATS
+        </a>
+        <h1 className={`w-full text-center ${styles.h1}`}>TAKE IT</h1>
+      </div>
+
       <div
         className={`${styles.container} shadow-md`}
         style={{ marginBottom: "20px", padding: "16px" }}

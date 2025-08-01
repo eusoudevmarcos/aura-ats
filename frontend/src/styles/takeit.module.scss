@@ -22,8 +22,7 @@
   font-size: 2rem;
 }
 
-.categoryButton,
-.buttonPrimary {
+.categoryButton {
   background: none;
   border: none;
   padding: 15px 30px;
@@ -251,27 +250,6 @@
   }
 }
 
-/* --------------------------------------------------- */
-/* Botões Gerais */
-/* --------------------------------------------------- */
-.buttonPrimary {
-  background-color: #48038a;
-  color: #fff;
-  padding: 12px 28px;
-  border: none;
-  border-radius: 8px;
-  font-size: 1.1em;
-  font-weight: 700;
-  cursor: pointer;
-  transition: background-color 0.3s, transform 0.15s;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-
-  &:hover {
-    background-color: #8f24f3;
-    transform: translateY(-2px);
-  }
-}
-
 .buttonSecondary {
   background-color: #6c757d;
   color: #fff;
@@ -355,12 +333,6 @@
 
   .searchForm input[type="text"] {
     min-width: 100%;
-  }
-
-  .buttonPrimary,
-  .buttonSecondary {
-    width: 100%;
-    padding: 14px 0;
   }
 
   .table {

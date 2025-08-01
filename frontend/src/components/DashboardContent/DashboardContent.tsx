@@ -51,7 +51,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         return (
           <>
             <button
-              className={clientsStyles.createButton}
+              className="buttonPrimary"
               onClick={() => setShowClientForm(true)}
             >
               <PlusIcon />
@@ -67,7 +67,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         return (
           <>
             <button
-              className={professionalsStyles.createButton}
+              className="buttonPrimary"
               onClick={() => setShowProfessionalForm(true)}
             >
               <PlusIcon />
@@ -83,7 +83,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
         return (
           <>
             <button
-              className={vagasStyles.createButton}
+              className="buttonPrimary"
               onClick={() => setShowVagasForm(true)}
             >
               <PlusIcon />

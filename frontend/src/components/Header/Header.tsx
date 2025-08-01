@@ -29,10 +29,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
       {/* Botões de Ação e Perfil */}
       <div className={styles.headerActions}>
-        <button className={styles.createButton}>
+        <a href="/take-it" className="buttonPrimary">
           <SearchIcon />
           TAKE IT
-        </button>
+        </a>
         <button className={styles.iconButton}>
           <BellIcon />
         </button>
