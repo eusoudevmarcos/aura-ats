@@ -4,6 +4,7 @@ import styles from "./Header.module.css"; // Importa o módulo CSS
 import { BellIcon, SearchIcon } from "../icons"; // Importa os ícones
 import { ListIcon } from "../icons/ListIcon"; // Importa um novo ícone para o toggle da sidebar
 import Image from "next/image";
+import Link from "next/link";
 
 interface HeaderProps {
   toggleSidebar: () => void; // Adicionado: A propriedade toggleSidebar
@@ -29,10 +30,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
       {/* Botões de Ação e Perfil */}
       <div className={styles.headerActions}>
-        <a href="/take-it" className="buttonPrimary">
+        <Link href="/take-it" className="buttonPrimary">
           <SearchIcon />
           TAKE IT
-        </a>
+        </Link>
         <button className={styles.iconButton}>
           <BellIcon />
         </button>

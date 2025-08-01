@@ -3,6 +3,7 @@ import { searchApi } from "@/axios/searchApi";
 import SearchForm from "@/components/takeit/SearchForm";
 import styles from "@/styles/takeit.module.scss";
 import { HomeIcon } from "@/components/icons";
+import Link from "next/link";
 
 type TypeColumns = "persons" | "companies";
 
@@ -65,10 +66,10 @@ export default function TakeitLayout({ children, fit }: Props) {
       }}
     >
       <div className="flex justify-between items-center">
-        <a href="/dashboard" className="buttonPrimary text-nowrap">
+        <Link href="/dashboard" className="buttonPrimary text-nowrap">
           <HomeIcon />
           Aura ATS
-        </a>
+        </Link>
         <h1 className={`w-full text-center ${styles.h1}`}>TAKE IT</h1>
       </div>
 

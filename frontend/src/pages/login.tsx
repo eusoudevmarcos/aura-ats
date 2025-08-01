@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import { GetServerSideProps } from "next";
 import nookies from "nookies";
+import Link from "next/link";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = nookies.get(ctx);
@@ -101,9 +102,9 @@ const LoginPage: React.FC = () => {
             {loading ? "Carregando..." : "Entrar"}
           </button>
         </form>
-        <a href="#" className={styles.forgotPassword}>
+        <Link href="#" className={styles.forgotPassword}>
           Esqueceu a senha?
-        </a>
+        </Link>
       </div>
     </div>
   );
