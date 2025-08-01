@@ -1,5 +1,5 @@
-// import { getAnalytics } from "firebase/analytics";
 import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 import { getDatabase, ref, get, child, set } from "firebase/database";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
@@ -13,8 +13,24 @@ const firebaseConfig = {
   measurementId: "G-TSKND0VTYK",
 };
 
+// Inicializa a instância
 const app = initializeApp(firebaseConfig);
-const firestore = getFirestore(app);
-// const analytics = getAnalytics(app);
 
-export { ref, get, child, set, firestore, doc, setDoc, getDoc };
+// Instâncias dos serviços
+const firestore = getFirestore(app);
+const database = getDatabase(app);
+const auth = getAuth(app);
+
+export {
+  app,
+  firestore,
+  database,
+  auth,
+  ref,
+  get,
+  child,
+  set,
+  doc,
+  setDoc,
+  getDoc,
+};

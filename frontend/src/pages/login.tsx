@@ -19,7 +19,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 
   return {
-    props: {}, // sem redirecionamento, renderiza normalmente
+    props: {},
   };
 };
 
@@ -27,11 +27,14 @@ const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const router = useRouter();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
+    setError(""); // Resetar o erro
+
     try {
       const res = await fetch("/api/login", {
         method: "POST",
@@ -42,11 +45,12 @@ const LoginPage: React.FC = () => {
       if (res.ok) {
         router.push("/dashboard");
       } else {
-        throw "Login falhou";
+        const data = await res.json();
+        setError(data.error || "Login falhou");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      alert("Erro ao fazer login. Por favor, tente novamente.");
+      setError("Erro ao fazer login. Por favor, tente novamente.");
     } finally {
       setLoading(false);
     }
@@ -65,7 +69,7 @@ const LoginPage: React.FC = () => {
               Usuário:
             </label>
             <input
-              type="text"
+              type="email"
               id="username"
               name="username"
               value={username}
@@ -88,6 +92,7 @@ const LoginPage: React.FC = () => {
               required
             />
           </div>
+          {error && <div className={styles.errorMessage}>{error}</div>}
           <button
             type="submit"
             disabled={loading}

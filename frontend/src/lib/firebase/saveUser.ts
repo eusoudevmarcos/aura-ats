@@ -1,32 +1,43 @@
 // lib/firebase/saveUser.ts
-import { firestore } from "@/lib/firebase";
+import { auth, firestore } from "@/lib/firebase";
+import {
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+} from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import bcrypt from "bcryptjs";
-import { v4 as uuidv4 } from "uuid";
 
-interface User {
+type SaveUserParams = {
   email: string;
   password: string;
-  name?: string;
-}
+  name: string;
+};
 
-export async function saveUser(user: User) {
-  const uid = uuidv4();
-  const hashedPassword = await bcrypt.hash(user.password, 10);
-
-  const userData = {
-    uid,
-    email: user.email,
-    password: hashedPassword,
-    name: user.name || "",
-    createdAt: new Date().toISOString(),
-  };
-
+export async function saveUser({ email, password, name }: SaveUserParams) {
   try {
-    await setDoc(doc(firestore, "users", uid), userData);
+    // Evita duplicidade verificando se já existe conta com esse email
+    const existing = await fetchSignInMethodsForEmail(auth, email);
+    if (existing.length > 0) {
+      return { success: false, error: new Error("Email já está em uso.") };
+    }
+
+    const userCredential = await createUserWithEmailAndPassword(
+      auth,
+      email,
+      password
+    );
+
+    const user = userCredential.user;
+
+    // Salva dados adicionais no Firestore
+    await setDoc(doc(firestore, "users", user.uid), {
+      name,
+      email,
+      createdAt: new Date().toISOString(),
+    });
+
     return { success: true };
   } catch (error) {
-    console.error("Erro ao salvar usuário no Firestore:", error);
+    console.error("Erro em saveUser:", error);
     return { success: false, error };
   }
 }

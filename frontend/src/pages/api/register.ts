@@ -12,8 +12,10 @@ export default async function handler(
 
   const { name, email, password } = req.body;
 
-  if (!email || !password) {
-    return res.status(400).json({ message: "Email e senha são obrigatórios." });
+  if (!email || !password || !name) {
+    return res
+      .status(400)
+      .json({ message: "Nome, email e senha são obrigatórios." });
   }
 
   try {
@@ -26,8 +28,8 @@ export default async function handler(
     return res.status(201).json({ message: "Usuário registrado com sucesso" });
   } catch (error: any) {
     console.error("Erro no /api/register:", error);
-    return res
-      .status(500)
-      .json({ message: error.message || "Erro ao registrar usuário." });
+    return res.status(500).json({
+      message: error.message || "Erro ao registrar usuário.",
+    });
   }
 }
