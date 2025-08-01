@@ -3,6 +3,25 @@ import React, { useState } from "react";
 import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";
 import Image from "next/image";
+import { GetServerSideProps } from "next";
+import nookies from "nookies";
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+  const cookies = nookies.get(ctx);
+
+  if (cookies.token) {
+    return {
+      redirect: {
+        destination: "/dashboard",
+        permanent: false,
+      },
+    };
+  }
+
+  return {
+    props: {}, // sem redirecionamento, renderiza normalmente
+  };
+};
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");

@@ -10,7 +10,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = nookies.get(ctx);
 
   try {
-    const user = verify(cookies.token, "sua_chave_secreta_jwt");
+    const user = verify(
+      cookies.token,
+      "87UHddtY6KejUDStQv2oCQx5CzPLES7AqzdthLK5hwCFi4qKpgnRcdTBDfZePiPwV6b7lWD5zylJz2fB0ggXipQ7DTIpJziEzmZVJiFgkMyEWp08SRk1hOZFKiGLVImy5a0Jg2ZfNbT1zHhfrsrhfhUuHUklBZZ1ADPi6prg0VwVotQYefkDNiXDaEe1Xm77EZqkYoCLpLRX8YxXgtsMuEXky6pJkhlYpqMEpTnnTixYpmE5j7aelfB1sJpUhg5Q"
+    );
     return { props: { user } };
   } catch {
     return {

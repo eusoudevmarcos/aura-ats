@@ -27,6 +27,7 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
+      console.log(res);
 
       const data = await res.json();
 
@@ -35,6 +36,7 @@ export default function RegisterPage() {
       alert("Usuário registrado com sucesso!");
       router.push("/login"); // redireciona para login se quiser
     } catch (err: any) {
+      console.log(err);
       setError(err.message || "Erro inesperado");
     } finally {
       setLoading(false);
