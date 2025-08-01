@@ -26,11 +26,11 @@ const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
 }) => {
   const navItems = [
-    { icon: <HomeIcon className={styles.icon} />, label: "Dashboard" }, // Renomeado para 'Dashboard'
+    // { icon: <HomeIcon className={styles.icon} />, label: "Dashboard" }, // Renomeado para 'Dashboard'
+    { icon: <CalendarIcon className={styles.icon} />, label: "Atividade" }, // 'Atividade' agora é um item de menu principal
     { icon: <BriefcaseIcon className={styles.icon} />, label: "Vagas" },
     { icon: <UsersIcon className={styles.icon} />, label: "Profissionais" },
     { icon: <HandshakeIcon className={styles.icon} />, label: "Clientes" },
-    { icon: <CalendarIcon className={styles.icon} />, label: "Atividade" }, // 'Atividade' agora é um item de menu principal
     { icon: <HandshakeIcon className={styles.icon} />, label: "Entrevistas" }, // Pode ser um ícone diferente se tiver um específico para entrevistas
     { icon: <ClipboardCheckIcon className={styles.icon} />, label: "Testes" },
     { icon: <SettingsIcon className={styles.icon} />, label: "Configurações" },

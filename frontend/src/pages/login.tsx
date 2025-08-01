@@ -26,21 +26,29 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: any) => {
     e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+      });
 
-    const res = await fetch("/api/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username, password }),
-    });
-
-    if (res.ok) {
-      router.push("/dashboard");
-    } else {
-      alert("Login falhou");
+      if (res.ok) {
+        router.push("/dashboard");
+      } else {
+        throw "Login falhou";
+      }
+    } catch (error) {
+      console.error("Erro ao fazer login:", error);
+      alert("Erro ao fazer login. Por favor, tente novamente.");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -80,8 +88,12 @@ const LoginPage: React.FC = () => {
               required
             />
           </div>
-          <button type="submit" className={styles.loginButton}>
-            Entrar
+          <button
+            type="submit"
+            disabled={loading}
+            className={styles.loginButton}
+          >
+            {loading ? "Carregando..." : "Entrar"}
           </button>
         </form>
         <a href="#" className={styles.forgotPassword}>
