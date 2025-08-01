@@ -43,8 +43,12 @@ const Header: React.FC = () => {
 
   const handleLoginRedirect = () => {
     setIsMenuOpen(false);
-    // ALTERADO: Redireciona para a URL completa da página de login no projeto 'frontend' (porta 3001)
-    window.location.href = "http://localhost:3001/login";
+    // Redireciona para a URL correta dependendo do ambiente
+    if (process.env.NODE_ENV === "production") {
+      window.location.href = "https://aura-ats-frontend.vercel.app/";
+    } else {
+      window.location.href = "http://localhost:3000";
+    }
   };
 
   return (

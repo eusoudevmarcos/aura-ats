@@ -1,14 +1,15 @@
-// frontend/pages/_app.tsx
-import "@/styles/Login.module.css";
-import Link from "next/link";
+import { useEffect } from "react";
 
 function Home() {
-  return (
-    <section>
-      <h1>Front-end da ATS</h1>
-      <Link href="/login">Login</Link>
-    </section>
-  );
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") {
+      window.location.href = "https://www.aurareslabs.com/";
+    } else {
+      window.location.href = "http://localhost:3001";
+    }
+  }, []);
+
+  return null;
 }
 
 export default Home;
