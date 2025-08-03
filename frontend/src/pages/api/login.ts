@@ -4,6 +4,7 @@ import { auth } from "@/lib/firebase";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { serialize } from "cookie";
 import jwt from "jsonwebtoken";
+import { saveLog } from "@/lib/logger";
 
 const SECRET = process.env.JWT_SECRET as string;
 export default async function handler(
@@ -39,8 +40,24 @@ export default async function handler(
       })
     );
 
+    await saveLog({
+      type: "login",
+      status: "success",
+      data: {
+        email: user.email,
+        uid: user.uid,
+        token,
+      },
+    });
+
     return res.status(200).json({ message: "Login bem-sucedido" });
-  } catch (error) {
+  } catch (error: any) {
+    await saveLog({
+      type: "login",
+      status: "error",
+      data: JSON.stringify(error),
+    });
+
     console.error("Erro ao logar:", error);
     return res.status(401).json({ error: "Credenciais inválidas" });
   }
