@@ -23,7 +23,6 @@ export function sanitize(
   if (emailValido) resultado.email = emailValido;
 
   const cnpjValido = validateCNPJ(paramsTrim);
-  console.log(cnpjValido);
   if (cnpjValido) resultado.cnpj = cnpjValido;
 
   const phoneValido = validatePhone(paramsTrim);

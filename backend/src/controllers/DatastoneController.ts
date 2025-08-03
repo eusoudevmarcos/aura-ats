@@ -80,7 +80,6 @@ export class DatastoneController {
       }
 
       const cached = cache.getFromCacheFileByKey(tipo, result.tipo, input);
-      console.log(cached);
       if (cached) {
         res.status(200).json({ status: 200, cache: true, data: cached });
         return;
