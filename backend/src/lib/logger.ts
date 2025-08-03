@@ -1,4 +1,4 @@
-import { adminDb } from "./firebaseAdmin";
+import { firestoreDB } from "./firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";
 
 export async function saveLog({
@@ -17,7 +17,7 @@ export async function saveLog({
     data: JSON.stringify(data),
   };
 
-  const logsDocRef = adminDb.collection("logs").doc("main");
+  const logsDocRef = firestoreDB.collection("logs").doc("main");
 
   try {
     await logsDocRef.update({

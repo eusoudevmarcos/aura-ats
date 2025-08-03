@@ -1,6 +1,5 @@
 // src/routes/candidateRoutes.ts
 import express from "express";
-import { firestoreDB } from "../lib/firebaseAdmin";
 import CandidateController from "../controllers/CandidateController";
 
 const router = express.Router();

@@ -1,6 +1,10 @@
 import express from "express";
 import cors from "cors";
+import dotenv from "dotenv";
 
+dotenv.config();
+
+import authenticationRoutes from "./routes/authenticationRoutes";
 import userRoutes from "./routes/userRoutes";
 import clientRoutes from "./routes/clientRoutes";
 import candidateRoutes from "./routes/candidateRoutes";
@@ -34,6 +38,7 @@ app.use(
 app.use(express.json());
 
 // ROTAS
+app.use("/api/auth", authenticationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/candidates", candidateRoutes);
