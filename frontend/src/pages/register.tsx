@@ -27,7 +27,6 @@ export default function RegisterPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),
       });
-      console.log(res);
 
       const data = await res.json();
 

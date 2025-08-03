@@ -18,7 +18,7 @@ function mostrarValor(valor: any): string {
 }
 
 type Props = {
-  data: any;
+  data: data;
 };
 
 interface data {
@@ -132,7 +132,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
 
   return (
     <TakeitLayout fit>
-      {({ results, loading, typeColumns }) => (
+      {({}) => (
         <>
           <button onClick={() => router.back()} className={style.buttonPrimary}>
             Voltar

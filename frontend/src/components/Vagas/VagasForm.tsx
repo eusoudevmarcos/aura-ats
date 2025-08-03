@@ -1,6 +1,6 @@
 // frontend/components/Vagas/VagasForm.tsx
-import React, { useState } from 'react';
-import styles from './Vagas.module.css'; // Importa o módulo CSS específico de Vagas
+import React, { useState } from "react";
+import styles from "./Vagas.module.css"; // Importa o módulo CSS específico de Vagas
 
 interface VagasFormProps {
   onClose: () => void;
@@ -8,22 +8,25 @@ interface VagasFormProps {
 
 const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    company: '',
-    location: '',
-    description: '',
-    requirements: '',
-    status: 'open',
+    title: "",
+    company: "",
+    location: "",
+    description: "",
+    requirements: "",
+    status: "open",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados da Vaga:', formData);
     // Aqui você faria a chamada para a API para cadastrar a vaga
     onClose(); // Fecha o modal após o envio
   };
@@ -34,7 +37,9 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
         <h2 className={styles.cardTitle}>Cadastrar Nova Vaga</h2>
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="title" className={styles.formLabel}>Título da Vaga:</label>
+            <label htmlFor="title" className={styles.formLabel}>
+              Título da Vaga:
+            </label>
             <input
               type="text"
               id="title"
@@ -47,7 +52,9 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="company" className={styles.formLabel}>Empresa:</label>
+            <label htmlFor="company" className={styles.formLabel}>
+              Empresa:
+            </label>
             <input
               type="text"
               id="company"
@@ -60,7 +67,9 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="location" className={styles.formLabel}>Localização:</label>
+            <label htmlFor="location" className={styles.formLabel}>
+              Localização:
+            </label>
             <input
               type="text"
               id="location"
@@ -73,7 +82,9 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="description" className={styles.formLabel}>Descrição:</label>
+            <label htmlFor="description" className={styles.formLabel}>
+              Descrição:
+            </label>
             <textarea
               id="description"
               name="description"
@@ -86,7 +97,9 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="requirements" className={styles.formLabel}>Requisitos (separados por vírgula):</label>
+            <label htmlFor="requirements" className={styles.formLabel}>
+              Requisitos (separados por vírgula):
+            </label>
             <textarea
               id="requirements"
               name="requirements"
@@ -98,7 +111,9 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="status" className={styles.formLabel}>Status:</label>
+            <label htmlFor="status" className={styles.formLabel}>
+              Status:
+            </label>
             <select
               id="status"
               name="status"
@@ -114,8 +129,16 @@ const VagasForm: React.FC<VagasFormProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formButtons}>
-            <button type="submit" className={styles.submitButton}>Cadastrar</button>
-            <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
+            <button type="submit" className={styles.submitButton}>
+              Cadastrar
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className={styles.cancelButton}
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </div>

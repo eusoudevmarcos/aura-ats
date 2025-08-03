@@ -191,7 +191,6 @@ const ProfessionalsForm: React.FC<ProfessionalsFormProps> = ({ onClose }) => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Dados do Profissional:", formData);
     // Aqui você faria a chamada para a API para cadastrar o profissional
     onClose(); // Fecha o modal após o envio
   };

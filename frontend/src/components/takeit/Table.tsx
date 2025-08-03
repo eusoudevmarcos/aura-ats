@@ -216,10 +216,6 @@ interface TableProps {
 }
 
 function Table({ data, onSelect, typeColumns, loading }: TableProps) {
-  const [error, setError] = useState<string>("");
-
-  if (error) return <div style={{ color: "red" }}>{error}</div>;
-
   const normalizedData = normalizeDataForTable(data);
 
   // Pegamos apenas as colunas fixas que existem em columnsByType

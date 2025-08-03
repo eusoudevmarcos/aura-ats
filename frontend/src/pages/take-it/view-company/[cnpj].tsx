@@ -103,7 +103,6 @@ const ViewCompanyPage: React.FC = () => {
     try {
       // Passa uf dentro de options
       const data = await searchApi(cnpj || "", "companies");
-      console.log(data.data);
       setCompany(data.data[0]);
     } catch (error) {
       console.error("error:" + error);

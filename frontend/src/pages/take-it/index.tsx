@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import Table from "@/components/takeit/Table";
 import PersonDetailsModal from "@/components/takeit/PersonDetailsModal";
-import { useRouter } from "next/router";
 import styles from "@/styles/takeit.module.scss";
 import TakeitLayout from "@/layout/takeitLayout";
 
@@ -16,10 +15,7 @@ interface ResultItem {
 }
 
 const App: React.FC = () => {
-  const [typeColumns, setTypeColumns] = useState<TypeColumns>("persons");
   const [selectedItem, setSelectedItem] = useState<ResultItem | null>(null);
-
-  const router = useRouter();
 
   const handleSelectItem = (item: any) => {
     setSelectedItem(item);

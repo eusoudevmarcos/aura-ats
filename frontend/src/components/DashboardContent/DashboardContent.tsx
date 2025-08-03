@@ -15,9 +15,9 @@ import { PlusIcon } from "../icons"; // Ícone para os botões de cadastro
 
 // Importa estilos de módulos específicos
 import cardsStyles from "../Cards/Cards.module.css"; // Para cards gerais e placeholders
-import professionalsStyles from "../Professionals/Professionals.module.css"; // Para estilos de profissionais
-import clientsStyles from "../Clients/Clients.module.css"; // Para estilos de clientes
-import vagasStyles from "../Vagas/Vagas.module.css"; // Para estilos de vagas
+// import professionalsStyles from "../Professionals/Professionals.module.css"; // Para estilos de profissionais
+// import clientsStyles from "../Clients/Clients.module.css"; // Para estilos de clientes
+// import vagasStyles from "../Vagas/Vagas.module.css"; // Para estilos de vagas
 
 interface DashboardContentProps {
   activeSection: string;
@@ -26,7 +26,7 @@ interface DashboardContentProps {
 const DashboardContent: React.FC<DashboardContentProps> = ({
   activeSection,
 }) => {
-  const [showProfessionalForm, setShowProfessionalForm] = useState(false);
+  // const [showProfessionalForm, setShowProfessionalForm] = useState(false);
   const [showClientForm, setShowClientForm] = useState(false);
   const [showVagasForm, setShowVagasForm] = useState(false);
 
@@ -66,10 +66,7 @@ const DashboardContent: React.FC<DashboardContentProps> = ({
       case "Profissionais":
         return (
           <>
-            <button
-              className="buttonPrimary"
-              onClick={() => setShowProfessionalForm(true)}
-            >
+            <button className="buttonPrimary">
               <PlusIcon />
               Cadastrar Profissional
             </button>

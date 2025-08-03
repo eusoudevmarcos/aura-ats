@@ -73,7 +73,6 @@ const validateCNPJ = (cnpj: string): string | null => {
   if (cnpjLimpo.length !== 14) return null;
   // CNPJs inválidos com todos os dígitos iguais
   if (/^(\d)\1{13}$/.test(cnpjLimpo)) return null;
-  console.log(cnpj);
 
   const calcDigito = (base: number[]) => {
     let soma = 0;

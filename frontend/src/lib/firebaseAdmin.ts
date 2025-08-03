@@ -18,7 +18,7 @@ if (process.env.NODE_ENV === "development") {
     );
   }
 
-  serviceAccount = require(filePath);
+  serviceAccount = import(filePath);
 } else {
   const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 

@@ -2,7 +2,6 @@ import React from "react";
 import SidebarItem from "./SidebarItem";
 import styles from "./Sidebar.module.css";
 import {
-  HomeIcon,
   BriefcaseIcon,
   UsersIcon,
   CalendarIcon,
@@ -26,7 +25,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
 }) => {
   const navItems = [
-    // { icon: <HomeIcon className={styles.icon} />, label: "Dashboard" }, // Renomeado para 'Dashboard'
     { icon: <CalendarIcon className={styles.icon} />, label: "Atividade" }, // 'Atividade' agora é um item de menu principal
     { icon: <BriefcaseIcon className={styles.icon} />, label: "Vagas" },
     { icon: <UsersIcon className={styles.icon} />, label: "Profissionais" },

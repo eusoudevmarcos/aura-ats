@@ -1,6 +1,6 @@
 // frontend/components/Clients/ClientForms.tsx
-import React, { useState } from 'react';
-import styles from './Clients.module.css'; // Importa o módulo CSS específico de Clientes
+import React, { useState } from "react";
+import styles from "./Clients.module.css"; // Importa o módulo CSS específico de Clientes
 
 interface ClientFormsProps {
   onClose: () => void;
@@ -8,24 +8,25 @@ interface ClientFormsProps {
 
 const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
   const [formData, setFormData] = useState({
-    nome: '',
-    email: '',
-    telefone: '',
-    empresa: '',
-    endereco: '',
-    cidade: '',
-    estado: '',
-    pais: '',
+    nome: "",
+    email: "",
+    telefone: "",
+    empresa: "",
+    endereco: "",
+    cidade: "",
+    estado: "",
+    pais: "",
   });
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('Dados do Cliente:', formData);
     // Aqui você faria a chamada para a API para cadastrar o cliente
     onClose(); // Fecha o modal após o envio
   };
@@ -36,7 +37,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
         <h2 className={styles.cardTitle}>Cadastrar Novo Cliente</h2>
         <form onSubmit={handleSubmit}>
           <div className={styles.formGroup}>
-            <label htmlFor="nome" className={styles.formLabel}>Nome do Cliente:</label>
+            <label htmlFor="nome" className={styles.formLabel}>
+              Nome do Cliente:
+            </label>
             <input
               type="text"
               id="nome"
@@ -49,7 +52,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="email" className={styles.formLabel}>Email:</label>
+            <label htmlFor="email" className={styles.formLabel}>
+              Email:
+            </label>
             <input
               type="email"
               id="email"
@@ -62,7 +67,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="telefone" className={styles.formLabel}>Telefone:</label>
+            <label htmlFor="telefone" className={styles.formLabel}>
+              Telefone:
+            </label>
             <input
               type="tel"
               id="telefone"
@@ -74,7 +81,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="empresa" className={styles.formLabel}>Empresa:</label>
+            <label htmlFor="empresa" className={styles.formLabel}>
+              Empresa:
+            </label>
             <input
               type="text"
               id="empresa"
@@ -86,7 +95,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="endereco" className={styles.formLabel}>Endereço:</label>
+            <label htmlFor="endereco" className={styles.formLabel}>
+              Endereço:
+            </label>
             <input
               type="text"
               id="endereco"
@@ -98,7 +109,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="cidade" className={styles.formLabel}>Cidade:</label>
+            <label htmlFor="cidade" className={styles.formLabel}>
+              Cidade:
+            </label>
             <input
               type="text"
               id="cidade"
@@ -110,7 +123,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="estado" className={styles.formLabel}>Estado:</label>
+            <label htmlFor="estado" className={styles.formLabel}>
+              Estado:
+            </label>
             <input
               type="text"
               id="estado"
@@ -122,7 +137,9 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formGroup}>
-            <label htmlFor="pais" className={styles.formLabel}>País:</label>
+            <label htmlFor="pais" className={styles.formLabel}>
+              País:
+            </label>
             <input
               type="text"
               id="pais"
@@ -134,8 +151,16 @@ const ClientForms: React.FC<ClientFormsProps> = ({ onClose }) => {
           </div>
 
           <div className={styles.formButtons}>
-            <button type="submit" className={styles.submitButton}>Cadastrar</button>
-            <button type="button" onClick={onClose} className={styles.cancelButton}>Cancelar</button>
+            <button type="submit" className={styles.submitButton}>
+              Cadastrar
+            </button>
+            <button
+              type="button"
+              onClick={onClose}
+              className={styles.cancelButton}
+            >
+              Cancelar
+            </button>
           </div>
         </form>
       </div>
