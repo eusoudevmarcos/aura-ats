@@ -4,19 +4,17 @@ import { getDatabase, ref, get, child, set } from "firebase/database";
 import { getFirestore, doc, setDoc, getDoc } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCoW3k9bK8d8fDKjy48qNn03BpdOXIBPa0",
-  authDomain: "auradb-a857f.firebaseapp.com",
-  projectId: "auradb-a857f",
-  storageBucket: "auradb-a857f.firebasestorage.app",
-  messagingSenderId: "812771286978",
-  appId: "1:812771286978:web:f037b4a9540715db8ec05b",
-  measurementId: "G-TSKND0VTYK",
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREABASE_MEASUREMENT_ID,
 };
 
-// Inicializa a instância
 const app = initializeApp(firebaseConfig);
 
-// Instâncias dos serviços
 const firestore = getFirestore(app);
 const database = getDatabase(app);
 const auth = getAuth(app);
