@@ -16,7 +16,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   if (cookies.token) {
     return {
       redirect: {
-        destination: "/dashboard",
+        destination: "/atividades/agendas",
         permanent: false,
       },
     };
