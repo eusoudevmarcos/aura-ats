@@ -40,20 +40,22 @@ export default class AuthenticationController {
 
       const { idToken, localId, email } = data;
 
-      // Criar um JWT próprio (opcional, você pode usar o idToken direto também)
       const token = jwt.sign({ uid: localId, email }, SECRET, {
         expiresIn: "2h",
       });
 
-      // Setar cookie com JWT
       res.setHeader(
         "Set-Cookie",
         serialize("token", token, {
           httpOnly: true,
           path: "/",
-          maxAge: 60 * 60 * 2, // 2h
+          maxAge: 60 * 60 * 2,
+          secure: process.env.NODE_ENV === "production",
+          sameSite: "strict",
         })
       );
+
+      res.setHeader("Authorization", `Bearer ${token}`);
 
       await saveLog({
         type: "login",
