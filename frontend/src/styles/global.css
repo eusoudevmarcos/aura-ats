@@ -54,6 +54,7 @@ body {
   border-radius: 12px;
   font-size: 14px;
   font-weight: 500;
+  display: flex;
   gap: 8px;
   border: none;
   cursor: pointer;

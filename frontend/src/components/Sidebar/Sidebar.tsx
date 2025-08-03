@@ -39,7 +39,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       icon: <CalendarIcon className={styles.icon} />,
       label: "Atividade",
-      href: "/atividades/agenda",
+      href: "/atividades/agendas",
     }, // 'Atividade' agora é um item de menu principal
     {
       icon: <BriefcaseIcon className={styles.icon} />,
