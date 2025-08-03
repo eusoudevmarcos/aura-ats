@@ -1,10 +1,17 @@
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "../components/Header/Header"; // Importa o componente Header
-import DashboardContent from "../components/DashboardContent/DashboardContent"; // Importa o componente de conteúdo dinâmico
 import { GetServerSideProps } from "next";
 import { verify } from "jsonwebtoken";
 import nookies from "nookies";
+
+interface Children {
+  activeSection?: string;
+}
+
+interface Props {
+  children: React.ReactNode | ((props: Children) => React.ReactNode);
+}
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = nookies.get(ctx);
@@ -22,8 +29,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
   }
 };
 
-const DashboardPage: React.FC = () => {
-  const [activeSection, setActiveSection] = useState("Atividade");
+function DashboardLayout({ children }: Props) {
+  const [activeSection, setActiveSection] = useState("");
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
   const toggleSidebar = () => {
@@ -36,8 +43,8 @@ const DashboardPage: React.FC = () => {
       {/* Classe global definida em globals.css */}
       {/* Sidebar */}
       <Sidebar
-        setActiveSection={setActiveSection}
-        activeSection={activeSection}
+        setActiveSection={(section: string) => setActiveSection(section)}
+        activeSection={activeSection ?? ""}
         isCollapsed={isSidebarCollapsed}
         toggleSidebar={toggleSidebar}
       />
@@ -52,12 +59,13 @@ const DashboardPage: React.FC = () => {
           {" "}
           {/* Classe global definida em globals.css */}
           {/* O título da seção agora reflete a seção ativa do menu principal */}
-          <h1 className="sectionTitle">{activeSection}</h1>
-          <DashboardContent activeSection={activeSection} />
+          {typeof children === "function"
+            ? children({ activeSection })
+            : children}
         </main>
       </div>
     </div>
   );
-};
+}
 
-export default DashboardPage;
+export default DashboardLayout;

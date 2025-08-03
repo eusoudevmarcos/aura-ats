@@ -66,10 +66,6 @@ export default function TakeitLayout({ children, fit }: Props) {
       }}
     >
       <div className="flex justify-between items-center">
-        <Link href="/dashboard" className="buttonPrimary text-nowrap">
-          <HomeIcon />
-          Aura ATS
-        </Link>
         <h1 className={`w-full text-center ${styles.h1}`}>TAKE IT</h1>
       </div>
 

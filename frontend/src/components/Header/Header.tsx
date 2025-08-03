@@ -11,6 +11,14 @@ interface HeaderProps {
 }
 
 const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
+  const [uid, setUid] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      setUid(localStorage.getItem("uid"));
+    }
+  }, []);
+
   return (
     <header className={styles.header}>
       {/* Botão para recolher/expandir a sidebar */}
@@ -37,14 +45,16 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         <button className={styles.iconButton}>
           <BellIcon />
         </button>
-        <Image
-          src="https://placehold.co/40x40/FFD700/000000?text=JD"
-          width={30}
-          height={30}
-          alt="User Avatar"
-          className={styles.userAvatar}
-          unoptimized
-        />
+        <Link href={`/profile/${uid}`}>
+          <Image
+            src="https://placehold.co/40x40/FFD700/000000?text=JD"
+            width={30}
+            height={30}
+            alt="User Avatar"
+            className={styles.userAvatar}
+            unoptimized
+          />
+        </Link>
       </div>
     </header>
   );

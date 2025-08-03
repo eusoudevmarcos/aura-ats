@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SidebarItem from "./SidebarItem";
 import styles from "./Sidebar.module.css";
 import {
@@ -11,6 +11,7 @@ import {
   ChevronDownIcon,
 } from "../icons";
 import Image from "next/image";
+import nookies from "nookies";
 
 interface SidebarProps {
   setActiveSection: (section: string) => void;
@@ -19,19 +20,62 @@ interface SidebarProps {
   toggleSidebar?: () => void;
 }
 
+// pages/dashboard.tsx
 const Sidebar: React.FC<SidebarProps> = ({
   setActiveSection,
   activeSection,
   isCollapsed,
 }) => {
+  const [uid, setUid] = useState<string | null>(null);
+
+  useEffect(() => {
+    const storedToken = localStorage.getItem("uid");
+    setUid(storedToken);
+  }, []);
+
+  if (!uid) return <p>Carregando...</p>;
+
   const navItems = [
-    { icon: <CalendarIcon className={styles.icon} />, label: "Atividade" }, // 'Atividade' agora é um item de menu principal
-    { icon: <BriefcaseIcon className={styles.icon} />, label: "Vagas" },
-    { icon: <UsersIcon className={styles.icon} />, label: "Profissionais" },
-    { icon: <HandshakeIcon className={styles.icon} />, label: "Clientes" },
-    { icon: <HandshakeIcon className={styles.icon} />, label: "Entrevistas" }, // Pode ser um ícone diferente se tiver um específico para entrevistas
-    { icon: <ClipboardCheckIcon className={styles.icon} />, label: "Testes" },
-    { icon: <SettingsIcon className={styles.icon} />, label: "Configurações" },
+    {
+      icon: <CalendarIcon className={styles.icon} />,
+      label: "Atividade",
+      href: "/atividades/agenda",
+    }, // 'Atividade' agora é um item de menu principal
+    {
+      icon: <BriefcaseIcon className={styles.icon} />,
+      label: "Vagas",
+      href: "/vagas",
+    },
+    {
+      icon: <UsersIcon className={styles.icon} />,
+      label: "Profissionais",
+      href: "/profissionais",
+    },
+    {
+      icon: <HandshakeIcon className={styles.icon} />,
+      label: "Clientes",
+      href: "/clientes",
+    },
+    {
+      icon: <HandshakeIcon className={styles.icon} />,
+      label: "Entrevistas",
+      href: "/entrevistas",
+    }, // Pode ser um ícone diferente se tiver um específico para entrevistas
+    {
+      icon: <ClipboardCheckIcon className={styles.icon} />,
+      label: "Testes",
+      href: "/testes",
+    },
+    {
+      icon: <SettingsIcon className={styles.icon} />,
+      label: "Configurações",
+      href: "/configuracoes",
+    },
+    {
+      icon: <SettingsIcon className={styles.icon} />,
+      label: "Perfil",
+      href: "/profile/" + uid,
+    },
   ];
 
   return (
@@ -58,6 +102,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             icon={item.icon}
             label={item.label}
             active={activeSection === item.label}
+            href={item.href}
             onClick={() => setActiveSection(item.label)}
           />
         ))}

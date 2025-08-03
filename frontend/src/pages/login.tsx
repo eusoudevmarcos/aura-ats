@@ -54,7 +54,9 @@ const LoginPage: React.FC = () => {
           body: JSON.stringify({ token: res.data.token }),
         });
 
-        router.push("/dashboard");
+        localStorage.setItem("uid", res.data.uid);
+
+        router.push("/atividades/agendas");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
