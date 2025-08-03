@@ -18,3 +18,6 @@ build/
 
 # Ignorar arquivos do sistema operacional (opcional)
 .DS_Store
+
+# firebase
+**/*firebase-adminsdk*.json
