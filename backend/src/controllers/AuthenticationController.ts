@@ -68,7 +68,9 @@ export default class AuthenticationController {
         },
       });
 
-      return res.status(200).json({ message: "Login bem-sucedido", token });
+      return res
+        .status(200)
+        .json({ message: "Login bem-sucedido", token, uid: localId });
     } catch (error: any) {
       await saveLog({
         type: "login",
