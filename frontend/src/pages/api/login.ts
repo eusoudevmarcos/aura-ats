@@ -1,12 +1,12 @@
 // pages/api/login.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth } from "@/lib/firebase";
-import { signInWithEmailAndPassword } from "firebase/auth";
 import { serialize } from "cookie";
 import jwt from "jsonwebtoken";
 import { saveLog } from "@/lib/logger";
 
 const SECRET = process.env.JWT_SECRET as string;
+const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY;
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -16,27 +16,44 @@ export default async function handler(
   const { username, password } = req.body;
 
   try {
-    // Utilizando o Firebase Auth para login com email/senha
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      username,
-      password
+    if (!FIREBASE_API_KEY) {
+      throw new Error("FIREBASE_API_KEY não configurada.");
+    }
+
+    // Login via REST API do Firebase
+    const response = await fetch(
+      `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: username,
+          password,
+          returnSecureToken: true,
+        }),
+      }
     );
 
-    const user = userCredential.user;
+    const data = await response.json();
 
-    // Criando o JWT com as informações do Firebase
-    const token = jwt.sign({ email: user.email, uid: user.uid }, SECRET, {
+    if (!response.ok) {
+      throw new Error(data.error?.message || "Erro ao autenticar");
+    }
+
+    const { idToken, localId, email } = data;
+
+    // Criar um JWT próprio (opcional, você pode usar o idToken direto também)
+    const token = jwt.sign({ uid: localId, email }, SECRET, {
       expiresIn: "2h",
     });
 
-    // Armazenando o token no cookie
+    // Setar cookie com JWT
     res.setHeader(
       "Set-Cookie",
       serialize("token", token, {
         httpOnly: true,
         path: "/",
-        maxAge: 60 * 60 * 2, // 2 horas
+        maxAge: 60 * 60 * 2, // 2h
       })
     );
 
@@ -44,9 +61,9 @@ export default async function handler(
       type: "login",
       status: "success",
       data: {
-        email: user.email,
-        uid: user.uid,
-        token,
+        email,
+        uid: localId,
+        firebaseIdToken: idToken,
       },
     });
 
@@ -55,7 +72,7 @@ export default async function handler(
     await saveLog({
       type: "login",
       status: "error",
-      data: JSON.stringify(error),
+      data: { message: error.message },
     });
 
     console.error("Erro ao logar:", error);

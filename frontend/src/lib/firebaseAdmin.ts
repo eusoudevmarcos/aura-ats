@@ -7,18 +7,24 @@ import path from "path";
 let serviceAccount: Record<string, any>;
 
 if (process.env.NODE_ENV === "development") {
-  const filePath = path.resolve(
-    __dirname,
-    "../../auradb-a857f-firebase-adminsdk-fbsvc-8e4a845103.json"
+  const filePath = path.join(
+    process.cwd(),
+    "auradb-a857f-firebase-adminsdk-fbsvc-8e4a845103.json"
   );
 
   if (!fs.existsSync(filePath)) {
     throw new Error(
-      `Arquivo de credencial Firebase não encontrado em: ${filePath}. Certifique-se de que ele exista em desenvolvimento.`
+      `Arquivo de credencial Firebase não encontrado em: ${filePath}`
     );
   }
 
-  serviceAccount = import(filePath);
+  const fileContents = fs.readFileSync(filePath, "utf8");
+
+  try {
+    serviceAccount = JSON.parse(fileContents);
+  } catch (err) {
+    throw new Error("Arquivo de credencial Firebase não contém JSON válido.");
+  }
 } else {
   const key = process.env.FIREBASE_SERVICE_ACCOUNT_KEY;
 

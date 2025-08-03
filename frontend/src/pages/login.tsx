@@ -6,6 +6,7 @@ import Image from "next/image";
 import { GetServerSideProps } from "next";
 import nookies from "nookies";
 import Link from "next/link";
+import api from "@/axios";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = nookies.get(ctx);
@@ -37,16 +38,18 @@ const LoginPage: React.FC = () => {
     setError(""); // Resetar o erro
 
     try {
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password }),
-      });
+      const res = await api.post(
+        "/api/auth/login",
+        { username, password },
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
-      if (res.ok) {
+      if (res.status === 200) {
         router.push("/dashboard");
       } else {
-        const data = await res.json();
+        const data = await res.data.json();
         setError(data.error || "Login falhou");
       }
     } catch (error) {
