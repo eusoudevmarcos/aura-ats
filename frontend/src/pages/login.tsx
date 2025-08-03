@@ -6,26 +6,6 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
 import api from "@/axios";
-import nookies from "nookies";
-import jwt from "jsonwebtoken";
-
-export const getServerSideProps: GetServerSideProps = async (ctx) => {
-  const cookies = nookies.get(ctx);
-  const token = cookies.token;
-
-  if (cookies.token) {
-    return {
-      redirect: {
-        destination: "/atividades/agendas",
-        permanent: false,
-      },
-    };
-  }
-
-  return {
-    props: {},
-  };
-};
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -47,14 +27,14 @@ const LoginPage: React.FC = () => {
       });
 
       if (res.status === 200) {
+        localStorage.setItem("uid", res.data.uid);
+
         // Envie o token para o Next.js setar o cookie
         await fetch("/api/set-cookie", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ token: res.data.token }),
         });
-
-        localStorage.setItem("uid", res.data.uid);
 
         router.push("/atividades/agendas");
       }
