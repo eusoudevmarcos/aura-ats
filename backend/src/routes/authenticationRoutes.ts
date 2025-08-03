@@ -9,5 +9,6 @@ const authenticationController = new AuthenticationController();
 // Logar
 router.post("/login", authenticationController.logIn);
 router.post("/logout", authenticationController.logOut);
+router.post("/register", authenticationController.register);
 
 export default router;
