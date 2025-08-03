@@ -1,15 +1,17 @@
 // frontend/pages/login.tsx
+import { GetServerSideProps } from "next";
 import React, { useState } from "react";
 import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";
 import Image from "next/image";
-import { GetServerSideProps } from "next";
-import nookies from "nookies";
 import Link from "next/link";
 import api from "@/axios";
+import nookies from "nookies";
+import jwt from "jsonwebtoken";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = nookies.get(ctx);
+  const token = cookies.token;
 
   if (cookies.token) {
     return {
@@ -35,26 +37,23 @@ const LoginPage: React.FC = () => {
   const handleSubmit = async (e: any) => {
     e.preventDefault();
     setLoading(true);
-    setError(""); // Resetar o erro
+    setError("");
 
     try {
-      const res = await api.post(
-        "/api/auth/login",
-        { username, password },
-        {
-          headers: { "Content-Type": "application/json" },
-        }
-      );
+      // Chamada para API externa
+      const res = await api.post("/api/auth/login", {
+        username,
+        password,
+      });
 
       if (res.status === 200) {
         router.push("/dashboard");
       } else {
-        const data = await res.data.json();
-        setError(data.error || "Login falhou");
+        setError("Token não encontrado na resposta.");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
-      setError("Erro ao fazer login. Por favor, tente novamente.");
+      setError("Erro ao fazer login. Verifique suas credenciais.");
     } finally {
       setLoading(false);
     }
