@@ -11,7 +11,7 @@ import candidateRoutes from "./routes/candidateRoutes";
 import datastoneRoutes from "./routes/datastoneRoutes";
 
 const app = express();
-const PORT = 4000;
+const PORT = process.env.PORT;
 
 const allowedOrigins = [
   "http://localhost:3000", // frontend local
