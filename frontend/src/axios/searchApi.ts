@@ -12,7 +12,7 @@ export async function searchApi(
 
   const inputUnmask = unmask(input);
 
-  const URL = process.env.API_URL + "/api/search";
+  const URL = process.env.NEXT_PUBLIC_API_URL + "/api/take-it/search";
 
   const params = {
     query: inputUnmask,

@@ -1,25 +1,10 @@
-import React from "react";
+import React, { useState, useRef, useEffect } from "react";
 import Card from "@/components/takeit/Card";
 import { searchApi } from "@/axios/searchApi";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import TakeitLayout from "@/layout/takeitLayout";
-import style from "@/styles/takeit.module.scss";
-
-function mostrarValor(valor: any): string {
-  if (
-    valor === null ||
-    valor === undefined ||
-    (typeof valor === "string" && valor.trim() === "")
-  ) {
-    return "N/A";
-  }
-  return valor;
-}
-
-type Props = {
-  data: data;
-};
+import { exportToCSV, exportToPDF, mostrarValor } from "@/utils/exportCSV";
 
 interface data {
   name?: string;
@@ -115,8 +100,34 @@ export async function getStaticProps(context: any) {
   }
 }
 
-export default function ViewdataPage({ data }: Props): React.ReactElement {
+export default function ViewPersonPage({ data }: any): React.ReactElement {
   const router = useRouter();
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
+
+  // Função para exportar
+  const handleExport = async (type: "csv" | "pdf") => {
+    setShowExportDropdown(false);
+    if (type === "csv") {
+      exportToCSV(data);
+    } else if (type === "pdf") {
+      await exportToPDF(cardRef as React.RefObject<HTMLDivElement>);
+    }
+  };
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        showExportDropdown &&
+        !(event.target as HTMLElement).closest("#export-dropdown") &&
+        !(event.target as HTMLElement).closest("#export-btn")
+      ) {
+        setShowExportDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showExportDropdown]);
 
   if (router.isFallback) {
     return <div className="p-8 text-center text-gray-500">Carregando</div>;
@@ -133,14 +144,64 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
   return (
     <TakeitLayout fit>
       {({}) => (
-        <>
-          <button onClick={() => router.back()} className={style.buttonPrimary}>
-            Voltar
-          </button>
+        <div>
+          <div className="flex justify-between mb-10 px-4 py-2">
+            <button
+              onClick={() => router.push("/take-it")}
+              className="buttonPrimary"
+            >
+              Voltar
+            </button>
+
+            <div className="relative inline-block" id="export-dropdown">
+              <button
+                id="export-btn"
+                className="buttonPrimary flex items-center"
+                onClick={() => setShowExportDropdown((prev) => !prev)}
+                type="button"
+              >
+                Exportar
+                <svg
+                  className="ml-2 w-4 h-4"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M19 9l-7 7-7-7"
+                  />
+                </svg>
+              </button>
+              {showExportDropdown && (
+                <div className="absolute z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => handleExport("csv")}
+                  >
+                    Exportar CSV
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    onClick={() => handleExport("pdf")}
+                  >
+                    Exportar PDF
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           <h1 className="text-2xl mb-4 font-black">
             Nome: {mostrarValor(data.name)}
           </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div
+            className="grid grid-cols-1 md:grid-cols-2 gap-6"
+            id="card"
+            ref={cardRef}
+          >
             {/* Dados Pessoais */}
             <Card title="Dados Pessoais" className={"col-start-1 col-end-3"}>
               <div className="flex flex-wrap space-y-4 space-x-9">
@@ -454,7 +515,7 @@ export default function ViewdataPage({ data }: Props): React.ReactElement {
               )}
             </Card>
           </div>
-        </>
+        </div>
       )}
     </TakeitLayout>
   );

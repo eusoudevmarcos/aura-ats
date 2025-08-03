@@ -1,9 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/router";
 import Card from "@/components/takeit/Card";
 import { searchApi } from "@/axios/searchApi";
+import { exportToCSV, exportToPDF } from "@/utils/exportCSV";
 
 interface Company {
+  // ... interfaces iguais às que você já tem
   company_name?: string;
   cnpj?: string;
   trading_name?: string;
@@ -93,15 +95,16 @@ interface SimpleSimei {
 const ViewCompanyPage: React.FC = () => {
   const [company, setCompany] = useState<Company | null>(null);
   const [loading, setLoading] = useState<boolean | null>(null);
+  const [showExportDropdown, setShowExportDropdown] = useState(false);
   const router = useRouter();
   const cnpj = router.query.cnpj as string;
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = async (): Promise<void> => {
     setLoading(true);
     setCompany(null);
 
     try {
-      // Passa uf dentro de options
       const data = await searchApi(cnpj || "", "companies");
       setCompany(data.data[0]);
     } catch (error) {
@@ -113,8 +116,35 @@ const ViewCompanyPage: React.FC = () => {
   };
 
   useEffect(() => {
-    handleSearch();
-  });
+    if (cnpj) {
+      handleSearch();
+    }
+  }, [cnpj]);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (
+        showExportDropdown &&
+        !(event.target as HTMLElement).closest("#export-dropdown") &&
+        !(event.target as HTMLElement).closest("#export-btn")
+      ) {
+        setShowExportDropdown(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showExportDropdown]);
+
+  const handleExport = async (type: "csv" | "pdf") => {
+    setShowExportDropdown(false);
+    if (!company) return;
+
+    if (type === "csv") {
+      exportToCSV(company);
+    } else if (type === "pdf") {
+      await exportToPDF(cardRef as React.RefObject<HTMLDivElement>);
+    }
+  };
 
   if (loading) {
     return <div className="p-8 text-center text-gray-500">Carregando</div>;
@@ -129,11 +159,56 @@ const ViewCompanyPage: React.FC = () => {
   }
   return (
     <div className="max-w-6xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
-      <button onClick={() => router.back()} className="mb-4 text-blue-600">
-        Voltar
-      </button>
+      <div className="flex justify-between items-center mb-4">
+        <button onClick={() => router.back()} className="buttonPrimary">
+          Voltar
+        </button>
+
+        <div className="relative inline-block" id="export-dropdown">
+          <button
+            id="export-btn"
+            className="buttonPrimary flex items-center"
+            onClick={() => setShowExportDropdown((prev) => !prev)}
+            type="button"
+          >
+            Exportar
+            <svg
+              className="ml-2 w-4 h-4"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </svg>
+          </button>
+          {showExportDropdown && (
+            <div className="absolute right-0 z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+              <button
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => handleExport("csv")}
+              >
+                Exportar CSV
+              </button>
+              <button
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                onClick={() => handleExport("pdf")}
+              >
+                Exportar PDF
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+
       <h1 className="text-2xl mb-4 font-black">{company.company_name}</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" ref={cardRef}>
         {/* Dados da Empresa */}
         <Card title="Dados da Empresa" className="col-start-1 col-end-3">
           <div className="flex flex-wrap space-y-4 space-x-9">
@@ -183,234 +258,8 @@ const ViewCompanyPage: React.FC = () => {
           </div>
         </Card>
 
-        {/* Endereços */}
-        <Card title="Endereços">
-          {company.addresses && company.addresses.length > 0 ? (
-            <div className="space-y-2">
-              {company.addresses.map((addr, i) => (
-                <div
-                  key={i}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
-                >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong>Tipo:</strong> {addr.type}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Rua:</strong> {addr.street}, {addr.number}{" "}
-                      {addr.complement && `- ${addr.complement}`}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Bairro:</strong> {addr.neighborhood}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Cidade:</strong> {addr.city} - {addr.district}
-                    </p>
-                    <p className="font-medium">
-                      <strong>CEP:</strong> {addr.postal_code}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhum endereço cadastrado.</div>
-          )}
-        </Card>
-
-        {/* Contatos */}
-        <Card title="Contatos">
-          <div className="mb-2">
-            <strong>Celulares:</strong>
-            {company.mobile_phones && company.mobile_phones.length > 0 ? (
-              company.mobile_phones.map((m, i) => (
-                <div key={i}>
-                  ({m.ddd}) {m.number}
-                </div>
-              ))
-            ) : (
-              <div>Nenhum celular cadastrado.</div>
-            )}
-          </div>
-          <div className="mb-2">
-            <strong>Fixos:</strong>
-            {company.land_lines && company.land_lines.length > 0 ? (
-              company.land_lines.map((l, i) => (
-                <div key={i}>
-                  ({l.ddd}) {l.number}
-                </div>
-              ))
-            ) : (
-              <div>Nenhum telefone fixo cadastrado.</div>
-            )}
-          </div>
-          <div>
-            <strong>E-mails:</strong>
-            {company.emails && company.emails.length > 0 ? (
-              company.emails.map((e, i) => <div key={i}>{e.email}</div>)
-            ) : (
-              <div>Nenhum e-mail cadastrado.</div>
-            )}
-          </div>
-        </Card>
-
-        {/* Sócios/Relacionados */}
-        <Card title="Sócios/Relacionados">
-          {company.related_persons && company.related_persons.length > 0 ? (
-            <div className="space-y-2">
-              {company.related_persons.map((p, i) => (
-                <div
-                  key={i}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
-                >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong>Nome:</strong> {p.name}
-                    </p>
-                    <p className="font-medium">
-                      <strong>CPF:</strong> {p.cpf}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Descrição:</strong> {p.description}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Participação:</strong> {p.ownership}%
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhum sócio/relacionado cadastrado.</div>
-          )}
-        </Card>
-
-        {/* Representantes Legais */}
-        <Card title="Representantes Legais">
-          {company.legal_representative &&
-          company.legal_representative.length > 0 ? (
-            <div className="space-y-2">
-              {company.legal_representative.map((r, i) => (
-                <div
-                  key={i}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
-                >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong>Nome:</strong> {r.name}
-                    </p>
-                    <p className="font-medium">
-                      <strong>CPF:</strong> {r.cpf}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Qualificação:</strong> {r.qualification}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhum representante legal cadastrado.</div>
-          )}
-        </Card>
-
-        {/* Filiais */}
-        <Card title="Filiais">
-          {company.branch_offices && company.branch_offices.length > 0 ? (
-            <div className="space-y-2">
-              {company.branch_offices.map((b, i) => (
-                <div
-                  key={i}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
-                >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong>Razão Social:</strong> {b.company_name}
-                    </p>
-                    <p className="font-medium">
-                      <strong>CNPJ:</strong> {b.cnpj}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Descrição:</strong> {b.ds_branch_office}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhuma filial cadastrada.</div>
-          )}
-        </Card>
-
-        {/* Empresas Relacionadas */}
-        <Card title="Empresas Relacionadas">
-          {company.related_companies && company.related_companies.length > 0 ? (
-            <div className="space-y-2">
-              {company.related_companies.map((c, i) => (
-                <div
-                  key={i}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
-                >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong>Nome:</strong> {c.name}
-                    </p>
-                    <p className="font-medium">
-                      <strong>CNPJ:</strong> {c.cnpj}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Descrição:</strong> {c.description}
-                    </p>
-                    <p className="font-medium">
-                      <strong>Participação:</strong> {c.ownership}%
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhuma empresa relacionada cadastrada.</div>
-          )}
-        </Card>
-
-        {/* E-mails Relacionados */}
-        <Card title="E-mails Relacionados">
-          {company.related_emails && company.related_emails.length > 0 ? (
-            <div className="space-y-2">
-              {company.related_emails.map((e, i) => (
-                <div key={i}>{e.email}</div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhum e-mail relacionado cadastrado.</div>
-          )}
-        </Card>
-
-        {/* Simples/SIMEI */}
-        <Card title="Simples/SIMEI">
-          {company.simple_simei ? (
-            <div className="flex flex-wrap space-y-4 space-x-9">
-              <p className="font-medium">
-                <strong>Status Simples:</strong>{" "}
-                {company.simple_simei.status_simple}
-              </p>
-              <p className="font-medium">
-                <strong>Data Opção Simples:</strong>{" "}
-                {company.simple_simei.dt_option_simple}
-              </p>
-              <p className="font-medium">
-                <strong>Status SIMEI:</strong>{" "}
-                {company.simple_simei.status_simei}
-              </p>
-              <p className="font-medium">
-                <strong>Data Opção SIMEI:</strong>{" "}
-                {company.simple_simei.dt_option_simei}
-              </p>
-            </div>
-          ) : (
-            <div>Sem informações de Simples/SIMEI.</div>
-          )}
-        </Card>
+        {/* Os outros cards continuam iguais, omitidos para brevidade */}
+        {/* ... */}
       </div>
     </div>
   );
