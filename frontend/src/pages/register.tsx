@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useRouter } from "next/router";
+import api from "@/axios";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -22,15 +23,14 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const res = await fetch("/api/register", {
-        method: "POST",
+      const res = await api.post("/api/register", JSON.stringify(form), {
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
       });
 
-      const data = await res.json();
+      if (res.status !== 200)
+        throw new Error(res.statusText || "Erro ao registrar");
 
-      if (!res.ok) throw new Error(data.message || "Erro ao registrar");
+      const data = await res.data.json();
 
       alert("Usuário registrado com sucesso!");
       router.push("/login"); // redireciona para login se quiser
