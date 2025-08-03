@@ -1,20 +1,43 @@
-import express from 'express';
-import cors from 'cors';
+import express from "express";
+import cors from "cors";
 
-import userRoutes from './routes/userRoutes';
-import clientRoutes from './routes/clientRoutes';
-import candidateRoutes from './routes/candidateRoutes';
+import userRoutes from "./routes/userRoutes";
+import clientRoutes from "./routes/clientRoutes";
+import candidateRoutes from "./routes/candidateRoutes";
+import datastoneRoutes from "./routes/datastoneRoutes";
 
 const app = express();
 const PORT = 4000;
 
-app.use(cors());
+const allowedOrigins = [
+  "http://localhost:3000", // frontend local
+  "https://takeitapi-1.onrender.com", // produção
+  "https://aura-ats-frontend.vercel.app", // produção
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      // Permitir requests sem origin (como do Postman)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+    credentials: true,
+  })
+);
+
 app.use(express.json());
 
 // ROTAS
-app.use('/api/users', userRoutes);
-app.use('/api/clients', clientRoutes);
-app.use('/api/candidates', candidateRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/clients", clientRoutes);
+app.use("/api/candidates", candidateRoutes);
+app.use("/api/take-it", datastoneRoutes);
 
 // START SERVER
 app.listen(PORT, () => {
