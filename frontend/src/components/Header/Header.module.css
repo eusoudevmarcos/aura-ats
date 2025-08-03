@@ -1,12 +1,11 @@
 /* frontend/components/Header/Header.module.css */
 .header {
   background-color: #ffffff;
-  padding: 24px; /* p-6 */
+  padding: 12px; /* p-6 */
   box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05); /* shadow-sm */
   display: flex;
   align-items: center;
   justify-content: space-between;
-  border-bottom-left-radius: 24px; /* rounded-bl-3xl */
   flex-shrink: 0; /* Garante que o header não encolha */
 }
 
@@ -49,7 +48,6 @@
 }
 
 .iconButton {
-  padding: 12px; /* p-3 */
   border-radius: 12px; /* rounded-xl */
   background-color: #f3f4f6; /* gray-100 */
   color: #4b5563; /* gray-600 */

@@ -60,7 +60,6 @@ body {
   border: none;
   cursor: pointer;
   transition: all 200ms ease-in-out;
-  margin-bottom: 24px; /* Espaçamento abaixo do botão */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
     0 2px 4px -1px rgba(0, 0, 0, 0.06);
 

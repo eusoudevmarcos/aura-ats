@@ -43,6 +43,7 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
           height={30}
           alt="User Avatar"
           className={styles.userAvatar}
+          unoptimized
         />
       </div>
     </header>

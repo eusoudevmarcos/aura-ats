@@ -46,6 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({
           width={30}
           src="https://placehold.co/40x40/6366F1/ffffff?text=A"
           alt="Logo Aura"
+          unoptimized
         />
         <span className={styles.sidebarLogoText}>Aura ATS</span>
       </div>
@@ -69,6 +70,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             width={30}
             src="https://placehold.co/40x40/FFD700/000000?text=JD"
             alt="User Avatar"
+            unoptimized
           />
           <div className={styles.sidebarUserInfo}>
             <p>João Silva</p>

@@ -1,14 +1,13 @@
 /* frontend/components/Sidebar/Sidebar.module.css */
 .sidebar {
   width: 256px; /* w-64 */
-  background-color: #1f2937; /* gray-800 */
-  color: #ffffff;
+  background-color: #ffff; /* gray-800 */
+  color: #474747;
   display: flex;
   flex-direction: column;
   padding: 24px; /* p-6 */
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-  border-top-right-radius: 24px; /* rounded-r-3xl */
-  border-bottom-right-radius: 24px; /* rounded-r-3xl */
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
   transition: width 0.3s ease-in-out; /* Transição para recolher/expandir */
   flex-shrink: 0; /* Garante que não encolha por padrão */
 }
@@ -83,9 +82,10 @@
 }
 
 .sidebarItemActive {
-  background-color: #4f46e5; /* indigo-600 */
-  color: #ffffff;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
+  background-color: #f1eefe; /* indigo-600 */
+  color: #7839cd;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-md */
 }
 
 .sidebarItem:not(.sidebarItemActive) {
@@ -111,7 +111,7 @@
 .sidebarFooter {
   margin-top: auto;
   padding-top: 24px; /* pt-6 */
-  border-top: 1px solid #374151; /* border-t border-gray-700 */
+  border-top: 1px solid #c9c9c9; /* border-t border-gray-700 */
 }
 
 .sidebarCollapsed .sidebarFooter {
@@ -126,7 +126,7 @@
   margin-top: 24px; /* mt-6 */
   padding: 12px; /* p-3 */
   border-radius: 8px; /* rounded-lg */
-  background-color: #374151; /* gray-700 */
+  background-color: #fff; /* gray-700 */
 }
 
 .sidebarCollapsed .sidebarUserCard {
@@ -155,17 +155,20 @@
   width: 0; /* Esconde info do usuário quando recolhida */
 }
 
-.sidebarCollapsed .chevronDownIcon { /* Esconde o ícone de seta quando recolhida */
+.sidebarCollapsed .chevronDownIcon {
+  /* Esconde o ícone de seta quando recolhida */
   display: none;
 }
 
-.icon { /* Estilo para os ícones dentro dos itens da sidebar */
+.icon {
+  /* Estilo para os ícones dentro dos itens da sidebar */
   width: 20px; /* w-5 */
   height: 20px; /* h-5 */
   flex-shrink: 0; /* Garante que o ícone não encolha */
   color: currentColor; /* Usa a cor do texto do item */
 }
 
-.dropdownItem { /* Estilo para itens de dropdown, se implementado */
+.dropdownItem {
+  /* Estilo para itens de dropdown, se implementado */
   padding-left: 36px; /* Indentação para itens de dropdown */
 }
