@@ -32,7 +32,7 @@ if (process.env.NODE_ENV === "development") {
   }
 
   try {
-    serviceAccount = JSON.parse(key);
+    serviceAccount = JSON.parse(key.replace(/\\n/g, "\n"));
   } catch (err) {
     throw new Error("FIREBASE_SERVICE_ACCOUNT_KEY não é um JSON válido.");
   }
