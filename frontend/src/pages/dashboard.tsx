@@ -8,7 +8,8 @@ import nookies from "nookies";
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
   const cookies = nookies.get(ctx);
-
+  console.log("get token: "+ cookies.token);
+  console.log("JWT: "+ process.env.JWT_SECRET)
   try {
     const user = verify(cookies.token, process.env.JWT_SECRET as string);
     return { props: { user } };
