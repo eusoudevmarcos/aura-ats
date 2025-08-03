@@ -12,7 +12,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
   const serialized = serialize("token", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
+    sameSite: "lax",
     path: "/",
     maxAge: 60 * 60 * 2, // 2 horas
   });

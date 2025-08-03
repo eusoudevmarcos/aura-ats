@@ -64,10 +64,11 @@ export default class AuthenticationController {
           email,
           uid: localId,
           firebaseIdToken: idToken,
+          token,
         },
       });
 
-      return res.status(200).json({ message: "Login bem-sucedido" });
+      return res.status(200).json({ message: "Login bem-sucedido", token });
     } catch (error: any) {
       await saveLog({
         type: "login",

@@ -47,9 +47,14 @@ const LoginPage: React.FC = () => {
       });
 
       if (res.status === 200) {
+        // Envie o token para o Next.js setar o cookie
+        await fetch("/api/set-cookie", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ token: res.data.token }),
+        });
+
         router.push("/dashboard");
-      } else {
-        setError("Token não encontrado na resposta.");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
