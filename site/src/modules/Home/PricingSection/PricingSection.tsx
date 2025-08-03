@@ -6,10 +6,6 @@ import { FaCheckCircle } from "react-icons/fa"; // Ícone de check
 
 const PricingSection: React.FC = () => {
   const handleContactClick = (planName: string) => {
-    // Redireciona para a seção de contato ou abre um formulário de interesse
-    console.log(
-      `Interesse no plano: ${planName}. Redirecionando para contato...`
-    );
     // Aqui você pode rolar para a seção de contato ou disparar um modal de formulário
     document
       .getElementById("contact-section")

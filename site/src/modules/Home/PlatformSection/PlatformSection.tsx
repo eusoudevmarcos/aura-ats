@@ -20,9 +20,6 @@ const PlatformSection: React.FC = () => {
 
   const handleSelectPlan = (planName: string, price: string) => {
     // Lógica futura para redirecionar para a área de assinatura/pagamento
-    console.log(
-      `Plano selecionado: ${planName} - ${price}. Redirecionando para pagamento...`
-    );
     alert(
       `Você selecionou o ${planName}. Em breve, será redirecionado para a área de assinatura e pagamento!`
     );
