@@ -5,7 +5,6 @@ import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
-import api from "@/axios";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -21,22 +20,20 @@ const LoginPage: React.FC = () => {
 
     try {
       // Chamada para API externa
-      const res = await api.post("/api/auth/login", {
-        username,
-        password,
+      const res = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include", // agora garante que cookies httpOnly funcionem
+        body: JSON.stringify({ username, password }),
       });
 
-      if (res.status === 200) {
-        localStorage.setItem("uid", res.data.uid);
+      const data = await res.json();
 
-        // Envie o token para o Next.js setar o cookie
-        await fetch("/api/set-cookie", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ token: res.data.token }),
-        });
-
+      if (res.ok) {
+        localStorage.setItem("uid", data.uid);
         router.push("/atividades/agendas");
+      } else {
+        setError(data.error || "Erro ao fazer login.");
       }
     } catch (error) {
       console.error("Erro ao fazer login:", error);
@@ -53,7 +50,7 @@ const LoginPage: React.FC = () => {
           <Image src="/Aura-icon.svg" width={30} height={30} alt="Logo Aura" />
           <span className={styles.loginLogoText}>Aura ATS</span>
         </div>
-        <form onSubmit={handleSubmit} style={{ width: "100%" }}>
+        <form onSubmit={handleSubmit} method="POST" style={{ width: "100%" }}>
           <div className={styles.formGroup}>
             <label htmlFor="username" className={styles.formLabel}>
               Usuário:

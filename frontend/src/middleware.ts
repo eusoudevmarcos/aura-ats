@@ -1,10 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verify } from "jsonwebtoken";
 
-function isPublic(pathname: string) {
-  return pathname === "/login" || pathname.startsWith("/api/public");
-}
+const PUBLIC_API_PATHS = ["/api/login", "/api/set-cookie", "/api/public"];
 
+function isPublic(pathname: string) {
+  return (
+    pathname === "/login" ||
+    PUBLIC_API_PATHS.some((publicPath) => pathname.startsWith(publicPath))
+  );
+}
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
