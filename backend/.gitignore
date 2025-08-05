@@ -21,3 +21,5 @@ build/
 
 # firebase
 **/*firebase-adminsdk*.json
+
+/src/generated/prisma

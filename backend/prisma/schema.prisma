@@ -1,0 +1,62 @@
+model Medico {
+  id            String         @id @default(uuid())
+  nome          String
+  cpf           String         @unique
+  crm           String
+  rqe           String[]
+  especialidades Especialidade[] @relation("MedicoEspecialidade", references: [id])
+  hospitais     Hospital[]     @relation("MedicoHospital", references: [id])
+  contatos      Contatos
+  localizacao   Localizacao
+  formacao      Formacao?
+  atendimentos  Atendimento[]
+  createdAt     DateTime       @default(now())
+  updatedAt     DateTime       @updatedAt
+}
+
+model Especialidade {
+  id      String    @id @default(uuid())
+  nome    String    @unique
+  medicos Medico[]  @relation("MedicoEspecialidade")
+}
+
+model Hospital {
+  id      String    @id @default(uuid())
+  nome    String
+  cidade  String
+  estado  String
+  medicos Medico[]  @relation("MedicoHospital")
+}
+
+model Atendimento {
+  id        String   @id @default(uuid())
+  medico    Medico   @relation(fields: [medicoId], references: [id])
+  medicoId  String
+  data      DateTime
+  observacao String?
+}
+
+model Contatos {
+  id        String  @id @default(uuid())
+  telefone  String? 
+  whatsapp  String? 
+  email     String? 
+  medico    Medico  @relation(fields: [medicoId], references: [id])
+  medicoId  String  @unique
+}
+
+model Localizacao {
+  id        String  @id @default(uuid())
+  cidade    String
+  estado    String
+  medico    Medico  @relation(fields: [medicoId], references: [id])
+  medicoId  String  @unique
+}
+
+model Formacao {
+  id                         String   @id @default(uuid())
+  data_conclusao_medicina   DateTime?
+  data_conclusao_residencia DateTime?
+  medico                    Medico   @relation(fields: [medicoId], references: [id])
+  medicoId                  String   @unique
+}
