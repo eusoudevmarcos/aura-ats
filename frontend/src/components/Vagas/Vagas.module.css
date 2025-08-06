@@ -1,15 +1,5 @@
 /* frontend/components/Vagas/Vagas.module.css */
 
-/* Estilos para a lista de vagas */
-.vagasSection {
-  margin-top: 32px;
-  background-color: #ffffff;
-  padding: 24px;
-  border-radius: 16px;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06);
-}
-
 .vagasHeader {
   display: flex;
   justify-content: space-between;
@@ -28,7 +18,7 @@
   max-width: 300px;
   padding: 8px 12px;
   border-radius: 8px;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #c9c9c9;
   outline: none;
 }
 

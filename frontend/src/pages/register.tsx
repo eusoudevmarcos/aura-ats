@@ -48,7 +48,7 @@ export default function RegisterPage() {
         onSubmit={handleSubmit}
         className="bg-white p-6 rounded-xl shadow-md w-full max-w-md space-y-4"
       >
-        <h1 className="text-2xl font-bold text-center">Criar conta</h1>
+        <h1 className="text-2xl font-bold text-center">Cadastrar usuario</h1>
 
         <input
           type="text"

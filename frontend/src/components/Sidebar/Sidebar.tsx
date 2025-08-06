@@ -12,6 +12,7 @@ import {
 } from "../icons";
 import Image from "next/image";
 import nookies from "nookies";
+import Link from "next/link";
 
 interface SidebarProps {
   setActiveSection: (section: string) => void;
@@ -109,7 +110,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       </nav>
 
       <div className={styles.sidebarFooter}>
-        <div className={styles.sidebarUserCard}>
+        <Link href={"/profile/" + uid} className={styles.sidebarUserCard}>
           <Image
             height={30}
             width={30}
@@ -122,7 +123,7 @@ const Sidebar: React.FC<SidebarProps> = ({
             <p>Admin</p>
           </div>
           <ChevronDownIcon className={styles.chevronDownIcon} />
-        </div>
+        </Link>
       </div>
     </aside>
   );
