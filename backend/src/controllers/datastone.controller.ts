@@ -3,7 +3,7 @@
 import { Request, Response } from "express";
 import axios from "axios";
 import { sanitize } from "../utils/sanitize";
-import CacheController from "./CacheController";
+import CacheController from "./cache.controller";
 
 const cache = new CacheController();
 

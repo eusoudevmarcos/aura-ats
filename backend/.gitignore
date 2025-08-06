@@ -22,4 +22,6 @@ build/
 # firebase
 **/*firebase-adminsdk*.json
 
-/src/generated/prisma
+# Prisma
+src/generated/prisma
+prisma/migrations/

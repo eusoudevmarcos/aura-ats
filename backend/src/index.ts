@@ -1,14 +1,16 @@
+import "reflect-metadata";
+import dotenv from "dotenv";
 import express from "express";
 import cors from "cors";
-import dotenv from "dotenv";
 
 dotenv.config();
 
-import authenticationRoutes from "./routes/authenticationRoutes";
-import userRoutes from "./routes/userRoutes";
-import clientRoutes from "./routes/clientRoutes";
-import candidateRoutes from "./routes/candidateRoutes";
-import datastoneRoutes from "./routes/datastoneRoutes";
+import authenticationRoutes from "./routes/authentication.routes";
+import userRoutes from "./routes/user.routes";
+import clientRoutes from "./routes/client.routes";
+import candidateRoutes from "./routes/candidate.routes";
+import datastoneRoutes from "./routes/datastone.routes";
+import profissionalRoutes from "./routes/profissional.routes";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -43,6 +45,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/candidates", candidateRoutes);
 app.use("/api/take-it", datastoneRoutes);
+app.use("/api/profissional", profissionalRoutes);
 
 // START SERVER
 app.listen(PORT, () => {

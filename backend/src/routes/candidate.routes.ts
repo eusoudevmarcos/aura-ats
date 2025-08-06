@@ -1,6 +1,6 @@
 // src/routes/candidateRoutes.ts
 import express from "express";
-import CandidateController from "../controllers/CandidateController";
+import CandidateController from "../controllers/candidate.controller";
 
 const router = express.Router();
 

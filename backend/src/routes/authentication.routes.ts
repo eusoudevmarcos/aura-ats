@@ -1,6 +1,6 @@
 // src/routes/candidateRoutes.ts
 import express from "express";
-import AuthenticationController from "../controllers/AuthenticationController";
+import AuthenticationController from "../controllers/authentication.controller";
 
 const router = express.Router();
 

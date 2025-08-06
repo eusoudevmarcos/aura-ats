@@ -1,6 +1,6 @@
 // src/routes/clientRoutes.ts
 import express from "express";
-import ClientController from "../controllers/ClientController";
+import ClientController from "../controllers/client.controller";
 
 const router = express.Router();
 
@@ -20,5 +20,7 @@ router.put("/:id", clientController.update);
 
 // Deletar
 router.delete("/:id", clientController.delete);
+
+router.post("/medico/create", clientController.createMedico);
 
 export default router;

@@ -1,7 +1,7 @@
 // src/routes/datastone.ts
 
 import { Router } from "express";
-import { DatastoneController } from "../controllers/DatastoneController";
+import { DatastoneController } from "../controllers/datastone.controller";
 
 const router = Router();
 

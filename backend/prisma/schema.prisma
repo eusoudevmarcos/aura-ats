@@ -1,62 +1,146 @@
-model Medico {
-  id            String         @id @default(uuid())
-  nome          String
-  cpf           String         @unique
-  crm           String
-  rqe           String[]
-  especialidades Especialidade[] @relation("MedicoEspecialidade", references: [id])
-  hospitais     Hospital[]     @relation("MedicoHospital", references: [id])
-  contatos      Contatos
-  localizacao   Localizacao
-  formacao      Formacao?
-  atendimentos  Atendimento[]
-  createdAt     DateTime       @default(now())
-  updatedAt     DateTime       @updatedAt
+// schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+enum TipoUsuario {
+  ADMIN
+  MODERADOR
+  ATENDENTE
+  PROFISSIONAL
+}
+
+enum TipoPessoa {
+  FISICA
+  JURIDICA
+}
+
+enum AreaProfissional {
+  MEDICO
+  ENFERMAGEM
+  TECNOLOGIA
+  OUTRO
+}
+
+model Pessoa {
+  id           String        @id @default(uuid())
+  nome         String
+  cpf          String?       @unique
+  cnpj         String?       @unique
+  tipo         TipoPessoa
+  usuario      Usuario?
+  profissional Profissional?
+  funcionario  Funcionario?
+  cliente      Cliente?
+  empresa      Empresa?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Usuario {
+  id       String      @id @default(uuid())
+  pessoa   Pessoa      @relation(fields: [pessoaId], references: [id])
+  pessoaId String      @unique
+  email    String      @unique
+  password String
+  tipo     TipoUsuario
+}
+
+model Profissional {
+  id             String           @id @default(uuid())
+  pessoa         Pessoa           @relation(fields: [pessoaId], references: [id])
+  pessoaId       String           @unique
+  area           AreaProfissional
+  crm            String?
+  contato        Contato?
+  localizacao    Localizacao?
+  formacao       Formacao?
+  especialidades Especialidade[]  @relation("ProfissionalEspecialidades")
+  hospitais      Hospital[]
+  atendimentos   Atendimento[]
 }
 
 model Especialidade {
-  id      String    @id @default(uuid())
-  nome    String    @unique
-  medicos Medico[]  @relation("MedicoEspecialidade")
+  id            Int            @id @default(autoincrement())
+  nome          String         @unique
+  sigla         String
+  profissionais Profissional[] @relation("ProfissionalEspecialidades")
 }
 
 model Hospital {
-  id      String    @id @default(uuid())
-  nome    String
-  cidade  String
-  estado  String
-  medicos Medico[]  @relation("MedicoHospital")
+  id             String       @id @default(uuid())
+  nome           String
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+  profissionalId String
 }
 
 model Atendimento {
-  id        String   @id @default(uuid())
-  medico    Medico   @relation(fields: [medicoId], references: [id])
-  medicoId  String
-  data      DateTime
-  observacao String?
+  id             String       @id @default(uuid())
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+  profissionalId String
+  data           DateTime
+  observacao     String?
 }
 
-model Contatos {
-  id        String  @id @default(uuid())
-  telefone  String? 
-  whatsapp  String? 
-  email     String? 
-  medico    Medico  @relation(fields: [medicoId], references: [id])
-  medicoId  String  @unique
+model Contato {
+  id             String       @id @default(uuid())
+  telefone       String?
+  whatsapp       String?
+  email          String?
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+  profissionalId String       @unique
 }
 
 model Localizacao {
-  id        String  @id @default(uuid())
-  cidade    String
-  estado    String
-  medico    Medico  @relation(fields: [medicoId], references: [id])
-  medicoId  String  @unique
+  id             String       @id @default(uuid())
+  cidade         String
+  estado         String
+  profissional   Profissional @relation(fields: [profissionalId], references: [id])
+  profissionalId String       @unique
 }
 
 model Formacao {
-  id                         String   @id @default(uuid())
+  id                        String       @id @default(uuid())
   data_conclusao_medicina   DateTime?
   data_conclusao_residencia DateTime?
-  medico                    Medico   @relation(fields: [medicoId], references: [id])
-  medicoId                  String   @unique
+  profissional              Profissional @relation(fields: [profissionalId], references: [id])
+  profissionalId            String       @unique
+}
+
+model Funcionario {
+  id       String  @id @default(uuid())
+  pessoa   Pessoa  @relation(fields: [pessoaId], references: [id])
+  pessoaId String  @unique
+  setor    String?
+  cargo    String?
+}
+
+model Cliente {
+  id       String @id @default(uuid())
+  pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
+  pessoaId String @unique
+}
+
+model Empresa {
+  id          String @id @default(uuid())
+  pessoa      Pessoa @relation(fields: [pessoaId], references: [id])
+  pessoaId    String @unique
+  razaoSocial String
+  vagas       Vaga[]
+}
+
+model Vaga {
+  id        String           @id @default(uuid())
+  titulo    String
+  descricao String
+  area      AreaProfissional
+  empresa   Empresa          @relation(fields: [empresaId], references: [id])
+  empresaId String
+  criadaEm  DateTime         @default(now())
 }
