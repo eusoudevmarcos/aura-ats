@@ -77,6 +77,11 @@ const Sidebar: React.FC<SidebarProps> = ({
       label: "Perfil",
       href: "/profile/" + uid,
     },
+    {
+      icon: <SettingsIcon className={styles.icon} />,
+      label: "Funcionarios",
+      href: "/funcionarios/",
+    },
   ];
 
   return (

@@ -1,0 +1,31 @@
+export type Pessoa = {
+  id: string;
+  nome: string;
+  cpf: string;
+  dataNascimento: string;
+  rg: string;
+  estadoCivil: string;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type Empresa = {
+  id: string;
+  razaoSocial: string;
+  cnpj: string;
+  dataAbertura: string;
+  // outros campos se necessário
+};
+
+export type Funcionario = {
+  id: string;
+  email: string;
+  password: string;
+  tipoUsuario: string;
+  setor?: string;
+  cargo?: string;
+  pessoaId?: string;
+  empresaId?: string | null;
+  pessoa?: Pessoa | null;
+  empresa?: Empresa | null;
+};

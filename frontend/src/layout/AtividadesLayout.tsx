@@ -1,4 +1,4 @@
-import styles from "@/components/Cards/Cards.module.css";
+import styles from "@/components/Card/Cards.module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
 

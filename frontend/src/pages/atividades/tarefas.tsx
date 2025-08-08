@@ -1,4 +1,4 @@
-import cardsStyles from "@/components/Cards/Cards.module.css";
+import cardsStyles from "@/components/Card/Cards.module.css";
 import { PlusIcon } from "@/components/icons";
 import AtividadeLayout from "@/layout/AtividadesLayout";
 

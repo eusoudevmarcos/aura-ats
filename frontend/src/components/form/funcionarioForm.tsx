@@ -1,94 +1,44 @@
-import React, { useState } from "react";
-import { z } from "zod";
-
-// Schema Zod para validação
-const contatoSchema = z.object({
-  telefone: z.string().optional(),
-  whatsapp: z.string().optional(),
-  email: z.email().optional(),
-});
-
-const localizacaoSchema = z.object({
-  cidade: z.string().min(1, "Cidade é obrigatório"),
-  estado: z.string().min(2, "Estado é obrigatório"),
-});
-
-const formacaoSchema = z.object({
-  dataConclusaoMedicina: z
-    .string()
-    .optional()
-    .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
-  dataConclusaoResidencia: z
-    .string()
-    .optional()
-    .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
-});
-
-const pessoaSchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
-  cpf: z
-    .string()
-    .regex(/^\d{11}$/, "CPF deve ter 11 números")
-    .optional(),
-  dataNascimento: z
-    .string()
-    .optional()
-    .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
-  estadoCivil: z
-    .enum([
-      "SOLTEIRO",
-      "CASADO",
-      "DIVORCIADO",
-      "VIUVO",
-      "SEPARADO",
-      "UNIAO_ESTAVEL",
-    ])
-    .optional(),
-  rg: z.string().regex(/^\d+$/, "RG deve conter só números").optional(),
-  contatos: z.array(contatoSchema).optional(),
-  localizacoes: z.array(localizacaoSchema).optional(),
-  formacoes: z.array(formacaoSchema).optional(),
-});
-
-const empresaSchema = z.object({
-  razaoSocial: z.string().min(1, "Razão social é obrigatória"),
-  cnpj: z.string().regex(/^\d{14}$/, "CNPJ deve ter 14 números"),
-  dataAbertura: z
-    .string()
-    .optional()
-    .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
-  contatos: z.array(contatoSchema).optional(),
-  localizacoes: z.array(localizacaoSchema).optional(),
-});
-
-const funcionarioSchema = z.object({
-  tipoUsuario: z.enum([
-    "ADMIN",
-    "MODERADOR",
-    "ATENDENTE",
-    "PROFISSIONAL",
-    "FUNCIONARIO",
-  ]),
-  email: z.string().email("Email inválido"),
-  password: z.string().min(6, "Senha deve ter no mínimo 6 caracteres"),
-  setor: z.string().optional(),
-  cargo: z.string().optional(),
-
-  tipoPessoaOuEmpresa: z.enum(["pessoa", "empresa"]),
-
-  pessoa: pessoaSchema.optional(),
-  empresa: empresaSchema.optional(),
-});
+import api from "@/axios";
+import { funcionarioSchema } from "@/schemas/funcionario.schema";
+import React, { useState, useEffect } from "react";
+import z from "zod";
+import { NoViewIcon, ViewIcon } from "../icons";
 
 type FuncionarioFormData = z.infer<typeof funcionarioSchema>;
 
-export function FuncionarioForm() {
+type FuncionarioFormProps = {
+  onSuccess: (msg: boolean) => void;
+  funcionarioData?: Partial<FuncionarioFormData>;
+};
+
+export function FuncionarioForm({
+  onSuccess,
+  funcionarioData,
+}: FuncionarioFormProps) {
   const [formData, setFormData] = useState<Partial<FuncionarioFormData>>({
     tipoPessoaOuEmpresa: "pessoa",
-    tipoUsuario: "FUNCIONARIO",
+    tipoUsuario: "MODERADOR",
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+
+  // Preenche o formulário com os dados recebidos via props para edição
+  useEffect(() => {
+    if (funcionarioData) {
+      setFormData((prev) => ({
+        ...prev,
+        ...funcionarioData,
+        // Garante que os objetos aninhados também sejam copiados corretamente
+        pessoa: funcionarioData.pessoa
+          ? { ...funcionarioData.pessoa }
+          : prev.pessoa,
+        empresa: funcionarioData.empresa
+          ? { ...funcionarioData.empresa }
+          : prev.empresa,
+      }));
+    }
+  }, [funcionarioData]);
 
   function handleChange(
     e: React.ChangeEvent<
@@ -98,7 +48,6 @@ export function FuncionarioForm() {
     const { name, value } = e.target;
 
     if (name.includes(".")) {
-      // Para campos aninhados como pessoa.nome, empresa.cnpj etc
       const [parent, child] = name.split(".");
       setFormData((prev) => ({
         ...prev,
@@ -112,21 +61,19 @@ export function FuncionarioForm() {
     }
   }
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Validação
     let validationData: any = { ...formData };
     if (formData.tipoPessoaOuEmpresa === "pessoa") {
-      validationData.empresa = undefined; // remove empresa
+      validationData.empresa = undefined;
     } else {
-      validationData.pessoa = undefined; // remove pessoa
+      validationData.pessoa = undefined;
     }
 
     const result = funcionarioSchema.safeParse(validationData);
 
     if (!result.success) {
-      // Extrai mensagens de erro do ZodError
       const fieldErrors: Record<string, string> = {};
       if (result.error && Array.isArray(result.error.issues)) {
         result.error.issues.forEach((err) => {
@@ -140,147 +87,240 @@ export function FuncionarioForm() {
 
     setErrors({});
 
-    // Aqui você pode enviar `result.data` para API / backend
-    console.log("Formulário válido:", result.data);
-    alert("Funcionário criado com sucesso!");
+    try {
+      // Se for edição, pode-se trocar o método para PUT/PATCH e endpoint, se necessário
+      const isEdit = !!funcionarioData;
+      const url = isEdit
+        ? `/api/funcionario/update/${formData.tipoPessoaOuEmpresa}`
+        : `/api/funcionario/create/${formData.tipoPessoaOuEmpresa}`;
+
+      const response = await api.post(url, result.data);
+
+      console.log("Resposta da API:", response.data);
+
+      // Se quiser limpar o form após sucesso (apenas se não for edição):
+      if (!isEdit) {
+        setFormData({
+          tipoPessoaOuEmpresa: "pessoa",
+          tipoUsuario: "ADMIN",
+        });
+      }
+
+      onSuccess(true);
+    } catch (error: any) {
+      onSuccess(false);
+      console.error("Erro ao criar funcionário:", error);
+
+      // Se a API retornar erros específicos, você pode setar aqui:
+      if (error.response?.data?.errors) {
+        setErrors(error.response.data.errors);
+      }
+    }
   }
 
-  return (
-    <form onSubmit={handleSubmit} noValidate>
-      <h2>Cadastrar Funcionário</h2>
+  const inputClass =
+    "w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500";
 
-      <label>
-        Tipo de Funcionário:
+  const labelClass = "block mb-1 font-medium text-gray-700";
+
+  const errorClass = "text-red-600 text-sm mt-1";
+
+  return (
+    <form
+      onSubmit={handleSubmit}
+      noValidate
+      className="max-w-3xl mx-auto p-6 bg-white rounded-lg space-y-6"
+    >
+      {/* Tipo de Funcionário */}
+      <div>
+        <label htmlFor="tipoUsuario" className={labelClass}>
+          Tipo de Funcionário:
+        </label>
         <select
+          id="tipoUsuario"
           name="tipoUsuario"
           value={formData.tipoUsuario}
           onChange={handleChange}
           required
+          className={inputClass}
         >
           <option value="ADMIN">ADMIN</option>
           <option value="MODERADOR">MODERADOR</option>
           <option value="ATENDENTE">ATENDENTE</option>
-          <option value="PROFISSIONAL">PROFISSIONAL</option>
-          <option value="FUNCIONARIO">FUNCIONARIO</option>
         </select>
         {errors.tipoUsuario && (
-          <p style={{ color: "red" }}>{errors.tipoUsuario}</p>
+          <p className={errorClass}>{errors.tipoUsuario}</p>
         )}
-      </label>
+      </div>
 
-      <label>
-        Email*:
+      {/* Email */}
+      <div>
+        <label htmlFor="email" className={labelClass}>
+          Email*:
+        </label>
         <input
           type="email"
+          id="email"
           name="email"
           value={formData.email || ""}
           onChange={handleChange}
           required
+          className={inputClass}
+          autoComplete="email"
         />
-        {errors.email && <p style={{ color: "red" }}>{errors.email}</p>}
-      </label>
+        {errors.email && <p className={errorClass}>{errors.email}</p>}
+      </div>
 
-      <label>
-        Senha*:
-        <input
-          type="password"
-          name="password"
-          value={formData.password || ""}
-          onChange={handleChange}
-          required
-        />
-        {errors.password && <p style={{ color: "red" }}>{errors.password}</p>}
-      </label>
+      {/* Senha */}
+      <div>
+        <label htmlFor="password" className={labelClass}>
+          Senha*:
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            id="password"
+            name="password"
+            value={formData.password || ""}
+            onChange={handleChange}
+            required
+            className={inputClass + " pr-10"}
+            autoComplete="new-password"
+          />
+          <button
+            type="button"
+            className="absolute inset-y-0 right-0 flex items-center px-3 text-gray-500"
+            onClick={() => setShowPassword((prev: boolean) => !prev)}
+            tabIndex={-1}
+            aria-label={showPassword ? "Ocultar senha" : "Mostrar senha"}
+          >
+            {showPassword ? <ViewIcon /> : <NoViewIcon />}
+          </button>
+        </div>
+        {errors.password && <p className={errorClass}>{errors.password}</p>}
+      </div>
 
-      <label>
-        Setor:
-        <input
-          type="text"
-          name="setor"
-          value={formData.setor || ""}
-          onChange={handleChange}
-        />
-        {errors.setor && <p style={{ color: "red" }}>{errors.setor}</p>}
-      </label>
+      {/* Setor e Cargo lado a lado */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div>
+          <label htmlFor="setor" className={labelClass}>
+            Setor:
+          </label>
+          <input
+            type="text"
+            id="setor"
+            name="setor"
+            value={formData.setor || ""}
+            onChange={handleChange}
+            className={inputClass}
+          />
+          {errors.setor && <p className={errorClass}>{errors.setor}</p>}
+        </div>
+        <div>
+          <label htmlFor="cargo" className={labelClass}>
+            Cargo:
+          </label>
+          <input
+            type="text"
+            id="cargo"
+            name="cargo"
+            value={formData.cargo || ""}
+            onChange={handleChange}
+            className={inputClass}
+          />
+          {errors.cargo && <p className={errorClass}>{errors.cargo}</p>}
+        </div>
+      </div>
 
-      <label>
-        Cargo:
-        <input
-          type="text"
-          name="cargo"
-          value={formData.cargo || ""}
-          onChange={handleChange}
-        />
-        {errors.cargo && <p style={{ color: "red" }}>{errors.cargo}</p>}
-      </label>
-
-      <label>
-        Tipo de Funcionário (Pessoa ou Empresa)*:
+      {/* Tipo de Pessoa ou Empresa */}
+      <div>
+        <label htmlFor="tipoPessoaOuEmpresa" className={labelClass}>
+          Tipo de Funcionário (Pessoa ou Empresa)*:
+        </label>
         <select
+          id="tipoPessoaOuEmpresa"
           name="tipoPessoaOuEmpresa"
           value={formData.tipoPessoaOuEmpresa}
           onChange={handleChange}
           required
+          className={inputClass}
         >
           <option value="pessoa">Pessoa</option>
           <option value="empresa">Empresa</option>
         </select>
         {errors.tipoPessoaOuEmpresa && (
-          <p style={{ color: "red" }}>{errors.tipoPessoaOuEmpresa}</p>
+          <p className={errorClass}>{errors.tipoPessoaOuEmpresa}</p>
         )}
-      </label>
+      </div>
 
+      {/* Dados da Pessoa */}
       {formData.tipoPessoaOuEmpresa === "pessoa" && (
-        <>
-          <h3>Dados da Pessoa</h3>
+        <div className="border p-4 rounded-md bg-gray-50 space-y-4">
+          <h3 className="text-xl font-semibold mb-2">Dados da Pessoa</h3>
 
-          <label>
-            Nome*:
+          <div>
+            <label htmlFor="pessoa.nome" className={labelClass}>
+              Nome*:
+            </label>
             <input
               type="text"
+              id="pessoa.nome"
               name="pessoa.nome"
               value={formData.pessoa?.nome || ""}
               onChange={handleChange}
               required
+              className={inputClass}
             />
             {errors["pessoa.nome"] && (
-              <p style={{ color: "red" }}>{errors["pessoa.nome"]}</p>
+              <p className={errorClass}>{errors["pessoa.nome"]}</p>
             )}
-          </label>
+          </div>
 
-          <label>
-            CPF:
+          <div>
+            <label htmlFor="pessoa.cpf" className={labelClass}>
+              CPF:
+            </label>
             <input
               type="text"
+              id="pessoa.cpf"
               name="pessoa.cpf"
               value={formData.pessoa?.cpf || ""}
               onChange={handleChange}
               placeholder="Somente números, 11 dígitos"
+              className={inputClass}
             />
             {errors["pessoa.cpf"] && (
-              <p style={{ color: "red" }}>{errors["pessoa.cpf"]}</p>
+              <p className={errorClass}>{errors["pessoa.cpf"]}</p>
             )}
-          </label>
+          </div>
 
-          <label>
-            Data de Nascimento:
+          <div>
+            <label htmlFor="pessoa.dataNascimento" className={labelClass}>
+              Data de Nascimento:
+            </label>
             <input
               type="date"
+              id="pessoa.dataNascimento"
               name="pessoa.dataNascimento"
               value={formData.pessoa?.dataNascimento || ""}
               onChange={handleChange}
+              className={inputClass}
             />
             {errors["pessoa.dataNascimento"] && (
-              <p style={{ color: "red" }}>{errors["pessoa.dataNascimento"]}</p>
+              <p className={errorClass}>{errors["pessoa.dataNascimento"]}</p>
             )}
-          </label>
+          </div>
 
-          <label>
-            Estado Civil:
+          <div>
+            <label htmlFor="pessoa.estadoCivil" className={labelClass}>
+              Estado Civil:
+            </label>
             <select
+              id="pessoa.estadoCivil"
               name="pessoa.estadoCivil"
               value={formData.pessoa?.estadoCivil || ""}
               onChange={handleChange}
+              className={inputClass}
             >
               <option value="">-- Selecione --</option>
               <option value="SOLTEIRO">Solteiro</option>
@@ -291,79 +331,97 @@ export function FuncionarioForm() {
               <option value="UNIAO_ESTAVEL">União Estável</option>
             </select>
             {errors["pessoa.estadoCivil"] && (
-              <p style={{ color: "red" }}>{errors["pessoa.estadoCivil"]}</p>
+              <p className={errorClass}>{errors["pessoa.estadoCivil"]}</p>
             )}
-          </label>
+          </div>
 
-          <label>
-            RG:
+          <div>
+            <label htmlFor="pessoa.rg" className={labelClass}>
+              RG:
+            </label>
             <input
               type="text"
+              id="pessoa.rg"
               name="pessoa.rg"
               value={formData.pessoa?.rg || ""}
               onChange={handleChange}
               placeholder="Apenas números"
+              className={inputClass}
             />
             {errors["pessoa.rg"] && (
-              <p style={{ color: "red" }}>{errors["pessoa.rg"]}</p>
+              <p className={errorClass}>{errors["pessoa.rg"]}</p>
             )}
-          </label>
-
-          {/* Para simplificar, aqui pode adicionar campos para contatos, localizacoes e formacoes se quiser */}
-        </>
+          </div>
+        </div>
       )}
 
+      {/* Dados da Empresa */}
       {formData.tipoPessoaOuEmpresa === "empresa" && (
-        <>
-          <h3>Dados da Empresa</h3>
+        <div className="border p-4 rounded-md bg-gray-50 space-y-4">
+          <h3 className="text-xl font-semibold mb-2">Dados da Empresa</h3>
 
-          <label>
-            Razão Social*:
+          <div>
+            <label htmlFor="empresa.razaoSocial" className={labelClass}>
+              Razão Social*:
+            </label>
             <input
               type="text"
+              id="empresa.razaoSocial"
               name="empresa.razaoSocial"
               value={formData.empresa?.razaoSocial || ""}
               onChange={handleChange}
               required
+              className={inputClass}
             />
             {errors["empresa.razaoSocial"] && (
-              <p style={{ color: "red" }}>{errors["empresa.razaoSocial"]}</p>
+              <p className={errorClass}>{errors["empresa.razaoSocial"]}</p>
             )}
-          </label>
+          </div>
 
-          <label>
-            CNPJ*:
+          <div>
+            <label htmlFor="empresa.cnpj" className={labelClass}>
+              CNPJ*:
+            </label>
             <input
               type="text"
+              id="empresa.cnpj"
               name="empresa.cnpj"
               value={formData.empresa?.cnpj || ""}
               onChange={handleChange}
               placeholder="Somente números, 14 dígitos"
               required
+              className={inputClass}
             />
             {errors["empresa.cnpj"] && (
-              <p style={{ color: "red" }}>{errors["empresa.cnpj"]}</p>
+              <p className={errorClass}>{errors["empresa.cnpj"]}</p>
             )}
-          </label>
+          </div>
 
-          <label>
-            Data de Abertura:
+          <div>
+            <label htmlFor="empresa.dataAbertura" className={labelClass}>
+              Data de Abertura:
+            </label>
             <input
               type="date"
+              id="empresa.dataAbertura"
               name="empresa.dataAbertura"
               value={formData.empresa?.dataAbertura || ""}
               onChange={handleChange}
+              className={inputClass}
             />
             {errors["empresa.dataAbertura"] && (
-              <p style={{ color: "red" }}>{errors["empresa.dataAbertura"]}</p>
+              <p className={errorClass}>{errors["empresa.dataAbertura"]}</p>
             )}
-          </label>
-
-          {/* Também pode expandir para contatos e localizações aqui */}
-        </>
+          </div>
+        </div>
       )}
 
-      <button type="submit">Cadastrar Funcionário</button>
+      <button
+        type="submit"
+        className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
+      >
+        {funcionarioData ? "Salvar Alterações" : "Cadastrar Funcionário"}
+      </button>
     </form>
   );
 }
