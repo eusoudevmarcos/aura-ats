@@ -5,9 +5,11 @@
   "type": "commonjs",
   "license": "MIT",
   "scripts": {
-    "build": "tsc",
-    "start": "npx prisma migrate deploy && node dist/index.js",
-    "dev": "ts-node-dev src/index.ts"
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "npx prisma generate && tsc && cpx \"src/public/**/*\" dist/public",
+    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "seed-script": "tsx prisma/seed.ts",
+    "seed": "npm run seed-script"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",
