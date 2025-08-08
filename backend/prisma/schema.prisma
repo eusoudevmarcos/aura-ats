@@ -52,7 +52,7 @@ model Pessoa {
   nome           String
   cpf            String?        @unique
   dataNascimento DateTime?
-  rg             Int?
+  rg             String?
   estadoCivil    EstadoCivil?
   contatos       Contato[] // contatos ligados à pessoa
   localizacoes   Localizacao[] // localizações ligadas à pessoa
