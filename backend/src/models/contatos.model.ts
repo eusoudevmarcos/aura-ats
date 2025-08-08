@@ -1,38 +1,38 @@
-// CRUD de usuário utilizando Prisma na tabela "Contatos"
+// CRUD de usuário utilizando Prisma na tabela "Contato"
 
-import { PrismaClient, Contatos } from "@prisma/client";
+import { PrismaClient, Contato } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-export class ContatosModel {
-  async create(data: Omit<Contatos, "id">): Promise<Contatos> {
-    return await prisma.contatos.create({
+export class ContatoModel {
+  async create(data: Omit<Contato, "id">): Promise<Contato> {
+    return await prisma.contato.create({
       data,
     });
   }
 
-  async getAll(): Promise<Contatos[]> {
-    return await prisma.contatos.findMany();
+  async getAll(): Promise<Contato[]> {
+    return await prisma.contato.findMany();
   }
 
-  async getOne(id: string): Promise<Contatos | null> {
-    return await prisma.contatos.findUnique({
+  async getOne(id: string): Promise<Contato | null> {
+    return await prisma.contato.findUnique({
       where: { id },
     });
   }
 
   async update(
     id: string,
-    data: Partial<Omit<Contatos, "id">>
-  ): Promise<Contatos | null> {
-    return await prisma.contatos.update({
+    data: Partial<Omit<Contato, "id">>
+  ): Promise<Contato | null> {
+    return await prisma.contato.update({
       where: { id },
       data,
     });
   }
 
-  async delete(id: string): Promise<Contatos | null> {
-    return await prisma.contatos.delete({
+  async delete(id: string): Promise<Contato | null> {
+    return await prisma.contato.delete({
       where: { id },
     });
   }

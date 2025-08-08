@@ -14,12 +14,4 @@ export default class ProfissionalService {
   async get(id: string) {
     return await this.profissionalModel.getOne(id);
   }
-  /*
-  async update(id: string, data: MedicoInput) {
-    return await this.medicoModel.update(id, data);
-  }
-
-  async delete(id: string) {
-    return await this.medicoModel.delete(id);
-  }*/
 }

@@ -96,15 +96,17 @@ export class DatastoneController {
       const data = response.data;
       if (isDetail === "true" && data?.[0]?.id) {
         const enriched = await this.detail(data[0], tipo);
-        await log(enriched);
-        res.json(enriched);
+        const saveCache = cache.saveCacheFile(tipo, enriched);
+        await log({ status: 200, enriched, URL, saveCache });
+
+        res.status(200).json({ status: 200, enriched, saveCache });
       }
 
       const saveCache = cache.saveCacheFile(tipo, data);
+      await log({ status: 200, data, URL, saveCache });
 
-      res.status(200).json({ status: 200, data, URL, saveCache });
+      res.status(200).json({ status: 200, data, saveCache });
     } catch (error: any) {
-      console.log(error);
       await log(error);
       console.error(
         "Erro ao consultar DataStone:",
@@ -116,7 +118,7 @@ export class DatastoneController {
     }
   }
 
-  private async detail(data: any, tipo: string): Promise<any> {
+  private async detail(data: any, tipo: "persons" | "companies"): Promise<any> {
     try {
       const id = data.id;
       const endpoint = tipo === "companies" ? "companies" : "persons";

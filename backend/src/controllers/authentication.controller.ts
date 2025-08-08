@@ -2,48 +2,63 @@ import { Request, Response } from "express";
 import { serialize } from "cookie";
 import jwt from "jsonwebtoken";
 import { saveLog } from "../lib/logger";
-import { getAuth } from "firebase-admin/auth";
-import { firestoreDB } from "../lib/firebaseAdmin";
+import bcrypt from "bcryptjs";
+import { PrismaClient } from "@prisma/client";
 
-const FIREBASE_API_KEY = process.env.FIREBASE_API_KEY as string;
+const prisma = new PrismaClient();
 const SECRET = process.env.JWT_SECRET as string;
 
 export default class AuthenticationController {
   async logIn(req: Request, res: Response) {
     if (req.method !== "POST") return res.status(405).end();
+
     const { username, password } = req.body;
 
     try {
-      if (!FIREBASE_API_KEY) {
-        throw new Error("FIREBASE_API_KEY não configurada.");
+      if (!username || !password) {
+        return res
+          .status(400)
+          .json({ error: "Email e senha são obrigatórios." });
       }
 
-      // Login via REST API do Firebase
-      const response = await fetch(
-        `https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${FIREBASE_API_KEY}`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: username,
-            password,
-            returnSecureToken: true,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error?.message || "Erro ao autenticar");
-      }
-
-      const { idToken, localId, email } = data;
-
-      const token = jwt.sign({ uid: localId, email }, SECRET, {
-        expiresIn: "2h",
+      // Busca o funcionário pelo email no banco
+      const funcionario = await prisma.funcionario.findUnique({
+        where: { email: username },
       });
 
+      if (!funcionario) {
+        await saveLog({
+          type: "login",
+          status: "error",
+          data: { message: "Funcionário não encontrado" },
+        });
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+
+      // Verifica a senha
+      const senhaCorreta = await bcrypt.compare(password, funcionario.password);
+
+      if (!senhaCorreta) {
+        await saveLog({
+          type: "login",
+          status: "error",
+          data: { message: "Senha incorreta" },
+        });
+        return res.status(401).json({ error: "Credenciais inválidas" });
+      }
+
+      // Gera token JWT
+      const token = jwt.sign(
+        {
+          uid: funcionario.id,
+          email: funcionario.email,
+          tipo: funcionario.tipoUsuario,
+        },
+        SECRET,
+        { expiresIn: "2h" }
+      );
+
+      // Define cookie httpOnly
       res.setHeader(
         "Set-Cookie",
         serialize("token", token, {
@@ -61,16 +76,15 @@ export default class AuthenticationController {
         type: "login",
         status: "success",
         data: {
-          email,
-          uid: localId,
-          firebaseIdToken: idToken,
+          email: funcionario.email,
+          uid: funcionario.id,
           token,
         },
       });
 
       return res
         .status(200)
-        .json({ message: "Login bem-sucedido", token, uid: localId });
+        .json({ message: "Login bem-sucedido", token, uid: funcionario.id });
     } catch (error: any) {
       await saveLog({
         type: "login",
@@ -115,56 +129,8 @@ export default class AuthenticationController {
   }
 
   async register(req: Request, res: Response) {
-    if (req.method !== "POST") {
-      return res.status(405).json({ message: "Método não permitido" });
-    }
-
-    const { name, email, password } = req.body;
-
-    if (!email || !password || !name) {
-      return res
-        .status(400)
-        .json({ message: "Nome, email e senha são obrigatórios." });
-    }
-
-    const auth = getAuth();
-
-    try {
-      let existingUser;
-      try {
-        existingUser = await auth.getUserByEmail(email);
-      } catch (err: any) {
-        if (err.code !== "auth/user-not-found") {
-          throw err;
-        }
-      }
-
-      if (existingUser) {
-        return res.status(400).json({ message: "Email já está em uso." });
-      }
-
-      // Cria o usuário no Firebase Auth
-      const userRecord = await auth.createUser({
-        email,
-        password,
-        displayName: name,
-      });
-
-      // Salva dados adicionais no Firestore
-      await firestoreDB.collection("users").doc(userRecord.uid).set({
-        name,
-        email,
-        createdAt: new Date().toISOString(),
-      });
-
-      return res
-        .status(201)
-        .json({ message: "Usuário registrado com sucesso" });
-    } catch (error: any) {
-      console.error("Erro no register:", error);
-      return res.status(500).json({
-        message: error.message || "Erro ao registrar usuário.",
-      });
-    }
+    return res
+      .status(501)
+      .json({ message: "Registro de usuário não implementado para Prisma." });
   }
 }
