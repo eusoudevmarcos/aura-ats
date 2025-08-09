@@ -4,6 +4,7 @@ import { useRouter } from "next/router";
 import "../styles/global.css";
 import "../styles/Login.module.css";
 import DashboardLayout from "@/layout/DashboardLayout";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 const PUBLIC_ROUTES = ["/login"];
 
@@ -13,14 +14,21 @@ function App({ Component, pageProps }: AppProps) {
 
   // Se for rota pública, renderiza sem layout
   if (isPublic) {
-    return <Component {...pageProps} />;
+    return (
+      <>
+        <SpeedInsights /> <Component {...pageProps} />
+      </>
+    );
   }
 
   // Se for rota privada, usa layout do dashboard
   return (
-    <DashboardLayout>
-      {(dashboardProps) => <Component {...pageProps} {...dashboardProps} />}
-    </DashboardLayout>
+    <>
+      <SpeedInsights />
+      <DashboardLayout>
+        {(dashboardProps) => <Component {...pageProps} {...dashboardProps} />}
+      </DashboardLayout>
+    </>
   );
 }
 
