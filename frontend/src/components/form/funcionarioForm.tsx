@@ -21,10 +21,10 @@ type FuncionarioFormProps = {
   funcionarioData?: Partial<FuncionarioInput>;
 };
 
-export function FuncionarioForm({
+export const FuncionarioForm = ({
   onSuccess,
   funcionarioData,
-}: FuncionarioFormProps) {
+}: FuncionarioFormProps) => {
   const methods = useSafeForm<FuncionarioInput>({
     mode: "independent",
     useFormProps: {
@@ -219,4 +219,4 @@ export function FuncionarioForm({
       </form>
     </FormProvider>
   );
-}
+};

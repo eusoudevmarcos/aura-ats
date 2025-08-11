@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "@/axios";
 import { useRouter } from "next/router";
 import { EditPenIcon, TrashIcon } from "@/components/icons";
-import { FuncionarioForm } from "../../components/form/FuncionarioForm";
+import { FuncionarioForm } from "@/components/form/FuncionarioForm";
 import { FuncionarioInput } from "@/schemas/funcionario.schema";
 import Modal from "@/components/modal/Modal";
 import Card from "@/components/Card";
