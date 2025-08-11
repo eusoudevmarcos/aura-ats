@@ -94,6 +94,13 @@ model Funcionario {
   empresa   Empresa? @relation(fields: [empresaId], references: [id])
 }
 
+enum StatusCliente {
+  ATIVO
+  INATIVO
+  PENDENTE
+  LEAD
+}
+
 model Cliente {
   id             String        @id @default(uuid())
   empresaId      String        @unique
@@ -101,6 +108,7 @@ model Cliente {
   tipoServico    TipoServico[]
   profissionalId String?       @unique
   profissional   Profissional? @relation(fields: [profissionalId], references: [id])
+  status         StatusCliente
 }
 
 model Profissional {

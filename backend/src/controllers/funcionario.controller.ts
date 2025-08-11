@@ -9,7 +9,6 @@ export class FuncionarioController {
   ) {}
 
   async getAll(req: Request, res: Response) {
-    // Extrai page e pageSize da query string, convertendo para número e usando valores padrão se não fornecidos
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
     const pageSize = req.query.pageSize
       ? parseInt(req.query.pageSize as string, 10)

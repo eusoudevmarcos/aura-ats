@@ -10,6 +10,7 @@ import userRoutes from "./routes/user.routes";
 import candidateRoutes from "./routes/candidate.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
+import clienteRoutes from "./routes/cliente.routes";
 const app = express();
 const PORT = process.env.PORT;
 
@@ -43,6 +44,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/candidates", candidateRoutes);
 app.use("/api/take-it", datastoneRoutes);
 app.use("/api/funcionario", funcionarioRoutes);
+app.use("/api/cliente", clienteRoutes);
 
 // START SERVER
 app.listen(PORT, () => {
