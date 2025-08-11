@@ -10,15 +10,16 @@ function isPublic(pathname: string) {
     PUBLIC_API_PATHS.some((publicPath) => pathname.startsWith(publicPath))
   );
 }
-
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
 
-  if (isPublic(pathname) && !token) {
+  // Libera rotas públicas SEM checar token
+  if (isPublic(pathname)) {
     return NextResponse.next();
   }
 
+  // Se não tiver token, manda para login
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
   }
@@ -26,7 +27,6 @@ export default function middleware(req: NextRequest) {
   try {
     const userData = verify(token, process.env.JWT_SECRET || "");
 
-    // Cria uma nova resposta e injeta userData nos headers
     const requestHeaders = new Headers(req.headers);
     requestHeaders.set("x-user", JSON.stringify(userData));
 
@@ -36,7 +36,9 @@ export default function middleware(req: NextRequest) {
       },
     });
   } catch {
-    return NextResponse.redirect(new URL("/login", req.url));
+    const response = NextResponse.redirect(new URL("/login", req.url));
+    response.cookies.delete("token"); // apaga cookie inválido para evitar loop
+    return response;
   }
 }
 
