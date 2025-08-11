@@ -111,13 +111,13 @@ export class ClienteController {
     try {
       const skip = (page - 1) * pageSize;
       const [clientes, total] = await Promise.all([
-        prisma.cliente.findMany({
+        await prisma.cliente.findMany({
           skip,
           take: pageSize,
           include: { empresa: true },
           orderBy: { id: "asc" },
         }),
-        prisma.cliente.count(),
+        await prisma.cliente.count(),
       ]);
       return res.status(200).json({
         data: clientes,

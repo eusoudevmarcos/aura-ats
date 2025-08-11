@@ -329,13 +329,13 @@ export class FuncionarioService {
   async getAll(page: number = 1, pageSize: number = 10) {
     const skip = (page - 1) * pageSize;
     const [funcionarios, total] = await Promise.all([
-      prisma.funcionario.findMany({
+      await prisma.funcionario.findMany({
         skip,
         take: pageSize,
         include: { pessoa: true, empresa: true },
         orderBy: { id: "asc" },
       }),
-      prisma.funcionario.count(),
+      await prisma.funcionario.count(),
     ]);
 
     return {

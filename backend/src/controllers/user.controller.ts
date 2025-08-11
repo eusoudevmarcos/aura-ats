@@ -1,7 +1,6 @@
 import { Request, Response } from "express";
 import { getAuth } from "firebase-admin/auth";
 import { firestoreDB } from "../lib/firebaseAdmin";
-import prisma from "../lib/prisma";
 
 export default class UserController {
   async create(req: Request, res: Response) {
