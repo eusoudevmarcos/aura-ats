@@ -1,3 +1,5 @@
+import { ContatoInput, LocalizacaoInput } from "@/schemas/pessoa.schema";
+
 export type Pessoa = {
   id: string;
   nome: string;
@@ -14,6 +16,8 @@ export type Empresa = {
   razaoSocial: string;
   cnpj: string;
   dataAbertura: string;
+  localizacoes: LocalizacaoInput;
+  contatos: ContatoInput[];
   // outros campos se necessário
 };
 

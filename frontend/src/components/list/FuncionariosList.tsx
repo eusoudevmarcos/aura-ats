@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Table, { TableColumn } from "../Table";
 import api from "@/axios";
-import { Pagination } from "@/model/pagenation";
+import { Pagination } from "@/model/pagenation.model";
 import { useRouter } from "next/router";
 
 // Tipos para Pessoa e Empresa
@@ -28,54 +28,41 @@ interface Empresa {
   localizacoes?: { cidade: string; estado: string }[];
 }
 
-type Funcionario =
-  | {
-      pessoa: Pessoa;
-      email: string;
-      password: string;
-      tipoUsuario: string;
-      setor?: string;
-      cargo?: string;
-      id?: string;
-    }
-  | {
-      empresa: Empresa;
-      email: string;
-      password: string;
-      tipoUsuario: string;
-      setor?: string;
-      cargo?: string;
-      id?: string;
-    };
+type Funcionario = {
+  pessoa?: Pessoa;
+  empresa?: Empresa;
+  email: string;
+  password: string;
+  tipoUsuario: string;
+  setor?: string;
+  cargo?: string;
+};
 
 type FuncionarioTabela = {
-  nome: string;
-  email: string;
+  nome?: string;
+  email?: string;
   tipoUsuario: string;
   dataNascimento: string;
 };
 
-function normalizarFuncionariosParaTabela(
-  funcionarios: Funcionario[]
-): FuncionarioTabela[] {
+function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
   return funcionarios.map((f) => {
     if ("pessoa" in f) {
       return {
-        nome: f.pessoa.nome,
-        email: f.pessoa.contatos?.[0]?.email || f.email,
+        nome: f.pessoa?.nome,
+        email: f.pessoa?.contatos?.[0]?.email || f.email,
         tipoUsuario: f.tipoUsuario,
-        dataNascimento: f.pessoa.dataNascimento
-          ? new Date(f.pessoa.dataNascimento).toLocaleDateString("pt-BR")
+        dataNascimento: f.pessoa?.dataNascimento
+          ? new Date(f.pessoa?.dataNascimento).toLocaleDateString("pt-BR")
           : "-",
-        id: f.id,
       };
     } else if ("empresa" in f) {
       return {
-        nome: f.empresa.razaoSocial,
-        email: f.empresa.contatos?.[0]?.email || f.email,
+        nome: f.empresa?.razaoSocial,
+        email: f.empresa?.contatos?.[0]?.email || f.email,
         tipoUsuario: f.tipoUsuario,
-        dataNascimento: f.empresa.dataAbertura
-          ? new Date(f.empresa.dataAbertura).toLocaleDateString("pt-BR")
+        dataNascimento: f.empresa?.dataAbertura
+          ? new Date(f.empresa?.dataAbertura).toLocaleDateString("pt-BR")
           : "-",
       };
     }
@@ -137,12 +124,12 @@ const FuncionariosList: React.FC = () => {
     fetchFuncionarios();
   }, [page, pageSize]);
 
-  const dadosTabela = normalizarFuncionariosParaTabela(funcionarios);
+  const dadosTabela = normalizarTable(funcionarios);
 
   const dadosFiltrados = dadosTabela.filter(
     (f) =>
-      f.nome.toLowerCase().includes(search.toLowerCase()) ||
-      f.email.toLowerCase().includes(search.toLowerCase()) ||
+      f.nome?.toLowerCase().includes(search.toLowerCase()) ||
+      f.email?.toLowerCase().includes(search.toLowerCase()) ||
       f.tipoUsuario.toLowerCase().includes(search.toLowerCase())
   );
 

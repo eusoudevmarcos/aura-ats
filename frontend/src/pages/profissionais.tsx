@@ -1,4 +1,4 @@
-import ProfissionalForm from "@/components/form/profissionalForm";
+import ProfissionalForm from "@/components/form/ProfissionalForm";
 import { PlusIcon } from "@/components/icons";
 import Modal from "@/components/modal/Modal";
 import ProfessionalsList from "@/components/Professionals/ProfessionalsList";

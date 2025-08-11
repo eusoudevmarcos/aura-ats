@@ -3,7 +3,7 @@ import { useRouter } from "next/router";
 import api from "@/axios";
 import { EditPenIcon, TrashIcon } from "@/components/icons";
 import Modal from "@/components/modal/Modal";
-import { FuncionarioForm } from "@/components/form/funcionarioForm";
+import { FuncionarioForm } from "@/components/form/FuncionarioForm";
 import { Funcionario } from "@/model/funcionario.model";
 import Card from "@/components/Card";
 

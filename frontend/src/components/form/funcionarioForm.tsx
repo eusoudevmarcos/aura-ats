@@ -4,6 +4,11 @@ import React, { useState, useEffect } from "react";
 import z from "zod";
 import { NoViewIcon, ViewIcon } from "../icons";
 
+import PessoaForm, { PessoaFormData } from "@/components/form/PessoaForm";
+import EmpresaForm, { EmpresaFormData } from "@/components/form/EmpresaForm";
+import { useForm, UseFormReturn } from "react-hook-form";
+
+// Tipagem ajustada para corresponder ao schema do funcionário
 type FuncionarioFormData = z.infer<typeof funcionarioSchema>;
 
 type FuncionarioFormProps = {
@@ -15,21 +20,47 @@ export function FuncionarioForm({
   onSuccess,
   funcionarioData,
 }: FuncionarioFormProps) {
+  // Estado para os dados do formulário
   const [formData, setFormData] = useState<Partial<FuncionarioFormData>>({
     tipoPessoaOuEmpresa: "pessoa",
     tipoUsuario: "MODERADOR",
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  // useForm tipado corretamente para FuncionarioFormData
+  const formContexto = useForm<FuncionarioFormData>({
+    defaultValues: funcionarioData
+      ? {
+          ...funcionarioData,
+          pessoa: funcionarioData.pessoa
+            ? { ...funcionarioData.pessoa }
+            : undefined,
+          empresa: funcionarioData.empresa
+            ? { ...funcionarioData.empresa }
+            : undefined,
+        }
+      : {
+          tipoPessoaOuEmpresa: "pessoa",
+          tipoUsuario: "MODERADOR",
+        },
+    mode: "onTouched",
+  });
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors },
+  } = formContexto;
+
   const [showPassword, setShowPassword] = useState<boolean>(false);
 
-  // Preenche o formulário com os dados recebidos via props para edição
+  // Atualiza o estado local e o react-hook-form ao receber dados externos
   useEffect(() => {
     if (funcionarioData) {
       setFormData((prev) => ({
         ...prev,
         ...funcionarioData,
-        // Garante que os objetos aninhados também sejam copiados corretamente
         pessoa: funcionarioData.pessoa
           ? { ...funcionarioData.pessoa }
           : prev.pessoa,
@@ -37,9 +68,25 @@ export function FuncionarioForm({
           ? { ...funcionarioData.empresa }
           : prev.empresa,
       }));
-    }
-  }, [funcionarioData]);
 
+      // Atualiza os valores do react-hook-form
+      Object.entries(funcionarioData).forEach(([key, value]) => {
+        if (key === "pessoa" && value) {
+          Object.entries(value as PessoaFormData).forEach(([k, v]) => {
+            setValue(`pessoa.${k}` as any, v);
+          });
+        } else if (key === "empresa" && value) {
+          Object.entries(value as PessoaFormData).forEach(([k, v]) => {
+            setValue(`empresa.${k}` as any, v);
+          });
+        } else {
+          setValue(key as keyof FuncionarioFormData, value as any);
+        }
+      });
+    }
+  }, [funcionarioData, setValue]);
+
+  // Atualiza o estado local e o react-hook-form ao digitar
   function handleChange(
     e: React.ChangeEvent<
       HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
@@ -56,16 +103,17 @@ export function FuncionarioForm({
           [child]: value,
         },
       }));
+      setValue(name as any, value);
     } else {
       setFormData((prev) => ({ ...prev, [name]: value }));
+      setValue(name as keyof FuncionarioFormData, value as any);
     }
   }
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    let validationData: any = { ...formData };
-    if (formData.tipoPessoaOuEmpresa === "pessoa") {
+  async function onSubmit(data: FuncionarioFormData): Promise<void> {
+    // Monta os dados para validação e envio
+    let validationData: any = { ...data };
+    if (data.tipoPessoaOuEmpresa === "pessoa") {
       validationData.empresa = undefined;
     } else {
       validationData.pessoa = undefined;
@@ -74,33 +122,26 @@ export function FuncionarioForm({
     const result = funcionarioSchema.safeParse(validationData);
 
     if (!result.success) {
-      const fieldErrors: Record<string, string> = {};
-      if (result.error && Array.isArray(result.error.issues)) {
-        result.error.issues.forEach((err) => {
-          const path = err.path.join(".");
-          fieldErrors[path] = err.message;
-        });
-      }
-      setErrors(fieldErrors);
+      // Aqui você pode tratar os erros de validação se quiser
       return;
     }
 
-    setErrors({});
-
     try {
-      // Se for edição, pode-se trocar o método para PUT/PATCH e endpoint, se necessário
       const isEdit = !!funcionarioData;
       const url = isEdit
-        ? `/api/funcionario/update/${formData.tipoPessoaOuEmpresa}`
-        : `/api/funcionario/create/${formData.tipoPessoaOuEmpresa}`;
+        ? `/api/funcionario/update/${data.tipoPessoaOuEmpresa}`
+        : `/api/funcionario/create/${data.tipoPessoaOuEmpresa}`;
 
       const response = await api.post(url, result.data);
 
       console.log("Resposta da API:", response.data);
 
-      // Se quiser limpar o form após sucesso (apenas se não for edição):
       if (!isEdit) {
         setFormData({
+          tipoPessoaOuEmpresa: "pessoa",
+          tipoUsuario: "ADMIN",
+        });
+        formContexto.reset({
           tipoPessoaOuEmpresa: "pessoa",
           tipoUsuario: "ADMIN",
         });
@@ -110,11 +151,6 @@ export function FuncionarioForm({
     } catch (error: any) {
       onSuccess(false);
       console.error("Erro ao criar funcionário:", error);
-
-      // Se a API retornar erros específicos, você pode setar aqui:
-      if (error.response?.data?.errors) {
-        setErrors(error.response.data.errors);
-      }
     }
   }
 
@@ -127,19 +163,18 @@ export function FuncionarioForm({
 
   return (
     <form
-      onSubmit={handleSubmit}
+      onSubmit={handleSubmit(onSubmit)}
       noValidate
       className="max-w-3xl mx-auto p-6 bg-white rounded-lg space-y-6"
     >
-      {/* Tipo de Funcionário */}
       <div>
         <label htmlFor="tipoUsuario" className={labelClass}>
           Tipo de Funcionário:
         </label>
         <select
           id="tipoUsuario"
-          name="tipoUsuario"
-          value={formData.tipoUsuario}
+          {...register("tipoUsuario")}
+          value={watch("tipoUsuario")}
           onChange={handleChange}
           required
           className={inputClass}
@@ -149,7 +184,7 @@ export function FuncionarioForm({
           <option value="ATENDENTE">ATENDENTE</option>
         </select>
         {errors.tipoUsuario && (
-          <p className={errorClass}>{errors.tipoUsuario}</p>
+          <p className={errorClass}>{errors.tipoUsuario.message as string}</p>
         )}
       </div>
 
@@ -161,14 +196,16 @@ export function FuncionarioForm({
         <input
           type="email"
           id="email"
-          name="email"
-          value={formData.email || ""}
+          {...register("email")}
+          value={watch("email") || ""}
           onChange={handleChange}
           required
           className={inputClass}
           autoComplete="email"
         />
-        {errors.email && <p className={errorClass}>{errors.email}</p>}
+        {errors.email && (
+          <p className={errorClass}>{errors.email.message as string}</p>
+        )}
       </div>
 
       {/* Senha */}
@@ -180,8 +217,8 @@ export function FuncionarioForm({
           <input
             type={showPassword ? "text" : "password"}
             id="password"
-            name="password"
-            value={formData.password || ""}
+            {...register("password")}
+            value={watch("password") || ""}
             onChange={handleChange}
             required
             className={inputClass + " pr-10"}
@@ -197,7 +234,9 @@ export function FuncionarioForm({
             {showPassword ? <ViewIcon /> : <NoViewIcon />}
           </button>
         </div>
-        {errors.password && <p className={errorClass}>{errors.password}</p>}
+        {errors.password && (
+          <p className={errorClass}>{errors.password.message as string}</p>
+        )}
       </div>
 
       {/* Setor e Cargo lado a lado */}
@@ -209,12 +248,14 @@ export function FuncionarioForm({
           <input
             type="text"
             id="setor"
-            name="setor"
-            value={formData.setor || ""}
+            {...register("setor")}
+            value={watch("setor") || ""}
             onChange={handleChange}
             className={inputClass}
           />
-          {errors.setor && <p className={errorClass}>{errors.setor}</p>}
+          {errors.setor && (
+            <p className={errorClass}>{errors.setor.message as string}</p>
+          )}
         </div>
         <div>
           <label htmlFor="cargo" className={labelClass}>
@@ -223,12 +264,14 @@ export function FuncionarioForm({
           <input
             type="text"
             id="cargo"
-            name="cargo"
-            value={formData.cargo || ""}
+            {...register("cargo")}
+            value={watch("cargo") || ""}
             onChange={handleChange}
             className={inputClass}
           />
-          {errors.cargo && <p className={errorClass}>{errors.cargo}</p>}
+          {errors.cargo && (
+            <p className={errorClass}>{errors.cargo.message as string}</p>
+          )}
         </div>
       </div>
 
@@ -239,8 +282,8 @@ export function FuncionarioForm({
         </label>
         <select
           id="tipoPessoaOuEmpresa"
-          name="tipoPessoaOuEmpresa"
-          value={formData.tipoPessoaOuEmpresa}
+          {...register("tipoPessoaOuEmpresa")}
+          value={watch("tipoPessoaOuEmpresa")}
           onChange={handleChange}
           required
           className={inputClass}
@@ -249,170 +292,34 @@ export function FuncionarioForm({
           <option value="empresa">Empresa</option>
         </select>
         {errors.tipoPessoaOuEmpresa && (
-          <p className={errorClass}>{errors.tipoPessoaOuEmpresa}</p>
+          <p className={errorClass}>
+            {errors.tipoPessoaOuEmpresa.message as string}
+          </p>
         )}
       </div>
 
       {/* Dados da Pessoa */}
-      {formData.tipoPessoaOuEmpresa === "pessoa" && (
+      {watch("tipoPessoaOuEmpresa") === "pessoa" && (
         <div className="border p-4 rounded-md bg-gray-50 space-y-4">
           <h3 className="text-xl font-semibold mb-2">Dados da Pessoa</h3>
-
-          <div>
-            <label htmlFor="pessoa.nome" className={labelClass}>
-              Nome*:
-            </label>
-            <input
-              type="text"
-              id="pessoa.nome"
-              name="pessoa.nome"
-              value={formData.pessoa?.nome || ""}
-              onChange={handleChange}
-              required
-              className={inputClass}
-            />
-            {errors["pessoa.nome"] && (
-              <p className={errorClass}>{errors["pessoa.nome"]}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="pessoa.cpf" className={labelClass}>
-              CPF:
-            </label>
-            <input
-              type="text"
-              id="pessoa.cpf"
-              name="pessoa.cpf"
-              value={formData.pessoa?.cpf || ""}
-              onChange={handleChange}
-              placeholder="Somente números, 11 dígitos"
-              className={inputClass}
-            />
-            {errors["pessoa.cpf"] && (
-              <p className={errorClass}>{errors["pessoa.cpf"]}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="pessoa.dataNascimento" className={labelClass}>
-              Data de Nascimento:
-            </label>
-            <input
-              type="date"
-              id="pessoa.dataNascimento"
-              name="pessoa.dataNascimento"
-              value={formData.pessoa?.dataNascimento || ""}
-              onChange={handleChange}
-              className={inputClass}
-            />
-            {errors["pessoa.dataNascimento"] && (
-              <p className={errorClass}>{errors["pessoa.dataNascimento"]}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="pessoa.estadoCivil" className={labelClass}>
-              Estado Civil:
-            </label>
-            <select
-              id="pessoa.estadoCivil"
-              name="pessoa.estadoCivil"
-              value={formData.pessoa?.estadoCivil || ""}
-              onChange={handleChange}
-              className={inputClass}
-            >
-              <option value="">-- Selecione --</option>
-              <option value="SOLTEIRO">Solteiro</option>
-              <option value="CASADO">Casado</option>
-              <option value="DIVORCIADO">Divorciado</option>
-              <option value="VIUVO">Viúvo</option>
-              <option value="SEPARADO">Separado</option>
-              <option value="UNIAO_ESTAVEL">União Estável</option>
-            </select>
-            {errors["pessoa.estadoCivil"] && (
-              <p className={errorClass}>{errors["pessoa.estadoCivil"]}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="pessoa.rg" className={labelClass}>
-              RG:
-            </label>
-            <input
-              type="text"
-              id="pessoa.rg"
-              name="pessoa.rg"
-              value={formData.pessoa?.rg || ""}
-              onChange={handleChange}
-              placeholder="Apenas números"
-              className={inputClass}
-            />
-            {errors["pessoa.rg"] && (
-              <p className={errorClass}>{errors["pessoa.rg"]}</p>
-            )}
-          </div>
+          {/* Passa o contexto do formulário para o PessoaForm */}
+          <PessoaForm
+            formContexto={
+              formContexto as unknown as UseFormReturn<PessoaFormData>
+            }
+          />
         </div>
       )}
 
       {/* Dados da Empresa */}
-      {formData.tipoPessoaOuEmpresa === "empresa" && (
+      {watch("tipoPessoaOuEmpresa") === "empresa" && (
         <div className="border p-4 rounded-md bg-gray-50 space-y-4">
           <h3 className="text-xl font-semibold mb-2">Dados da Empresa</h3>
-
-          <div>
-            <label htmlFor="empresa.razaoSocial" className={labelClass}>
-              Razão Social*:
-            </label>
-            <input
-              type="text"
-              id="empresa.razaoSocial"
-              name="empresa.razaoSocial"
-              value={formData.empresa?.razaoSocial || ""}
-              onChange={handleChange}
-              required
-              className={inputClass}
-            />
-            {errors["empresa.razaoSocial"] && (
-              <p className={errorClass}>{errors["empresa.razaoSocial"]}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="empresa.cnpj" className={labelClass}>
-              CNPJ*:
-            </label>
-            <input
-              type="text"
-              id="empresa.cnpj"
-              name="empresa.cnpj"
-              value={formData.empresa?.cnpj || ""}
-              onChange={handleChange}
-              placeholder="Somente números, 14 dígitos"
-              required
-              className={inputClass}
-            />
-            {errors["empresa.cnpj"] && (
-              <p className={errorClass}>{errors["empresa.cnpj"]}</p>
-            )}
-          </div>
-
-          <div>
-            <label htmlFor="empresa.dataAbertura" className={labelClass}>
-              Data de Abertura:
-            </label>
-            <input
-              type="date"
-              id="empresa.dataAbertura"
-              name="empresa.dataAbertura"
-              value={formData.empresa?.dataAbertura || ""}
-              onChange={handleChange}
-              className={inputClass}
-            />
-            {errors["empresa.dataAbertura"] && (
-              <p className={errorClass}>{errors["empresa.dataAbertura"]}</p>
-            )}
-          </div>
+          <EmpresaForm
+            formContexto={
+              formContexto as unknown as UseFormReturn<EmpresaFormData>
+            }
+          />
         </div>
       )}
 

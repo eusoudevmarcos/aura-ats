@@ -1,30 +1,109 @@
 // frontend/components/Clients/ClientList.tsx
-import React, { useState } from 'react';
-import styles from './Clients.module.css'; // Importa o módulo CSS específico de Clientes
+import React, { useEffect, useMemo, useState } from "react";
+import styles from "./Clients.module.css";
+import api from "@/axios";
+import Table, { TableColumn } from "../Table";
+import { useRouter } from "next/router";
+import { Pagination } from "@/model/pagination.model";
 
-interface Client {
+interface EmpresaContato {
+  telefone?: string;
+  whatsapp?: string;
+  email?: string;
+}
+interface EmpresaLocalizacao {
+  cidade: string;
+  estado: string;
+}
+interface Empresa {
   id: string;
-  name: string;
-  contactEmail: string;
-  company: string;
-  status: 'active' | 'inactive' | 'lead';
+  razaoSocial: string;
+  cnpj: string;
+  dataAbertura?: string;
+  contatos?: EmpresaContato[];
+  localizacoes?: EmpresaLocalizacao[];
+}
+interface Cliente {
+  id: string;
+  tipoServico: string[];
+  empresa: Empresa;
+  status: string;
+}
+
+function normalizarTable(clientes: Cliente[]) {
+  return clientes.map((c) => ({
+    id: c.id,
+    nome: c.empresa?.razaoSocial ?? "-",
+    email: c.empresa?.contatos?.[0]?.email ?? "-",
+    cnpj: c.empresa?.cnpj ?? "-",
+    dataAbertura: c.empresa?.dataAbertura
+      ? new Date(c.empresa.dataAbertura).toLocaleDateString("pt-BR")
+      : "-",
+    servicos: Array.isArray(c.tipoServico)
+      ? c.tipoServico.join(", ")
+      : String(c.tipoServico ?? "-"),
+    status: c.status,
+  }));
 }
 
 const ClientList: React.FC = () => {
-  const [searchTerm, setSearchTerm] = useState('');
-  // Dados mockados: Em um projeto real, estes viriam do seu backend (API)
-  const clients: Client[] = [
-    { id: 'c1', name: 'Empresa Alpha', contactEmail: 'contato@alpha.com', company: 'Alpha Solutions', status: 'active' },
-    { id: 'c2', name: 'João da Silva', contactEmail: 'joao@beta.com', company: 'Beta Corp', status: 'lead' },
-    { id: 'c3', name: 'Tecno Inovação Ltda.', contactEmail: 'info@tecno.com', company: 'Tecno Inovação', status: 'active' },
-    { id: 'c4', name: 'Maria Oliveira', contactEmail: 'maria@gama.com', company: 'Gama Services', status: 'inactive' },
+  const [search, setSearch] = useState("");
+  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+
+  // Paginação (ajuste quando backend suportar paginação de clientes)
+  const [page, setPage] = useState<number>(1);
+  const pageSize = 10;
+  const [total, setTotal] = useState<number>(0);
+  const [totalPages, setTotalPages] = useState<number>(1);
+
+  const router = useRouter();
+
+  useEffect(() => {
+    const fetchClientes = async () => {
+      setLoading(true);
+      try {
+        const response = await api.get<Pagination<Cliente[]>>("/api/cliente");
+        const data = Array.isArray(response.data?.data)
+          ? response.data.data
+          : [];
+        setClientes(data);
+        setTotal(data.length);
+        setTotalPages(Math.max(1, Math.ceil(data.length / pageSize)));
+      } catch (error) {
+        setClientes([]);
+        setTotal(0);
+        setTotalPages(1);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchClientes();
+  }, []);
+
+  const dadosTabela = useMemo(() => normalizarTable(clientes), [clientes]);
+
+  const dadosFiltrados = useMemo(() => {
+    const s = search.toLowerCase();
+    return dadosTabela.filter((c: any) =>
+      [c.nome, c.email, c.cnpj, c.servicos, c.status]
+        .filter(Boolean)
+        .some((v: string) => String(v).toLowerCase().includes(s))
+    );
+  }, [dadosTabela, search]);
+
+  const columns: TableColumn<any>[] = [
+    { label: "Nome", key: "nome" },
+    { label: "Email", key: "email" },
+    { label: "CNPJ", key: "cnpj" },
+    { label: "Abertura", key: "dataAbertura" },
+    { label: "Serviços", key: "servicos" },
+    { label: "Status", key: "status" },
   ];
 
-  const filteredClients = clients.filter(client =>
-    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.company.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.contactEmail.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  const onRowClick = (row: any) => {
+    router.push(`/cliente/${row.id}`);
+  };
 
   return (
     <div className={styles.clientsSection}>
@@ -33,38 +112,25 @@ const ClientList: React.FC = () => {
         <input
           type="text"
           placeholder="Buscar cliente..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           className={styles.clientsSearchInput}
         />
       </div>
-      <table className={styles.clientsTable}>
-        <thead>
-          <tr>
-            <th>Nome</th>
-            <th>Empresa</th>
-            <th>Email de Contato</th>
-            <th>Status</th>
-          </tr>
-        </thead>
-        <tbody>
-          {filteredClients.map(client => (
-            <tr key={client.id}>
-              <td>{client.name}</td>
-              <td>{client.company}</td>
-              <td>{client.contactEmail}</td>
-              <td>
-                <span className={`${styles.statusPill} ${styles[client.status]}`}>
-                  {client.status === 'active' ? 'Ativo' : client.status === 'inactive' ? 'Inativo' : 'Lead'}
-                </span>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-      {filteredClients.length === 0 && (
-        <p style={{ textAlign: 'center', marginTop: '20px', color: '#6b7280' }}>Nenhum cliente encontrado.</p>
-      )}
+      <Table
+        columns={columns}
+        data={dadosFiltrados}
+        loading={loading}
+        emptyMessage="Nenhum cliente encontrado."
+        pagination={{
+          page,
+          pageSize,
+          total,
+          totalPages,
+          onPageChange: setPage,
+        }}
+        onRowClick={onRowClick}
+      />
     </div>
   );
 };

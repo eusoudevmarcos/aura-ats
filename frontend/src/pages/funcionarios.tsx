@@ -1,6 +1,6 @@
 import ClientForms from "@/components/Clients/ClientForms";
 import ClientList from "@/components/Clients/ClientList";
-import { FuncionarioForm } from "@/components/form/funcionarioForm";
+import { FuncionarioForm } from "@/components/form/FuncionarioForm";
 import { PlusIcon } from "@/components/icons";
 import FuncionariosList from "@/components/list/FuncionariosList";
 import Modal from "@/components/modal/Modal";
@@ -42,7 +42,7 @@ export default function Funcionarios() {
       <Modal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
-        title="Cadastro de Profissional"
+        title="Cadastro de Funcionario"
       >
         <FuncionarioForm onSuccess={onSuccess} />
       </Modal>
