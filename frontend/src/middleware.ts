@@ -15,7 +15,7 @@ export default function middleware(req: NextRequest) {
   const token = req.cookies.get("token")?.value;
 
   // Libera rotas públicas SEM checar token
-  if (isPublic(pathname)) {
+  if (isPublic(pathname) && !token) {
     return NextResponse.next();
   }
 
