@@ -27,7 +27,7 @@ export class FuncionarioController {
 
   async getById(req: Request, res: Response) {
     try {
-      const funcionario = await this.service.getById(req.query.id as string);
+      const funcionario = await this.service.getById(req.query.uid as string);
       return res.status(200).json(funcionario);
     } catch (error: any) {
       return res.status(400).json({

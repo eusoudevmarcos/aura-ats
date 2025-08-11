@@ -7,7 +7,7 @@ const router = Router();
 const funcionarioController = container.resolve(FuncionarioController);
 
 router.get("/", (req, res) => funcionarioController.getAll(req, res));
-router.get("/:id", (req, res) => funcionarioController.getById(req, res));
+router.get("/:uid", (req, res) => funcionarioController.getById(req, res));
 
 router.post("/create/pessoa", (req, res) =>
   funcionarioController.createPessoa(req, res)

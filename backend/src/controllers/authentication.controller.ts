@@ -24,6 +24,7 @@ export default class AuthenticationController {
       // Busca o funcionário pelo email no banco
       const funcionario = await prisma.funcionario.findUnique({
         where: { email: username },
+        include: { pessoa: true, empresa: true },
       });
 
       if (!funcionario) {
@@ -47,16 +48,26 @@ export default class AuthenticationController {
         return res.status(401).json({ error: "Credenciais inválidas" });
       }
 
+      const infoUser = {
+        uid: funcionario.id,
+        email: funcionario.email,
+        tipo: funcionario.tipoUsuario,
+      };
+
+      if (funcionario.pessoa) {
+        Object.assign(infoUser, {
+          nome: funcionario.pessoa?.nome,
+          cpf: funcionario.pessoa?.cpf,
+        });
+      } else if (funcionario.empresa) {
+        Object.assign(infoUser, {
+          razaoSocial: funcionario.empresa?.razaoSocial,
+          cnpj: funcionario.empresa?.cnpj,
+        });
+      }
+
       // Gera token JWT
-      const token = jwt.sign(
-        {
-          uid: funcionario.id,
-          email: funcionario.email,
-          tipo: funcionario.tipoUsuario,
-        },
-        SECRET,
-        { expiresIn: "2h" }
-      );
+      const token = jwt.sign(infoUser, SECRET, { expiresIn: "2h" });
 
       // Define cookie httpOnly
       res.setHeader(
