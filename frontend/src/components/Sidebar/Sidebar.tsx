@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import SidebarItem from "./SidebarItem";
 import styles from "./Sidebar.module.css";
 import {
@@ -11,8 +11,15 @@ import {
   ChevronDownIcon,
 } from "../icons";
 import Image from "next/image";
-import nookies from "nookies";
 import Link from "next/link";
+import { useUser } from "@/hook/useUser";
+import { getFirstLetter } from "@/utils/getFirstLetter";
+
+interface UserData {
+  id: string;
+  name: string;
+  role?: string;
+}
 
 interface SidebarProps {
   setActiveSection: (section: string) => void;
@@ -21,31 +28,30 @@ interface SidebarProps {
   toggleSidebar?: () => void;
 }
 
-// pages/dashboard.tsx
 const Sidebar: React.FC<SidebarProps> = ({
   setActiveSection,
   activeSection,
   isCollapsed,
 }) => {
-  const [uid, setUid] = useState<string | null>(null);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem("uid");
-    setUid(storedToken);
-  }, []);
-
-  if (!uid) return <p>Carregando...</p>;
+  const user = useUser();
+  console.log(user);
+  if (!user) return null;
 
   const navItems = [
     {
       icon: <CalendarIcon className={styles.icon} />,
       label: "Atividade",
       href: "/atividades/agendas",
-    }, // 'Atividade' agora é um item de menu principal
+    },
     {
       icon: <BriefcaseIcon className={styles.icon} />,
       label: "Vagas",
       href: "/vagas",
+    },
+    {
+      icon: <UsersIcon className={styles.icon} />,
+      label: "Prospecções",
+      href: "/prospeccoes/",
     },
     {
       icon: <UsersIcon className={styles.icon} />,
@@ -61,7 +67,7 @@ const Sidebar: React.FC<SidebarProps> = ({
       icon: <HandshakeIcon className={styles.icon} />,
       label: "Entrevistas",
       href: "/entrevistas",
-    }, // Pode ser um ícone diferente se tiver um específico para entrevistas
+    },
     {
       icon: <ClipboardCheckIcon className={styles.icon} />,
       label: "Testes",
@@ -75,7 +81,7 @@ const Sidebar: React.FC<SidebarProps> = ({
     {
       icon: <SettingsIcon className={styles.icon} />,
       label: "Perfil",
-      href: "/profile/" + uid,
+      href: `/profile/${user.uid}`,
     },
     {
       icon: <SettingsIcon className={styles.icon} />,
@@ -114,22 +120,23 @@ const Sidebar: React.FC<SidebarProps> = ({
         ))}
       </nav>
 
-      <div className={styles.sidebarFooter}>
-        <Link href={"/profile/" + uid} className={styles.sidebarUserCard}>
-          <Image
-            height={30}
-            width={30}
-            src="https://placehold.co/40x40/FFD700/000000?text=JD"
-            alt="User Avatar"
-            unoptimized
-          />
-          <div className={styles.sidebarUserInfo}>
-            <p>João Silva</p>
-            <p>Admin</p>
-          </div>
-          <ChevronDownIcon className={styles.chevronDownIcon} />
-        </Link>
-      </div>
+      <Link href={`/profile/${user.id}`} className={styles.sidebarUserCard}>
+        <Image
+          height={30}
+          width={30}
+          src={`https://placehold.co/40x40/FFD700/000000?text=${getFirstLetter(
+            user?.nome || user?.razaoSocial
+          )}`}
+          alt="User Avatar"
+          unoptimized
+        />
+        <div className={styles.sidebarUserInfo}>
+          <p>{user?.nome || user?.razaoSocial}</p>
+          <p>{user.email}</p>
+          <p>{user.tipo}</p>
+        </div>
+        <ChevronDownIcon className={styles.chevronDownIcon} />
+      </Link>
     </aside>
   );
 };

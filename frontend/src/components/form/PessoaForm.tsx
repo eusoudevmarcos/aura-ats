@@ -97,7 +97,7 @@ const PessoaForm = ({
   if (!formContext) {
     return (
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((d) => onSubmit?.(d))}>
+        <form onSubmit={methods.handleSubmit((data: any) => onSubmit?.(data))}>
           {formContent}
           <button
             type="submit"

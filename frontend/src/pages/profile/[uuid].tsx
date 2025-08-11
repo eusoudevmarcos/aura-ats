@@ -3,6 +3,7 @@ import { useRouter } from "next/router";
 
 import api from "@/axios";
 import DashboardLayout from "@/layout/DashboardLayout";
+import Card from "@/components/Card";
 
 interface UserData {
   name?: string;
@@ -25,7 +26,7 @@ const UserPage: React.FC = () => {
         setErro(null);
         try {
           console.log(uuid);
-          const resp = await api.get("/api/users/" + uuid);
+          const resp = await api.get("/api/funcionario/" + uuid);
           console.log(resp);
           if (resp.status === 200) {
             setUserData(resp.data);
@@ -65,13 +66,49 @@ const UserPage: React.FC = () => {
         boxShadow: "0 2px 8px #0001",
       }}
     >
-      <h1>Perfil do Usuário</h1>
-      <ul style={{ listStyle: "none", padding: 0 }}>
-        {Object.entries(userData).map(([key, value]) => (
-          <li key={key} style={{ marginBottom: 12 }}>
-            <strong>{key}:</strong> {String(value)}
-          </li>
-        ))}
+      <h1 className="text-[#8c53ff] font-bold mb-4">Perfil do Usuário</h1>
+      <ul className="[&>li]:mb-1 list-none p-0">
+        {Object.entries(userData).map(([key, value]) => {
+          if (value === null || value === undefined || value === "")
+            return null;
+
+          // Função recursiva para iterar sobre objetos aninhados
+          const renderObject = (obj: any) => (
+            <ul style={{ listStyle: "none", paddingLeft: 16 }}>
+              {Object.entries(obj).map(([k, v]) => {
+                if (v === null || v === undefined || v === "") return null;
+                if (typeof v === "object" && v !== null) {
+                  return (
+                    <li key={k} style={{ marginBottom: 8 }}>
+                      <strong>{k}:</strong>
+                      {renderObject(v)}
+                    </li>
+                  );
+                }
+                return (
+                  <li key={k}>
+                    <strong>{k}:</strong> {String(v)}
+                  </li>
+                );
+              })}
+            </ul>
+          );
+
+          if (typeof value === "object" && value !== null) {
+            return (
+              <li key={key}>
+                <strong>{key}:</strong>
+                {renderObject(value)}
+              </li>
+            );
+          } else {
+            return (
+              <li key={key}>
+                <strong>{key}:</strong> {String(value)}
+              </li>
+            );
+          }
+        })}
       </ul>
     </div>
   );

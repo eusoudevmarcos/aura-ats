@@ -1,3 +1,4 @@
+// middleware.ts
 import { NextRequest, NextResponse } from "next/server";
 import { verify } from "jsonwebtoken";
 
@@ -9,6 +10,7 @@ function isPublic(pathname: string) {
     PUBLIC_API_PATHS.some((publicPath) => pathname.startsWith(publicPath))
   );
 }
+
 export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("token")?.value;
@@ -19,16 +21,27 @@ export default function middleware(req: NextRequest) {
 
   if (!token) {
     return NextResponse.redirect(new URL("/login", req.url));
-  } else {
-    return NextResponse.next();
+  }
+
+  try {
+    const userData = verify(token, process.env.JWT_SECRET || "");
+
+    // Cria uma nova resposta e injeta userData nos headers
+    const requestHeaders = new Headers(req.headers);
+    requestHeaders.set("x-user", JSON.stringify(userData));
+
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  } catch {
+    return NextResponse.redirect(new URL("/login", req.url));
   }
 }
 
 export const config = {
   matcher: [
-    /**
-     * Protege tudo, exceto arquivos estáticos e recursos internos do Next.js
-     */
     "/((?!_next/static|_next/image|_next/data|favicon.ico|robots.txt|logo.png).*)",
   ],
 };
