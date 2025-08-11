@@ -8,7 +8,7 @@ export class ClienteController {
       const { id } = req.params as { id?: string };
       const body = req.body as any;
 
-      const CNPJExiste = prisma.empresa.findFirst({
+      const CNPJExiste = await prisma.empresa.findFirst({
         where: { cnpj: body.empresa.cnpj },
       });
 
