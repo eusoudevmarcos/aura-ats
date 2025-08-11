@@ -29,7 +29,4 @@ export const pessoaSchema = z.object({
   formacoes: z.array(formacaoSchema).optional(),
 });
 
-export type PessoaSectionInput = z.infer<typeof pessoaSchema>;
-export type ContatoInput = z.infer<typeof contatoSchema>;
-export type LocalizacaoInput = z.infer<typeof localizacaoSchema>;
-export type FormacaoInput = z.infer<typeof formacaoSchema>;
+export type PessoaInput = z.infer<typeof pessoaSchema>;

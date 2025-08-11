@@ -16,4 +16,4 @@ export const empresaSchema = z.object({
   localizacoes: z.array(localizacaoSchema).optional(),
 });
 
-export type EmpresaSectionInput = z.infer<typeof empresaSchema>;
+export type EmpresaInput = z.infer<typeof empresaSchema>;

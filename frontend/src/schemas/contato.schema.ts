@@ -5,3 +5,4 @@ export const contatoSchema = z.object({
   whatsapp: z.string().optional(),
   email: z.email("Email inválido").optional(),
 });
+export type ContatoInput = z.infer<typeof contatoSchema>;

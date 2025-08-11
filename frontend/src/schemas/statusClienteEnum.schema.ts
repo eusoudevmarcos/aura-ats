@@ -6,4 +6,4 @@ export const StatusClienteEnum = z.enum([
   "PENDENTE",
   "LEAD",
 ]);
-export type StatusCliente = z.infer<typeof StatusClienteEnum>;
+export type StatusClienteEnumInput = z.infer<typeof StatusClienteEnum>;

@@ -6,4 +6,4 @@ export const TipoServicoEnum = z.enum([
   "RECRUTAMENTO_INFORMACAO",
   "PLATAFORMA",
 ]);
-export type TipoServico = z.infer<typeof TipoServicoEnum>;
+export type TipoServicoEnumInput = z.infer<typeof TipoServicoEnum>;

@@ -10,3 +10,4 @@ export const formacaoSchema = z.object({
     .optional()
     .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
 });
+export type FormacaoInput = z.infer<typeof formacaoSchema>;

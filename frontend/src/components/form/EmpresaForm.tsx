@@ -1,47 +1,44 @@
 import React from "react";
-import { Controller, UseFormReturn, Path, useForm } from "react-hook-form";
-import { EmpresaSectionInput } from "@/schemas/empresa.schema";
-import ContatoForm from "@/components/form/ContatoForm";
-import LocalizacaoSection from "@/components/form/LocalizacaoSection";
+import {
+  Controller,
+  UseFormReturn,
+  Path,
+  useFormContext,
+  useForm,
+  FormProvider,
+  FieldValues,
+} from "react-hook-form";
 import { ClienteInput } from "@/schemas/cliente.schema";
-import { Empresa } from "@/model/funcionario.model";
 import { IMaskInput } from "react-imask";
+import ContatoForm from "@/components/form/ContatoForm";
+import LocalizacaoForm from "@/components/form/LocalizacaoForm";
+import { EmpresaInput } from "@/schemas/empresa.schema";
+import { useSafeForm } from "@/hook/useSafeForm";
+import { makeName } from "@/utils/makeName";
+import { FormInput } from "../input/FormInput";
+import Card from "../Card";
 
-type EmpresaFormProps = {
-  namePrefix: string; // Exemplo: "empresa"
-  formContexto: UseFormReturn<ClienteInput>;
+type EmpresaFormProps<T extends FieldValues> = {
+  namePrefix?: string;
+  formContexto?: UseFormReturn<T>;
   onSubmit?: (data: any) => void;
 };
 
-const EmpresaForm: React.FC<EmpresaFormProps> = ({
-  namePrefix,
-  formContexto,
+const EmpresaForm = ({
+  namePrefix = "empresa",
   onSubmit,
-}) => {
+  formContexto,
+}: EmpresaFormProps<any>) => {
+  const formContext = useSafeForm({ mode: "context", debug: true });
   const {
-    register,
     control,
+    register,
     formState: { errors },
-    handleSubmit,
-  } = formContexto;
-  const isInternalForm = !formContexto;
-  const methods = formContexto || useForm<Empresa>();
+  } = formContext;
 
-  // Para construir o nome do campo no formato correto com prefixo
-  const field = (name: Path<EmpresaSectionInput>): Path<ClienteInput> =>
-    `${namePrefix}.${name}` as Path<ClienteInput>;
-
-  // Função para obter mensagem de erro para campos aninhados
-  const getErrorByPath = (path: string) => {
-    try {
-      const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".");
-      let obj: any = errors;
-      for (const p of parts) obj = obj?.[p];
-      return obj?.message as string | undefined;
-    } catch {
-      return undefined;
-    }
-  };
+  const cnpj = makeName<EmpresaInput>(namePrefix, "cnpj");
+  const razaoSocial = makeName<EmpresaInput>(namePrefix, "razaoSocial");
+  const dataAbertura = makeName<EmpresaInput>(namePrefix, "dataAbertura");
 
   const submitHandler = (data: any) => {
     if (onSubmit) {
@@ -50,104 +47,55 @@ const EmpresaForm: React.FC<EmpresaFormProps> = ({
   };
 
   const formContent = (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div className="mb-4">
-        <label
-          htmlFor={field("razaoSocial")}
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
-          Razão Social*:
-        </label>
-        <input
-          id={field("razaoSocial")}
-          type="text"
-          {...register(field("razaoSocial") as any)}
-          autoComplete="off"
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-        {getErrorByPath(field("razaoSocial")) && (
-          <p className="text-red-500 text-xs italic">
-            {getErrorByPath(field("razaoSocial"))}
-          </p>
-        )}
-      </div>
+    <Card
+      title="Empresa"
+      classNameContent="grid grid-cols-1 md:grid-cols-3 gap-2"
+    >
+      <FormInput
+        name={cnpj}
+        register={register}
+        maskProps={{ mask: "00.000.000/0000-00" }}
+        placeholder="00.000.000/0000-00"
+        errors={errors}
+      />
 
-      <div className="mb-4">
-        <label
-          htmlFor={field("cnpj")}
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
-          CNPJ*:
-        </label>
-        <Controller
-          name={field("cnpj")}
-          control={control}
-          render={({ field }) => (
-            <IMaskInput
-              mask="99.999.999/9999-99"
-              value={typeof field.value === "string" ? field.value : ""}
-              onChange={field.onChange}
-              onBlur={field.onBlur}
-              inputRef={(el) => {
-                field.ref(el);
-              }}
-              onAccept={(value: string) => field.onChange(value)}
-              autoComplete="off"
-              placeholder="00.000.000/0000-00"
-              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-            />
-          )}
-        />
-        {getErrorByPath(field("cnpj")) && (
-          <p className="text-red-500 text-xs italic">
-            {getErrorByPath(field("cnpj"))}
-          </p>
-        )}
-      </div>
+      <FormInput
+        name={razaoSocial}
+        register={register}
+        placeholder="Razão Social"
+        errors={errors}
+      />
 
-      {/* Data de Abertura */}
-      <div className="mb-4">
-        <label
-          htmlFor={field("dataAbertura")}
-          className="block text-gray-700 text-sm font-bold mb-2"
-        >
-          Data de Abertura:
-        </label>
-        <input
-          id={field("dataAbertura")}
-          type="date"
-          {...register(field("dataAbertura") as any)}
-          className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-        />
-        {getErrorByPath(field("dataAbertura")) && (
-          <p className="text-red-500 text-xs italic">
-            {getErrorByPath(field("dataAbertura"))}
-          </p>
-        )}
-      </div>
+      <FormInput
+        name={dataAbertura}
+        register={register}
+        placeholder="Razão Social"
+        errors={errors}
+        type="date"
+      />
 
-      {/* Contatos e Localizações */}
-      <div className="col-span-1 md:col-span-2">
+      <div className="col-span-3">
         <ContatoForm
           namePrefix={`${namePrefix}.contatos[0]`}
-          formContexto={formContexto as any}
-          title="Contato da Empresa"
+          formContexto={formContext}
         />
-        <LocalizacaoSection
+        <LocalizacaoForm
           namePrefix={`${namePrefix}.localizacoes[0]`}
-          formContexto={formContexto as any}
-          title="Localização da Empresa"
+          formContexto={formContext}
         />
       </div>
-    </div>
+    </Card>
   );
-  if (isInternalForm) {
-    // Se não recebeu contexto externo, renderiza o <form> com handleSubmit
+
+  if (!formContexto) {
+    const methods = useForm();
     return (
-      <form onSubmit={methods.handleSubmit(submitHandler)}>
-        {formContent}
-        <button type="submit">Salvar Empresa</button>
-      </form>
+      <FormProvider {...methods}>
+        <form onSubmit={methods.handleSubmit(submitHandler)}>
+          {formContent}
+          <button type="submit">Salvar Empresa</button>
+        </form>
+      </FormProvider>
     );
   }
 

@@ -6,6 +6,7 @@ import EmpresaForm from "@/components/form/EmpresaForm";
 import api from "@/axios";
 import { TipoServicoEnum } from "@/schemas/tipoServicoEnum.schema";
 import { StatusClienteEnum } from "@/schemas/statusClienteEnum.schema";
+import { useSafeForm } from "@/hook/useSafeForm";
 
 type ClienteFormProps = {
   formContexto?: UseFormReturn<ClienteInput>;
@@ -14,21 +15,14 @@ type ClienteFormProps = {
   initialValues?: Partial<ClienteInput>;
 };
 
-const ClienteForm: React.FC<ClienteFormProps> = ({
-  formContexto,
-  onSubmit,
-  initialValues,
-  onSuccess,
-}) => {
-  const methods =
-    formContexto ||
-    useForm<ClienteInput>({
-      resolver: zodResolver(clienteSchema) as any,
+const ClienteForm: React.FC<ClienteFormProps> = ({ onSubmit, onSuccess }) => {
+  const methods = useSafeForm<ClienteInput>({
+    mode: "independent",
+    useFormProps: {
+      resolver: zodResolver(clienteSchema),
       mode: "onTouched",
-      defaultValues: {
-        ...initialValues,
-      },
-    });
+    },
+  });
 
   const {
     register,
@@ -39,7 +33,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   const submitHandler = async (data: ClienteInput) => {
     if (onSubmit) onSubmit(data);
 
-    // Normaliza payload e datas para o backend
     const payload: ClienteInput = { ...data } as ClienteInput;
     if (payload.empresa) {
       const e: any = { ...payload.empresa };

@@ -6,7 +6,7 @@ import { StatusClienteEnum } from "./statusClienteEnum.schema";
 export const clienteSchema = z
   .object({
     empresaId: z.string().optional(),
-    empresa: empresaSchema.shape,
+    empresa: empresaSchema,
 
     tipoServico: z
       .array(TipoServicoEnum)

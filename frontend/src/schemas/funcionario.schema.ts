@@ -20,3 +20,4 @@ export const funcionarioSchema = z.object({
   pessoa: pessoaSchema.optional(),
   empresa: empresaSchema.optional(),
 });
+export type FuncionarioInput = z.infer<typeof funcionarioSchema>;

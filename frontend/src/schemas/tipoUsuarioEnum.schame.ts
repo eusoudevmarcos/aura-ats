@@ -7,4 +7,4 @@ export const TipoUsuarioEnum = z.enum([
   "PROFISSIONAL",
 ]);
 
-export type TipoUsuario = z.infer<typeof TipoUsuarioEnum>;
+export type TipoUsuarioEnumInput = z.infer<typeof TipoUsuarioEnum>;

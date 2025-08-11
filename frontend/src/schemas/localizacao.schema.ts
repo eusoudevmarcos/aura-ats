@@ -7,3 +7,4 @@ export const localizacaoSchema = z.object({
     .length(2, "UF deve conter 2 letras")
     .transform((s) => s.toUpperCase()),
 });
+export type LocalizacaoInput = z.infer<typeof localizacaoSchema>;
