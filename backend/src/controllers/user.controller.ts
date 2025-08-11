@@ -36,7 +36,6 @@ export default class UserController {
 
   async getOne(req: Request, res: Response) {
     try {
-      console.log(req.params.id);
       const doc = await firestoreDB
         .collection("users")
         .doc(req.params.id)
@@ -46,7 +45,6 @@ export default class UserController {
 
       res.json({ id: doc.id, ...doc.data() });
     } catch (error) {
-      console.log(error);
       res.status(500).json({ error: "Erro ao buscar usuário" });
     }
   }
