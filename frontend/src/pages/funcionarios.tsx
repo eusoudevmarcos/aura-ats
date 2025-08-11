@@ -1,5 +1,3 @@
-import ClientForms from "@/components/Clients/ClientForms";
-import ClientList from "@/components/Clients/ClientList";
 import { FuncionarioForm } from "@/components/form/FuncionarioForm";
 import { PlusIcon } from "@/components/icons";
 import FuncionariosList from "@/components/list/FuncionariosList";
@@ -10,16 +8,6 @@ export default function Funcionarios() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
-
-  const handleSuccess = () => {
-    setMessage("Funcionário cadastrado com sucesso!");
-    setIsError(false);
-  };
-
-  const handleError = (msg: string) => {
-    setMessage(msg);
-    setIsError(true);
-  };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);

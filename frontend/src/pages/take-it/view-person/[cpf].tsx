@@ -5,31 +5,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import TakeitLayout from "@/layout/takeitLayout";
 import { exportToCSV, exportToPDF, mostrarValor } from "@/utils/exportCSV";
-
-interface data {
-  name?: string;
-  cpf?: string;
-  rg?: string;
-  gender?: string;
-  birthday?: string;
-  mother_name?: string;
-  possibly_dead?: boolean | null;
-  retired?: boolean | null;
-  bolsa_familia?: boolean | null;
-  cbo_code?: string;
-  cbo_description?: string;
-  estimated_income?: string;
-  pep?: boolean | null;
-  pep_type?: string;
-  addresses?: Address[];
-  mobile_phones?: Phone[];
-  land_lines?: Phone[];
-  emails?: Email[];
-  family_datas?: Familydata[];
-  related_companies?: RelatedCompany[];
-  [key: string]: any;
-}
-
 interface Address {
   type?: string;
   street?: string;

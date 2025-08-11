@@ -30,8 +30,6 @@ export default function RegisterPage() {
       if (res.status !== 200)
         throw new Error(res.statusText || "Erro ao registrar");
 
-      const data = await res.data.json();
-
       alert("Usuário registrado com sucesso!");
       router.push("/login"); // redireciona para login se quiser
     } catch (err: any) {

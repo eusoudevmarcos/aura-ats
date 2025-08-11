@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { TipoUsuarioEnum } from "@/schemas/tipoUsuarioEnum.schame";
 import { AreaProfissionalEnum } from "./areaProfissionalEnum.schama";
 import { contatoSchema } from "./contato.schema";
 import { localizacaoSchema } from "./localizacao.schema";

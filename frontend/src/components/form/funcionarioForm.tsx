@@ -5,8 +5,9 @@ import z from "zod";
 import { NoViewIcon, ViewIcon } from "../icons";
 
 import PessoaForm, { PessoaFormData } from "@/components/form/PessoaForm";
-import EmpresaForm, { EmpresaFormData } from "@/components/form/EmpresaForm";
+import EmpresaForm from "@/components/form/EmpresaForm";
 import { useForm, UseFormReturn } from "react-hook-form";
+import { EmpresaSectionInput } from "@/schemas/empresa.schema";
 
 // Tipagem ajustada para corresponder ao schema do funcionário
 type FuncionarioFormData = z.infer<typeof funcionarioSchema>;
@@ -99,7 +100,7 @@ export function FuncionarioForm({
       setFormData((prev) => ({
         ...prev,
         [parent]: {
-          ...(prev[parent as keyof FuncionarioFormData] || {}),
+          ...((prev[parent as keyof FuncionarioFormData] || {}) as any),
           [child]: value,
         },
       }));
@@ -317,7 +318,7 @@ export function FuncionarioForm({
           <h3 className="text-xl font-semibold mb-2">Dados da Empresa</h3>
           <EmpresaForm
             formContexto={
-              formContexto as unknown as UseFormReturn<EmpresaFormData>
+              formContexto as unknown as UseFormReturn<EmpresaSectionInput>
             }
           />
         </div>

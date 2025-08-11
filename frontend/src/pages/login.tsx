@@ -1,5 +1,4 @@
 // frontend/pages/login.tsx
-import { GetServerSideProps } from "next";
 import React, { useState } from "react";
 import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";

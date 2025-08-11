@@ -6,22 +6,18 @@ import { useState } from "react";
 
 export default function Profissionais() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [message, setMessage] = useState("");
   const [isError, setIsError] = useState(false);
 
   const handleSuccess = () => {
-    setMessage("Funcionário cadastrado com sucesso!");
     setIsError(false);
   };
 
   const handleError = (msg: string) => {
-    setMessage(msg);
     setIsError(true);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setMessage(""); // Limpa a mensagem ao fechar o modal
   };
   return (
     <>

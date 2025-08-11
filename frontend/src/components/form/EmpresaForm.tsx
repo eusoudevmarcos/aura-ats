@@ -1,7 +1,6 @@
 import React from "react";
-import InputMask from "react-input-mask";
 import { Controller, UseFormReturn, Path, useForm } from "react-hook-form";
-import { empresaSchema, EmpresaSectionInput } from "@/schemas/empresa.schema";
+import { EmpresaSectionInput } from "@/schemas/empresa.schema";
 import ContatoForm from "@/components/form/ContatoForm";
 import LocalizacaoSection from "@/components/form/LocalizacaoSection";
 import { ClienteInput } from "@/schemas/cliente.schema";
@@ -10,7 +9,7 @@ import { IMaskInput } from "react-imask";
 
 type EmpresaFormProps = {
   namePrefix: string; // Exemplo: "empresa"
-  formContexto: UseFormReturn<ClienteInput>; // Contexto do formulário do cliente
+  formContexto: UseFormReturn<ClienteInput>;
   onSubmit?: (data: any) => void;
 };
 
