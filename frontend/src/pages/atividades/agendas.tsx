@@ -1,4 +1,3 @@
-import cardsStyles from "@/components/Card/Cards.module.css";
 import { PlusIcon } from "@/components/icons";
 import AtividadeLayout from "@/layout/AtividadesLayout";
 export default function Agenda() {

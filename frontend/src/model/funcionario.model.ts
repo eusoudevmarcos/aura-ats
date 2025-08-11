@@ -1,4 +1,5 @@
-import { ContatoInput, LocalizacaoInput } from "@/schemas/pessoa.schema";
+import { ContatoInput } from "@/schemas/contato.schema";
+import { LocalizacaoInput } from "@/schemas/localizacao.schema";
 
 export type Pessoa = {
   id: string;
@@ -18,7 +19,6 @@ export type Empresa = {
   dataAbertura: string;
   localizacoes: LocalizacaoInput;
   contatos: ContatoInput[];
-  // outros campos se necessário
 };
 
 export type Funcionario = {

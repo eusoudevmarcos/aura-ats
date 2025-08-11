@@ -1,4 +1,3 @@
-import Link from "next/link";
 import React from "react";
 
 // Tipo genérico para coluna
@@ -51,9 +50,7 @@ function renderCellValue<T>(
 }
 
 // Função para enviar informações da linha ao clicar
-function enviarInformacoesDaLinha<T>(row: T) {
-  // console.log("Informações da linha clicada:", row);
-}
+function enviarInformacoesDaLinha<T>(row: T) {}
 
 function TR<T>({
   row,

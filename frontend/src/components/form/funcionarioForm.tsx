@@ -8,12 +8,13 @@ import {
 } from "@/schemas/funcionario.schema";
 import { useSafeForm } from "@/hook/useSafeForm";
 
-import PessoaForm, { PessoaFormData } from "@/components/form/PessoaForm";
+import PessoaForm from "@/components/form/PessoaForm";
 import EmpresaForm from "@/components/form/EmpresaForm";
 import { makeName } from "@/utils/makeName";
 import { FormInput } from "../input/FormInput";
 import { FormSelect } from "../input/FormSelect";
 import Card from "../Card";
+import { PessoaInput } from "@/schemas/pessoa.schema";
 
 type FuncionarioFormProps = {
   onSuccess: (msg: boolean) => void;
@@ -24,13 +25,6 @@ export function FuncionarioForm({
   onSuccess,
   funcionarioData,
 }: FuncionarioFormProps) {
-  const [formData, setFormData] = useState<Partial<FuncionarioInput>>({
-    tipoPessoaOuEmpresa: "pessoa",
-    tipoUsuario: "MODERADOR",
-  });
-  const [tipoPessoaOuEmpresa, setTipoPessoaOuEmpresa] =
-    React.useState("pessoa");
-
   const methods = useSafeForm<FuncionarioInput>({
     mode: "independent",
     useFormProps: {
@@ -45,6 +39,13 @@ export function FuncionarioForm({
     setValue,
     formState: { errors },
   } = methods;
+
+  const [formData, setFormData] = useState<Partial<FuncionarioInput>>({
+    tipoPessoaOuEmpresa: "pessoa",
+    tipoUsuario: "MODERADOR",
+  });
+  const [tipoPessoaOuEmpresa, setTipoPessoaOuEmpresa] =
+    React.useState("pessoa");
 
   const email = makeName<FuncionarioInput>("funcionario", "email");
   const senha = makeName<FuncionarioInput>("funcionario", "senha");
@@ -68,11 +69,11 @@ export function FuncionarioForm({
       // Atualiza os valores do react-hook-form
       Object.entries(funcionarioData).forEach(([key, value]) => {
         if (key === "pessoa" && value) {
-          Object.entries(value as PessoaFormData).forEach(([k, v]) => {
+          Object.entries(value as PessoaInput).forEach(([k, v]) => {
             setValue(`pessoa.${k}` as any, v);
           });
         } else if (key === "empresa" && value) {
-          Object.entries(value as PessoaFormData).forEach(([k, v]) => {
+          Object.entries(value as PessoaInput).forEach(([k, v]) => {
             setValue(`empresa.${k}` as any, v);
           });
         } else {
@@ -92,17 +93,16 @@ export function FuncionarioForm({
 
   async function onSubmit(data: FuncionarioInput): Promise<void> {
     // Monta os dados para validação e envio
-    let validationData: any = { ...data };
+    const validationData: any = { ...data };
     if (data.tipoPessoaOuEmpresa === "pessoa") {
-      validationData.empresa = undefined;
+      Object.assign(validationData.empresa, undefined);
     } else {
-      validationData.pessoa = undefined;
+      Object.assign(validationData.pessoa, undefined);
     }
 
     const result = funcionarioSchema.safeParse(validationData);
 
     if (!result.success) {
-      // Aqui você pode tratar os erros de validação se quiser
       return;
     }
 
@@ -112,9 +112,7 @@ export function FuncionarioForm({
         ? `/api/funcionario/update/${data.tipoPessoaOuEmpresa}`
         : `/api/funcionario/create/${data.tipoPessoaOuEmpresa}`;
 
-      const response = await api.post(url, result.data);
-
-      console.log("Resposta da API:", response.data);
+      await api.post(url, result.data);
 
       if (!isEdit) {
         setFormData({
@@ -208,13 +206,9 @@ export function FuncionarioForm({
           }}
         />
 
-        {tipoPessoaOuEmpresa === "pessoa" && (
-          <PessoaForm formContext={methods} />
-        )}
+        {tipoPessoaOuEmpresa === "pessoa" && <PessoaForm />}
 
-        {tipoPessoaOuEmpresa === "empresa" && (
-          <EmpresaForm formContexto={methods} />
-        )}
+        {tipoPessoaOuEmpresa === "empresa" && <EmpresaForm />}
 
         <button
           type="submit"

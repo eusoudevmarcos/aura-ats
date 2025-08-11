@@ -1,18 +1,9 @@
 import React from "react";
-import {
-  FormProvider,
-  useForm,
-  UseFormReturn,
-  Controller,
-  Path,
-  FieldValues,
-} from "react-hook-form";
+import { FormProvider, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ContatoInput, contatoSchema } from "@/schemas/contato.schema";
-import { IMaskInput } from "react-imask";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { makeName } from "@/utils/makeName";
-import { getError } from "@/utils/getError";
 import { FormInput } from "../input/FormInput";
 import Card from "../Card";
 
@@ -22,10 +13,14 @@ type ContatoFormProps = {
   onSubmit?: (data: any) => void;
 };
 
-function ContatoFormInner({ namePrefix }: { namePrefix: string }) {
-  const { control, register, formState } = useSafeForm<ContatoInput>({
-    mode: "context",
-  });
+function ContatoFormInner({
+  namePrefix,
+  methods,
+}: {
+  namePrefix: string;
+  methods: UseFormReturn;
+}) {
+  const { control, formState } = methods;
   const { errors } = formState;
 
   const telefoneName = makeName<ContatoInput>(namePrefix, "telefone");
@@ -42,6 +37,7 @@ function ContatoFormInner({ namePrefix }: { namePrefix: string }) {
         control={control}
         maskProps={{ mask: "(00) 0000-0000" }}
         placeholder="(00) 0000-0000"
+        errors={errors}
       />
 
       <FormInput
@@ -49,6 +45,7 @@ function ContatoFormInner({ namePrefix }: { namePrefix: string }) {
         control={control}
         maskProps={{ mask: "(00) 00000-0000" }}
         placeholder="(00) 00000-0000"
+        errors={errors}
       />
 
       <FormInput
@@ -56,23 +53,26 @@ function ContatoFormInner({ namePrefix }: { namePrefix: string }) {
         control={control}
         placeholder="Email"
         type="email"
+        errors={errors}
       />
     </Card>
   );
 }
 export function ContatoForm({
   namePrefix = "contatos[0]",
-  formContexto,
   onSubmit,
 }: ContatoFormProps) {
-  if (!formContexto) {
-    const methods = useForm<ContatoInput>({
-      resolver: zodResolver(contatoSchema),
-    });
+  const mode = "context";
+  const methods = useSafeForm<ContatoInput>({
+    useFormProps: { resolver: zodResolver(contatoSchema) },
+    mode,
+  });
+
+  if (mode !== "context") {
     return (
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit((d) => onSubmit?.(d))}>
-          <ContatoFormInner namePrefix={namePrefix} />
+          <ContatoFormInner namePrefix={namePrefix} methods={methods} />
           <button
             type="submit"
             className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
@@ -83,7 +83,7 @@ export function ContatoForm({
       </FormProvider>
     );
   }
-  return <ContatoFormInner namePrefix={namePrefix} />;
+  return <ContatoFormInner namePrefix={namePrefix} methods={methods} />;
 }
 
 export default ContatoForm;

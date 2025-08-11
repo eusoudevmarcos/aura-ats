@@ -22,14 +22,19 @@ type Props = {
   onSubmit?: (data: any) => void;
 };
 
-const LocalizacaoFormInner: React.FC<Pick<Props, "namePrefix" | "title">> = ({
+const LocalizacaoFormInner: React.FC<{
+  methods: UseFormReturn;
+  title: string;
+  namePrefix: string;
+}> = ({
   namePrefix = "localizacoes[0]",
   title = "Localização (Opcional)",
+  methods,
 }) => {
   const {
     register,
     formState: { errors },
-  } = useSafeForm<LocalizacaoInput>({ mode: "context" });
+  } = methods;
 
   const cidade = makeName<LocalizacaoInput>(namePrefix, "cidade");
   const estado = makeName<LocalizacaoInput>(namePrefix, "estado");
@@ -85,18 +90,27 @@ const LocalizacaoFormInner: React.FC<Pick<Props, "namePrefix" | "title">> = ({
 const LocalizacaoForm: React.FC<Props> = ({
   namePrefix = "localizacoes[0]",
   title = "Localização (Opcional)",
-  formContexto,
   onSubmit,
 }) => {
-  if (!formContexto) {
-    const methods = useForm({
+  const mode = "context";
+
+  const methods = useSafeForm({
+    mode,
+    useFormProps: {
       resolver: zodResolver(localizacaoSchema) as any,
       mode: "onTouched",
-    });
+    },
+  });
+
+  if (mode !== "context") {
     return (
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit((d) => onSubmit?.(d))}>
-          <LocalizacaoFormInner namePrefix={namePrefix} title={title} />
+          <LocalizacaoFormInner
+            namePrefix={namePrefix}
+            title={title}
+            methods={methods}
+          />
           <button
             type="submit"
             className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
@@ -107,7 +121,13 @@ const LocalizacaoForm: React.FC<Props> = ({
       </FormProvider>
     );
   }
-  return <LocalizacaoFormInner namePrefix={namePrefix} title={title} />;
+  return (
+    <LocalizacaoFormInner
+      namePrefix={namePrefix}
+      title={title}
+      methods={methods}
+    />
+  );
 };
 
 export default LocalizacaoForm;

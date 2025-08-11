@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
 import api from "@/axios";
+import { useRouter } from "next/router";
 import { EditPenIcon, TrashIcon } from "@/components/icons";
-import Modal from "@/components/modal/Modal";
 import { FuncionarioForm } from "@/components/form/FuncionarioForm";
-import { Funcionario } from "@/model/funcionario.model";
+import { FuncionarioInput } from "@/schemas/funcionario.schema";
+import Modal from "@/components/modal/Modal";
 import Card from "@/components/Card";
 
 const FuncionarioPage: React.FC = () => {
   const router = useRouter();
   const { uuid } = router.query;
 
-  const [funcionario, setFuncionario] = useState<Funcionario | null>(null);
+  const [funcionario, setFuncionario] = useState<FuncionarioInput | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [showModalEdit, setShowModalEdit] = useState<boolean>(false);
   const [erro, setErro] = useState<string | null>(null);
@@ -80,7 +80,7 @@ const FuncionarioPage: React.FC = () => {
             </button>
             <button
               className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
-              onClick={() => handleTrash()}
+              // onClick={() => handleTrash()}
             >
               <TrashIcon />
             </button>
@@ -88,9 +88,6 @@ const FuncionarioPage: React.FC = () => {
         </div>
         <div className="flex gap-4">
           <Card title="Informações Gerais">
-            <div>
-              <span className="font-medium">ID:</span> {funcionario.id}
-            </div>
             <div>
               <span className="font-medium">Email:</span> {funcionario.email}
             </div>
@@ -121,9 +118,10 @@ const FuncionarioPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-medium">Data de Nascimento:</span>{" "}
-                {new Date(funcionario.pessoa.dataNascimento).toLocaleDateString(
-                  "pt-BR"
-                )}
+                {funcionario?.pessoa?.dataNascimento &&
+                  new Date(
+                    funcionario?.pessoa?.dataNascimento
+                  ).toLocaleDateString("pt-BR")}
               </div>
               <div>
                 <span className="font-medium">RG:</span> {funcionario.pessoa.rg}

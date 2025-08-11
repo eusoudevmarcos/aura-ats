@@ -1,9 +1,9 @@
+/* eslint-disable react-hooks/rules-of-hooks */
 import {
   FieldValues,
   useForm,
   useFormContext,
   UseFormProps,
-  UseFormReturn,
 } from "react-hook-form";
 
 type Mode = "context" | "independent";
@@ -19,17 +19,26 @@ export function useSafeForm<T extends FieldValues>({
   debug = false,
   mode = "context",
 }: Props<T>) {
-  if (mode === "context") {
-    try {
-      const ctx = useFormContext<T>();
-      if (debug) console.log("[useSafeForm] Usando contexto");
-      return ctx;
-    } catch {
-      if (debug) console.log("[useSafeForm] Sem contexto, criando local");
-      return useForm<T>();
-    }
+  let ctx: ReturnType<typeof useForm<T>> | undefined;
+  const localForm = useForm<T>(useFormProps as Partial<UseFormProps<T>>);
+
+  try {
+    ctx = useFormContext<T>();
+  } catch {
+    ctx = undefined;
   }
 
-  if (debug) console.log("[useSafeForm] Criando independente");
-  return useForm<T>(useFormProps as Partial<UseFormProps<T>>);
+  if (debug) {
+    console.info(
+      `[useSafeForm] ${
+        mode === "context" ? "Modo contexto" : "Modo independente"
+      }`
+    );
+  }
+
+  if (mode === "context" && ctx) {
+    return { ...ctx, mode };
+  }
+
+  return localForm;
 }

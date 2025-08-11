@@ -1,13 +1,15 @@
 // src/model/cliente.model.ts
 
-import { AreaProfissional, StatusCliente, TipoServico } from "@/schemas/enums";
+import { AreaProfissionalEnumInput } from "@/schemas/areaProfissionalEnum.schama";
+import { StatusClienteEnumInput } from "@/schemas/statusClienteEnum.schema";
+import { TipoServicoEnumInput } from "@/schemas/tipoServicoEnum.schema";
 
 export interface Cliente {
   id: string;
   empresaId: string;
-  tipoServico: TipoServico[];
+  tipoServico: TipoServicoEnumInput[];
   profissionalId?: string | null;
-  status: StatusCliente;
+  status: StatusClienteEnumInput;
   empresa: {
     id: string;
     razaoSocial: string;
@@ -27,7 +29,7 @@ export interface Cliente {
   };
   profissional?: {
     id: string;
-    area: AreaProfissional;
+    area: AreaProfissionalEnumInput;
     crm?: string | null;
     corem?: string | null;
     rqe?: string | null;

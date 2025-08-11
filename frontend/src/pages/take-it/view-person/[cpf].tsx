@@ -5,45 +5,6 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import TakeitLayout from "@/layout/takeitLayout";
 import { exportToCSV, exportToPDF, mostrarValor } from "@/utils/exportCSV";
-interface Address {
-  type?: string;
-  street?: string;
-  number?: string | number;
-  complement?: string;
-  neighborhood?: string;
-  city?: string;
-  district?: string;
-  postal_code?: string;
-  priority?: string;
-}
-
-interface Phone {
-  ddd?: string;
-  number?: string;
-  priority?: string;
-  cdr_datetime?: string;
-  hot_datetime?: string;
-  whatsapp_datetime?: string;
-  cpc_datetime?: string;
-}
-
-interface Email {
-  email?: string;
-  priority?: string;
-}
-
-interface Familydata {
-  name?: string;
-  cpf?: string;
-  description?: string;
-}
-
-interface RelatedCompany {
-  cnpj?: string;
-  company_name?: string;
-  trading_name?: string;
-  registry_situation?: string;
-}
 
 export async function getStaticPaths() {
   return {
@@ -66,11 +27,8 @@ export async function getStaticProps(context: any) {
       revalidate: 60,
     };
   } catch (error: any) {
-    console.log(error);
-
     return {
       props: { data: null },
-      // ou: notFound: true se quiser redirecionar para 404
     };
   }
 }

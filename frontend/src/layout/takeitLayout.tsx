@@ -2,8 +2,6 @@ import { useState } from "react";
 import { searchApi } from "@/axios/searchApi";
 import SearchForm from "@/components/takeit/SearchForm";
 import styles from "@/styles/takeit.module.scss";
-import { HomeIcon } from "@/components/icons";
-import Link from "next/link";
 
 type TypeColumns = "persons" | "companies";
 

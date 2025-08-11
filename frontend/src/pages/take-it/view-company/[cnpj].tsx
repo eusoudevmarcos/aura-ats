@@ -119,7 +119,7 @@ const ViewCompanyPage: React.FC = () => {
     if (cnpj) {
       handleSearch();
     }
-  }, [cnpj]);
+  });
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {

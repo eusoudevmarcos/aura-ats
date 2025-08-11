@@ -1,9 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/router";
-
 import api from "@/axios";
-import DashboardLayout from "@/layout/DashboardLayout";
-import Card from "@/components/Card";
 
 interface UserData {
   name?: string;
@@ -25,9 +22,8 @@ const UserPage: React.FC = () => {
         setLoading(true);
         setErro(null);
         try {
-          console.log(uuid);
           const resp = await api.get("/api/funcionario/" + uuid);
-          console.log(resp);
+
           if (resp.status === 200) {
             setUserData(resp.data);
           } else {

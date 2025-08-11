@@ -15,7 +15,6 @@ export default function Funcionarios() {
   };
 
   const onSuccess = (msg: boolean) => {
-    console.log(msg);
     setIsModalOpen(!msg);
   };
   return (

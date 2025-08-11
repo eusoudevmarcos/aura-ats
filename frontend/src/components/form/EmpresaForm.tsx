@@ -1,21 +1,12 @@
 import React from "react";
-import {
-  Controller,
-  UseFormReturn,
-  Path,
-  useFormContext,
-  useForm,
-  FormProvider,
-  FieldValues,
-} from "react-hook-form";
-import { ClienteInput } from "@/schemas/cliente.schema";
-import { IMaskInput } from "react-imask";
-import ContatoForm from "@/components/form/ContatoForm";
-import LocalizacaoForm from "@/components/form/LocalizacaoForm";
-import { EmpresaInput } from "@/schemas/empresa.schema";
+import { UseFormReturn, FormProvider, FieldValues } from "react-hook-form";
+import { EmpresaInput, empresaSchema } from "@/schemas/empresa.schema";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { makeName } from "@/utils/makeName";
 import { FormInput } from "../input/FormInput";
+import { zodResolver } from "@hookform/resolvers/zod";
+import ContatoForm from "@/components/form/ContatoForm";
+import LocalizacaoForm from "@/components/form/LocalizacaoForm";
 import Card from "../Card";
 
 type EmpresaFormProps<T extends FieldValues> = {
@@ -27,14 +18,19 @@ type EmpresaFormProps<T extends FieldValues> = {
 const EmpresaForm = ({
   namePrefix = "empresa",
   onSubmit,
-  formContexto,
 }: EmpresaFormProps<any>) => {
-  const formContext = useSafeForm({ mode: "context", debug: true });
+  const mode = "context";
+
+  const methods = useSafeForm({
+    debug: true,
+    useFormProps: { resolver: zodResolver(empresaSchema) },
+    mode,
+  });
+
   const {
-    control,
     register,
     formState: { errors },
-  } = formContext;
+  } = methods;
 
   const cnpj = makeName<EmpresaInput>(namePrefix, "cnpj");
   const razaoSocial = makeName<EmpresaInput>(namePrefix, "razaoSocial");
@@ -75,20 +71,13 @@ const EmpresaForm = ({
       />
 
       <div className="col-span-3">
-        <ContatoForm
-          namePrefix={`${namePrefix}.contatos[0]`}
-          formContexto={formContext}
-        />
-        <LocalizacaoForm
-          namePrefix={`${namePrefix}.localizacoes[0]`}
-          formContexto={formContext}
-        />
+        <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
+        <LocalizacaoForm namePrefix={`${namePrefix}.localizacoes[0]`} />
       </div>
     </Card>
   );
 
-  if (!formContexto) {
-    const methods = useForm();
+  if (mode !== "context") {
     return (
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit(submitHandler)}>

@@ -1,53 +1,19 @@
 import React from "react";
-import {
-  FieldValues,
-  FormProvider,
-  useForm,
-  UseFormReturn,
-} from "react-hook-form";
-import { z } from "zod";
-import { zodResolver } from "@hookform/resolvers/zod";
+import { FieldValues, FormProvider, UseFormReturn } from "react-hook-form";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { makeName } from "@/utils/makeName";
 import { PessoaInput } from "@/schemas/pessoa.schema";
 import { FormInput } from "../input/FormInput";
 import Card from "../Card";
 
-// Definição do schema Zod para Pessoa conforme o schema.prisma
-export const pessoaSchema = z.object({
-  nome: z
-    .string()
-    .min(1, "O nome é obrigatório")
-    .max(255, "O nome deve ter no máximo 255 caracteres"),
-  cpf: z
-    .string()
-    .min(11, "O CPF deve ter 11 dígitos")
-    .max(11, "O CPF deve ter 11 dígitos")
-    .regex(/^\d{11}$/, "O CPF deve conter apenas números"),
-  dataNascimento: z
-    .string()
-    .optional()
-    .refine(
-      (val) => !val || !isNaN(Date.parse(val)),
-      "Data de nascimento inválida"
-    ),
-  rg: z.string().optional(),
-});
-
-export type PessoaFormData = z.infer<typeof pessoaSchema>;
-
-type PessoaFormProps<T extends FieldValues> = {
+type PessoaFormProps = {
   namePrefix?: string;
-  formContext?: UseFormReturn<T>;
-  onSubmit?: (data: PessoaFormData) => void;
+  onSubmit?: (data: PessoaInput) => void;
 };
 
-const PessoaForm = ({
-  namePrefix = "pessoa",
-  formContext,
-  onSubmit,
-}: PessoaFormProps<any>) => {
-  const methods = useSafeForm({ mode: "context", debug: true });
+const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
+  const mode = "context";
+  const methods = useSafeForm({ mode, debug: true });
   const {
     register,
     formState: { errors },
@@ -94,7 +60,7 @@ const PessoaForm = ({
     </Card>
   );
 
-  if (!formContext) {
+  if (mode !== "context") {
     return (
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit((data: any) => onSubmit?.(data))}>

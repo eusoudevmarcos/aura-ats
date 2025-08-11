@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Table, { TableColumn } from "../Table";
 import api from "@/axios";
-import { Pagination } from "@/model/pagenation.model";
+import { Pagination } from "@/model/pagination.model";
 import { useRouter } from "next/router";
 
 // Tipos para Pessoa e Empresa

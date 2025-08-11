@@ -34,7 +34,6 @@ const Sidebar: React.FC<SidebarProps> = ({
   isCollapsed,
 }) => {
   const user = useUser();
-  console.log(user);
   if (!user) return null;
 
   const navItems = [
