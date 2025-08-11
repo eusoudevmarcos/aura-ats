@@ -79,11 +79,11 @@ export class DatastoneController {
         return;
       }
 
-      const cached = cache.getFromCacheFileByKey(tipo, result.tipo, input);
-      if (cached) {
-        res.status(200).json({ status: 200, cache: true, data: cached });
-        return;
-      }
+      // const cached = cache.getFromCacheFileByKey(tipo, result.tipo, input);
+      // if (cached) {
+      //   res.status(200).json({ status: 200, cache: true, data: cached });
+      //   return;
+      // }
 
       const URL = `${BASE_URL}/${result.pathname}?${result.query}`;
 
@@ -94,13 +94,13 @@ export class DatastoneController {
       });
 
       const data = response.data;
-      if (isDetail === "true" && data?.[0]?.id) {
-        const enriched = await this.detail(data[0], tipo);
-        const saveCache = cache.saveCacheFile(tipo, enriched);
-        await log({ status: 200, enriched, URL, saveCache });
+      // if (isDetail === "true" && data?.[0]?.id) {
+      //   const enriched = await this.detail(data[0], tipo);
+      //   const saveCache = cache.saveCacheFile(tipo, enriched);
+      //   await log({ status: 200, enriched, URL, saveCache });
 
-        res.status(200).json({ status: 200, enriched, saveCache });
-      }
+      //   res.status(200).json({ status: 200, enriched, saveCache });
+      // }
 
       const saveCache = cache.saveCacheFile(tipo, data);
       await log({ status: 200, data, URL, saveCache });
