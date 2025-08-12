@@ -6,9 +6,11 @@ import bcrypt from "bcryptjs";
 export class UsuarioSistemaService {
   async saveFuncionarioPessoa(data: any) {
     return await prisma.$transaction(async (tx) => {
-      if (data.pessoa.cpf) {
+      const cpf = data.pessoa.cpf.replace(/\D/g, "");
+      const rg = data.pessoa.rg.replace(/\D/g, "");
+      if (cpf.replace(/\D/g, "")) {
         const pessoaExistente = await tx.pessoa.findUnique({
-          where: { cpf: data.pessoa.cpf },
+          where: { cpf: cpf.replace(/\D/g, "") },
         });
         if (pessoaExistente && pessoaExistente.id !== data.id) {
           throw new Error("CPF já cadastrado");
@@ -35,9 +37,9 @@ export class UsuarioSistemaService {
             pessoa: {
               create: {
                 nome: data.pessoa.nome,
-                cpf: data.pessoa.cpf,
+                cpf: cpf,
                 dataNascimento: data.pessoa.dataNascimento,
-                rg: data.pessoa.rg,
+                rg: rg,
                 estadoCivil: data.pessoa.estadoCivil,
               },
             },
@@ -70,9 +72,9 @@ export class UsuarioSistemaService {
             pessoa: {
               update: {
                 nome: data.nome,
-                cpf: data.cpf,
+                cpf: cpf,
                 dataNascimento: data.dataNascimento,
-                rg: data.rg,
+                rg: rg,
                 estadoCivil: data.estadoCivil,
               },
             },
@@ -91,9 +93,10 @@ export class UsuarioSistemaService {
 
   async saveFuncionarioEmpresa(data: any) {
     return await prisma.$transaction(async (tx) => {
-      // Validações simples
+      const cnpj = data.empresa.cnpj.replace(/\D/g, "");
+
       const empresaExistente = await tx.empresa.findUnique({
-        where: { cnpj: data.empresa.cnpj },
+        where: { cnpj: cnpj },
       });
       if (empresaExistente && empresaExistente.id !== data.id) {
         throw new Error("CNPJ já cadastrado");
@@ -116,7 +119,7 @@ export class UsuarioSistemaService {
             empresa: {
               create: {
                 razaoSocial: data.empresa.razaoSocial,
-                cnpj: data.empresa.cnpj,
+                cnpj: cnpj,
               },
             },
             funcionario: {
