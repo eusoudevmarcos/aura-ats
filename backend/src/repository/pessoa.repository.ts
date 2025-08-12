@@ -19,7 +19,7 @@ export class PessoaRepository {
 
   async getFisrtCpf(
     cpf: string,
-    prismaClient: PrismaContext
+    prismaClient = prisma
   ): Promise<Pessoa | null> {
     return await prismaClient.pessoa.findFirst({ where: { cpf } });
   }
