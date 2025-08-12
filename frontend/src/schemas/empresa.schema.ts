@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { contatoSchema } from "./contato.schema";
 import { localizacaoSchema } from "./localizacao.schema";
+import { pessoaSchema } from "./pessoa.schema";
 
 export const empresaSchema = z.object({
   razaoSocial: z.string().min(1, "Razão Social é obrigatória"),
@@ -14,6 +15,7 @@ export const empresaSchema = z.object({
     .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
   contatos: z.array(contatoSchema),
   localizacoes: z.array(localizacaoSchema).optional(),
+  representante: z.array(pessoaSchema),
 });
 
 export type EmpresaInput = z.infer<typeof empresaSchema>;

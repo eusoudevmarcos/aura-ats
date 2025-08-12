@@ -1,5 +1,4 @@
 export const UF_MODEL = [
-  { label: "Selecione o estado", value: null },
   { label: "AC", value: "AC" },
   { label: "AL", value: "AL" },
   { label: "AM", value: "AM" },

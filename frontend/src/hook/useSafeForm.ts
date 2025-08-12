@@ -21,7 +21,6 @@ export function useSafeForm<T extends FieldValues>({
 }: Props<T>) {
   let ctx: ReturnType<typeof useForm<T>> | undefined;
   const localForm = useForm<T>(useFormProps as Partial<UseFormProps<T>>);
-
   try {
     ctx = useFormContext<T>();
   } catch {

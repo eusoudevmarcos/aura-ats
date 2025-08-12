@@ -26,7 +26,7 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
 
   const formContent = (
     <Card
-      title="Pessoa"
+      title="Pessoa/Representante"
       classNameContent="grid grid-cols-1 md:grid-cols-2 gap-2"
     >
       <FormInput

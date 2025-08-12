@@ -1,12 +1,14 @@
-import React from "react";
+import React, { useState } from "react";
+import api from "@/axios";
 import { FormProvider, useForm, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { clienteSchema, ClienteInput } from "@/schemas/cliente.schema";
 import EmpresaForm from "@/components/form/EmpresaForm";
-import api from "@/axios";
 import { TipoServicoEnum } from "@/schemas/tipoServicoEnum.schema";
 import { StatusClienteEnum } from "@/schemas/statusClienteEnum.schema";
 import { useSafeForm } from "@/hook/useSafeForm";
+import { PrimaryButton } from "../button/PrimaryButton";
+// import { PrimaryButton } from "@/components/button/PrimaryButton";
 
 type ClienteFormProps = {
   formContexto?: UseFormReturn<ClienteInput>;
@@ -15,12 +17,18 @@ type ClienteFormProps = {
   initialValues?: Partial<ClienteInput>;
 };
 
-const ClienteForm: React.FC<ClienteFormProps> = ({ onSubmit, onSuccess }) => {
+const ClienteForm: React.FC<ClienteFormProps> = ({
+  onSubmit,
+  onSuccess,
+  initialValues,
+}) => {
+  const [loading, setLoading] = useState(false);
   const methods = useSafeForm<ClienteInput>({
     mode: "independent",
     useFormProps: {
       resolver: zodResolver(clienteSchema),
       mode: "onTouched",
+      defaultValues: initialValues,
     },
   });
 
@@ -40,6 +48,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ onSubmit, onSuccess }) => {
         e.dataAbertura = new Date(e.dataAbertura).toISOString();
       payload.empresa = e;
     }
+    setLoading(true);
 
     try {
       const response = await api.post("/api/cliente/save", payload);
@@ -51,6 +60,8 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ onSubmit, onSuccess }) => {
         "Erro ao criar cliente: " + erro?.response?.data?.message ||
           "Erro não encontrado"
       );
+    } finally {
+      setLoading(true);
     }
   };
 
@@ -68,7 +79,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ onSubmit, onSuccess }) => {
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-6">
-        <EmpresaForm formContexto={methods} namePrefix="empresa" />
+        <EmpresaForm namePrefix="empresa" />
 
         <div>
           <label className="block text-gray-700 text-sm font-bold mb-2">
@@ -120,12 +131,9 @@ const ClienteForm: React.FC<ClienteFormProps> = ({ onSubmit, onSuccess }) => {
         </div>
 
         <div className="flex justify-end">
-          <button
-            type="submit"
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
-          >
-            Salvar Cliente
-          </button>
+          <PrimaryButton type="submit" disabled={loading}>
+            Salvar
+          </PrimaryButton>
         </div>
       </form>
     </FormProvider>

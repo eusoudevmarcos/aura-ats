@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  FormProvider,
-  useForm,
-  UseFormReturn,
-  useFormContext,
-} from "react-hook-form";
+import { FormProvider, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   LocalizacaoInput,
@@ -12,8 +7,10 @@ import {
 } from "@/schemas/localizacao.schema";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { makeName } from "@/utils/makeName";
-import { getError } from "@/utils/getError";
 import Card from "../Card";
+import { FormInput } from "../input/FormInput";
+import { FormSelect } from "../input/FormSelect";
+import { UF_MODEL } from "@/utils/UF";
 
 type Props = {
   namePrefix?: string; // e.g., "empresa.localizacoes[0]"
@@ -38,50 +35,67 @@ const LocalizacaoFormInner: React.FC<{
 
   const cidade = makeName<LocalizacaoInput>(namePrefix, "cidade");
   const estado = makeName<LocalizacaoInput>(namePrefix, "estado");
+  const cep = makeName<LocalizacaoInput>(namePrefix, "cep");
+  const regiao = makeName<LocalizacaoInput>(namePrefix, "regiao");
+  const complemento = makeName<LocalizacaoInput>(namePrefix, "complemento");
+  const logradouro = makeName<LocalizacaoInput>(namePrefix, "complemento");
+  const bairro = makeName<LocalizacaoInput>(namePrefix, "bairro");
+  const uf = makeName<LocalizacaoInput>(namePrefix, "uf");
 
   return (
     <Card title="localizacao">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="mb-4">
-          <label
-            htmlFor={cidade}
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Cidade:
-          </label>
-          <input
-            type="text"
-            id={cidade}
-            {...register(cidade)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-          {getError(errors, cidade) && (
-            <p className="text-red-500 text-xs italic">
-              {getError(errors, cidade)}
-            </p>
-          )}
-        </div>
-        <div className="mb-4">
-          <label
-            htmlFor={estado}
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Estado (UF):
-          </label>
-          <input
-            type="text"
-            id={estado}
-            maxLength={2}
-            {...register(estado)}
-            placeholder="Ex: SP"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-          {getError(errors, estado) && (
-            <p className="text-red-500 text-xs italic">
-              {getError(errors, estado)}
-            </p>
-          )}
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2">
+        <FormInput
+          name={cep}
+          register={register}
+          placeholder="CEP"
+          errors={errors}
+        />
+        <FormSelect
+          name={uf}
+          register={register}
+          errors={errors}
+          placeholder="Selecione o UF"
+          selectProps={{
+            children: (
+              <>
+                {UF_MODEL.map(({ label }) => (
+                  <option key={label}>{label}</option>
+                ))}
+              </>
+            ),
+          }}
+        />
+        <FormInput
+          name={cidade}
+          register={register}
+          placeholder="Cidade"
+          errors={errors}
+        />
+        <FormInput
+          name={regiao}
+          register={register}
+          placeholder="Região"
+          errors={errors}
+        />
+        <FormInput
+          name={bairro}
+          register={register}
+          placeholder="Bairro"
+          errors={errors}
+        />
+        <FormInput
+          name={complemento}
+          register={register}
+          placeholder="Complemento"
+          errors={errors}
+        />
+
+        <FormInput
+          name={logradouro}
+          register={register}
+          placeholder="Logradouro (Opcional)"
+        />
       </div>
     </Card>
   );

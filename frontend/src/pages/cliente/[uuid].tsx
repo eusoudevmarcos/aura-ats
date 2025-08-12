@@ -7,12 +7,14 @@ import Modal from "@/components/modal/Modal";
 import Card from "@/components/Card";
 // import { ClienteForm } from "@/components/form/ClienteForm"; // Criar semelhante ao FuncionarioForm
 import { Cliente } from "@/model/cliente.model"; // Criar o model para tipagem
+import ClienteForm from "@/components/form/ClienteForm";
+import { ClienteInput } from "@/schemas/cliente.schema";
 
 const ClientePage: React.FC = () => {
   const router = useRouter();
   const { uuid } = router.query;
 
-  const [cliente, setCliente] = useState<Cliente | null>(null);
+  const [cliente, setCliente] = useState<ClienteInput | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -102,31 +104,38 @@ const ClientePage: React.FC = () => {
           {/* Informações do Cliente */}
           <Card title="Informações do Cliente">
             <div>
-              <span className="font-medium">ID:</span> {cliente.id}
+              <span className="font-medium">Status:</span>
+
+              <span className="ml-2 bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+                {cliente.status}
+              </span>
             </div>
             <div>
-              <span className="font-medium">Status:</span> {cliente.status}
-            </div>
-            <div>
-              <span className="font-medium">Tipo de Serviço:</span>{" "}
-              {cliente.tipoServico.join(", ")}
+              <span className="font-medium">Tipo de Serviço:</span>
+              {cliente.tipoServico.map((tipo, idx) => (
+                <span
+                  key={idx}
+                  className="ml-2 bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]"
+                >
+                  {tipo.replace(/_/g, " ")}
+                </span>
+              ))}
             </div>
           </Card>
-
           {/* Empresa */}
           {cliente.empresa && (
             <Card title="Dados da Empresa">
               <div>
-                <span className="font-medium">Razão Social:</span>{" "}
+                <span className="font-medium">Razão Social:</span>
                 {cliente.empresa.razaoSocial}
               </div>
               <div>
-                <span className="font-medium">CNPJ:</span>{" "}
+                <span className="font-medium">CNPJ:</span>
                 {cliente.empresa.cnpj}
               </div>
               {cliente.empresa.dataAbertura && (
                 <div>
-                  <span className="font-medium">Data de Abertura:</span>{" "}
+                  <span className="font-medium">Data de Abertura:</span>
                   {new Date(cliente.empresa.dataAbertura).toLocaleDateString(
                     "pt-BR"
                   )}
@@ -134,33 +143,31 @@ const ClientePage: React.FC = () => {
               )}
             </Card>
           )}
-
-          {/* Profissional */}
+          {/* Profissional
           {cliente.profissional && cliente.profissional.pessoa && (
             <Card title="Profissional Associado">
               <div>
-                <span className="font-medium">Área:</span>{" "}
+                <span className="font-medium">Área:</span>
                 {cliente.profissional.area}
               </div>
               <div>
-                <span className="font-medium">Nome:</span>{" "}
+                <span className="font-medium">Nome:</span>
                 {cliente.profissional.pessoa.nome}
               </div>
               {cliente.profissional.crm && (
                 <div>
-                  <span className="font-medium">CRM:</span>{" "}
+                  <span className="font-medium">CRM:</span>
                   {cliente.profissional.crm}
                 </div>
               )}
               {cliente.profissional.corem && (
                 <div>
-                  <span className="font-medium">COREM:</span>{" "}
+                  <span className="font-medium">COREM:</span>
                   {cliente.profissional.corem}
                 </div>
               )}
             </Card>
-          )}
-
+          )} */}
           {/* Contatos */}
           {cliente.empresa?.contatos?.length > 0 && (
             <Card title="Contatos da Empresa">
@@ -173,14 +180,54 @@ const ClientePage: React.FC = () => {
               ))}
             </Card>
           )}
-
           {/* Localizações */}
           {cliente.empresa?.localizacoes?.length > 0 && (
             <Card title="Localizações">
               {cliente.empresa.localizacoes.map((loc: any) => (
-                <div key={loc.id}>
-                  {loc.cidade} - {loc.estado}
-                </div>
+                <ul key={loc.id} className="mb-2 list-inside">
+                  {loc.cidade && (
+                    <li>
+                      <span className="font-medium">Cidade:</span> {loc.cidade}
+                    </li>
+                  )}
+                  {loc.estado && (
+                    <li>
+                      <span className="font-medium">Estado:</span> {loc.estado}
+                    </li>
+                  )}
+                  {loc.cep && (
+                    <li>
+                      <span className="font-medium">CEP:</span> {loc.cep}
+                    </li>
+                  )}
+                  {loc.bairro && (
+                    <li>
+                      <span className="font-medium">Bairro:</span> {loc.bairro}
+                    </li>
+                  )}
+                  {loc.uf && (
+                    <li>
+                      <span className="font-medium">UF:</span> {loc.uf}
+                    </li>
+                  )}
+                  {loc.complemento && (
+                    <li>
+                      <span className="font-medium">Complemento:</span>
+                      {loc.complemento}
+                    </li>
+                  )}
+                  {loc.logradouro && (
+                    <li>
+                      <span className="font-medium">Logradouro:</span>
+                      {loc.logradouro}
+                    </li>
+                  )}
+                  {loc.regiao && (
+                    <li>
+                      <span className="font-medium">Região:</span> {loc.regiao}
+                    </li>
+                  )}
+                </ul>
               ))}
             </Card>
           )}
@@ -192,8 +239,7 @@ const ClientePage: React.FC = () => {
         onClose={() => setShowModalEdit(false)}
         title="Editar Cliente"
       >
-        {/* <ClienteForm onSuccess={() => {}} clienteData={cliente} /> */}
-        <div>Formulário de edição aqui</div>
+        <ClienteForm onSuccess={() => {}} initialValues={cliente} />
       </Modal>
     </div>
   );

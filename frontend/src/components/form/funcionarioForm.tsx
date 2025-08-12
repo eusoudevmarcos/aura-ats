@@ -47,11 +47,17 @@ export const FuncionarioForm = ({
   const [tipoPessoaOuEmpresa, setTipoPessoaOuEmpresa] =
     React.useState("pessoa");
 
-  const email = makeName<FuncionarioInput>("funcionario", "email");
-  const senha = makeName<FuncionarioInput>("funcionario", "senha");
-  const setor = makeName<FuncionarioInput>("funcionario", "setor");
-  const cargo = makeName<FuncionarioInput>("funcionario", "cargo");
-  const tipoPessoa = makeName<FuncionarioInput>("funcionario", "tipoPessoa");
+  const email = makeName<FuncionarioInput>("usuarioSistema", "email");
+  const senha = makeName<FuncionarioInput>("usuarioSistema", "senha");
+  const setor = makeName<FuncionarioInput>(
+    "usuarioSistema.funcionario",
+    "setor"
+  );
+  const cargo = makeName<FuncionarioInput>(
+    "usuarioSistema.funcionario",
+    "cargo"
+  );
+  const tipoPessoa = makeName<FuncionarioInput>("usuarioSistema", "tipoPessoa");
 
   useEffect(() => {
     if (funcionarioData) {

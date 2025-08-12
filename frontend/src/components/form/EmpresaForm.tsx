@@ -8,6 +8,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import ContatoForm from "@/components/form/ContatoForm";
 import LocalizacaoForm from "@/components/form/LocalizacaoForm";
 import Card from "../Card";
+import PessoaForm from "./PessoaForm";
 
 type EmpresaFormProps<T extends FieldValues> = {
   namePrefix?: string;
@@ -29,6 +30,7 @@ const EmpresaForm = ({
 
   const {
     register,
+    control,
     formState: { errors },
   } = methods;
 
@@ -49,7 +51,7 @@ const EmpresaForm = ({
     >
       <FormInput
         name={cnpj}
-        register={register}
+        control={control}
         maskProps={{ mask: "00.000.000/0000-00" }}
         placeholder="00.000.000/0000-00"
         errors={errors}
@@ -70,7 +72,8 @@ const EmpresaForm = ({
         type="date"
       />
 
-      <div className="col-span-3">
+      <div className="col-span-3 flex flex-col gap-2">
+        <PessoaForm namePrefix={`${namePrefix}.representante[0]`} />
         <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
         <LocalizacaoForm namePrefix={`${namePrefix}.localizacoes[0]`} />
       </div>

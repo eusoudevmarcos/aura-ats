@@ -8,7 +8,6 @@ export interface Cliente {
   id: string;
   empresaId: string;
   tipoServico: TipoServicoEnumInput[];
-  profissionalId?: string | null;
   status: StatusClienteEnumInput;
   empresa: {
     id: string;
@@ -23,23 +22,31 @@ export interface Cliente {
     }[];
     localizacoes: {
       id: string;
+      cep: string;
       cidade: string;
+      bairro: string;
+      uf: string;
       estado: string;
+      complemento: string;
+      logradouro: string;
+      regiao: string;
     }[];
   };
-  profissional?: {
-    id: string;
-    area: AreaProfissionalEnumInput;
-    crm?: string | null;
-    corem?: string | null;
-    rqe?: string | null;
-    pessoa?: {
-      id: string;
-      nome: string;
-      cpf?: string | null;
-      dataNascimento?: string | null;
-      rg?: string | null;
-      estadoCivil?: string | null;
-    } | null;
-  } | null;
+  // profissionalId?: string | null;
+
+  // profissional?: {
+  //   id: string;
+  //   area: AreaProfissionalEnumInput;
+  //   crm?: string | null;
+  //   corem?: string | null;
+  //   rqe?: string | null;
+  //   pessoa?: {
+  //     id: string;
+  //     nome: string;
+  //     cpf?: string | null;
+  //     dataNascimento?: string | null;
+  //     rg?: string | null;
+  //     estadoCivil?: string | null;
+  //   } | null;
+  // } | null;
 }

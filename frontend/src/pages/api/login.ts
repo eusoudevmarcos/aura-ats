@@ -33,7 +33,7 @@ export default async function handler(
     res.setHeader("Set-Cookie", serialized);
     res.status(200).json({ uid });
   } catch (err: any) {
-    console.error("Erro no login:", err?.response?.data || err.message);
-    res.status(401).json({ error: "Usuário ou senha inválidos." });
+    console.error("Erro no login:", err?.response?.data || err);
+    res.status(401).json({ err });
   }
 }
