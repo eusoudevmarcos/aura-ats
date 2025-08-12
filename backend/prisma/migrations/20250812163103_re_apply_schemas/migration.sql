@@ -1,11 +1,11 @@
 -- CreateEnum
-CREATE TYPE "public"."TipoUsuario" AS ENUM ('ADMIN', 'MODERADOR', 'ATENDENTE', 'PROFISSIONAL');
+CREATE TYPE "public"."TipoUsuario" AS ENUM ('ADMIN_SISTEMA', 'ADMINISTRATIVO', 'MODERADOR', 'RECRUTADOR', 'VENDEDOR', 'CLIENTE_ATS', 'CLIENTE_ATS_CRM');
 
 -- CreateEnum
 CREATE TYPE "public"."TipoPessoa" AS ENUM ('FISICA', 'JURIDICA');
 
 -- CreateEnum
-CREATE TYPE "public"."AreaProfissional" AS ENUM ('MEDICINA', 'ENFERMAGEM', 'OUTRO');
+CREATE TYPE "public"."AreaCandidato" AS ENUM ('MEDICINA', 'ENFERMAGEM', 'OUTRO');
 
 -- CreateEnum
 CREATE TYPE "public"."EstadoCivil" AS ENUM ('SOLTEIRO', 'CASADO', 'DIVORCIADO', 'VIUVO', 'SEPARADO', 'UNIAO_ESTAVEL');
@@ -16,16 +16,20 @@ CREATE TYPE "public"."TipoSocio" AS ENUM ('REPRESENTANTE', 'SOCIO', 'ADMINISTRAD
 -- CreateEnum
 CREATE TYPE "public"."TipoServico" AS ENUM ('RECRUTAMENTO_CONTRATUAL', 'RECRUTAMENTO_DISPARO_CURRICULO', 'RECRUTAMENTO_INFORMACAO', 'PLATAFORMA');
 
+-- CreateEnum
+CREATE TYPE "public"."StatusCliente" AS ENUM ('ATIVO', 'INATIVO', 'PENDENTE', 'LEAD');
+
 -- CreateTable
 CREATE TABLE "public"."Pessoa" (
     "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "cpf" TEXT,
     "dataNascimento" TIMESTAMP(3),
-    "rg" INTEGER,
+    "rg" TEXT,
     "estadoCivil" "public"."EstadoCivil",
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "empresaRepresentadaId" TEXT,
 
     CONSTRAINT "Pessoa_pkey" PRIMARY KEY ("id")
 );
@@ -43,7 +47,7 @@ CREATE TABLE "public"."Empresa" (
 );
 
 -- CreateTable
-CREATE TABLE "public"."Funcionario" (
+CREATE TABLE "public"."UsuarioSistema" (
     "id" TEXT NOT NULL,
     "email" TEXT NOT NULL,
     "password" TEXT NOT NULL,
@@ -53,7 +57,7 @@ CREATE TABLE "public"."Funcionario" (
     "pessoaId" TEXT,
     "empresaId" TEXT,
 
-    CONSTRAINT "Funcionario_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "UsuarioSistema_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -61,22 +65,23 @@ CREATE TABLE "public"."Cliente" (
     "id" TEXT NOT NULL,
     "empresaId" TEXT NOT NULL,
     "tipoServico" "public"."TipoServico"[],
-    "profissionalId" TEXT,
+    "status" "public"."StatusCliente" NOT NULL,
 
     CONSTRAINT "Cliente_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
-CREATE TABLE "public"."Profissional" (
+CREATE TABLE "public"."Candidato" (
     "id" TEXT NOT NULL,
-    "area" "public"."AreaProfissional" NOT NULL,
+    "areaCandidato" "public"."AreaCandidato" NOT NULL,
     "pessoaId" TEXT,
     "crm" TEXT,
     "corem" TEXT,
     "rqe" TEXT,
     "especialidadeId" INTEGER,
+    "agendaId" TEXT,
 
-    CONSTRAINT "Profissional_pkey" PRIMARY KEY ("id")
+    CONSTRAINT "Candidato_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -104,8 +109,14 @@ CREATE TABLE "public"."Contato" (
 -- CreateTable
 CREATE TABLE "public"."Localizacao" (
     "id" TEXT NOT NULL,
+    "cep" TEXT NOT NULL,
     "cidade" TEXT NOT NULL,
-    "estado" TEXT NOT NULL,
+    "bairro" TEXT NOT NULL,
+    "uf" TEXT NOT NULL,
+    "estado" TEXT,
+    "complemento" TEXT,
+    "logradouro" TEXT,
+    "regiao" TEXT,
     "pessoaId" TEXT,
     "empresaId" TEXT,
 
@@ -127,11 +138,20 @@ CREATE TABLE "public"."Vaga" (
     "id" TEXT NOT NULL,
     "titulo" TEXT NOT NULL,
     "descricao" TEXT NOT NULL,
-    "area" "public"."AreaProfissional" NOT NULL,
-    "empresaId" TEXT,
-    "criadaEm" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "create_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "update_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "areaCandidato" "public"."AreaCandidato" NOT NULL,
+    "clienteId" TEXT NOT NULL,
+    "agendaId" TEXT NOT NULL,
 
     CONSTRAINT "Vaga_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "public"."Agenda" (
+    "id" TEXT NOT NULL,
+
+    CONSTRAINT "Agenda_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateTable
@@ -143,6 +163,14 @@ CREATE TABLE "public"."Especialidade" (
     CONSTRAINT "Especialidade_pkey" PRIMARY KEY ("id")
 );
 
+-- CreateTable
+CREATE TABLE "public"."_CandidatoToVaga" (
+    "A" TEXT NOT NULL,
+    "B" TEXT NOT NULL,
+
+    CONSTRAINT "_CandidatoToVaga_AB_pkey" PRIMARY KEY ("A","B")
+);
+
 -- CreateIndex
 CREATE UNIQUE INDEX "Pessoa_cpf_key" ON "public"."Pessoa"("cpf");
 
@@ -150,22 +178,19 @@ CREATE UNIQUE INDEX "Pessoa_cpf_key" ON "public"."Pessoa"("cpf");
 CREATE UNIQUE INDEX "Empresa_cnpj_key" ON "public"."Empresa"("cnpj");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Funcionario_email_key" ON "public"."Funcionario"("email");
+CREATE UNIQUE INDEX "UsuarioSistema_email_key" ON "public"."UsuarioSistema"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Funcionario_pessoaId_key" ON "public"."Funcionario"("pessoaId");
+CREATE UNIQUE INDEX "UsuarioSistema_pessoaId_key" ON "public"."UsuarioSistema"("pessoaId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Funcionario_empresaId_key" ON "public"."Funcionario"("empresaId");
+CREATE UNIQUE INDEX "UsuarioSistema_empresaId_key" ON "public"."UsuarioSistema"("empresaId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Cliente_empresaId_key" ON "public"."Cliente"("empresaId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Cliente_profissionalId_key" ON "public"."Cliente"("profissionalId");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Profissional_pessoaId_key" ON "public"."Profissional"("pessoaId");
+CREATE UNIQUE INDEX "Candidato_pessoaId_key" ON "public"."Candidato"("pessoaId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Socio_pessoaId_empresaId_key" ON "public"."Socio"("pessoaId", "empresaId");
@@ -173,23 +198,26 @@ CREATE UNIQUE INDEX "Socio_pessoaId_empresaId_key" ON "public"."Socio"("pessoaId
 -- CreateIndex
 CREATE UNIQUE INDEX "Especialidade_nome_key" ON "public"."Especialidade"("nome");
 
--- AddForeignKey
-ALTER TABLE "public"."Funcionario" ADD CONSTRAINT "Funcionario_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "public"."Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+-- CreateIndex
+CREATE INDEX "_CandidatoToVaga_B_index" ON "public"."_CandidatoToVaga"("B");
 
 -- AddForeignKey
-ALTER TABLE "public"."Funcionario" ADD CONSTRAINT "Funcionario_empresaId_fkey" FOREIGN KEY ("empresaId") REFERENCES "public"."Empresa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Pessoa" ADD CONSTRAINT "Pessoa_empresaRepresentadaId_fkey" FOREIGN KEY ("empresaRepresentadaId") REFERENCES "public"."Empresa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."UsuarioSistema" ADD CONSTRAINT "UsuarioSistema_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "public"."Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."UsuarioSistema" ADD CONSTRAINT "UsuarioSistema_empresaId_fkey" FOREIGN KEY ("empresaId") REFERENCES "public"."Empresa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Cliente" ADD CONSTRAINT "Cliente_empresaId_fkey" FOREIGN KEY ("empresaId") REFERENCES "public"."Empresa"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Cliente" ADD CONSTRAINT "Cliente_profissionalId_fkey" FOREIGN KEY ("profissionalId") REFERENCES "public"."Profissional"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Candidato" ADD CONSTRAINT "Candidato_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "public"."Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Profissional" ADD CONSTRAINT "Profissional_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "public"."Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "public"."Profissional" ADD CONSTRAINT "Profissional_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "public"."Especialidade"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Candidato" ADD CONSTRAINT "Candidato_especialidadeId_fkey" FOREIGN KEY ("especialidadeId") REFERENCES "public"."Especialidade"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "public"."Socio" ADD CONSTRAINT "Socio_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "public"."Pessoa"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
@@ -213,4 +241,13 @@ ALTER TABLE "public"."Localizacao" ADD CONSTRAINT "Localizacao_empresaId_fkey" F
 ALTER TABLE "public"."Formacao" ADD CONSTRAINT "Formacao_pessoaId_fkey" FOREIGN KEY ("pessoaId") REFERENCES "public"."Pessoa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "public"."Vaga" ADD CONSTRAINT "Vaga_empresaId_fkey" FOREIGN KEY ("empresaId") REFERENCES "public"."Empresa"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+ALTER TABLE "public"."Vaga" ADD CONSTRAINT "Vaga_clienteId_fkey" FOREIGN KEY ("clienteId") REFERENCES "public"."Cliente"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."Vaga" ADD CONSTRAINT "Vaga_agendaId_fkey" FOREIGN KEY ("agendaId") REFERENCES "public"."Agenda"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."_CandidatoToVaga" ADD CONSTRAINT "_CandidatoToVaga_A_fkey" FOREIGN KEY ("A") REFERENCES "public"."Candidato"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "public"."_CandidatoToVaga" ADD CONSTRAINT "_CandidatoToVaga_B_fkey" FOREIGN KEY ("B") REFERENCES "public"."Vaga"("id") ON DELETE CASCADE ON UPDATE CASCADE;

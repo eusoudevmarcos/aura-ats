@@ -8,10 +8,13 @@ generator client {
 }
 
 enum TipoUsuario {
-  ADMIN
-  MODERADOR
-  ATENDENTE
-  PROFISSIONAL
+  ADMIN_SISTEMA
+  ADMINISTRATIVO
+  MODERADOR // Gerente
+  RECRUTADOR
+  VENDEDOR
+  CLIENTE_ATS
+  CLIENTE_ATS_CRM
 }
 
 enum TipoPessoa {
@@ -19,7 +22,7 @@ enum TipoPessoa {
   JURIDICA
 }
 
-enum AreaProfissional {
+enum AreaCandidato {
   MEDICINA
   ENFERMAGEM
   OUTRO
@@ -47,53 +50,6 @@ enum TipoServico {
   PLATAFORMA
 }
 
-model Pessoa {
-  id             String         @id @default(uuid())
-  nome           String
-  cpf            String?        @unique
-  dataNascimento DateTime?
-  rg             String?
-  estadoCivil    EstadoCivil?
-  contatos       Contato[] // contatos ligados à pessoa
-  localizacoes   Localizacao[] // localizações ligadas à pessoa
-  formacoes      Formacao[] // formações ligadas à pessoa
-  funcionarios   Funcionario[]
-  socios         Socio[] // sócia em várias empresas
-  profissionais  Profissional[]
-  createdAt      DateTime       @default(now())
-  updatedAt      DateTime       @updatedAt
-}
-
-model Empresa {
-  id           String        @id @default(uuid())
-  razaoSocial  String
-  cnpj         String        @unique
-  dataAbertura DateTime?
-  contatos     Contato[]
-  localizacoes Localizacao[]
-  funcionarios Funcionario[]
-  socios       Socio[]
-  cliente      Cliente?
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
-  Vaga         Vaga[]
-}
-
-model Funcionario {
-  id          String      @id @default(uuid())
-  email       String      @unique
-  password    String
-  tipoUsuario TipoUsuario
-  setor       String?
-  cargo       String?
-
-  pessoaId String? @unique
-  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
-
-  empresaId String?  @unique
-  empresa   Empresa? @relation(fields: [empresaId], references: [id])
-}
-
 enum StatusCliente {
   ATIVO
   INATIVO
@@ -101,27 +57,82 @@ enum StatusCliente {
   LEAD
 }
 
-model Cliente {
-  id             String        @id @default(uuid())
-  empresaId      String        @unique
-  empresa        Empresa       @relation(fields: [empresaId], references: [id])
-  tipoServico    TipoServico[]
-  profissionalId String?       @unique
-  profissional   Profissional? @relation(fields: [profissionalId], references: [id])
-  status         StatusCliente
+model Pessoa {
+  id             String           @id @default(uuid())
+  nome           String
+  cpf            String?          @unique
+  dataNascimento DateTime?
+  rg             String?
+  estadoCivil    EstadoCivil?
+  contatos       Contato[] // contatos ligados à pessoa
+  localizacoes   Localizacao[] // localizações ligadas à pessoa
+  formacoes      Formacao[] // formações ligadas à pessoa
+  usuarioSistema UsuarioSistema[] // Uma Pessoa pode ter um UsuarioSistema (1:1 ou 1:N, mas aqui 1:1 é o mais comum)
+  socios         Socio[] // sócia em várias empresas
+  candidato      Candidato[]
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  // Relação para representar a empresa (Pessoa é representante de uma Empresa)
+  empresaRepresentada   Empresa? @relation("EmpresaRepresentantes", fields: [empresaRepresentadaId], references: [id])
+  empresaRepresentadaId String?
 }
 
-model Profissional {
-  id              String           @id @default(uuid())
-  area            AreaProfissional
-  pessoaId        String?          @unique
-  pessoa          Pessoa?          @relation(fields: [pessoaId], references: [id])
+model Empresa {
+  id             String           @id @default(uuid())
+  razaoSocial    String
+  cnpj           String           @unique
+  dataAbertura   DateTime?
+  contatos       Contato[]
+  localizacoes   Localizacao[]
+  usuarioSistema UsuarioSistema[] // Uma Empresa pode ter um UsuarioSistema
+  socios         Socio[]
+  representante  Pessoa[]         @relation("EmpresaRepresentantes") // Empresa tem vários representantes (Pessoa)
+  cliente        Cliente? // Uma Empresa pode ser um Cliente (0 ou 1)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+}
+
+model UsuarioSistema {
+  id          String      @id @default(uuid())
+  email       String      @unique
+  password    String
+  tipoUsuario TipoUsuario
+  setor       String? // Removido. Estas são características de Funcionario, não UsuarioSistema puro
+  cargo       String? // Removido. Estas são características de Funcionario, não 
+  pessoaId    String?     @unique
+  pessoa      Pessoa?     @relation(fields: [pessoaId], references: [id])
+
+  empresaId String?  @unique // Opcional, mas se preenchido, deve ser único para garantir 1:1 com Empresa
+  empresa   Empresa? @relation(fields: [empresaId], references: [id])
+
+  funcionario Funcionario? // Um UsuarioSistema pode ter um perfil de Funcionario (1:1)
+}
+
+model Cliente {
+  id          String        @id @default(uuid())
+  empresaId   String        @unique // Garante que cada Cliente está ligado a uma Empresa única e uma Empresa é Cliente apenas uma vez
+  empresa     Empresa       @relation(fields: [empresaId], references: [id])
+  tipoServico TipoServico[]
+  status      StatusCliente
+  vagas       Vaga[] // Cliente pode ter várias vagas
+  // Relação com UsuarioSistema é feita através da Empresa.
+  // Se a empresa é um Cliente, o UsuarioSistema associado a essa empresa é o login do Cliente.
+}
+
+model Candidato {
+  id              String         @id @default(uuid())
+  areaCandidato   AreaCandidato
+  pessoaId        String?        @unique // Um Candidato é uma Pessoa (opcional, se um Candidato pode ser criado sem detalhes completos de Pessoa)
+  pessoa          Pessoa?        @relation(fields: [pessoaId], references: [id])
   crm             String? // para médicos
   corem           String? // para enfermagem
   rqe             String?
-  cliente         Cliente?
-  especialidade   Especialidade?   @relation(fields: [especialidadeId], references: [id])
+  especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
   especialidadeId Int?
+  agendaId        String? // Alterado para String para corresponder a Agenda.id
+  // Relação N:N com Vaga, gerenciada por uma tabela de junção implícita pelo Prisma
+  vagas           Vaga[]
 }
 
 model Socio {
@@ -133,7 +144,7 @@ model Socio {
   pessoa  Pessoa  @relation(fields: [pessoaId], references: [id])
   empresa Empresa @relation(fields: [empresaId], references: [id])
 
-  @@unique([pessoaId, empresaId])
+  @@unique([pessoaId, empresaId]) // Uma pessoa só pode ser um tipo de sócio em uma empresa uma vez
 }
 
 model Contato {
@@ -150,9 +161,15 @@ model Contato {
 }
 
 model Localizacao {
-  id     String @id @default(uuid())
-  cidade String
-  estado String
+  id          String  @id @default(uuid())
+  cep         String
+  cidade      String
+  bairro      String
+  uf          String
+  estado      String?
+  complemento String?
+  logradouro  String?
+  regiao      String?
 
   pessoaId String?
   pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
@@ -171,18 +188,39 @@ model Formacao {
 }
 
 model Vaga {
-  id        String           @id @default(uuid())
-  titulo    String
-  descricao String
-  area      AreaProfissional
-  empresaId String?
-  empresa   Empresa?         @relation(fields: [empresaId], references: [id])
-  criadaEm  DateTime         @default(now())
+  id            String        @id @default(uuid())
+  titulo        String
+  descricao     String
+  create_at     DateTime      @default(now())
+  update_at     DateTime      @default(now()) @updatedAt // Adicionado @updatedAt para rastrear a última atualização
+  areaCandidato AreaCandidato
+
+  clienteId String // Uma Vaga pertence a um Cliente. Removido @unique para permitir vários vagas por cliente
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  // Relação N:N com Candidato
+  candidatos Candidato[]
+
+  agenda   Agenda @relation(fields: [agendaId], references: [id])
+  agendaId String
+}
+
+model Agenda {
+  id   String @id @default(uuid())
+  Vaga Vaga[] // Uma Agenda pode ter várias Vagas
 }
 
 model Especialidade {
-  id           Int            @id @default(autoincrement())
-  nome         String         @unique
-  sigla        String
-  Profissional Profissional[]
+  id        Int         @id @default(autoincrement())
+  nome      String      @unique
+  sigla     String
+  candidato Candidato[]
+}
+
+model Funcionario {
+  id               String         @id @default(uuid())
+  setor            String?
+  cargo            String?
+  usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
+  usuarioSistemaId String         @unique
 }

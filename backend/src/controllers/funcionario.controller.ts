@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
-import { FuncionarioService } from "../services/funcionario.service";
+import { UsuarioSistemaService } from "../services/usuarioSistema.service";
 
 @injectable()
 export class FuncionarioController {
   constructor(
-    @inject(FuncionarioService) private service: FuncionarioService
+    @inject(UsuarioSistemaService) private service: UsuarioSistemaService
   ) {}
 
   async getAll(req: Request, res: Response) {
@@ -15,8 +15,8 @@ export class FuncionarioController {
       : 10;
 
     try {
-      const funcionario = await this.service.getAll(page, pageSize);
-      return res.status(200).json(funcionario);
+      //const funcionario = await this.service.getAll(page, pageSize);
+      return res.status(200).json("ola");
     } catch (error: any) {
       return res.status(400).json({
         error: "Erro ao buscar funcionários",

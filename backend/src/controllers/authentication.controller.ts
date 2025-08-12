@@ -22,12 +22,12 @@ export default class AuthenticationController {
       }
 
       // Busca o funcionário pelo email no banco
-      const funcionario = await prisma.funcionario.findUnique({
+      const usuarioSistema = await prisma.usuarioSistema.findUnique({
         where: { email: username },
         include: { pessoa: true, empresa: true },
       });
 
-      if (!funcionario) {
+      if (!usuarioSistema) {
         await saveLog({
           type: "login",
           status: "error",
@@ -37,7 +37,12 @@ export default class AuthenticationController {
       }
 
       // Verifica a senha
-      const senhaCorreta = await bcrypt.compare(password, funcionario.password);
+      const senhaCorreta = await bcrypt.compare(
+        password,
+        usuarioSistema.password
+      );
+      console.log(password);
+      console.log(usuarioSistema);
 
       if (!senhaCorreta) {
         await saveLog({
@@ -45,24 +50,25 @@ export default class AuthenticationController {
           status: "error",
           data: { message: "Senha incorreta" },
         });
+
         return res.status(401).json({ error: "Credenciais inválidas" });
       }
 
       const infoUser = {
-        uid: funcionario.id,
-        email: funcionario.email,
-        tipo: funcionario.tipoUsuario,
+        uid: usuarioSistema.id,
+        email: usuarioSistema.email,
+        tipo: usuarioSistema.tipoUsuario,
       };
 
-      if (funcionario.pessoa) {
+      if (usuarioSistema.pessoa) {
         Object.assign(infoUser, {
-          nome: funcionario.pessoa?.nome,
-          cpf: funcionario.pessoa?.cpf,
+          nome: usuarioSistema.pessoa?.nome,
+          cpf: usuarioSistema.pessoa?.cpf,
         });
-      } else if (funcionario.empresa) {
+      } else if (usuarioSistema.empresa) {
         Object.assign(infoUser, {
-          razaoSocial: funcionario.empresa?.razaoSocial,
-          cnpj: funcionario.empresa?.cnpj,
+          razaoSocial: usuarioSistema.empresa?.razaoSocial,
+          cnpj: usuarioSistema.empresa?.cnpj,
         });
       }
 
@@ -87,15 +93,15 @@ export default class AuthenticationController {
         type: "login",
         status: "success",
         data: {
-          email: funcionario.email,
-          uid: funcionario.id,
+          email: usuarioSistema.email,
+          uid: usuarioSistema.id,
           token,
         },
       });
 
       return res
         .status(200)
-        .json({ message: "Login bem-sucedido", token, uid: funcionario.id });
+        .json({ message: "Login bem-sucedido", token, uid: usuarioSistema.id });
     } catch (error: any) {
       await saveLog({
         type: "login",
