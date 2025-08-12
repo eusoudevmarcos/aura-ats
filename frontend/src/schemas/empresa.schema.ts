@@ -14,7 +14,7 @@ export const empresaSchema = z.object({
     .string()
     .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
   contatos: z.array(contatoSchema),
-  localizacoes: z.array(localizacaoSchema).optional(),
+  localizacoes: z.array(localizacaoSchema),
   representante: z.array(pessoaSchema),
 });
 

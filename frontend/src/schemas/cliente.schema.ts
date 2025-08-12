@@ -7,10 +7,9 @@ import { localizacaoSchema } from "./localizacao.schema";
 
 export const clienteSchema = z
   .object({
+    id: z.uuid().optional(),
     empresaId: z.string().optional(),
     empresa: empresaSchema,
-    contato: contatoSchema,
-    localizacoes: localizacaoSchema,
     tipoServico: z
       .array(TipoServicoEnum)
       .min(1, "Selecione ao menos um serviço"),
