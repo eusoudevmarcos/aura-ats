@@ -170,4 +170,49 @@ export class UsuarioSistemaService {
   async getById(id: string) {
     return await prisma.usuarioSistema.findFirst({ where: { id } });
   }
+
+  async getAll(page: number, pageSize: number) {
+    const skip = (page - 1) * pageSize;
+
+    try {
+      // Consulta os usuários com paginação
+      const usuarios = await prisma.usuarioSistema.findMany({
+        skip: skip,
+        take: pageSize,
+        include: {
+          pessoa: {
+            include: {
+              contatos: true,
+              localizacoes: true,
+              formacoes: true,
+            },
+          },
+          empresa: {
+            include: {
+              contatos: true,
+              localizacoes: true,
+            },
+          },
+        },
+        // orderBy: {
+        //   criadoEm: "desc",
+        // },
+      });
+
+      const totalUsuarios = await prisma.usuarioSistema.count();
+
+      return {
+        data: usuarios,
+        total: totalUsuarios,
+        page: page,
+        pageSize: pageSize,
+        totalPages: Math.ceil(totalUsuarios / pageSize),
+      };
+    } catch (error) {
+      console.error("Erro ao buscar usuários do sistema:", error);
+      throw new Error("Não foi possível buscar os usuários do sistema.");
+    } finally {
+      await prisma.$disconnect(); // Desconecta o Prisma após a operação
+    }
+  }
 }

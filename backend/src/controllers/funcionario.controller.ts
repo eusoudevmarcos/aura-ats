@@ -15,8 +15,8 @@ export class FuncionarioController {
       : 10;
 
     try {
-      //const funcionario = await this.service.getAll(page, pageSize);
-      return res.status(200).json("ola");
+      const funcionario = await this.service.getAll(page, pageSize);
+      return res.status(200).json(funcionario);
     } catch (error: any) {
       return res.status(400).json({
         error: "Erro ao buscar funcionários",
