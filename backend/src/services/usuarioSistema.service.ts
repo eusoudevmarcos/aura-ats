@@ -168,7 +168,25 @@ export class UsuarioSistemaService {
   }
 
   async getById(id: string) {
-    return await prisma.usuarioSistema.findFirst({ where: { id } });
+    return await prisma.usuarioSistema.findFirst({
+      where: { id },
+      include: {
+        pessoa: {
+          include: {
+            contatos: true,
+            localizacoes: true,
+            formacoes: true,
+          },
+        },
+        funcionario: true,
+        empresa: {
+          include: {
+            contatos: true,
+            localizacoes: true,
+          },
+        },
+      },
+    });
   }
 
   async getAll(page: number, pageSize: number) {
@@ -180,6 +198,7 @@ export class UsuarioSistemaService {
         skip: skip,
         take: pageSize,
         include: {
+          funcionario: true,
           pessoa: {
             include: {
               contatos: true,

@@ -29,6 +29,7 @@ interface Empresa {
 }
 
 type Funcionario = {
+  id?: string;
   pessoa?: Pessoa;
   empresa?: Empresa;
   email: string;
@@ -55,6 +56,7 @@ function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
         dataNascimento: f.pessoa?.dataNascimento
           ? new Date(f.pessoa?.dataNascimento).toLocaleDateString("pt-BR")
           : "-",
+        id: f.id,
       };
     } else if ("empresa" in f) {
       return {
@@ -64,6 +66,7 @@ function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
         dataNascimento: f.empresa?.dataAbertura
           ? new Date(f.empresa?.dataAbertura).toLocaleDateString("pt-BR")
           : "-",
+        id: f.id,
       };
     }
     return {
