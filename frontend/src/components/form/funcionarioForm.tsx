@@ -40,10 +40,6 @@ export const FuncionarioForm = ({
     formState: { errors },
   } = methods;
 
-  const [formData, setFormData] = useState<Partial<FuncionarioInput>>({
-    tipoPessoaOuEmpresa: "pessoa",
-    tipoUsuario: "MODERADOR",
-  });
   const [tipoPessoaOuEmpresa, setTipoPessoaOuEmpresa] =
     React.useState("pessoa");
 
@@ -61,18 +57,6 @@ export const FuncionarioForm = ({
 
   useEffect(() => {
     if (funcionarioData) {
-      setFormData((prev) => ({
-        ...prev,
-        ...funcionarioData,
-        pessoa: funcionarioData.pessoa
-          ? { ...funcionarioData.pessoa }
-          : prev.pessoa,
-        empresa: funcionarioData.empresa
-          ? { ...funcionarioData.empresa }
-          : prev.empresa,
-      }));
-
-      // Atualiza os valores do react-hook-form
       Object.entries(funcionarioData).forEach(([key, value]) => {
         if (key === "pessoa" && value) {
           Object.entries(value as PessoaInput).forEach(([k, v]) => {
@@ -119,17 +103,6 @@ export const FuncionarioForm = ({
         : `/api/funcionario/create/${data.tipoPessoaOuEmpresa}`;
 
       await api.post(url, result.data);
-
-      if (!isEdit) {
-        setFormData({
-          tipoPessoaOuEmpresa: "pessoa",
-          tipoUsuario: "ADMIN",
-        });
-        methods.reset({
-          tipoPessoaOuEmpresa: "pessoa",
-          tipoUsuario: "ADMIN",
-        });
-      }
 
       onSuccess(true);
     } catch (error: any) {

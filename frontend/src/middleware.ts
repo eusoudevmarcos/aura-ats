@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { verify } from "jsonwebtoken";
 
 const PUBLIC_API_PATHS = ["/api/login", "/api/set-cookie", "/api/public"];
 

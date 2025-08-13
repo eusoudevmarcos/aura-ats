@@ -50,7 +50,7 @@ function renderCellValue<T>(
 }
 
 // Função para enviar informações da linha ao clicar
-function enviarInformacoesDaLinha<T>(row: T) {}
+// function enviarInformacoesDaLinha<T>(row: T) {}
 
 function TR<T>({
   row,
@@ -65,7 +65,6 @@ function TR<T>({
 }) {
   // Função que será chamada ao clicar na linha
   const handleRowClick = () => {
-    enviarInformacoesDaLinha(row);
     if (onRowClick) {
       onRowClick(row);
     }
@@ -77,7 +76,7 @@ function TR<T>({
       onClick={handleRowClick}
       style={{ cursor: onRowClick ? "pointer" : "default" }}
     >
-      {columns.map((col, i) => (
+      {columns.map((col) => (
         <td key={String(col.key)}>
           {renderCellValue((row as any)[col.key], col, row, index)}
         </td>

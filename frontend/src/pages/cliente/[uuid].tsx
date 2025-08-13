@@ -5,8 +5,6 @@ import api from "@/axios";
 import { EditPenIcon, TrashIcon } from "@/components/icons";
 import Modal from "@/components/modal/Modal";
 import Card from "@/components/Card";
-// import { ClienteForm } from "@/components/form/ClienteForm"; // Criar semelhante ao FuncionarioForm
-import { Cliente } from "@/model/cliente.model"; // Criar o model para tipagem
 import ClienteForm from "@/components/form/ClienteForm";
 import { ClienteInput } from "@/schemas/cliente.schema";
 
@@ -28,7 +26,7 @@ const ClientePage: React.FC = () => {
       try {
         const res = await api.get(`/api/cliente/${uuid}`);
         setCliente(res.data);
-      } catch (err) {
+      } catch (_) {
         setErro("Cliente não encontrado ou erro ao buscar dados.");
         setCliente(null);
       } finally {
@@ -101,7 +99,6 @@ const ClientePage: React.FC = () => {
         </div>
 
         <div className="flex flex-wrap gap-4">
-          {/* Informações do Cliente */}
           <Card title="Informações do Cliente">
             <div>
               <span className="font-medium">Status:</span>

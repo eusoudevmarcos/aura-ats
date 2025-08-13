@@ -1,11 +1,6 @@
 import React, { useState } from "react";
 import Sidebar from "../components/Sidebar/Sidebar";
 import Header from "@/components/Header/Header";
-interface UserData {
-  id: string;
-  name: string;
-  role?: string;
-}
 
 interface DashboardProps {
   children: React.ReactNode | ((data: any) => void);

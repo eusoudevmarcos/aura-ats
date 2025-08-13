@@ -2,6 +2,7 @@ import { z } from "zod";
 import { contatoSchema } from "./contato.schema";
 import { localizacaoSchema } from "./localizacao.schema";
 import { pessoaSchema } from "./pessoa.schema";
+import { zDateValidate } from "./util/dateValidation";
 
 export const empresaSchema = z.object({
   razaoSocial: z.string().min(1, "Razão Social é obrigatória"),
@@ -10,9 +11,7 @@ export const empresaSchema = z.object({
     .min(18, "CNPJ inválido") // inclui pontos, barra e traço
     .regex(/^\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}$/, "Formato de CNPJ inválido"),
 
-  dataAbertura: z
-    .string()
-    .refine((date) => !date || !isNaN(Date.parse(date)), "Data inválida"),
+  dataAbertura: zDateValidate,
   contatos: z.array(contatoSchema),
   localizacoes: z.array(localizacaoSchema),
   representante: z.array(pessoaSchema),

@@ -13,7 +13,7 @@ export default function handler(req: NextApiRequest, res: NextApiResponse) {
 
     const user = verify(token, process.env.NUXT_PUBLIC_JWT_SECRET || "") as any;
     return res.status(200).json({ user });
-  } catch (err) {
+  } catch (_) {
     return res.status(401).json({ error: "Token inválido" });
   }
 }

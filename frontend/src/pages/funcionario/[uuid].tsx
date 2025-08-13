@@ -25,7 +25,7 @@ const FuncionarioPage: React.FC = () => {
       try {
         const response = await api.get(`/api/funcionario/${uuid}`);
         setFuncionario(response.data);
-      } catch (err: any) {
+      } catch (_: any) {
         setErro("Funcionário não encontrado ou erro ao buscar dados.");
         setFuncionario(null);
       } finally {
@@ -142,12 +142,14 @@ const FuncionarioPage: React.FC = () => {
                 <span className="font-medium">CNPJ:</span>{" "}
                 {funcionario.empresa.cnpj}
               </div>
-              <div>
-                <span className="font-medium">Data de Abertura:</span>{" "}
-                {new Date(funcionario.empresa.dataAbertura).toLocaleDateString(
-                  "pt-BR"
-                )}
-              </div>
+              {funcionario?.empresa?.dataAbertura && (
+                <div>
+                  <span className="font-medium">Data de Abertura:</span>{" "}
+                  {new Date(
+                    funcionario.empresa.dataAbertura as string
+                  ).toLocaleDateString("pt-BR")}
+                </div>
+              )}
             </Card>
           )}
         </div>

@@ -1,6 +1,5 @@
 // src/model/cliente.model.ts
 
-import { AreaProfissionalEnumInput } from "@/schemas/areaProfissionalEnum.schama";
 import { StatusClienteEnumInput } from "@/schemas/statusClienteEnum.schema";
 import { TipoServicoEnumInput } from "@/schemas/tipoServicoEnum.schema";
 

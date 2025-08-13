@@ -7,7 +7,6 @@ import { FormInput } from "../input/FormInput";
 import { zodResolver } from "@hookform/resolvers/zod";
 import ContatoForm from "@/components/form/ContatoForm";
 import LocalizacaoForm from "@/components/form/LocalizacaoForm";
-import Card from "../Card";
 import PessoaForm from "./PessoaForm";
 
 type EmpresaFormProps<T extends FieldValues> = {
@@ -45,10 +44,7 @@ const EmpresaForm = ({
   };
 
   const formContent = (
-    <Card
-      title="Empresa"
-      classNameContent="grid grid-cols-1 md:grid-cols-3 gap-2"
-    >
+    <section className="grid grid-cols-1 md:grid-cols-3 gap-2">
       <FormInput
         name={cnpj}
         control={control}
@@ -66,18 +62,30 @@ const EmpresaForm = ({
 
       <FormInput
         name={dataAbertura}
-        register={register}
-        placeholder="Razão Social"
+        control={control}
+        placeholder="Data abertura"
         errors={errors}
         type="date"
       />
 
-      <div className="col-span-3 flex flex-col gap-2">
-        <PessoaForm namePrefix={`${namePrefix}.representante[0]`} />
-        <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
-        <LocalizacaoForm namePrefix={`${namePrefix}.localizacoes[0]`} />
+      <div className="col-span-full flex flex-col gap-2">
+        <div title="contato da empresa">
+          <h3 className="text-xl font-bold">Contato da empresa</h3>
+          <section className="flex w-full gap-2">
+            <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
+          </section>
+        </div>
+        <div title="Localizacao">
+          <h3 className="text-xl font-bold">Localização da empresa</h3>
+          <LocalizacaoForm namePrefix={`${namePrefix}.localizacoes[0]`} />
+        </div>
+
+        <div title="Representante">
+          <h3 className="text-xl font-bold">Representante</h3>
+          <PessoaForm namePrefix={`${namePrefix}.representante[0]`} />
+        </div>
       </div>
-    </Card>
+    </section>
   );
 
   if (mode !== "context") {

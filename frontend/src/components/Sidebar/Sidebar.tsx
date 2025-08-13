@@ -15,12 +15,6 @@ import Link from "next/link";
 import { useUser } from "@/hook/useUser";
 import { getFirstLetter } from "@/utils/getFirstLetter";
 
-interface UserData {
-  id: string;
-  name: string;
-  role?: string;
-}
-
 interface SidebarProps {
   setActiveSection: (section: string) => void;
   activeSection: string;
@@ -91,7 +85,7 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`${styles.sidebar} ${
+      className={`sticky ${styles.sidebar} ${
         isCollapsed ? styles.sidebarCollapsed : ""
       }`}
     >

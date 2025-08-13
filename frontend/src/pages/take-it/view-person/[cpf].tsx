@@ -27,6 +27,7 @@ export async function getStaticProps(context: any) {
       revalidate: 60,
     };
   } catch (error: any) {
+    console.log(error);
     return {
       props: { data: null },
     };

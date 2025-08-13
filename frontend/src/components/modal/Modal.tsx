@@ -37,7 +37,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
       }`}
     >
       <div
-        className={`bg-white rounded-lg shadow-md relative w-full max-w-2xl max-h-[90vh] overflow-y-auto transition-transform duration-200 ${
+        className={`bg-white rounded-lg shadow-md relative w-full max-w-2xl max-h-[90vh] overflow-y-scroll transition-transform duration-200 ${
           visible ? "scale-100" : "scale-95"
         }`}
       >
@@ -45,7 +45,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
           {title && <h3 className="text-xl font-semibold ">{title}</h3>}
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl font-bold ml-auto cursor-pointer"
+            className="text-white hover:text-gray-700 text-2xl font-bold ml-auto cursor-pointer"
           >
             &times;
           </button>

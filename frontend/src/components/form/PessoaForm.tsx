@@ -1,10 +1,10 @@
 import React from "react";
-import { FieldValues, FormProvider, UseFormReturn } from "react-hook-form";
+import { FormProvider } from "react-hook-form";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { makeName } from "@/utils/makeName";
 import { PessoaInput } from "@/schemas/pessoa.schema";
 import { FormInput } from "../input/FormInput";
-import Card from "../Card";
+import ContatoForm from "./ContatoForm";
 
 type PessoaFormProps = {
   namePrefix?: string;
@@ -16,6 +16,7 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
   const methods = useSafeForm({ mode, debug: true });
   const {
     register,
+    control,
     formState: { errors },
   } = methods;
 
@@ -25,10 +26,7 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
   const dataNascimento = makeName<PessoaInput>(namePrefix, "dataNascimento");
 
   const formContent = (
-    <Card
-      title="Pessoa/Representante"
-      classNameContent="grid grid-cols-1 md:grid-cols-2 gap-2"
-    >
+    <section className="grid grid-cols-1 md:grid-cols-2 gap-2">
       <FormInput
         name={nome}
         register={register}
@@ -38,14 +36,15 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
 
       <FormInput
         name={cpf}
-        register={register}
+        control={control}
+        maskProps={{ mask: "000.000.000-00" }}
         placeholder="CPF"
         errors={errors}
       />
 
       <FormInput
         name={dataNascimento}
-        register={register}
+        control={control}
         placeholder="Data de Nascimento"
         errors={errors}
         type="date"
@@ -57,7 +56,14 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
         placeholder="RG"
         errors={errors}
       />
-    </Card>
+
+      <div className="col-span-full" title="Contato do representante">
+        <h3 className="text-xl font-bold">Contato do representante</h3>
+        <section className="flex w-full gap-2">
+          <ContatoForm namePrefix={`${namePrefix}.contato[0]`} />
+        </section>
+      </div>
+    </section>
   );
 
   if (mode !== "context") {

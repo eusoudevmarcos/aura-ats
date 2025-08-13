@@ -70,7 +70,7 @@ const ClientList: React.FC = () => {
         setClientes(data);
         setTotal(data.length);
         setTotalPages(Math.max(1, Math.ceil(data.length / pageSize)));
-      } catch (error) {
+      } catch (_) {
         setClientes([]);
         setTotal(0);
         setTotalPages(1);

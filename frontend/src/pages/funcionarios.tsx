@@ -6,12 +6,9 @@ import { useState } from "react";
 
 export default function Funcionarios() {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [message, setMessage] = useState("");
-  const [isError, setIsError] = useState(false);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setMessage("");
   };
 
   const onSuccess = (msg: boolean) => {

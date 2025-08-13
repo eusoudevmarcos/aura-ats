@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import api from "@/axios";
-import { FormProvider, useForm, UseFormReturn } from "react-hook-form";
+import { FormProvider, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { clienteSchema, ClienteInput } from "@/schemas/cliente.schema";
 import EmpresaForm from "@/components/form/EmpresaForm";
@@ -8,7 +8,8 @@ import { TipoServicoEnum } from "@/schemas/tipoServicoEnum.schema";
 import { StatusClienteEnum } from "@/schemas/statusClienteEnum.schema";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { PrimaryButton } from "../button/PrimaryButton";
-// import { PrimaryButton } from "@/components/button/PrimaryButton";
+import Card from "../Card";
+import { getError } from "@/utils/getError";
 
 type ClienteFormProps = {
   formContexto?: UseFormReturn<ClienteInput>;
@@ -79,56 +80,53 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-6">
-        <EmpresaForm namePrefix="empresa" />
+        <Card title="Dados da empresa">
+          <EmpresaForm namePrefix="empresa" />
+        </Card>
 
-        <div>
-          <label className="block text-gray-700 text-sm font-bold mb-2">
-            Tipo de Serviço:
-          </label>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-            {TipoServicoEnum.options.map((serv) => (
-              <label key={serv} className="inline-flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  value={serv}
-                  {...register("tipoServico")}
-                />
-                <span>{serv.replaceAll("_", " ")}</span>
-              </label>
-            ))}
-          </div>
-          {getErrorByPath("tipoServico") && (
-            <p className="text-red-500 text-xs italic">
-              {getErrorByPath("tipoServico")}
-            </p>
-          )}
+        <label className="block text-[#48038a] text-xl font-bold mb-2">
+          Tipo de Serviço:
+        </label>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          {TipoServicoEnum.options.map((serv) => (
+            <label key={serv} className="inline-flex items-center gap-2">
+              <input
+                type="checkbox"
+                value={serv}
+                {...register("tipoServico")}
+              />
+              <span>{serv.replaceAll("_", " ")}</span>
+            </label>
+          ))}
         </div>
+        {getError(errors, "tipoServico") && (
+          <p className="text-red-500 text-xs italic">
+            {getError(errors, "tipoServico")}
+          </p>
+        )}
 
-        {/* Status */}
-        <div>
-          <label
-            htmlFor="status"
-            className="block text-gray-700 text-sm font-bold mb-2"
-          >
-            Status
-          </label>
-          <select
-            id="status"
-            {...register("status")}
-            className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          >
-            {StatusClienteEnum.options.map((st) => (
-              <option key={st} value={st}>
-                {st}
-              </option>
-            ))}
-          </select>
-          {getErrorByPath("status") && (
-            <p className="text-red-500 text-xs italic">
-              {getErrorByPath("status")}
-            </p>
-          )}
-        </div>
+        <label
+          htmlFor="status"
+          className="block text-[#48038a] text-xl font-bold mb-2"
+        >
+          Status
+        </label>
+        <select
+          id="status"
+          {...register("status")}
+          className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+        >
+          {StatusClienteEnum.options.map((st) => (
+            <option key={st} value={st}>
+              {st}
+            </option>
+          ))}
+        </select>
+        {getErrorByPath("status") && (
+          <p className="text-red-500 text-xs italic">
+            {getErrorByPath("status")}
+          </p>
+        )}
 
         <div className="flex justify-end">
           <PrimaryButton type="submit" disabled={loading}>

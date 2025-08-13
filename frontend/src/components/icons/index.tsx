@@ -1,6 +1,5 @@
 import React from "react";
 
-// Definimos um tipo para as props dos ícones, que inclui todas as propriedades SVG padrão.
 type IconProps = React.SVGProps<SVGSVGElement>;
 
 export const HomeIcon: React.FC<IconProps> = (props) => (
@@ -353,7 +352,7 @@ export const TrashIcon: React.FC<IconProps> = (props) => (
   </svg>
 );
 
-export const ViewIcon: React.FC<IconProps> = (props) => (
+export const ViewIcon: React.FC<IconProps> = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     className="h-5 w-5"

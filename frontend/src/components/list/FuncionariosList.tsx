@@ -112,7 +112,7 @@ const FuncionariosList: React.FC = () => {
         setFuncionarios(response.data.data);
         setTotal(response.data.total);
         setTotalPages(response.data.totalPages);
-      } catch (error) {
+      } catch (_) {
         setFuncionarios([]);
         setTotal(0);
         setTotalPages(1);
@@ -136,8 +136,6 @@ const FuncionariosList: React.FC = () => {
   const onRowClick = (row: any) => {
     router.push(`/funcionario/${row.id}`);
   };
-
-  const dataParaTabela = search ? dadosFiltrados : dadosTabela;
 
   return (
     <div className="p-6">

@@ -5,7 +5,6 @@ import { ContatoInput, contatoSchema } from "@/schemas/contato.schema";
 import { useSafeForm } from "@/hook/useSafeForm";
 import { makeName } from "@/utils/makeName";
 import { FormInput } from "../input/FormInput";
-import Card from "../Card";
 
 type ContatoFormProps = {
   namePrefix: string; // ex: "empresa.contatos[0]"
@@ -28,10 +27,7 @@ function ContatoFormInner({
   const emailName = makeName<ContatoInput>(namePrefix, "email");
 
   return (
-    <Card
-      title="Contato"
-      classNameContent="flex justify-between flex-1/3 gap-2"
-    >
+    <>
       <FormInput
         name={telefoneName}
         control={control}
@@ -55,7 +51,7 @@ function ContatoFormInner({
         type="email"
         errors={errors}
       />
-    </Card>
+    </>
   );
 }
 export function ContatoForm({
