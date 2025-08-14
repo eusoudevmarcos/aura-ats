@@ -9,7 +9,7 @@ export class ClienteService {
     @inject(EmpresaRepository) private empresaRepository: EmpresaRepository
   ) {}
 
-  async save(clienteData: any): Promise<Cliente> {
+  async saveWithTransaction(clienteData: any): Promise<Cliente> {
     const { id, empresa, empresaId, status, tipoServico } = clienteData;
 
     if (!empresa && !empresaId) {
@@ -18,101 +18,120 @@ export class ClienteService {
       );
     }
 
-    let empresaFinal: Empresa;
+    return await prisma.$transaction(
+      async (prismaTransaction) => {
+        let empresaFinal: Empresa;
 
-    if (empresaId) {
-      const existingEmpresa = await this.empresaRepository.findById(
-        empresaId as string
-      );
+        if (empresaId) {
+          const existingEmpresa =
+            await this.empresaRepository.findByIdWithTransaction(
+              empresaId as string,
+              prismaTransaction
+            );
 
-      if (!existingEmpresa) {
-        throw new Error(`Empresa com ID ${empresaId} não encontrada.`);
-      }
+          if (!existingEmpresa) {
+            throw new Error(`Empresa com ID ${empresaId} não encontrada.`);
+          }
 
-      if (empresa && empresa.id === empresaId) {
-        empresaFinal = await this.empresaRepository.save({
-          ...empresa,
-          id: empresaId,
-        });
-      } else {
-        empresaFinal = existingEmpresa;
-      }
-    } else if (empresa) {
-      if (
-        !id &&
-        (!empresa.representantes || empresa.representantes.length === 0)
-      ) {
-        throw new Error(
-          "Ao criar uma nova empresa para o cliente, é obrigatório informar pelo menos um representante."
-        );
-      }
+          if (empresa && empresa.id === empresaId) {
+            empresaFinal = await this.empresaRepository.saveWithTransaction(
+              { ...empresa, id: empresaId },
+              prismaTransaction
+            );
+          } else {
+            empresaFinal = existingEmpresa;
+          }
+        } else if (empresa) {
+          if (
+            !id &&
+            (!empresa.representantes || empresa.representantes.length === 0)
+          ) {
+            throw new Error(
+              "Ao criar uma nova empresa para o cliente, é obrigatório informar pelo menos um representante."
+            );
+          }
 
-      const CNPJExiste = await this.empresaRepository.findByCnpj(empresa.cnpj);
+          const CNPJExiste =
+            await this.empresaRepository.findByCnpjWithTransaction(
+              empresa.cnpj,
+              prismaTransaction
+            );
 
-      if (CNPJExiste) {
-        empresaFinal = await this.empresaRepository.save({
-          ...empresa,
-          id: CNPJExiste.id,
-        });
-      } else {
-        empresaFinal = await this.empresaRepository.save(empresa);
-      }
-    } else {
-      throw new Error("Informações da empresa inválidas ou ausentes.");
-    }
+          if (CNPJExiste) {
+            empresaFinal = await this.empresaRepository.saveWithTransaction(
+              { ...empresa, id: CNPJExiste.id },
+              prismaTransaction
+            );
+          } else {
+            empresaFinal = await this.empresaRepository.saveWithTransaction(
+              empresa,
+              prismaTransaction
+            );
+          }
+        } else {
+          throw new Error("Informações da empresa inválidas ou ausentes.");
+        }
 
-    const clientePayload: any = {
-      status: status as StatusCliente,
-      tipoServico: tipoServico as TipoServico[],
-      empresa: {
-        connect: { id: empresaFinal.id },
+        const clientePayload: any = {
+          status: status as StatusCliente,
+          tipoServico: tipoServico as TipoServico[],
+          empresa: {
+            connect: { id: empresaFinal.id },
+          },
+        };
+
+        const includeRelations = {
+          empresa: {
+            include: {
+              contatos: true,
+              localizacoes: true,
+              representantes: true,
+              socios: true,
+            },
+          },
+        } as const;
+
+        if (id) {
+          const existingCliente = await prismaTransaction.cliente.findUnique({
+            where: { id },
+          });
+
+          if (!existingCliente) {
+            throw new Error(`Cliente com ID ${id} não encontrado.`);
+          }
+
+          return await prismaTransaction.cliente.update({
+            where: { id },
+            data: clientePayload,
+            include: includeRelations,
+          });
+        } else {
+          // Lógica para CRIAR Cliente dentro da transação
+          const existingClienteForEmpresa =
+            await prismaTransaction.cliente.findUnique({
+              where: { empresaId: empresaFinal.id },
+            });
+
+          if (existingClienteForEmpresa) {
+            throw new Error(
+              `Já existe um cliente associado à empresa com ID: ${empresaFinal.id}`
+            );
+          }
+          return await prismaTransaction.cliente.create({
+            data: clientePayload,
+            include: includeRelations,
+          });
+        }
       },
-    };
-
-    const includeRelations = {
-      empresa: {
-        include: {
-          contatos: true,
-          localizacoes: true,
-          representantes: true,
-          socios: true,
-        },
-      },
-    } as const;
-
-    if (id) {
-      const existingCliente = await prisma.cliente.findUnique({
-        where: { id },
-      });
-
-      if (!existingCliente) {
-        throw new Error(`Cliente com ID ${id} não encontrado.`);
+      {
+        maxWait: 5000,
+        timeout: 10000,
       }
-
-      return await prisma.cliente.update({
-        where: { id },
-        data: clientePayload,
-        include: includeRelations,
-      });
-    } else {
-      const existingClienteForEmpresa = await prisma.cliente.findUnique({
-        where: { empresaId: empresaFinal.id },
-      });
-
-      if (existingClienteForEmpresa) {
-        throw new Error(
-          `Já existe um cliente associado à empresa com ID: ${empresaFinal.id}`
-        );
-      }
-      return await prisma.cliente.create({
-        data: clientePayload,
-        include: includeRelations,
-      });
-    }
+    );
   }
 
   async update(clienteData: any, clienteId: string): Promise<Cliente> {
-    return this.save({ ...clienteData, id: clienteId });
+    return this.saveWithTransaction({ ...clienteData, id: clienteId });
   }
 
   async getClienteById(id: string): Promise<Cliente | null> {

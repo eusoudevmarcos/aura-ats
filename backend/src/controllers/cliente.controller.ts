@@ -9,7 +9,7 @@ export class ClienteController {
 
   async save(req: Request, res: Response) {
     try {
-      const response = await this.service.save(req.body);
+      const response = await this.service.saveWithTransaction(req.body);
       return res.status(200).json(response);
     } catch (error: any) {
       console.error("Erro no método save do ClienteController:", error);

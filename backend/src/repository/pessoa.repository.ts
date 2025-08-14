@@ -1,15 +1,8 @@
 // src/repository/pessoa.repository.ts
-import {
-  Contato,
-  Formacao,
-  Localizacao,
-  Pessoa,
-  TipoSocio,
-} from "@prisma/client";
+import { Pessoa, PrismaClient } from "@prisma/client";
 import { injectable } from "tsyringe";
-import prisma from "../lib/prisma"; // Importe o prisma aqui
+import prisma from "../lib/prisma";
 
-// Certifique-se de que os seus tipos PessoaCreateInput e PessoaUpdateInput estão corretos
 export type PessoaCreateInput = Omit<
   Pessoa,
   "id" | "createdAt" | "updatedAt" | "empresaRepresentadaId" | "empresaId"
@@ -26,7 +19,7 @@ export type PessoaUpdateInput = Partial<
     "id" | "createdAt" | "updatedAt" | "empresaRepresentadaId" | "empresaId"
   >
 > & {
-  id: string; // ID é necessário para atualização
+  id: string;
   contatos?: {
     create?: any[];
     connect?: { id: string }[];
@@ -45,10 +38,7 @@ export type PessoaUpdateInput = Partial<
 
 @injectable()
 export class PessoaRepository {
-  constructor() {} // Se não tiver dependências, o construtor pode estar vazio
-
   getCreateInput(pessoaData: any): PessoaCreateInput {
-    // Apenas prepara os dados para CRIAÇÃO
     return {
       nome: pessoaData.nome,
       cpf: pessoaData.cpf,
@@ -57,7 +47,6 @@ export class PessoaRepository {
         : null,
       rg: pessoaData.rg,
       estadoCivil: pessoaData.estadoCivil,
-      // Supondo que splitCreateConnect seja usado para contatos, localizacoes, etc.
       contatos: pessoaData.contatos
         ? { create: pessoaData.contatos }
         : undefined,
@@ -67,28 +56,29 @@ export class PessoaRepository {
       formacoes: pessoaData.formacoes
         ? { create: pessoaData.formacoes }
         : undefined,
-      // ... outras relações
     };
   }
 
-  // Novo método para buscar pessoa por CPF
   async findByCpf(cpf: string): Promise<Pessoa | null> {
     return await prisma.pessoa.findUnique({
       where: { cpf },
     });
   }
 
-  // Novo método para salvar (criar ou atualizar) a pessoa
-  async save(pessoaData: any): Promise<Pessoa> {
-    // Verifica se a pessoa já existe pelo ID, se fornecido
+  async save(
+    pessoaData: any,
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >
+  ): Promise<Pessoa> {
     if (pessoaData.id) {
-      const existing = await prisma.pessoa.findUnique({
+      const existing = await tx.pessoa.findUnique({
         where: { id: pessoaData.id },
       });
       if (existing) {
-        // É uma atualização
         const { id, ...updateData } = pessoaData;
-        return await prisma.pessoa.update({
+        return await tx.pessoa.update({
           where: { id },
           data: {
             ...updateData,
@@ -116,12 +106,10 @@ export class PessoaRepository {
       }
     }
 
-    // Se não tem ID ou não encontrou, tenta buscar por CPF (para evitar duplicidade)
     const existingByCpf = await this.findByCpf(pessoaData.cpf);
     if (existingByCpf) {
-      // Se a pessoa já existe pelo CPF, vamos atualizá-la
       const { id, ...updateData } = pessoaData;
-      return await prisma.pessoa.update({
+      return await tx.pessoa.update({
         where: { id: existingByCpf.id },
         data: {
           ...updateData,
@@ -144,14 +132,12 @@ export class PessoaRepository {
                   .map((l: any) => ({ where: { id: l.id }, data: l })),
               }
             : undefined,
-          // ... outras relações aninhadas para update
         } as any,
       });
     }
 
-    // Se a pessoa não existe (nem por ID, nem por CPF), então cria
     const dataToCreate = this.getCreateInput(pessoaData);
-    return await prisma.pessoa.create({
+    return await tx.pessoa.create({
       data: dataToCreate as any,
     });
   }

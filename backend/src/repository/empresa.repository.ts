@@ -1,27 +1,17 @@
-// src/repository/empresa.repository.ts
-// ... (imports existentes)
 import {
   Contato,
   Empresa,
   Localizacao,
   Pessoa,
+  PrismaClient,
   TipoSocio,
 } from "@prisma/client";
-import {
-  PessoaRepository,
-  PessoaCreateInput,
-  PessoaUpdateInput,
-} from "./pessoa.repository"; // Importe os novos tipos e o repo
+import { PessoaRepository, PessoaCreateInput } from "./pessoa.repository";
 import { ContatoCreateOrConnect } from "./contato.repository";
-import { LocalizacaoCreateOrConnect } from "./localizacao.repository";
 import { inject, injectable } from "tsyringe";
 import { splitCreateConnect } from "../utils/splitCreateConnect";
 import prisma from "../lib/prisma";
-
-type PessoaCreateOrConnectOrUpdateForRepresentante =
-  | PessoaCreateInput
-  | PessoaUpdateInput
-  | { id: string };
+import { LocalizacaoCreateOrConnect } from "../types/prisma.types";
 
 type EmpresaCreateInput = Omit<Empresa, "id" | "createdAt" | "updatedAt"> & {
   contatos?: {
@@ -86,7 +76,6 @@ export class EmpresaRepository {
 
   get(empresaData: any): EmpresaCreateInput | EmpresaUpdateInput {
     const baseData: any = {
-      // Usar 'any' temporariamente para a complexidade da tipagem aninhada
       razaoSocial: empresaData.razaoSocial,
       cnpj: empresaData.cnpj,
       dataAbertura: empresaData.dataAbertura
@@ -94,7 +83,6 @@ export class EmpresaRepository {
         : null,
       contatos: splitCreateConnect(empresaData.contatos),
       localizacoes: splitCreateConnect(empresaData.localizacoes),
-      // Representantes e Sócios serão processados na função 'save'
     };
 
     if (empresaData.id) {
@@ -103,23 +91,27 @@ export class EmpresaRepository {
     return baseData as EmpresaCreateInput;
   }
 
-  async save(empresaData: any): Promise<Empresa> {
+  async saveWithTransaction(
+    empresaData: any,
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >
+  ): Promise<Empresa> {
     const isUpdate = !!empresaData.id;
 
-    // Processar Representantes
     const representantesPayload: any[] = [];
     if (empresaData.representante && empresaData.representante.length > 0) {
       for (const rep of empresaData.representante) {
-        const savedPessoa = await this.pessoaRepository.save(rep); // Salva/atualiza a pessoa
-        representantesPayload.push({ id: savedPessoa.id }); // Adiciona para conexão
+        const savedPessoa = await this.pessoaRepository.save(rep, tx);
+        representantesPayload.push({ id: savedPessoa.id });
       }
     }
 
-    // Processar Sócios (similar ao representante, se aplicável)
     const sociosPayload: any[] = [];
     if (empresaData.socios && empresaData.socios.length > 0) {
       for (const socio of empresaData.socios) {
-        const savedPessoa = await this.pessoaRepository.save(socio.pessoa); // Salva/atualiza a pessoa do sócio
+        const savedPessoa = await this.pessoaRepository.save(socio.pessoa, tx);
         sociosPayload.push({
           tipoSocio: socio.tipoSocio,
           pessoa: { connect: { id: savedPessoa.id } },
@@ -127,16 +119,10 @@ export class EmpresaRepository {
       }
     }
 
-    const dataToSave = this.get(empresaData); // Pega os dados básicos da empresa
+    const dataToSave = this.get(empresaData);
 
-    // Agora, injeta as operações de conexão para representantes e sócios
     if (representantesPayload.length > 0) {
       if (isUpdate) {
-        // Para atualização, 'set' pode ser usado para substituir todos os representantes
-        // ou 'connect' para adicionar novos sem desconectar os existentes.
-        // Se a relação é 1:N (um para muitos), 'set' é geralmente o que se quer para atualização
-        // dos membros da lista. Se for 1:1, a lógica seria diferente.
-        // Vamos usar 'set' para simplicidade aqui, que substitui a lista atual.
         (dataToSave as EmpresaUpdateInput).representantes = {
           set: representantesPayload,
         };
@@ -149,8 +135,7 @@ export class EmpresaRepository {
 
     if (sociosPayload.length > 0) {
       if (isUpdate) {
-        // Similar ao representante, use 'set' ou 'connect'/'create'
-        (dataToSave as EmpresaUpdateInput).socios = { create: sociosPayload }; // 'create' aqui porque é um N:M através de uma tabela de junção
+        (dataToSave as EmpresaUpdateInput).socios = { create: sociosPayload };
       } else {
         (dataToSave as EmpresaCreateInput).socios = { create: sociosPayload };
       }
@@ -158,19 +143,26 @@ export class EmpresaRepository {
 
     if (isUpdate) {
       const { id, ...updateData } = dataToSave as EmpresaUpdateInput;
-      return await prisma.empresa.update({
+      return await tx.empresa.update({
         where: { id: id },
         data: updateData as any,
       });
     } else {
-      return await prisma.empresa.create({
+      return await tx.empresa.create({
         data: dataToSave as any,
       });
     }
   }
 
-  async findById(id: string): Promise<Empresa | null> {
-    return await prisma.empresa.findUnique({
+  async findByIdWithTransaction(
+    id: string,
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >
+  ): Promise<Empresa | null> {
+    return await tx.empresa.findUnique({
+      // Use tx aqui
       where: { id },
       include: {
         contatos: true,
@@ -184,10 +176,29 @@ export class EmpresaRepository {
       },
     });
   }
-
-  async findByCnpj(cnpj: string): Promise<Empresa | null> {
-    return await prisma.empresa.findFirst({
+  async findByCnpjWithTransaction(
+    cnpj: string,
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >
+  ): Promise<Empresa | null> {
+    return await tx.empresa.findFirst({
+      // Use tx aqui
       where: { cnpj },
     });
+  }
+
+  // Métodos 'save', 'findById', 'findByCnpj' que podem ser chamados fora de uma transação, usando 'prisma' global.
+  async save(empresaData: any): Promise<Empresa> {
+    return this.saveWithTransaction(empresaData, prisma);
+  }
+
+  async findById(id: string): Promise<Empresa | null> {
+    return this.findByIdWithTransaction(id, prisma);
+  }
+
+  async findByCnpj(cnpj: string): Promise<Empresa | null> {
+    return this.findByCnpjWithTransaction(cnpj, prisma);
   }
 }

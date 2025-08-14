@@ -14,7 +14,6 @@ export class FuncionarioRepository {
   }
 
   async getFisrt(id: string): Promise<Funcionario | null> {
-    // Atualiza uma funcionario existente no banco de dados
     return await prisma.funcionario.findFirst({ where: { id } });
   }
 }

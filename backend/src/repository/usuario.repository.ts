@@ -1,12 +1,6 @@
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import {
-  UsuarioSistema,
-  TipoUsuario,
-  Pessoa,
-  Empresa,
-  Funcionario,
-} from "@prisma/client";
+import { UsuarioSistema, Pessoa, Empresa, Funcionario } from "@prisma/client";
 
 type PessoaConnectOrCreate =
   | { connect: { id: string } }
@@ -41,7 +35,7 @@ export class UsuarioSistemaRepository {
         where: { id: usuarioSistemaData.id },
         data: {
           ...usuarioSistemaData,
-          pessoa: pessoa ? (pessoa as any) : undefined, // Prisma espera connect/create aqui
+          pessoa: pessoa ? (pessoa as any) : undefined,
           empresa: empresa ? (empresa as any) : undefined,
           funcionario: funcionario ? { create: funcionario.create } : undefined,
         },
