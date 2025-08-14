@@ -39,7 +39,7 @@ export class FuncionarioController {
 
   async createPessoa(req: Request, res: Response) {
     try {
-      const funcionario = await this.service.saveFuncionarioPessoa(req.body);
+      const funcionario = await this.service.save(req.body);
       return res.status(201).json(funcionario);
     } catch (error: any) {
       return res.status(400).json({
@@ -51,7 +51,7 @@ export class FuncionarioController {
 
   async createEmpresa(req: Request, res: Response) {
     try {
-      const funcionario = await this.service.saveFuncionarioEmpresa(req.body);
+      const funcionario = await this.service.save(req.body);
       return res.status(201).json(funcionario);
     } catch (error: any) {
       return res.status(400).json({

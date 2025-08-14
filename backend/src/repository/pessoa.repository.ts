@@ -65,7 +65,7 @@ export class PessoaRepository {
     });
   }
 
-  async save(
+  async saveWithTransaction(
     pessoaData: any,
     tx: Omit<
       PrismaClient,

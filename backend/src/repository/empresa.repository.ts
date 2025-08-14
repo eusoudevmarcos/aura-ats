@@ -7,11 +7,13 @@ import {
   TipoSocio,
 } from "@prisma/client";
 import { PessoaRepository, PessoaCreateInput } from "./pessoa.repository";
-import { ContatoCreateOrConnect } from "./contato.repository";
 import { inject, injectable } from "tsyringe";
 import { splitCreateConnect } from "../utils/splitCreateConnect";
 import prisma from "../lib/prisma";
-import { LocalizacaoCreateOrConnect } from "../types/prisma.types";
+import {
+  ContatoCreateOrConnect,
+  LocalizacaoCreateOrConnect,
+} from "../types/prisma.types";
 
 type EmpresaCreateInput = Omit<Empresa, "id" | "createdAt" | "updatedAt"> & {
   contatos?: {
@@ -103,7 +105,10 @@ export class EmpresaRepository {
     const representantesPayload: any[] = [];
     if (empresaData.representante && empresaData.representante.length > 0) {
       for (const rep of empresaData.representante) {
-        const savedPessoa = await this.pessoaRepository.save(rep, tx);
+        const savedPessoa = await this.pessoaRepository.saveWithTransaction(
+          rep,
+          tx
+        );
         representantesPayload.push({ id: savedPessoa.id });
       }
     }
@@ -111,7 +116,10 @@ export class EmpresaRepository {
     const sociosPayload: any[] = [];
     if (empresaData.socios && empresaData.socios.length > 0) {
       for (const socio of empresaData.socios) {
-        const savedPessoa = await this.pessoaRepository.save(socio.pessoa, tx);
+        const savedPessoa = await this.pessoaRepository.saveWithTransaction(
+          socio.pessoa,
+          tx
+        );
         sociosPayload.push({
           tipoSocio: socio.tipoSocio,
           pessoa: { connect: { id: savedPessoa.id } },
