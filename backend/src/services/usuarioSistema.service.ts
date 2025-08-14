@@ -2,10 +2,10 @@
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import bcrypt from "bcryptjs";
-import { PessoaRepository } from "../repository/pessoa.repository"; // Importe o PessoaRepository
-import { EmpresaRepository } from "../repository/empresa.repository"; // Importe o EmpresaRepository
-import { Empresa, Pessoa, UsuarioSistema, TipoUsuario } from "@prisma/client"; // Adicione tipos necessários
-// ...
+import { PessoaRepository } from "../repository/pessoa.repository";
+import { EmpresaRepository } from "../repository/empresa.repository";
+import { Empresa, Pessoa, UsuarioSistema, TipoUsuario } from "@prisma/client";
+
 @injectable()
 export class UsuarioSistemaService {
   constructor(
@@ -38,7 +38,6 @@ export class UsuarioSistemaService {
     const skip = (page - 1) * pageSize;
 
     try {
-      // Consulta os usuários com paginação
       const usuarios = await prisma.usuarioSistema.findMany({
         skip: skip,
         take: pageSize,
@@ -71,9 +70,9 @@ export class UsuarioSistemaService {
     } catch (error) {
       console.error("Erro ao buscar usuários do sistema:", error);
       throw new Error("Não foi possível buscar os usuários do sistema.");
-    } finally {
-      await prisma.$disconnect(); // Desconecta o Prisma após a operação
     }
+    // Removido `finally { await prisma.$disconnect(); }`
+    // Gerenciamento de conexão é feito pelo Tsyringe/singleton de Prisma.
   }
 
   async save(data: any): Promise<UsuarioSistema> {
@@ -114,17 +113,21 @@ export class UsuarioSistemaService {
         if (!cpfLimpo) {
           throw new Error("CPF é obrigatório para usuário tipo Pessoa.");
         }
-        const pessoaExistentePorCpf =
-          await this.pessoaRepository.saveWithTransaction(cpfLimpo, tx);
+
+        const existingPessoaByCpf =
+          await this.pessoaRepository.findByCpfWithTransaction(cpfLimpo, tx);
+
         if (
-          pessoaExistentePorCpf &&
-          pessoaExistentePorCpf.id !== (data.pessoa.id || data.id)
+          existingPessoaByCpf &&
+          existingPessoaByCpf.id !== (data.pessoa.id || undefined)
         ) {
-          throw new Error("CPF já cadastrado para outra pessoa.");
+          throw new Error(
+            `CPF '${data.pessoa.cpf}' já cadastrado para outra pessoa.`
+          );
         }
 
         const savedPessoa = await this.pessoaRepository.saveWithTransaction(
-          data.pessoa,
+          { ...data.pessoa, cpf: cpfLimpo },
           tx
         );
         pessoaIdToConnect = savedPessoa.id;
@@ -137,13 +140,17 @@ export class UsuarioSistemaService {
         if (!cnpjLimpo) {
           throw new Error("CNPJ é obrigatório para usuário tipo Empresa.");
         }
-        const empresaExistentePorCnpj =
+
+        const existingEmpresaByCnpj =
           await this.empresaRepository.findByCnpjWithTransaction(cnpjLimpo, tx);
+
         if (
-          empresaExistentePorCnpj &&
-          empresaExistentePorCnpj.id !== (data.empresa.id || data.id)
+          existingEmpresaByCnpj &&
+          existingEmpresaByCnpj.id !== (data.empresa.id || undefined)
         ) {
-          throw new Error("CNPJ já cadastrado para outra empresa.");
+          throw new Error(
+            `CNPJ '${data.empresa.cnpj}' já cadastrado para outra empresa.`
+          );
         }
 
         const savedEmpresa = await this.empresaRepository.saveWithTransaction(
@@ -165,22 +172,6 @@ export class UsuarioSistemaService {
         email: data.email,
         tipoUsuario: data.tipoUsuario as TipoUsuario,
         ...(hashedPassword ? { password: hashedPassword } : {}),
-        funcionario: {
-          upsert: {
-            where: {
-              usuarioSistemaId:
-                data.id || "00000000-0000-0000-0000-000000000000",
-            },
-            create: {
-              setor: data.setor,
-              cargo: data.cargo,
-            },
-            update: {
-              setor: data.setor,
-              cargo: data.cargo,
-            },
-          },
-        },
       };
 
       if (pessoaIdToConnect) {
@@ -194,7 +185,6 @@ export class UsuarioSistemaService {
           include: {
             contatos: true,
             localizacoes: true,
-            formacoes: true,
           },
         },
         empresa: {
@@ -209,19 +199,56 @@ export class UsuarioSistemaService {
       };
 
       if (!data.id) {
+        // Criar novo usuário
+        // Quando criamos um UsuarioSistema, se houver dados de funcionário, usamos 'create'
+        if (data.setor || data.cargo) {
+          usuarioSistemaData.funcionario = {
+            create: {
+              setor: data.setor,
+              cargo: data.cargo,
+            },
+          };
+        }
+
         const newUsuario = await tx.usuarioSistema.create({
           data: usuarioSistemaData,
           include: includeRelations,
         });
         return newUsuario;
       } else {
+        // Atualizar usuário existente
         const existingUsuario = await tx.usuarioSistema.findUnique({
           where: { id: data.id },
+          include: { funcionario: true }, // Incluir funcionário para verificar se já existe
         });
         if (!existingUsuario) {
           throw new Error(
             "Usuário do sistema não encontrado para atualização."
           );
+        }
+
+        // Lógica para atualização do funcionário (se existir ou se for para criar/atualizar)
+        if (data.setor || data.cargo) {
+          usuarioSistemaData.funcionario = existingUsuario.funcionario
+            ? {
+                // Se o funcionário já existe, faz update
+                update: {
+                  setor: data.setor,
+                  cargo: data.cargo,
+                },
+              }
+            : {
+                // Se o funcionário não existe, mas dados foram fornecidos, cria
+                create: {
+                  setor: data.setor,
+                  cargo: data.cargo,
+                },
+              };
+        } else if (existingUsuario.funcionario) {
+          // Se não há dados de setor/cargo no input, mas um funcionário existe,
+          // podemos considerar deletá-lo ou deixá-lo como está.
+          // Por enquanto, vamos manter se não for especificado para apagar.
+          // Para deletar, você precisaria de uma flag ou outro controle.
         }
 
         const updatedUsuario = await tx.usuarioSistema.update({
