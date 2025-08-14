@@ -60,7 +60,7 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
       <div className="col-span-full" title="Contato do representante">
         <h3 className="text-xl font-bold">Contato do representante</h3>
         <section className="flex w-full gap-2">
-          <ContatoForm namePrefix={`${namePrefix}.contato[0]`} />
+          <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
         </section>
       </div>
     </section>

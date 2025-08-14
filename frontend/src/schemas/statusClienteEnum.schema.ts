@@ -1,9 +1,10 @@
 import z from "zod";
 
 export const StatusClienteEnum = z.enum([
+  "PROSPECT",
+  "LEAD",
   "ATIVO",
   "INATIVO",
-  "PENDENTE",
-  "LEAD",
 ]);
+
 export type StatusClienteEnumInput = z.infer<typeof StatusClienteEnum>;

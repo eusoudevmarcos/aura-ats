@@ -14,7 +14,7 @@ export const empresaSchema = z.object({
   dataAbertura: zDateValidate,
   contatos: z.array(contatoSchema),
   localizacoes: z.array(localizacaoSchema),
-  representante: z.array(pessoaSchema),
+  representantes: z.array(pessoaSchema),
 });
 
 export type EmpresaInput = z.infer<typeof empresaSchema>;

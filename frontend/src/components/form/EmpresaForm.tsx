@@ -82,7 +82,7 @@ const EmpresaForm = ({
 
         <div title="Representante">
           <h3 className="text-xl font-bold">Representante</h3>
-          <PessoaForm namePrefix={`${namePrefix}.representante[0]`} />
+          <PessoaForm namePrefix={`${namePrefix}.representantes[0]`} />
         </div>
       </div>
     </section>
