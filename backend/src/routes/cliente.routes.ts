@@ -1,8 +1,9 @@
 import { Router } from "express";
 import { ClienteController } from "../controllers/cliente.controller";
+import { container } from "tsyringe";
 
 const router = Router();
-const controller = new ClienteController();
+const controller = container.resolve(ClienteController);
 
 router.post("/save", (req, res) => controller.save(req, res));
 router.put("/save/:id", (req, res) => controller.save(req, res));

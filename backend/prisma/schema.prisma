@@ -51,10 +51,11 @@ enum TipoServico {
 }
 
 enum StatusCliente {
+  PROSPECT
+  LEAD
   ATIVO
   INATIVO
   PENDENTE
-  LEAD
 }
 
 model Pessoa {
@@ -85,10 +86,10 @@ model Empresa {
   dataAbertura   DateTime?
   contatos       Contato[]
   localizacoes   Localizacao[]
-  usuarioSistema UsuarioSistema[] // Uma Empresa pode ter um UsuarioSistema
+  usuarioSistema UsuarioSistema[]
   socios         Socio[]
-  representante  Pessoa[]         @relation("EmpresaRepresentantes") // Empresa tem vários representantes (Pessoa)
-  cliente        Cliente? // Uma Empresa pode ser um Cliente (0 ou 1)
+  representantes Pessoa[]         @relation("EmpresaRepresentantes")
+  cliente        Cliente?
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 }
@@ -111,13 +112,11 @@ model UsuarioSistema {
 
 model Cliente {
   id          String        @id @default(uuid())
-  empresaId   String        @unique // Garante que cada Cliente está ligado a uma Empresa única e uma Empresa é Cliente apenas uma vez
+  empresaId   String        @unique
   empresa     Empresa       @relation(fields: [empresaId], references: [id])
   tipoServico TipoServico[]
   status      StatusCliente
-  vagas       Vaga[] // Cliente pode ter várias vagas
-  // Relação com UsuarioSistema é feita através da Empresa.
-  // Se a empresa é um Cliente, o UsuarioSistema associado a essa empresa é o login do Cliente.
+  vagas       Vaga[]
 }
 
 model Candidato {
@@ -192,13 +191,12 @@ model Vaga {
   titulo        String
   descricao     String
   create_at     DateTime      @default(now())
-  update_at     DateTime      @default(now()) @updatedAt // Adicionado @updatedAt para rastrear a última atualização
+  update_at     DateTime      @default(now()) @updatedAt
   areaCandidato AreaCandidato
 
-  clienteId String // Uma Vaga pertence a um Cliente. Removido @unique para permitir vários vagas por cliente
+  clienteId String
   cliente   Cliente @relation(fields: [clienteId], references: [id])
 
-  // Relação N:N com Candidato
   candidatos Candidato[]
 
   agenda   Agenda @relation(fields: [agendaId], references: [id])
@@ -207,7 +205,7 @@ model Vaga {
 
 model Agenda {
   id   String @id @default(uuid())
-  Vaga Vaga[] // Uma Agenda pode ter várias Vagas
+  Vaga Vaga[]
 }
 
 model Especialidade {
