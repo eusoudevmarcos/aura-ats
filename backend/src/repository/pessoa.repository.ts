@@ -2,39 +2,7 @@
 import { Pessoa, PrismaClient } from "@prisma/client";
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-
-export type PessoaCreateInput = Omit<
-  Pessoa,
-  "id" | "createdAt" | "updatedAt" | "empresaRepresentadaId" | "empresaId"
-> & {
-  contatos?: { create?: any[]; connect?: { id: string }[] };
-  localizacoes?: { create?: any[]; connect?: { id: string }[] };
-  formacoes?: { create?: any[] };
-  socios?: { create?: any[] };
-};
-
-export type PessoaUpdateInput = Partial<
-  Omit<
-    Pessoa,
-    "id" | "createdAt" | "updatedAt" | "empresaRepresentadaId" | "empresaId"
-  >
-> & {
-  id: string;
-  contatos?: {
-    create?: any[];
-    connect?: { id: string }[];
-    update?: any[];
-    delete?: any[];
-  };
-  localizacoes?: {
-    create?: any[];
-    connect?: { id: string }[];
-    update?: any[];
-    delete?: any[];
-  };
-  formacoes?: { create?: any[]; update?: any[]; delete?: any[] };
-  socios?: { create?: any[]; update?: any[]; delete?: any[] };
-};
+import { PessoaCreateInput } from "../types/prisma.types";
 
 @injectable()
 export class PessoaRepository {
@@ -63,6 +31,48 @@ export class PessoaRepository {
     return await prisma.pessoa.findUnique({
       where: { cpf },
     });
+  }
+
+  async findByIdWithTransaction(
+    id: string,
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >
+  ): Promise<Pessoa | null> {
+    return await tx.pessoa.findUnique({
+      where: { id },
+      include: {
+        contatos: true,
+        localizacoes: true,
+        usuarioSistema: true,
+        socios: true,
+        candidato: true,
+      },
+    });
+  }
+
+  async findByCpfWithTransaction(
+    cpf: string,
+    tx: Omit<
+      PrismaClient,
+      "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+    >
+  ): Promise<Pessoa | null> {
+    return await tx.pessoa.findUnique({
+      where: { cpf },
+      include: {
+        contatos: true,
+        localizacoes: true,
+        usuarioSistema: true,
+        socios: true,
+        candidato: true,
+      },
+    });
+  }
+
+  async findById(id: string): Promise<Pessoa | null> {
+    return this.findByIdWithTransaction(id, prisma);
   }
 
   async saveWithTransaction(

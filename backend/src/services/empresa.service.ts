@@ -1,76 +1,9 @@
-import {
-  Contato,
-  Empresa,
-  Formacao,
-  Localizacao,
-  Pessoa,
-  TipoSocio,
-} from "@prisma/client";
+import { Empresa } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import { splitCreateConnect } from "../utils/splitCreateConnect";
 import prisma from "../lib/prisma";
-import {
-  ContatoCreateOrConnect,
-  LocalizacaoCreateOrConnect,
-  PessoaCreateInput,
-} from "../types/prisma.types";
+import { EmpresaCreateInput, EmpresaUpdateInput } from "../types/prisma.types";
 import { PessoaRepository } from "../repository/pessoa.repository";
-
-type PessoaCreateOrConnectForRepresentante = PessoaCreateInput | { id: string };
-
-type EmpresaCreateInput = Omit<Empresa, "id" | "createdAt" | "updatedAt"> & {
-  contatos?: {
-    create?: ContatoCreateOrConnect[];
-    connect?: Pick<Contato, "id">[];
-  };
-  localizacoes?: {
-    create?: LocalizacaoCreateOrConnect[];
-    connect?: Pick<Localizacao, "id">[];
-  };
-  representante?: {
-    create?: PessoaCreateOrConnectForRepresentante[];
-    connect?: Pick<Pessoa, "id">[];
-  };
-  socios?: {
-    create?: {
-      tipoSocio: TipoSocio;
-      pessoa: {
-        create?: PessoaCreateInput;
-        connect?: Pick<Pessoa, "id">;
-      };
-    }[];
-  };
-};
-
-export type EmpresaUpdateInput = Partial<
-  Omit<Empresa, "id" | "createdAt" | "updatedAt">
-> & {
-  id: string;
-  contatos?: {
-    create?: ContatoCreateOrConnect[];
-    connect?: Pick<Contato, "id">[];
-    update?: { where: Pick<Contato, "id">; data: Partial<Contato> }[];
-  };
-  localizacoes?: {
-    create?: LocalizacaoCreateOrConnect[];
-    connect?: Pick<Localizacao, "id">[];
-    update?: { where: Pick<Localizacao, "id">; data: Partial<Localizacao> }[];
-  };
-  representante?: {
-    create?: PessoaCreateOrConnectForRepresentante[];
-    connect?: Pick<Pessoa, "id">[];
-    set?: Pick<Pessoa, "id">[];
-  };
-  socios?: {
-    create?: {
-      tipoSocio: TipoSocio;
-      pessoa: {
-        create?: PessoaCreateInput;
-        connect?: Pick<Pessoa, "id">;
-      };
-    }[];
-  };
-};
 
 @injectable()
 export class EmpresaRepository {
@@ -93,7 +26,7 @@ export class EmpresaRepository {
             return this.pessoaRepository.getCreateInput(p);
           }
         })
-      ) as EmpresaCreateInput["representante"],
+      ) as EmpresaCreateInput["representantes"],
       contatos: splitCreateConnect(
         empresaData.contatos
       ) as EmpresaCreateInput["contatos"],
@@ -118,7 +51,8 @@ export class EmpresaRepository {
     return baseData as EmpresaCreateInput;
   }
 
-  async save(empresaData: any): Promise<Empresa> {
+  async save(empresaData: EmpresaUpdateInput): Promise<Empresa> {
+    empresaData.cnpj = empresaData.cnpj?.replace(/\D/g, "");
     const data = this.get(empresaData);
 
     if ((data as EmpresaUpdateInput).id) {

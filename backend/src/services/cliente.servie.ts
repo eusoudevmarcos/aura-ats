@@ -11,6 +11,7 @@ export class ClienteService {
 
   async saveWithTransaction(clienteData: any): Promise<Cliente> {
     const { id, empresa, empresaId, status, tipoServico } = clienteData;
+    empresa.cnpj = empresa.cnpj.replace(/\D/g, "");
 
     if (!empresa && !empresaId) {
       throw new Error(

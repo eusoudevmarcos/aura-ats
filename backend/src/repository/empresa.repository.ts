@@ -1,74 +1,9 @@
-import {
-  Contato,
-  Empresa,
-  Localizacao,
-  Pessoa,
-  PrismaClient,
-  TipoSocio,
-} from "@prisma/client";
-import { PessoaRepository, PessoaCreateInput } from "./pessoa.repository";
+import { Empresa, PrismaClient } from "@prisma/client";
+import { PessoaRepository } from "./pessoa.repository";
 import { inject, injectable } from "tsyringe";
 import { splitCreateConnect } from "../utils/splitCreateConnect";
 import prisma from "../lib/prisma";
-import {
-  ContatoCreateOrConnect,
-  LocalizacaoCreateOrConnect,
-} from "../types/prisma.types";
-
-type EmpresaCreateInput = Omit<Empresa, "id" | "createdAt" | "updatedAt"> & {
-  contatos?: {
-    create?: ContatoCreateOrConnect[];
-    connect?: Pick<Contato, "id">[];
-  };
-  localizacoes?: {
-    create?: LocalizacaoCreateOrConnect[];
-    connect?: Pick<Localizacao, "id">[];
-  };
-  representantes?: {
-    create?: Omit<PessoaCreateInput, "id">[];
-    connect?: Pick<Pessoa, "id">[];
-  };
-  socios?: {
-    create?: {
-      tipoSocio: TipoSocio;
-      pessoa: {
-        create?: PessoaCreateInput;
-        connect?: Pick<Pessoa, "id">;
-      };
-    }[];
-  };
-};
-
-export type EmpresaUpdateInput = Partial<
-  Omit<Empresa, "id" | "createdAt" | "updatedAt">
-> & {
-  id: string;
-  contatos?: {
-    create?: ContatoCreateOrConnect[];
-    connect?: Pick<Contato, "id">[];
-    update?: { where: Pick<Contato, "id">; data: Partial<Contato> }[];
-  };
-  localizacoes?: {
-    create?: LocalizacaoCreateOrConnect[];
-    connect?: Pick<Localizacao, "id">[];
-    update?: { where: Pick<Localizacao, "id">; data: Partial<Localizacao> }[];
-  };
-
-  representantes?: {
-    create?: Omit<PessoaCreateInput, "id">[];
-    connect?: Pick<Pessoa, "id">[];
-    set?: Pick<Pessoa, "id">[];
-  };
-  socios?: {
-    create?: {
-      tipoSocio: TipoSocio;
-      pessoa: {
-        create?: PessoaCreateInput;
-        connect?: Pick<Pessoa, "id">;
-      };
-    }[];
-  };
-};
+import { EmpresaCreateInput, EmpresaUpdateInput } from "../types/prisma.types";
 
 @injectable()
 export class EmpresaRepository {

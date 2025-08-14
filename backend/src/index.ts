@@ -7,10 +7,11 @@ dotenv.config();
 
 import authenticationRoutes from "./routes/authentication.routes";
 import userRoutes from "./routes/user.routes";
-import candidateRoutes from "./routes/candidate.routes";
+import candidatoRoutes from "./routes/candidato.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
 import clienteRoutes from "./routes/cliente.routes";
+
 const app = express();
 const PORT = process.env.PORT;
 
@@ -41,10 +42,11 @@ app.use(express.json());
 // ROTAS
 app.use("/api/auth", authenticationRoutes);
 app.use("/api/users", userRoutes);
-app.use("/api/candidates", candidateRoutes);
+app.use("/api/candidates", candidatoRoutes);
 app.use("/api/take-it", datastoneRoutes);
 app.use("/api/funcionario", funcionarioRoutes);
 app.use("/api/cliente", clienteRoutes);
+app.use("/api/candidato", candidatoRoutes);
 
 // START SERVER
 app.listen(PORT, () => {

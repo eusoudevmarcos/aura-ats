@@ -7,10 +7,12 @@ import {
   Funcionario,
   Formacao,
   TipoSocio,
-  Cliente,
   StatusCliente,
   TipoServico,
   UsuarioSistema,
+  Especialidade,
+  Prisma,
+  PrismaClient,
 } from "@prisma/client";
 
 export type ContatoCreateOrConnect =
@@ -75,7 +77,43 @@ export type EmpresaCreateInput = Omit<
     connect?: Pick<Pessoa, "id">[];
   };
   socios?: {
-    create?: SocioCreateForEmpresa[];
+    create?: {
+      tipoSocio: TipoSocio;
+      pessoa: {
+        create?: PessoaCreateInput;
+        connect?: Pick<Pessoa, "id">;
+      };
+    }[];
+  };
+};
+
+export type EmpresaUpdateInput = Partial<
+  Omit<Empresa, "createdAt" | "updatedAt">
+> & {
+  id: string;
+  contatos?: {
+    create?: ContatoCreateOrConnect[];
+    connect?: Pick<Contato, "id">[];
+    update?: { where: Pick<Contato, "id">; data: Partial<Contato> }[];
+  };
+  localizacoes?: {
+    create?: LocalizacaoCreateOrConnect[];
+    connect?: Pick<Localizacao, "id">[];
+    update?: { where: Pick<Localizacao, "id">; data: Partial<Localizacao> }[];
+  };
+  representantes?: {
+    create?: PessoaCreateOrConnectForRepresentante[];
+    connect?: Pick<Pessoa, "id">[];
+    set?: Pick<Pessoa, "id">[];
+  };
+  socios?: {
+    create?: {
+      tipoSocio: TipoSocio;
+      pessoa: {
+        create?: PessoaCreateInput;
+        connect?: Pick<Pessoa, "id">;
+      };
+    }[];
   };
 };
 
@@ -102,7 +140,6 @@ export type UsuarioSistemaCreateInput = Omit<UsuarioSistema, "id"> & {
   };
 };
 
-// Cliente-specific types
 export type ClientePrismaCreateInput = {
   status: StatusCliente;
   tipoServico: TipoServico[];
@@ -140,3 +177,78 @@ export const splitCreateConnect = <T extends { id?: string }>(
 
   return Object.keys(result).length ? result : undefined;
 };
+
+export type PessoaCreateInputNested = Omit<
+  Prisma.PessoaCreateInput,
+  "contatos" | "localizacoes" | "formacoes"
+> & {
+  contatos?: {
+    create?: ContatoCreateOrConnect[];
+    connect?: Prisma.ContatoWhereUniqueInput[];
+  };
+  localizacoes?: {
+    create?: LocalizacaoCreateOrConnect[];
+    connect?: Prisma.LocalizacaoWhereUniqueInput[];
+  };
+  formacoes?: { create?: Prisma.FormacaoCreateInput[] };
+};
+
+export type PessoaUpdateInputNested = Partial<
+  Omit<Prisma.PessoaUpdateInput, "contatos" | "localizacoes" | "formacoes">
+> & {
+  id?: string;
+  contatos?: {
+    create?: ContatoCreateOrConnect[];
+    update?: Prisma.ContatoUpdateWithWhereUniqueWithoutPessoaInput[];
+    delete?: Prisma.ContatoWhereUniqueInput[];
+  };
+  localizacoes?: {
+    create?: LocalizacaoCreateOrConnect[];
+    update?: Prisma.LocalizacaoUpdateWithWhereUniqueWithoutPessoaInput[];
+    delete?: Prisma.LocalizacaoWhereUniqueInput[];
+  };
+  formacoes?: {
+    create?: Prisma.FormacaoCreateInput[];
+    // update?: Prisma.FormacaoUpdateWithWhereUniqueWithoutPessoaInput[];
+    delete?: Prisma.FormacaoWhereUniqueInput[];
+  };
+};
+export type CandidatoCreateInput = Omit<
+  Prisma.CandidatoCreateInput,
+  "pessoa" | "especialidade" | "vagas"
+> & {
+  pessoa: {
+    create?: PessoaCreateInputNested;
+    connect?: Prisma.PessoaWhereUniqueInput;
+  };
+  especialidade?: {
+    connect?: Prisma.EspecialidadeWhereUniqueInput;
+  };
+  vagas?: {
+    connect?: Prisma.VagaWhereUniqueInput[];
+  };
+};
+
+export type CandidatoUpdateInput = Partial<
+  Omit<Prisma.CandidatoUpdateInput, "pessoa" | "especialidade" | "vagas">
+> & {
+  id: string;
+  pessoa?: {
+    update?: PessoaUpdateInputNested;
+    connect?: Prisma.PessoaWhereUniqueInput;
+    disconnect?: boolean;
+  };
+  especialidade?: {
+    connect?: Prisma.EspecialidadeWhereUniqueInput;
+    disconnect?: boolean;
+  };
+  vagas?: {
+    connect?: Prisma.VagaWhereUniqueInput[];
+    set?: Prisma.VagaWhereUniqueInput[];
+  };
+};
+
+export type PrismaTransactionClient = Omit<
+  PrismaClient,
+  "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
+>;

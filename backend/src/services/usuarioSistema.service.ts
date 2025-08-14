@@ -21,7 +21,6 @@ export class UsuarioSistemaService {
           include: {
             contatos: true,
             localizacoes: true,
-            formacoes: true,
           },
         },
         funcionario: true,
@@ -49,7 +48,6 @@ export class UsuarioSistemaService {
             include: {
               contatos: true,
               localizacoes: true,
-              formacoes: true,
             },
           },
           empresa: {

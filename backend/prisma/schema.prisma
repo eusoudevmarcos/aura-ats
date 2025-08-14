@@ -67,7 +67,6 @@ model Pessoa {
   estadoCivil    EstadoCivil?
   contatos       Contato[]
   localizacoes   Localizacao[]
-  formacoes      Formacao[]
   usuarioSistema UsuarioSistema[]
   socios         Socio[]
   candidato      Candidato[]
@@ -121,8 +120,8 @@ model Cliente {
 model Candidato {
   id              String         @id @default(uuid())
   areaCandidato   AreaCandidato
-  pessoaId        String?        @unique
-  pessoa          Pessoa?        @relation(fields: [pessoaId], references: [id])
+  pessoaId        String         @unique
+  pessoa          Pessoa         @relation(fields: [pessoaId], references: [id])
   crm             String?
   corem           String?
   rqe             String?
@@ -130,6 +129,7 @@ model Candidato {
   especialidadeId Int?
   agendaId        String?
   vagas           Vaga[]
+  formacoes       Formacao[]
 }
 
 model Socio {
@@ -180,8 +180,8 @@ model Formacao {
   dataConclusaoMedicina   DateTime?
   dataConclusaoResidencia DateTime?
 
-  pessoaId String?
-  pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
+  Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+  candidatoId String?
 }
 
 model Vaga {

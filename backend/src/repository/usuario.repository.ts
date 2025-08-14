@@ -1,21 +1,11 @@
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { UsuarioSistema, Pessoa, Empresa, Funcionario } from "@prisma/client";
-
-type PessoaConnectOrCreate =
-  | { connect: { id: string } }
-  | {
-      create: Omit<
-        Pessoa,
-        "id" | "createdAt" | "updatedAt" | "empresaRepresentadaId"
-      >;
-    };
-
-type EmpresaConnectOrCreate =
-  | { connect: { id: string } }
-  | { create: Omit<Empresa, "id" | "createdAt" | "updatedado"> };
-
-type FuncionarioCreate = Omit<Funcionario, "id" | "usuarioSistemaId">;
+import { UsuarioSistema } from "@prisma/client";
+import {
+  EmpresaConnectOrCreate,
+  FuncionarioCreate,
+  PessoaConnectOrCreate,
+} from "../types/prisma.types";
 
 export type UsuarioSistemaCreateInput = UsuarioSistema & {
   pessoa?: PessoaConnectOrCreate;
