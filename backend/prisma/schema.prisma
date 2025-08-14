@@ -65,16 +65,15 @@ model Pessoa {
   dataNascimento DateTime?
   rg             String?
   estadoCivil    EstadoCivil?
-  contatos       Contato[] // contatos ligados à pessoa
-  localizacoes   Localizacao[] // localizações ligadas à pessoa
-  formacoes      Formacao[] // formações ligadas à pessoa
-  usuarioSistema UsuarioSistema[] // Uma Pessoa pode ter um UsuarioSistema (1:1 ou 1:N, mas aqui 1:1 é o mais comum)
-  socios         Socio[] // sócia em várias empresas
+  contatos       Contato[]
+  localizacoes   Localizacao[]
+  formacoes      Formacao[]
+  usuarioSistema UsuarioSistema[]
+  socios         Socio[]
   candidato      Candidato[]
   createdAt      DateTime         @default(now())
   updatedAt      DateTime         @updatedAt
 
-  // Relação para representar a empresa (Pessoa é representante de uma Empresa)
   empresaRepresentada   Empresa? @relation("EmpresaRepresentantes", fields: [empresaRepresentadaId], references: [id])
   empresaRepresentadaId String?
 }
@@ -99,15 +98,15 @@ model UsuarioSistema {
   email       String      @unique
   password    String
   tipoUsuario TipoUsuario
-  setor       String? // Removido. Estas são características de Funcionario, não UsuarioSistema puro
-  cargo       String? // Removido. Estas são características de Funcionario, não 
+  setor       String?
+  cargo       String?
   pessoaId    String?     @unique
   pessoa      Pessoa?     @relation(fields: [pessoaId], references: [id])
 
-  empresaId String?  @unique // Opcional, mas se preenchido, deve ser único para garantir 1:1 com Empresa
+  empresaId String?  @unique
   empresa   Empresa? @relation(fields: [empresaId], references: [id])
 
-  funcionario Funcionario? // Um UsuarioSistema pode ter um perfil de Funcionario (1:1)
+  funcionario Funcionario?
 }
 
 model Cliente {
@@ -122,15 +121,14 @@ model Cliente {
 model Candidato {
   id              String         @id @default(uuid())
   areaCandidato   AreaCandidato
-  pessoaId        String?        @unique // Um Candidato é uma Pessoa (opcional, se um Candidato pode ser criado sem detalhes completos de Pessoa)
+  pessoaId        String?        @unique
   pessoa          Pessoa?        @relation(fields: [pessoaId], references: [id])
-  crm             String? // para médicos
-  corem           String? // para enfermagem
+  crm             String?
+  corem           String?
   rqe             String?
   especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
   especialidadeId Int?
-  agendaId        String? // Alterado para String para corresponder a Agenda.id
-  // Relação N:N com Vaga, gerenciada por uma tabela de junção implícita pelo Prisma
+  agendaId        String?
   vagas           Vaga[]
 }
 
@@ -143,7 +141,7 @@ model Socio {
   pessoa  Pessoa  @relation(fields: [pessoaId], references: [id])
   empresa Empresa @relation(fields: [empresaId], references: [id])
 
-  @@unique([pessoaId, empresaId]) // Uma pessoa só pode ser um tipo de sócio em uma empresa uma vez
+  @@unique([pessoaId, empresaId])
 }
 
 model Contato {
