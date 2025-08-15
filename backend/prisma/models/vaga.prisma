@@ -1,0 +1,183 @@
+enum CategoriaVaga {
+    TECNOLOGIA
+    SAUDE
+    ADMINISTRATIVO
+    FINANCEIRO
+    RECURSOS_HUMANOS
+    MARKETING
+    VENDAS
+    OUTROS
+}
+
+enum StatusVaga {
+    ATIVA
+    PAUSADA
+    ENCERRADA
+    ARQUIVADA
+}
+
+enum TipoContrato {
+    CLT
+    PJ
+    ESTAGIO
+    FREELANCER
+    TEMPORARIO
+}
+
+enum NivelExperiencia {
+    ESTAGIO
+    JUNIOR
+    PLENO
+    SENIOR
+    ESPECIALISTA
+    GERENTE
+}
+
+enum TipoEtapa {
+    APLICACAO
+    TRIAGEM
+    TESTE
+    ENTREVISTA
+    OFERTA
+    CONTRATACAO
+}
+
+enum StatusCandidatura {
+    APLICADO // Candidato se candidatou
+    EM_ANALISE // Aplicação em revisão
+    ENTREVISTA_AGENDADA // Entrevista marcada
+    ENTREVISTA_CONCLUIDA // Entrevista realizada
+    OFERTA_ENVIADA // Oferta de emprego enviada
+    OFERTA_ACEITA // Candidato aceitou a oferta
+    OFERTA_RECUSADA // Candidato recusou a oferta
+    DESCLASSIFICADO // Candidato não avançou no processo
+    CONTRATADO // Candidato foi contratado (pode ser um status final)
+}
+
+enum TipoEventoAgenda {
+    TRIAGEM_INICIAL
+    ENTREVISTA_RH
+    ENTREVISTA_GESTOR
+    TESTE_TECNICO
+    TESTE_PSICOLOGICO
+    DINAMICA_GRUPO
+    PROPOSTA
+    OUTRO
+}
+
+model Vaga {
+    id                String    @id @default(uuid())
+    titulo            String
+    descricao         String
+    requisitos        String?
+    responsabilidades String?
+    salarioMinimo     Float?
+    salarioMaximo     Float?
+    dataPublicacao    DateTime  @default(now())
+    dataFechamento    DateTime?
+    create_at         DateTime  @default(now())
+    update_at         DateTime  @updatedAt
+
+    categoria        CategoriaVaga
+    status           StatusVaga
+    tipoContrato     TipoContrato
+    nivelExperiencia NivelExperiencia
+    areaCandidato    AreaCandidato?
+
+    candidatos      Candidato[]
+    CandidaturaVaga CandidaturaVaga[]
+    agendaVaga      AgendaVaga[]
+    beneficios      Beneficio[]
+    habilidades     VagaHabilidade[]
+    anexos          VagaAnexo[]
+
+    cliente   Cliente @relation(fields: [clienteId], references: [id])
+    clienteId String
+
+    localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
+    localizacaoId String?
+}
+
+model VagaHabilidade {
+    nivelExigido String? // Ex: "Básico", "Intermediário", "Avançado"
+
+    vaga         Vaga       @relation(fields: [vagaId], references: [id])
+    vagaId       String
+    habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
+    habilidadeId String
+
+    @@id([vagaId, habilidadeId]) // Chave primária composta
+}
+
+model ProcessoSeletivoEtapa {
+    id        String    @id @default(uuid())
+    nome      String
+    tipo      TipoEtapa
+    ordem     Int
+    descricao String?
+    ativa     Boolean   @default(true)
+
+    agendaVaga   AgendaVaga[]
+    candidaturas CandidaturaVaga[]
+}
+
+model AgendaVaga {
+    id          String           @id @default(uuid())
+    dataHora    DateTime
+    tipoEvento  TipoEventoAgenda
+    localizacao Localizacao?     @relation(fields: [localizacaoId], references: [id])
+    link        String?
+
+    vaga          Vaga    @relation(fields: [vagaId], references: [id])
+    vagaId        String
+    localizacaoId String?
+
+    etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
+    etapaAtualId String?
+}
+
+model CandidaturaVaga {
+    id            String            @id @default(uuid())
+    candidatoId   String
+    vagaId        String
+    status        StatusCandidatura @default(APLICADO)
+    dataAplicacao DateTime          @default(now())
+    observacoes   String?
+
+    candidato Candidato @relation(fields: [candidatoId], references: [id])
+    vaga      Vaga      @relation(fields: [vagaId], references: [id])
+
+    etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
+    etapaAtualId String?
+
+    @@unique([candidatoId, vagaId])
+}
+
+model Anexo {
+    id          String  @id @default(uuid())
+    nomeArquivo String
+    url         String
+    tipo        String? // Ex: "PDF", "Doc", "Imagem"
+    tamanhoKb   Int?
+
+    vagas VagaAnexo[]
+}
+
+model VagaAnexo {
+    vagaId  String
+    anexoId String
+
+    vaga  Vaga  @relation(fields: [vagaId], references: [id])
+    anexo Anexo @relation(fields: [anexoId], references: [id])
+
+    @@id([vagaId, anexoId])
+}
+
+model Beneficio {
+    id        String  @id @default(uuid())
+    nome      String  @unique
+    descricao String?
+
+    vaga   Vaga?   @relation(fields: [vagaId], references: [id])
+    vagaId String?
+}

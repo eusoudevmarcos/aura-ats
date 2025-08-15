@@ -1,0 +1,27 @@
+enum EstadoCivil {
+    SOLTEIRO
+    CASADO
+    DIVORCIADO
+    VIUVO
+    SEPARADO
+    UNIAO_ESTAVEL
+}
+
+model Pessoa {
+    id             String           @id @default(uuid())
+    nome           String
+    cpf            String?          @unique
+    dataNascimento DateTime?
+    rg             String?
+    estadoCivil    EstadoCivil?
+    contatos       Contato[]
+    localizacoes   Localizacao[]
+    usuarioSistema UsuarioSistema[]
+    socios         Socio[]
+    candidato      Candidato[]
+    createdAt      DateTime         @default(now())
+    updatedAt      DateTime         @updatedAt
+
+    empresaRepresentada   Empresa? @relation("EmpresaRepresentantes", fields: [empresaRepresentadaId], references: [id])
+    empresaRepresentadaId String?
+}

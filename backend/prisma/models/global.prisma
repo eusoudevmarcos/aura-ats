@@ -1,0 +1,41 @@
+model Habilidade {
+    id             String  @id @default(uuid())
+    nome           String  @unique
+    tipoHabilidade String?
+
+    vagas      VagaHabilidade[]
+    candidatos CandidatoHabilidade[]
+}
+
+model Contato {
+    id       String  @id @default(uuid())
+    telefone String?
+    whatsapp String?
+    email    String?
+
+    pessoaId String?
+    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
+
+    empresaId String?
+    empresa   Empresa? @relation(fields: [empresaId], references: [id])
+}
+
+model Localizacao {
+    id          String  @id @default(uuid())
+    cep         String
+    cidade      String
+    bairro      String
+    uf          String
+    estado      String?
+    complemento String?
+    logradouro  String?
+    regiao      String?
+
+    pessoaId String?
+    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
+
+    empresaId  String?
+    empresa    Empresa?     @relation(fields: [empresaId], references: [id])
+    vaga       Vaga[]
+    agendaVaga AgendaVaga[]
+}

@@ -1,0 +1,38 @@
+enum TipoUsuario {
+    ADMIN_SISTEMA
+    ADMINISTRATIVO
+    MODERADOR // Gerente
+    RECRUTADOR
+    VENDEDOR
+    CLIENTE_ATS
+    CLIENTE_ATS_CRM
+}
+
+enum TipoPessoa {
+    FISICA
+    JURIDICA
+}
+
+model UsuarioSistema {
+    id          String      @id @default(uuid())
+    email       String      @unique
+    password    String
+    tipoUsuario TipoUsuario
+    setor       String?
+    cargo       String?
+    pessoaId    String?     @unique
+    pessoa      Pessoa?     @relation(fields: [pessoaId], references: [id])
+
+    empresaId String?  @unique
+    empresa   Empresa? @relation(fields: [empresaId], references: [id])
+
+    funcionario Funcionario?
+}
+
+model Funcionario {
+    id               String         @id @default(uuid())
+    setor            String?
+    cargo            String?
+    usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
+    usuarioSistemaId String         @unique
+}

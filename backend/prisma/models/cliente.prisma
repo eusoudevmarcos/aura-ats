@@ -1,0 +1,15 @@
+enum TipoServico {
+    RECRUTAMENTO_CONTRATUAL
+    RECRUTAMENTO_DISPARO_CURRICULO
+    RECRUTAMENTO_INFORMACAO
+    PLATAFORMA
+}
+
+model Cliente {
+    id          String        @id @default(uuid())
+    empresaId   String        @unique
+    empresa     Empresa       @relation(fields: [empresaId], references: [id])
+    tipoServico TipoServico[]
+    status      StatusCliente
+    vagas       Vaga[]
+}
