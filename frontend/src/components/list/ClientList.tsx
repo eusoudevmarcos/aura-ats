@@ -1,10 +1,11 @@
 // frontend/components/Clients/ClientList.tsx
 import React, { useEffect, useMemo, useState } from "react";
-import styles from "./Clients.module.css";
+import styles from "@/styles/clients.module.css";
 import api from "@/axios";
 import Table, { TableColumn } from "../Table";
 import { useRouter } from "next/router";
-import { Pagination } from "@/model/pagination.model";
+import { Pagination } from "@/type/pagination.type";
+import Card from "../Card";
 
 interface EmpresaContato {
   telefone?: string;
@@ -106,15 +107,15 @@ const ClientList: React.FC = () => {
   };
 
   return (
-    <div className={styles.clientsSection}>
-      <div className={styles.clientsHeader}>
+    <Card classNameContainer="mt-6 px-6 py-8">
+      <div className="flex justify-between p-2">
         <h3 className={styles.clientsTitle}>Lista de Clientes</h3>
         <input
           type="text"
           placeholder="Buscar cliente..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className={styles.clientsSearchInput}
+          className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
         />
       </div>
       <Table
@@ -131,7 +132,7 @@ const ClientList: React.FC = () => {
         }}
         onRowClick={onRowClick}
       />
-    </div>
+    </Card>
   );
 };
 

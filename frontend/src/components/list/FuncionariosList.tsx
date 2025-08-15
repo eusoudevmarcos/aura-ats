@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from "react";
 import Table, { TableColumn } from "../Table";
 import api from "@/axios";
-import { Pagination } from "@/model/pagination.model";
+import { Pagination } from "@/type/pagination.type";
 import { useRouter } from "next/router";
+import Card from "../Card";
 
 // Tipos para Pessoa e Empresa
 interface Contato {
@@ -141,8 +142,17 @@ const FuncionariosList: React.FC = () => {
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Lista de Funcionários</h2>
+    <Card classNameContainer="mt-6 px-6 py-8">
+      <div className="flex justify-between p-2">
+        <h2 className="text-xl font-bold mb-4">Lista de Candidatos</h2>
+        <input
+          type="text"
+          placeholder="Buscar cliente..."
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
+        />
+      </div>
       <input
         type="text"
         placeholder="Buscar por nome, email ou tipo de usuário..."
@@ -164,7 +174,7 @@ const FuncionariosList: React.FC = () => {
           onPageChange: (p: number) => setPage(p),
         }}
       />
-    </div>
+    </Card>
   );
 };
 

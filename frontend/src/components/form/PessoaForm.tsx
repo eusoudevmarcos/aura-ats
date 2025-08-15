@@ -9,9 +9,14 @@ import ContatoForm from "./ContatoForm";
 type PessoaFormProps = {
   namePrefix?: string;
   onSubmit?: (data: PessoaInput) => void;
+  contatoPessoa?: { title: string };
 };
 
-const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
+const PessoaForm = ({
+  namePrefix = "pessoa",
+  onSubmit,
+  contatoPessoa,
+}: PessoaFormProps) => {
   const mode = "context";
   const methods = useSafeForm({ mode, debug: true });
   const {
@@ -57,12 +62,14 @@ const PessoaForm = ({ namePrefix = "pessoa", onSubmit }: PessoaFormProps) => {
         errors={errors}
       />
 
-      <div className="col-span-full" title="Contato do representante">
-        <h3 className="text-xl font-bold">Contato do representante</h3>
-        <section className="flex w-full gap-2">
-          <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
-        </section>
-      </div>
+      {contatoPessoa && (
+        <div className="col-span-full" title={contatoPessoa.title}>
+          <h3 className="text-xl font-bold">{contatoPessoa.title}</h3>
+          <section className="flex w-full gap-2">
+            <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
+          </section>
+        </div>
+      )}
     </section>
   );
 

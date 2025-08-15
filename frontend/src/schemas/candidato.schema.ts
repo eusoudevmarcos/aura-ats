@@ -1,5 +1,5 @@
+// src/schemas/candidato.schema.ts
 import { z } from "zod";
-
 import { pessoaSchema } from "./pessoa.schema";
 
 export const AreaCandidatoEnum = z.enum([
@@ -13,6 +13,7 @@ export const AreaCandidatoEnum = z.enum([
   "BIOMEDICINA",
   "OUTROS",
 ]);
+export type AreaCandidatoEnum = z.infer<typeof AreaCandidatoEnum>;
 
 export const especialidadeSchema = z.object({
   id: z.string().optional(),
@@ -22,33 +23,35 @@ export const especialidadeSchema = z.object({
 
 export const formacaoSchema = z.object({
   id: z.string().optional(),
-  dataConclusaoMedicina: z
-    .preprocess((arg) => {
-      if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
-      return arg;
-    }, z.date())
-    .optional(),
+  // dataConclusaoMedicina: z
+  //   .preprocess((arg) => {
+  //     if (arg === null || arg === undefined || arg === "") return undefined;
+  //     if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
+  //     return arg;
+  //   }, z.date().optional())
+  //   .optional()
+  //   .nullable()
+  //   .nullish(),
+
   dataConclusaoResidencia: z
     .preprocess((arg) => {
+      if (arg === null || arg === undefined || arg === "") return undefined;
       if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
       return arg;
-    }, z.date())
+    }, z.date().optional())
     .optional(),
 });
 
-// Schema principal do Candidato
 export const candidatoSchema = z.object({
   id: z.string().optional(),
   areaCandidato: AreaCandidatoEnum,
   crm: z.string().max(20).nullable().optional(),
   corem: z.string().max(20).nullable().optional(),
   rqe: z.string().max(20).nullable().optional(),
-
   especialidade: especialidadeSchema.optional(),
-
+  especialidadeId: z.number().nullable().optional(),
   pessoa: pessoaSchema,
-
-  formacoes: z.array(formacaoSchema).optional(),
+  formacoes: z.array(formacaoSchema),
 });
 
 export type CandidatoInput = z.infer<typeof candidatoSchema>;
