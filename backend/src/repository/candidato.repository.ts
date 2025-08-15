@@ -191,7 +191,11 @@ export class CandidatoRepository {
         skip,
         take: pageSize,
         include: {
-          pessoa: true,
+          pessoa: {
+            include: {
+              contatos: true, // <<< ISSO PRECISA ESTAR AQUI!
+            },
+          },
           especialidade: true,
           formacoes: true,
         },

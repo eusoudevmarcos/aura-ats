@@ -117,19 +117,64 @@ model Cliente {
   vagas       Vaga[]
 }
 
+enum StatusCandidatura {
+  APLICADO // Candidato se candidatou
+  EM_ANALISE // Aplicação em revisão
+  ENTREVISTA_AGENDADA // Entrevista marcada
+  ENTREVISTA_CONCLUIDA // Entrevista realizada
+  OFERTA_ENVIADA // Oferta de emprego enviada
+  OFERTA_ACEITA // Candidato aceitou a oferta
+  OFERTA_RECUSADA // Candidato recusou a oferta
+  DESCLASSIFICADO // Candidato não avançou no processo
+  CONTRATADO // Candidato foi contratado (pode ser um status final)
+}
+
+model CandidaturaVaga {
+  id            String            @id @default(uuid())
+  candidatoId   String
+  vagaId        String
+  status        StatusCandidatura @default(APLICADO)
+  dataAplicacao DateTime          @default(now())
+  observacoes   String?
+
+  candidato Candidato @relation(fields: [candidatoId], references: [id])
+  vaga      Vaga      @relation(fields: [vagaId], references: [id])
+
+  @@unique([candidatoId, vagaId]) // <--- ESTA LINHA É A CHAVE
+}
+
+model Vaga {
+  id            String        @id @default(uuid())
+  titulo        String
+  descricao     String
+  create_at     DateTime      @default(now())
+  update_at     DateTime      @default(now()) @updatedAt
+  areaCandidato AreaCandidato
+
+  clienteId String
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+
+  candidatos Candidato[]
+
+  agenda          Agenda            @relation(fields: [agendaId], references: [id])
+  agendaId        String
+  CandidaturaVaga CandidaturaVaga[]
+}
+
 model Candidato {
-  id              String         @id @default(uuid())
+  id              String            @id @default(uuid())
   areaCandidato   AreaCandidato
-  pessoaId        String         @unique
-  pessoa          Pessoa         @relation(fields: [pessoaId], references: [id])
+  pessoaId        String            @unique
+  pessoa          Pessoa            @relation(fields: [pessoaId], references: [id])
   crm             String?
   corem           String?
   rqe             String?
-  especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
+  especialidade   Especialidade?    @relation(fields: [especialidadeId], references: [id])
   especialidadeId Int?
   agendaId        String?
   vagas           Vaga[]
   formacoes       Formacao[]
+  CandidaturaVaga CandidaturaVaga[]
 }
 
 model Socio {
@@ -176,29 +221,16 @@ model Localizacao {
 }
 
 model Formacao {
-  id                      String    @id @default(uuid())
-  dataConclusaoMedicina   DateTime?
-  dataConclusaoResidencia DateTime?
+  id                   String    @id @default(uuid())
+  instituicao          String?   @default("A definir")
+  curso                String?   @default("A definir")
+  dataInicio           DateTime?
+  dataFim              DateTime?
+  dataInicioResidencia DateTime?
+  dataFimResidencia    DateTime?
 
   Candidato   Candidato? @relation(fields: [candidatoId], references: [id])
   candidatoId String?
-}
-
-model Vaga {
-  id            String        @id @default(uuid())
-  titulo        String
-  descricao     String
-  create_at     DateTime      @default(now())
-  update_at     DateTime      @default(now()) @updatedAt
-  areaCandidato AreaCandidato
-
-  clienteId String
-  cliente   Cliente @relation(fields: [clienteId], references: [id])
-
-  candidatos Candidato[]
-
-  agenda   Agenda @relation(fields: [agendaId], references: [id])
-  agendaId String
 }
 
 model Agenda {
