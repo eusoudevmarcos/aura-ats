@@ -5,8 +5,8 @@
   "type": "commonjs",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
-    "build": "npm run db:generate && npm run migrate:prod && tsc && cpx \"src/public/**/*\" dist/public",
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "npm run db:generate && tsc && cpx \"src/public/**/*\" dist/public",
     "start": "cross-env NODE_ENV=production node dist/src/index.js",
     "seed-script": "tsx prisma/seed.ts",
     "seed": "npm run seed-script",
