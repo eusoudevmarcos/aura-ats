@@ -21,26 +21,26 @@ export const especialidadeSchema = z.object({
   sigla: z.string().max(10).optional(),
 });
 
-export const formacaoSchema = z.object({
-  id: z.string().optional(),
-  // dataConclusaoMedicina: z
-  //   .preprocess((arg) => {
-  //     if (arg === null || arg === undefined || arg === "") return undefined;
-  //     if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
-  //     return arg;
-  //   }, z.date().optional())
-  //   .optional()
-  //   .nullable()
-  //   .nullish(),
+// export const formacaoSchema = z.object({
+//   id: z.string().optional(),
+// dataConclusaoMedicina: z
+//   .preprocess((arg) => {
+//     if (arg === null || arg === undefined || arg === "") return undefined;
+//     if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
+//     return arg;
+//   }, z.date().optional())
+//   .optional()
+//   .nullable()
+//   .nullish(),
 
-  dataConclusaoResidencia: z
-    .preprocess((arg) => {
-      if (arg === null || arg === undefined || arg === "") return undefined;
-      if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
-      return arg;
-    }, z.date().optional())
-    .optional(),
-});
+//   dataConclusaoResidencia: z
+//     .preprocess((arg) => {
+//       if (arg === null || arg === undefined || arg === "") return undefined;
+//       if (typeof arg === "string" || arg instanceof Date) return new Date(arg);
+//       return arg;
+//     }, z.date().optional())
+//     .optional(),
+// });
 
 export const candidatoSchema = z.object({
   id: z.string().optional(),
@@ -51,7 +51,7 @@ export const candidatoSchema = z.object({
   especialidade: especialidadeSchema.optional(),
   especialidadeId: z.number().nullable().optional(),
   pessoa: pessoaSchema,
-  formacoes: z.array(formacaoSchema),
+  // formacoes: z.array(formacaoSchema),
 });
 
 export type CandidatoInput = z.infer<typeof candidatoSchema>;

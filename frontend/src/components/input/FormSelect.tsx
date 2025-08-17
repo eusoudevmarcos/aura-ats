@@ -1,5 +1,5 @@
-import { ContainerProps } from "@/type/FormInput";
-import { FormSelectProps } from "@/type/FormSelect";
+import { ContainerProps } from "@/type/formInput.type";
+import { FormSelectProps } from "@/type/formSelect.type";
 import { getError } from "@/utils/getError";
 import React from "react";
 import { Controller, FieldValues } from "react-hook-form";

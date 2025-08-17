@@ -38,7 +38,7 @@ export type Candidato = {
   especialidadeId: number | null;
   agendaId: string | null;
   vagas: Vaga[];
-  formacoes: Formacao[];
+  // formacoes: Formacao[];
   // createdAt?: Date; // Adicione se você tiver timestamps automáticos
   // updatedAt?: Date; // Adicione se você tiver timestamps automáticos
 };

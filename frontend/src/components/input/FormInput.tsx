@@ -1,7 +1,7 @@
 import React from "react";
 import { Controller, FieldValues } from "react-hook-form";
 import { IMaskInput } from "react-imask";
-import { ContainerProps, FormInputProps } from "@/type/FormInput";
+import { ContainerProps, FormInputProps } from "@/type/formInput.type";
 import { convertDateFromPostgres } from "@/utils/date/convertDateFromPostgres";
 import { convertDateToPostgres } from "@/utils/date/convertDateToPostgres";
 import { getError } from "@/utils/getError";
