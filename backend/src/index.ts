@@ -10,7 +10,7 @@ import userRoutes from "./routes/user.routes";
 import candidatoRoutes from "./routes/candidato.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
-import vagaRoutes from "./routes/vaga.routes";
+// import vagaRoutes from "./routes/vaga.routes";
 import clienteRoutes from "./routes/cliente.routes";
 
 const app = express();
@@ -47,7 +47,7 @@ app.use("/api/take-it", datastoneRoutes);
 app.use("/api/funcionario", funcionarioRoutes);
 app.use("/api/cliente", clienteRoutes);
 app.use("/api/candidato", candidatoRoutes);
-app.use("/api/vaga", vagaRoutes);
+// app.use("/api/vaga", vagaRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

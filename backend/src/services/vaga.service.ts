@@ -1,111 +1,194 @@
-// src/services/VagaService.ts
-import { inject, injectable } from "tsyringe";
-import prisma from "../lib/prisma";
-import { VagaRepository } from "../repository/vaga.repository";
-import {
-  CategoriaVaga,
-  NivelExperiencia,
-  StatusVaga,
-  TipoContrato,
-  Vaga,
-} from "@prisma/client";
-@injectable()
-export class VagaService {
-  constructor(
-    @inject(VagaRepository)
-    private vagaRepository: VagaRepository
-  ) {}
+// import { injectable } from "tsyringe";
+// import prisma from "../lib/prisma"; // ajuste o path conforme sua estrutura
+// import { Vaga } from "../types/vaga.type";
+// import { connect } from "http2";
 
-  async save(vagaData: any): Promise<Vaga> {
-    return await prisma.$transaction(async (tx) => {
-      // 1. Validação de Dados Essenciais
-      if (!vagaData.titulo) {
-        throw new Error("O título da vaga é obrigatório.");
-      }
-      if (!vagaData.cliente || !vagaData.cliente?.id) {
-        throw new Error(
-          "A vaga deve estar associada a um cliente existente (clienteId)."
-        );
-      }
+// interface Pagination {
+//   page?: number;
+//   limit?: number;
+// }
 
-      if (
-        vagaData.status &&
-        !Object.values(StatusVaga).includes(vagaData.status)
-      ) {
-        throw new Error(`Status de vaga inválido: ${vagaData.status}`);
-      }
-      if (
-        vagaData.categoria &&
-        !Object.values(CategoriaVaga).includes(vagaData.categoria)
-      ) {
-        throw new Error(`Categoria de vaga inválida: ${vagaData.categoria}`);
-      }
-      if (
-        vagaData.tipoContrato &&
-        !Object.values(TipoContrato).includes(vagaData.tipoContrato)
-      ) {
-        throw new Error(`Tipo de contrato inválido: ${vagaData.tipoContrato}`);
-      }
-      if (
-        vagaData.nivelExperiencia &&
-        !Object.values(NivelExperiencia).includes(vagaData.nivelExperiencia)
-      ) {
-        throw new Error(
-          `Nível de experiência inválido: ${vagaData.nivelExperiencia}`
-        );
-      }
+// @injectable()
+// export class VagaService {
+//   constructor() {}
 
-      const clienteId = vagaData.cliente.id;
-      const clienteExiste = await tx.cliente.findFirst({
-        where: { id: clienteId },
-      });
+//   /**
+//    * Cria ou atualiza uma vaga e suas relações usando $transaction
+//    */
+//   async saveWithTransaction(vagaData: Vaga) {
+//     const {
+//       id,
+//       titulo,
+//       beneficios,
+//       habilidades,
+//       anexos,
+//       localizacao,
+//       areaCandidato,
+//       clienteId,
+//       ...rest
+//     } = vagaData;
 
-      if (!clienteExiste) {
-        throw new Error(`Cliente com ID ${clienteId} não encontrado.`);
-      }
+//     return await prisma.$transaction(async (tx) => {
+//       // Verifica duplicidade de título para o mesmo cliente
+//       const tituloExiste = await tx.vaga.findFirst({
+//         where: {
+//           titulo: titulo,
+//           clienteId: clienteId,
+//           NOT: id ? { id } : undefined,
+//         },
+//       });
 
-      const dataToSave = { ...vagaData };
+//       if (tituloExiste) {
+//         throw new Error(
+//           "Já existe uma vaga com este título para este cliente."
+//         );
+//       }
 
-      const savedVaga = await this.vagaRepository.saveWithTransaction(
-        dataToSave
-      );
+//       // Criação ou atualização da vaga
+//       const vaga = id
+//         ? await tx.vaga.update({
+//             where: { id },
+//             data: {
+//               titulo,
+//               ...rest,
+//               clienteId,
+//               localizacao: localizacao?.id
+//                 ? { update: localizacao }
+//                 : { create: localizacao },
+//             },
+//           })
+//         : await tx.vaga.create({
+//             data: {
+//               titulo,
+//               ...rest,
+//               clienteId,
+//               localizacaoId: localizacao?.id,
+//             },
+//           });
 
-      return savedVaga;
-    });
-  }
+//       // Benefícios
+//       if (beneficios?.length) {
+//         await tx.beneficio.deleteMany({ where: { vagaId: vaga.id } });
+//         await tx.beneficio.createMany({
+//           data: beneficios.map((b) => ({
+//             nome: b.nome,
+//             descricao: b.descricao,
+//             vagaId: vaga.id,
+//           })),
+//         });
+//       }
 
-  async getVagaById(id: string): Promise<Vaga | null> {
-    return await this.vagaRepository.findById(id);
-  }
+//       // Habilidades
+//       if (habilidades?.length) {
+//         await tx.vagaHabilidade.deleteMany({ where: { vagaId: vaga.id } });
+//         await tx.vagaHabilidade.createMany({
+//           data: habilidades.map((h) => ({
+//             vagaId: vaga.id,
+//             habilidadeId: h.habilidadeId,
+//             nivelExigido: h.nivelExigido,
+//           })),
+//         });
+//       }
 
-  async getAllVagas(
-    page: number = 1,
-    pageSize: number = 10
-  ): Promise<{
-    data: Vaga[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  }> {
-    const { data, total } = await this.vagaRepository.findAll(page, pageSize);
-    return {
-      data,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
-  }
+//       // Anexos
+//       if (anexos?.length) {
+//         await tx.vagaAnexo.deleteMany({ where: { vagaId: vaga.id } });
+//         await tx.vagaAnexo.createMany({
+//           data: anexos.map((a) => ({
+//             vagaId: vaga.id,
+//             anexoId: a.anexoId,
+//           })),
+//         });
+//       }
 
-  async deleteVaga(id: string): Promise<Vaga> {
-    return await prisma.$transaction(async (tx) => {
-      const vaga = await this.vagaRepository.findByIdWithTransaction(id, tx);
-      if (!vaga) {
-        throw new Error(`Vaga com ID ${id} não encontrada.`);
-      }
+//       return vaga;
+//     });
+//   }
 
-      return await this.vagaRepository.deleteWithTransaction(id, tx);
-    });
-  }
-}
+//   /**
+//    * Busca todas as vagas de um cliente com paginação
+//    */
+//   async getAllByCliente(
+//     clienteId: string,
+//     { page = 1, limit = 10 }: Pagination
+//   ) {
+//     const skip = (page - 1) * limit;
+
+//     const [vagas, total] = await prisma.$transaction([
+//       prisma.vaga.findMany({
+//         where: { clienteId },
+//         skip,
+//         take: limit,
+//         include: {
+//           beneficios: true,
+//           habilidades: true,
+//           anexos: true,
+//           localizacao: true,
+//           areaCandidato: true,
+//         },
+//       }),
+//       prisma.vaga.count({ where: { clienteId } }),
+//     ]);
+
+//     return {
+//       data: vagas,
+//       total,
+//       page,
+//       limit,
+//       totalPages: Math.ceil(total / limit),
+//     };
+//   }
+
+//   /**
+//    * Busca todas as vagas do sistema com paginação
+//    */
+//   async getAll({ page = 1, limit = 10 }: Pagination) {
+//     const skip = (page - 1) * limit;
+
+//     const [vagas, total] = await prisma.$transaction([
+//       prisma.vaga.findMany({
+//         skip,
+//         take: limit,
+//         include: {
+//           beneficios: true,
+//           habilidades: true,
+//           anexos: true,
+//           localizacao: true,
+//           areaCandidato: true,
+//         },
+//       }),
+//       prisma.vaga.count(),
+//     ]);
+
+//     return {
+//       data: vagas,
+//       total,
+//       page,
+//       limit,
+//       totalPages: Math.ceil(total / limit),
+//     };
+//   }
+
+//   /**
+//    * Busca vaga por ID
+//    */
+//   async getById(id: string) {
+//     const vaga = await prisma.vaga.findUnique({
+//       where: { id },
+//       include: {
+//         beneficios: true,
+//         habilidades: true,
+//         anexos: true,
+//         localizacao: true,
+//         areaCandidato: true,
+//         cliente: true,
+//       },
+//     });
+
+//     if (!vaga) {
+//       throw new Error("Vaga não encontrada.");
+//     }
+
+//     return vaga;
+//   }
+// }

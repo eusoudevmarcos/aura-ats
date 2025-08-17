@@ -15,7 +15,7 @@ import {
   Candidato,
   Formacao,
   ProcessoSeletivoEtapa,
-  EventoAgenda,
+  AgendaVaga,
   Especialidade,
   Socio,
   CandidaturaVaga,
@@ -33,10 +33,7 @@ export type PrismaTransactionClient = Omit<
 
 // Tipos base de Input (Omitindo campos auto-gerados e de relação complexa)
 export type ContatoInput = Omit<Contato, "id" | "pessoaId" | "empresaId">;
-export type LocalizacaoInput = Omit<
-  Localizacao,
-  "id" | "pessoaId" | "empresaId"
->;
+export type LocalizacaoInput = Omit<Localizacao, "pessoaId" | "empresaId">;
 export type FormacaoInput = Omit<Formacao, "id" | "candidatoId">;
 export type HabilidadeInput = Omit<Habilidade, "id">;
 export type BeneficioInput = Omit<Beneficio, "id">;
@@ -47,7 +44,7 @@ export type ProcessoSeletivoEtapaInput = Omit<
   "id" | "vagaId"
 >;
 export type EventoAgendaInput = Omit<
-  EventoAgenda,
+  AgendaVaga,
   "id" | "vagaId" | "localizacaoId" | "etapaAtualId"
 >;
 
