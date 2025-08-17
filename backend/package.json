@@ -1,17 +1,22 @@
 {
   "name": "backend-firebase-auth",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/src/index.js",
   "type": "commonjs",
   "license": "MIT",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "npx prisma generate && tsc && cpx \"src/public/**/*\" dist/public",
-    "start": "cross-env NODE_ENV=production node dist/index.js",
+    "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/index.ts",
+    "build": "npm run db:generate && npm run migrate:prod && tsc && cpx \"src/public/**/*\" dist/public",
+    "start": "cross-env NODE_ENV=production node dist/src/index.js",
     "seed-script": "tsx prisma/seed.ts",
     "seed": "npm run seed-script",
     "migrate:dev": "npx prisma migrate dev --schema ./prisma",
-    "migrate:prod": "npx prisma migrate deploy --schema ./prisma"
+    "migrate:prod": "npx prisma migrate deploy --schema ./prisma",
+    "prisma:generate": "npx prisma generate --schema ./prisma",
+    "db:generate": "npx prisma generate --schema ./prisma",
+    "db:push": "npx prisma db push --schema ./prisma",
+    "db:pull": "npx prisma db pull --schema ./prisma",
+    "db:studio": "npxprisma studio --schema ./prisma"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",
@@ -39,6 +44,7 @@
     "cpx": "^1.5.0",
     "cross-env": "^10.0.0",
     "prisma": "^6.13.0",
+    "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.2"
   }
 }

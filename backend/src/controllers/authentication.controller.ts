@@ -3,9 +3,8 @@ import { serialize } from "cookie";
 import jwt from "jsonwebtoken";
 import { saveLog } from "../lib/logger";
 import bcrypt from "bcryptjs";
-import { PrismaClient } from "@prisma/client";
+import prisma from "../lib/prisma";
 
-const prisma = new PrismaClient();
 const SECRET = process.env.JWT_SECRET as string;
 
 export default class AuthenticationController {
