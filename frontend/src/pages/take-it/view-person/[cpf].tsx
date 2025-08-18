@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Link from "next/link";
 import TakeitLayout from "@/layout/takeitLayout";
 import { exportToCSV, exportToPDF, mostrarValor } from "@/utils/exportCSV";
+import { SearchIcon, WhatsAppIcon } from "@/components/icons";
 
 export async function getStaticPaths() {
   return {
@@ -146,7 +147,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                   <strong>RG:</strong> {mostrarValor(data.rg)}
                 </p>
                 <p className="font-medium">
-                  <strong>Sexo:</strong>{" "}
+                  <strong>Sexo:</strong>
                   {data.gender === "F"
                     ? "Feminino"
                     : data.gender === "M"
@@ -154,14 +155,14 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                     : "N/A"}
                 </p>
                 <p className="font-medium">
-                  <strong>Data de Nascimento:</strong>{" "}
+                  <strong>Data de Nascimento:</strong>
                   {mostrarValor(data.birthday)}
                 </p>
                 <p className="font-medium">
                   <strong>Nome da Mãe:</strong> {mostrarValor(data.mother_name)}
                 </p>
                 <p className="font-medium">
-                  <strong>Falecido:</strong>{" "}
+                  <strong>Falecido:</strong>
                   {data.possibly_dead === null ||
                   data.possibly_dead === undefined
                     ? "N/A"
@@ -170,7 +171,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                     : "Não"}
                 </p>
                 <p className="font-medium">
-                  <strong>Aposentado:</strong>{" "}
+                  <strong>Aposentado:</strong>
                   {data.retired === null || data.retired === undefined
                     ? "N/A"
                     : data.retired
@@ -178,7 +179,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                     : "Não"}
                 </p>
                 <p className="font-medium">
-                  <strong>Bolsa Família:</strong>{" "}
+                  <strong>Bolsa Família:</strong>
                   {data.bolsa_familia === null ||
                   data.bolsa_familia === undefined
                     ? "N/A"
@@ -192,11 +193,11 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
             <Card title="Profissão e Renda">
               <div className="flex flex-wrap space-y-4 space-x-9">
                 <p className="font-medium">
-                  <strong>CBO:</strong> {mostrarValor(data.cbo_code)} -{" "}
+                  <strong>CBO:</strong> {mostrarValor(data.cbo_code)} -
                   {mostrarValor(data.cbo_description)}
                 </p>
                 <p className="font-medium">
-                  <strong>Renda Estimada:</strong>{" "}
+                  <strong>Renda Estimada:</strong>
                   {mostrarValor(data.estimated_income)}
                 </p>
               </div>
@@ -205,7 +206,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
             <Card title="Pessoa Politicamente Exposta (PEP)">
               <div className="flex flex-wrap space-y-4 space-x-9">
                 <p className="font-medium">
-                  <strong>PEP:</strong>{" "}
+                  <strong>PEP:</strong>
                   {data.pep === null || data.pep === undefined
                     ? "N/A"
                     : data.pep
@@ -233,24 +234,24 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                           <strong>Tipo:</strong> {mostrarValor(addr.type)}
                         </p>
                         <p className="font-medium">
-                          <strong>Rua:</strong> {mostrarValor(addr.street)},{" "}
-                          {mostrarValor(addr.number)}{" "}
+                          <strong>Rua:</strong> {mostrarValor(addr.street)},
+                          {mostrarValor(addr.number)}
                           {addr.complement &&
                             mostrarValor(`- ${addr.complement}`)}
                         </p>
                         <p className="font-medium">
-                          <strong>Bairro:</strong>{" "}
+                          <strong>Bairro:</strong>
                           {mostrarValor(addr.neighborhood)}
                         </p>
                         <p className="font-medium">
-                          <strong>Cidade:</strong> {mostrarValor(addr.city)} -{" "}
+                          <strong>Cidade:</strong> {mostrarValor(addr.city)} -
                           {mostrarValor(addr.district)}
                         </p>
                         <p className="font-medium">
                           <strong>CEP:</strong> {mostrarValor(addr.postal_code)}
                         </p>
                         <p className="font-medium">
-                          <strong>Prioridade:</strong>{" "}
+                          <strong>Prioridade:</strong>
                           {mostrarValor(addr.priority)}
                         </p>
                       </div>
@@ -271,28 +272,39 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                       className="border-b last:border-b-0 pb-2 last:pb-0"
                     >
                       <div className="flex flex-wrap space-y-4 space-x-9">
-                        <p className="font-medium">
-                          <strong>Número:</strong> ({mostrarValor(phone.ddd)}){" "}
+                        <p className="font-medium flex gap-2 items-center">
+                          <strong>Número:</strong>({mostrarValor(phone.ddd)})
                           {mostrarValor(phone.number)}
+                          <Link
+                            href={
+                              phone.number
+                                ? `https://wa.me/${phone.ddd + phone.number}`
+                                : ""
+                            }
+                            target="_blank"
+                            className="bg-emerald-600 rounded-md p-1"
+                          >
+                            <WhatsAppIcon color="white" />
+                          </Link>
                         </p>
                         <p className="font-medium">
-                          <strong>Prioridade:</strong>{" "}
+                          <strong>Prioridade:</strong>
                           {mostrarValor(phone.priority)}
                         </p>
                         <p className="font-medium">
-                          <strong>Data CDR:</strong>{" "}
+                          <strong>Data CDR:</strong>
                           {mostrarValor(phone.cdr_datetime)}
                         </p>
                         <p className="font-medium">
-                          <strong>Data Hot:</strong>{" "}
+                          <strong>Data Hot:</strong>
                           {mostrarValor(phone.hot_datetime)}
                         </p>
                         <p className="font-medium">
-                          <strong>WhatsApp:</strong>{" "}
+                          <strong>WhatsApp:</strong>
                           {mostrarValor(phone.whatsapp_datetime)}
                         </p>
                         <p className="font-medium">
-                          <strong>CPC:</strong>{" "}
+                          <strong>CPC:</strong>
                           {mostrarValor(phone.cpc_datetime)}
                         </p>
                       </div>
@@ -314,27 +326,35 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                     >
                       <div className="flex flex-wrap space-y-4 space-x-9">
                         <p className="font-medium">
-                          <strong>Número:</strong> ({mostrarValor(phone.ddd)}){" "}
+                          <strong>Número:</strong>({mostrarValor(phone.ddd)})
                           {mostrarValor(phone.number)}
                         </p>
                         <p className="font-medium">
-                          <strong>Prioridade:</strong>{" "}
+                          <strong>Prioridade:</strong>
                           {mostrarValor(phone.priority)}
                         </p>
                         <p className="font-medium">
-                          <strong>Data CDR:</strong>{" "}
+                          <strong>Data CDR:</strong>
                           {mostrarValor(phone.cdr_datetime)}
                         </p>
                         <p className="font-medium">
-                          <strong>Data Hot:</strong>{" "}
+                          <strong>Data Hot:</strong>
                           {mostrarValor(phone.hot_datetime)}
                         </p>
                         <p className="font-medium">
-                          <strong>WhatsApp:</strong>{" "}
-                          {mostrarValor(phone.whatsapp_datetime)}
+                          <strong>WhatsApp:</strong>
+                          <Link
+                            href={
+                              phone.whatsapp_datetime
+                                ? `https://wa.me/${phone.whatsapp_datetime}`
+                                : ""
+                            }
+                          >
+                            {mostrarValor(phone.whatsapp_datetime)}
+                          </Link>
                         </p>
                         <p className="font-medium">
-                          <strong>CPC:</strong>{" "}
+                          <strong>CPC:</strong>
                           {mostrarValor(phone.cpc_datetime)}
                         </p>
                       </div>
@@ -359,7 +379,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                           <strong>E-mail:</strong> {mostrarValor(email.email)}
                         </p>
                         <p className="font-medium">
-                          <strong>Prioridade:</strong>{" "}
+                          <strong>Prioridade:</strong>
                           {mostrarValor(email.priority)}
                         </p>
                       </div>
@@ -387,7 +407,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                           <strong>CPF:</strong> {mostrarValor(fam.cpf)}
                         </p>
                         <p className="font-medium">
-                          <strong>Descrição:</strong>{" "}
+                          <strong>Descrição:</strong>
                           {mostrarValor(fam.description)}
                         </p>
                       </div>
@@ -410,34 +430,29 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                       <div className="flex flex-wrap space-y-4 space-x-9">
                         <div className="flex gap-2">
                           <p className="font-medium">
-                            <strong>CNPJ:</strong> {mostrarValor(company.cnpj)}{" "}
+                            <strong>CNPJ:</strong> {mostrarValor(company.cnpj)}
                           </p>
                           <Link
                             href={`/take-it/view-company/${company.cnpj}`}
                             className="bg-[#48038a] rounded"
                           >
-                            <svg
-                              xmlns="http://www.w3.org/2000/svg"
-                              height="24px"
-                              viewBox="0 -960 960 960"
-                              width="24px"
-                              fill="#fff"
-                            >
-                              <path d="M784-120 532-372q-30 24-69 38t-83 14q-109 0-184.5-75.5T120-580q0-109 75.5-184.5T380-840q109 0 184.5 75.5T640-580q0 44-14 83t-38 69l252 252-56 56ZM380-400q75 0 127.5-52.5T560-580q0-75-52.5-127.5T380-760q-75 0-127.5 52.5T200-580q0 75 52.5 127.5T380-400Z" />
-                            </svg>
+                            <SearchIcon
+                              color="white"
+                              style={{ padding: "2px" }}
+                            />
                           </Link>
                         </div>
 
                         <p className="font-medium">
-                          <strong>Razão Social:</strong>{" "}
+                          <strong>Razão Social:</strong>
                           {mostrarValor(company.company_name)}
                         </p>
                         <p className="font-medium">
-                          <strong>Nome Fantasia:</strong>{" "}
+                          <strong>Nome Fantasia:</strong>
                           {mostrarValor(company.trading_name)}
                         </p>
                         <p className="font-medium">
-                          <strong>Situação Cadastral:</strong>{" "}
+                          <strong>Situação Cadastral:</strong>
                           {mostrarValor(company.registry_situation)}
                         </p>
                       </div>
