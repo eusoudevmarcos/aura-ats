@@ -4,6 +4,7 @@ import styles from "../styles/Login.module.css";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
+import logo from "@/assets/logo.svg";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -46,8 +47,10 @@ const LoginPage: React.FC = () => {
     <div className={styles.loginContainer}>
       <div className={styles.loginBox}>
         <div className={styles.loginLogo}>
-          <Image src="/Aura-icon.svg" width={30} height={30} alt="Logo Aura" />
-          <span className={styles.loginLogoText}>Aura ATS</span>
+          <Image src={logo} width={30} height={30} alt="Logo Aura" />
+          <span className="text-[#8C53FF] font-bold text-2xl">
+            A<span className="text-[#545454]">U</span>RA ATS
+          </span>
         </div>
         <form onSubmit={handleSubmit} method="POST" style={{ width: "100%" }}>
           <div className={styles.formGroup}>
@@ -78,7 +81,7 @@ const LoginPage: React.FC = () => {
               required
             />
           </div>
-          {error && <div className={styles.errorMessage}>{error}</div>}
+          {error && <p className="text-red-500">{error}</p>}
           <button
             type="submit"
             disabled={loading}

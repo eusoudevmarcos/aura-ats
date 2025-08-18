@@ -21,12 +21,10 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
   return (
     <header className={styles.header}>
-      {/* Botão para recolher/expandir a sidebar */}
       <button onClick={toggleSidebar} className={styles.sidebarToggleButton}>
-        <ListIcon /> {/* Ícone para o botão de toggle */}
+        <ListIcon />
       </button>
 
-      {/* Barra de Pesquisa */}
       <div className={styles.searchBar}>
         <SearchIcon className={styles.searchIcon} />
         <input
@@ -36,7 +34,6 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
         />
       </div>
 
-      {/* Botões de Ação e Perfil */}
       <div className={styles.headerActions}>
         <Link href="/take-it" className="buttonPrimary">
           <SearchIcon />
