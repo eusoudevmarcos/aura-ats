@@ -71,8 +71,8 @@ model Vaga {
     descricao         String
     requisitos        String?
     responsabilidades String?
-    salarioMinimo     Float?
-    salarioMaximo     Float?
+    salario           Float?
+    tipoSalario       String?
     dataPublicacao    DateTime  @default(now())
     dataFechamento    DateTime?
     create_at         DateTime  @default(now())

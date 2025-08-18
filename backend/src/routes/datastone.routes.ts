@@ -8,9 +8,7 @@ const router = Router();
 
 const datastoneController = new DatastoneController();
 
-router.get("/search", authMiddleware, (req: any, res) =>
-  datastoneController.search(req, res)
-);
-router.get("/cache", authMiddleware, datastoneController.listCache);
+router.get("/search", (req: any, res) => datastoneController.search(req, res));
+router.get("/cache", datastoneController.listCache);
 
 export default router;
