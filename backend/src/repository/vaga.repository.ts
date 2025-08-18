@@ -20,8 +20,8 @@ export class VagaRepository {
         descricao: vagaDataRaw.descricao,
         requisitos: vagaDataRaw.requisitos,
         responsabilidades: vagaDataRaw.responsabilidades,
-        salarioMinimo: vagaDataRaw.salarioMinimo,
-        salarioMaximo: vagaDataRaw.salarioMaximo,
+        salario: vagaDataRaw.salario,
+        tipoSalario: vagaDataRaw.tipoSalario, // A combinar
         categoria: vagaDataRaw.categoria,
         status: vagaDataRaw.status,
         tipoContrato: vagaDataRaw.tipoContrato,
