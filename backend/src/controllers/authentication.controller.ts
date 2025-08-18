@@ -40,8 +40,6 @@ export default class AuthenticationController {
         password,
         usuarioSistema.password
       );
-      console.log(password);
-      console.log(usuarioSistema);
 
       if (!senhaCorreta) {
         await saveLog({

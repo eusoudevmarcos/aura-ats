@@ -48,7 +48,7 @@ app.use("/api/funcionario", funcionarioRoutes);
 app.use("/api/cliente", clienteRoutes);
 app.use("/api/candidato", candidatoRoutes);
 // app.use("/api/vaga", vagaRoutes);
-
+1;
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
 });

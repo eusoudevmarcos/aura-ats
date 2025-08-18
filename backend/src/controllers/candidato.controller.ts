@@ -71,4 +71,14 @@ export class CandidatoController {
       return res.status(400).json({ message: error.message });
     }
   }
+
+  async getEspecialidades(_: Request, res: Response) {
+    try {
+      const especialidades = await this.candidatoService.getEspecialidades();
+      return res.status(200).send(especialidades);
+    } catch (error: any) {
+      console.error("Erro ao consultar especialidades:", error.message);
+      return res.status(400).json({ message: error.message });
+    }
+  }
 }

@@ -12,12 +12,18 @@ candidatoRouter.post("/", (req, res) =>
 candidatoRouter.put("/:id", (req, res) =>
   candidatoController.updateCandidato(req, res)
 );
+
+candidatoRouter.get("/especialidades", (req, res) =>
+  candidatoController.getEspecialidades(req, res)
+);
+
 candidatoRouter.get("/:id", (req, res) =>
   candidatoController.getCandidatoById(req, res)
 );
 candidatoRouter.get("/", (req, res) =>
   candidatoController.getAllCandidatos(req, res)
 );
+
 candidatoRouter.delete("/:id", (req, res) =>
   candidatoController.deleteCandidato(req, res)
 );
