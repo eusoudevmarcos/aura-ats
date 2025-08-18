@@ -26,8 +26,8 @@ export async function getStaticProps(context: any) {
       props: { data: response.data[0] || null },
       revalidate: 60,
     };
-  } catch (error: any) {
-    console.log(error);
+  } catch (_: any) {
+    console.log(_);
     return {
       props: { data: null },
     };

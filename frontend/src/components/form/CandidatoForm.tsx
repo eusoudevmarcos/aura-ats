@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { Children, useEffect, useState } from "react";
 import api from "@/axios";
 import { FormProvider, UseFormReturn } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -12,6 +12,8 @@ import LocalizacaoForm from "@/components/form/LocalizacaoForm";
 import FormacaoForm from "@/components/form/FormacaoForm";
 
 import { AreaCandidatoEnum } from "@/schemas/candidato.schema";
+import { FormSelect } from "../input/FormSelect";
+import { FormInput } from "../input/FormInput";
 
 type CandidatoFormProps = {
   formContexto?: UseFormReturn<CandidatoInput>;
@@ -45,20 +47,21 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     formState: { errors },
   } = methods;
 
-  // useEffect(() => {
-  //   const fetchEspecialidades = async () => {
-  //     try {
-  //       // Suponha que você tenha um endpoint para buscar especialidades
-  //       const response = await api.get<{ id: number; nome: string }[]>(
-  //         "/api/especialidades"
-  //       );
-  //       setEspecialidades(response.data);
-  //     } catch (error) {
-  //       console.error("Erro ao carregar especialidades:", error);
-  //     }
-  //   };
-  //   fetchEspecialidades();
-  // }, []);
+  const fetchEspecialidades = async () => {
+    try {
+      // Suponha que você tenha um endpoint para buscar especialidades
+      const response = await api.get<{ id: number; nome: string }[]>(
+        "/api/candidato/especialidades"
+      );
+      setEspecialidades(response.data);
+    } catch (error) {
+      console.error("Erro ao carregar especialidades:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchEspecialidades();
+  }, []);
 
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
@@ -102,7 +105,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         alert("Profissional salvo com sucesso!");
       }
     } catch (erro: any) {
-      console.error("Erro ao salvar profissional:", erro);
+      // console.error("Erro ao salvar profissional:", erro);
       alert(
         "Erro ao salvar profissional: " +
           (erro?.response?.data?.message || "Erro desconhecido")
@@ -123,124 +126,54 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         </Card>
 
         <Card title="Endereço">
-          <LocalizacaoForm namePrefix="pessoa.endereco" />
+          <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
         </Card>
 
-        <Card title="Formações Acadêmicas">
+        {/* <Card title="Formações Acadêmicas">
           <FormacaoForm namePrefix="" />
-        </Card>
+        </Card> */}
 
         <Card title="Dados Profissionais">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <label
-                htmlFor="areaCandidato"
-                className="block text-[#48038a] text-sm font-bold mb-2"
-              >
-                Área de Atuação:
-              </label>
-              <select
-                id="areaCandidato"
-                {...register("areaCandidato")}
-                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              >
-                <option value="">Selecione...</option>
-                {AreaCandidatoEnum.options.map((area) => (
-                  <option key={area} value={area}>
-                    {area.replaceAll("_", " ")}
-                  </option>
-                ))}
-              </select>
-              {getError(errors, "areaCandidato") && (
-                <p className="text-red-500 text-xs italic">
-                  {getError(errors, "areaCandidato")}
-                </p>
-              )}
-            </div>
+            <FormSelect
+              name="areaCandidato"
+              register={register}
+              errors={errors}
+              placeholder="Área de atuação"
+              selectProps={{
+                children: (
+                  <>
+                    {AreaCandidatoEnum.options.map((area) => (
+                      <option key={area} value={area}>
+                        {area.replaceAll("_", " ")}
+                      </option>
+                    ))}
+                  </>
+                ),
+              }}
+            ></FormSelect>
 
-            <div>
-              <label
-                htmlFor="especialidadeId"
-                className="block text-[#48038a] text-sm font-bold mb-2"
-              >
-                Especialidade:
-              </label>
-              <select
-                id="especialidadeId"
-                {...register("especialidadeId", { valueAsNumber: true })} // Importante para IDs numéricos
-                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              >
-                <option value="">Selecione...</option>
-                {especialidades.map((esp) => (
-                  <option key={esp.id} value={esp.id}>
-                    {esp.nome}
-                  </option>
-                ))}
-              </select>
-              {getError(errors, "especialidadeId") && (
-                <p className="text-red-500 text-xs italic">
-                  {getError(errors, "especialidadeId")}
-                </p>
-              )}
-            </div>
+            <FormSelect
+              name="especialidadeId"
+              errors={errors}
+              register={register}
+              placeholder="Especialidade"
+              selectProps={{
+                children: (
+                  <>
+                    {especialidades.map((esp) => (
+                      <option key={esp.id} value={esp.id}>
+                        {esp.nome}
+                      </option>
+                    ))}
+                  </>
+                ),
+              }}
+            ></FormSelect>
 
-            <div>
-              <label
-                htmlFor="crm"
-                className="block text-[#48038a] text-sm font-bold mb-2"
-              >
-                CRM:
-              </label>
-              <input
-                id="crm"
-                type="text"
-                {...register("crm")}
-                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-              {getError(errors, "crm") && (
-                <p className="text-red-500 text-xs italic">
-                  {getError(errors, "crm")}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="corem"
-                className="block text-[#48038a] text-sm font-bold mb-2"
-              >
-                COREM:
-              </label>
-              <input
-                id="corem"
-                type="text"
-                {...register("corem")}
-                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-              {getError(errors, "corem") && (
-                <p className="text-red-500 text-xs italic">
-                  {getError(errors, "corem")}
-                </p>
-              )}
-            </div>
-            <div>
-              <label
-                htmlFor="rqe"
-                className="block text-[#48038a] text-sm font-bold mb-2"
-              >
-                RQE:
-              </label>
-              <input
-                id="rqe"
-                type="text"
-                {...register("rqe")}
-                className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-              />
-              {getError(errors, "rqe") && (
-                <p className="text-red-500 text-xs italic">
-                  {getError(errors, "rqe")}
-                </p>
-              )}
-            </div>
+            <FormInput name="crm" placeholder="CRM" register={register} />
+            <FormInput name="corem" placeholder="COREM" register={register} />
+            <FormInput name="rqe" placeholder="RQE" register={register} />
           </div>
         </Card>
 

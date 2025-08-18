@@ -78,7 +78,6 @@ const CandidatoList: React.FC = () => {
             },
           }
         );
-        console.log("Dados recebidos da API:", response.data.data);
         setCandidatos(response.data.data);
         setTotal(response.data.total);
         setTotalPages(response.data.totalPages);

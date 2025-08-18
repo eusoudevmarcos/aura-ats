@@ -5,6 +5,7 @@ import "../styles/global.css";
 import "../styles/Login.module.css";
 import DashboardLayout from "@/layout/DashboardLayout";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { StrictMode } from "react";
 
 const PUBLIC_ROUTES = ["/login"];
 
@@ -24,10 +25,12 @@ function App({ Component, pageProps }: AppProps) {
   // Se for rota privada, usa layout do dashboard
   return (
     <>
-      <SpeedInsights />
-      <DashboardLayout>
-        {(dashboardProps) => <Component {...pageProps} {...dashboardProps} />}
-      </DashboardLayout>
+      <StrictMode>
+        <SpeedInsights />
+        <DashboardLayout>
+          {(dashboardProps) => <Component {...pageProps} {...dashboardProps} />}
+        </DashboardLayout>
+      </StrictMode>
     </>
   );
 }
