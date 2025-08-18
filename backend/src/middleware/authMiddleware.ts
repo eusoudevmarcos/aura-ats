@@ -1,15 +1,13 @@
-// src/middlewares/authMiddleware.ts (ou onde você preferir organizar seus middlewares)
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
+// import { UserRole } from "./roleMiddleware";
 
-// Defina uma interface para estender o objeto Request do Express
-// Isso permite adicionar a propriedade 'user' com segurança de tipo
 declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: string; // Exemplo: ID do usuário
-        // Adicione outras propriedades do payload do seu token que você espera aqui
+        id: string;
+        // role: UserRole; // Adicione o papel se aplicável
       };
     }
   }
@@ -22,22 +20,32 @@ export const authMiddleware = (
   res: Response,
   next: NextFunction
 ) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({
-      message:
-        "Acesso negado. Token não fornecido ou formato inválido (Bearer token).",
-    });
+  if (!JWT_SECRET) {
+    throw new Error("Token invalido");
   }
 
-  const token = authHeader.split(" ")[1];
+  let token: string | undefined;
+  console.log(req.headers.cookie);
+  if (req.headers.cookie) {
+    token = req.headers.cookie.replace("token=", "");
+  } else if (req.headers.authorization) {
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.split(" ")[1];
+    }
+  }
+
+  if (!token) {
+    return res
+      .status(401)
+      .json({ message: "Acesso negado. Token não fornecido." });
+  }
 
   try {
-    if (!JWT_SECRET) {
-      throw new Error("Token não fornecido");
-    }
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
+    const decoded = jwt.verify(token, JWT_SECRET) as {
+      id: string;
+      // role: UserRole;
+    };
 
     req.user = decoded;
 

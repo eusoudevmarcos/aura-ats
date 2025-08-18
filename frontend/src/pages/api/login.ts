@@ -30,6 +30,8 @@ export default async function handler(
       maxAge: 60 * 60 * 2, // 2 horas
     });
 
+    res.setHeader("Authorization", `Bearer ${token}`);
+
     res.setHeader("Set-Cookie", serialized);
     res.status(200).json({ uid });
   } catch (err: any) {
