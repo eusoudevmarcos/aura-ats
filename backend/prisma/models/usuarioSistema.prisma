@@ -18,10 +18,9 @@ model UsuarioSistema {
     email       String      @unique
     password    String
     tipoUsuario TipoUsuario
-    setor       String?
-    cargo       String?
-    pessoaId    String?     @unique
-    pessoa      Pessoa?     @relation(fields: [pessoaId], references: [id])
+
+    pessoaId String? @unique
+    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
 
     empresaId String?  @unique
     empresa   Empresa? @relation(fields: [empresaId], references: [id])
@@ -31,8 +30,8 @@ model UsuarioSistema {
 
 model Funcionario {
     id               String         @id @default(uuid())
-    setor            String?
-    cargo            String?
+    setor            String?        @db.VarChar(100)
+    cargo            String?        @db.VarChar(100)
     usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
     usuarioSistemaId String         @unique
 }
