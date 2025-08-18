@@ -2,19 +2,15 @@
 
 import { Router } from "express";
 import { DatastoneController } from "../controllers/datastone.controller";
+import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();
 
 const datastoneController = new DatastoneController();
 
-/**
- * Rota de busca no DataStone.
- * Espera parâmetros via query:
- * - query: valor a ser pesquisado (CPF, CNPJ, nome, etc.)
- * - tipo: "persons" ou "companies"
- * - uf, filial, list, isDetail (opcionais)
- */
-router.get("/search", datastoneController.search);
-router.get("/cache", datastoneController.listCache);
+router.get("/search", authMiddleware, (req: any, res) =>
+  datastoneController.search(req, res)
+);
+router.get("/cache", authMiddleware, datastoneController.listCache);
 
 export default router;

@@ -34,7 +34,7 @@ async function log(data: any) {
   }
 }
 
-interface Query {
+export interface Query {
   query: string;
   tipo: "persons" | "companies";
   uf: string;
