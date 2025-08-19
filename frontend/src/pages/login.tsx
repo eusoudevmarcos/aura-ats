@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
 import logo from "@/assets/logo.svg";
+import api from "@/axios";
 
 const LoginPage: React.FC = () => {
   const [username, setUsername] = useState("");
@@ -20,16 +21,14 @@ const LoginPage: React.FC = () => {
 
     try {
       // Chamada para API externa
-      const res = await fetch("/api/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include", // agora garante que cookies httpOnly funcionem
-        body: JSON.stringify({ username, password }),
+      const res = await api.post("/api/login", {
+        username,
+        password,
       });
 
-      const data = await res.json();
+      const data = await res.data;
 
-      if (res.ok) {
+      if (res.status === 200) {
         localStorage.setItem("uid", data.uid);
         router.push("/atividades/agendas");
       } else {

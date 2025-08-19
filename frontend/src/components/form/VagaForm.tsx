@@ -53,7 +53,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
     const fetchEmpresas = async () => {
       try {
         const response = await api.get<{ id: string; nome: string }[]>(
-          "/api/empresas"
+          "/api/external/empresas"
         );
         setEmpresas(response.data);
       } catch (error) {
@@ -78,7 +78,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
     setLoading(true);
 
     try {
-      const endpoint = payload.id ? `/api/vaga/${payload.id}` : "/api/vaga";
+      const endpoint = payload.id ? `/vaga/${payload.id}` : "/vaga";
       const method = payload.id ? api.put : api.post;
 
       const response = await method(endpoint, payload);

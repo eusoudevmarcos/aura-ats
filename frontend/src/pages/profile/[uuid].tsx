@@ -22,7 +22,7 @@ const UserPage: React.FC = () => {
         setLoading(true);
         setErro(null);
         try {
-          const resp = await api.get("/api/funcionario/" + uuid);
+          const resp = await api.get("/funcionario/" + uuid);
 
           if (resp.status === 200) {
             setUserData(resp.data);

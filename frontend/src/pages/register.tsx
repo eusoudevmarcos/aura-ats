@@ -23,9 +23,13 @@ export default function RegisterPage() {
     setError(null);
 
     try {
-      const res = await api.post("/api/register", JSON.stringify(form), {
-        headers: { "Content-Type": "application/json" },
-      });
+      const res = await api.post(
+        "/api/external/register",
+        JSON.stringify(form),
+        {
+          headers: { "Content-Type": "application/json" },
+        }
+      );
 
       if (res.status !== 200)
         throw new Error(res.statusText || "Erro ao registrar");

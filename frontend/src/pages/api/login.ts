@@ -1,13 +1,10 @@
 // pages/api/login.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { serialize } from "cookie";
-import axios from "axios"; // Importe axios diretamente aqui para clareza
-import api from "@/axios";
+import axios from "axios";
 
-// Crie uma instância de axios ESPECÍFICA para o backend externo
-// Isso é crucial para garantir que você chame o destino correto.
 const externalBackendApi = axios.create({
-  baseURL: process.env.YOUR_EXTERNAL_BACKEND_URL, // Assegure-se que esta variável de ambiente está definida (ex: "http://localhost:3001")
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   timeout: 10000,
 });
 
@@ -22,7 +19,7 @@ export default async function handler(
   const { username, password } = req.body;
 
   try {
-    const response = await api.post("/api/auth/login", {
+    const response = await externalBackendApi.post("/api/auth/login", {
       username,
       password,
     });
@@ -39,13 +36,12 @@ export default async function handler(
       );
     }
 
-    res.status(200).json({ uid }); // Retorne o UID para o frontend
+    res.status(200).json({ uid });
   } catch (err: any) {
     console.error("Erro no login:", err?.response?.data || err);
-    // Passe o status e a mensagem de erro do backend externo, se disponíveis
     res.status(err?.response?.status || 500).json({
       error: err?.response?.data?.error || "Erro desconhecido no login.",
-      details: err?.response?.data, // Útil para depuração
+      details: err?.response?.data,
     });
   }
 }

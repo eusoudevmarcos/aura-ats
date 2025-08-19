@@ -52,7 +52,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     setLoading(true);
 
     try {
-      const response = await api.post("/api/cliente/save", payload);
+      const response = await api.post("/api/external/cliente/save", payload);
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
       }

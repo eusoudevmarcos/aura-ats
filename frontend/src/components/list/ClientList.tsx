@@ -64,7 +64,9 @@ const ClientList: React.FC = () => {
     const fetchClientes = async () => {
       setLoading(true);
       try {
-        const response = await api.get<Pagination<Cliente[]>>("/api/cliente");
+        const response = await api.get<Pagination<Cliente[]>>(
+          "/api/external/cliente"
+        );
         const data = Array.isArray(response.data?.data)
           ? response.data.data
           : [];

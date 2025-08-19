@@ -51,7 +51,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     try {
       // Suponha que você tenha um endpoint para buscar especialidades
       const response = await api.get<{ id: number; nome: string }[]>(
-        "/api/candidato/especialidades"
+        "/api/external/candidato/especialidades"
       );
       setEspecialidades(response.data);
     } catch (error) {
@@ -94,9 +94,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
     try {
       // Determina se é uma criação (POST) ou atualização (PUT)
-      const endpoint = payload.id
-        ? `/api/candidato/${payload.id}`
-        : "/api/candidato";
+      const endpoint = payload.id ? `/candidato/${payload.id}` : "/candidato";
       const method = payload.id ? api.put : api.post;
 
       const response = await method(endpoint, payload);

@@ -69,7 +69,7 @@ const CandidatoList: React.FC = () => {
       setLoading(true);
       try {
         const response = await api.get<Pagination<CandidatoWithRelations[]>>(
-          "/api/candidato",
+          "/api/external/candidato",
           {
             params: {
               page,

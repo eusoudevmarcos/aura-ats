@@ -105,7 +105,7 @@ const FuncionariosList: React.FC = () => {
       setLoading(true);
       try {
         const response = await api.get<Pagination<Funcionario[]>>(
-          "/api/funcionario",
+          "/api/external/funcionario",
           {
             params: {
               page,
