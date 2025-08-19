@@ -26,14 +26,6 @@ body {
   flex-direction: column;
 }
 
-/* Estilo para a área de conteúdo principal do dashboard */
-.dashboardMainContent {
-  flex: 1;
-  padding: 32px; /* p-8 */
-  overflow-y: auto; /* Permite scroll se o conteúdo for maior que a tela */
-  background-color: #f3f4f6; /* Fundo da área de conteúdo */
-}
-
 /* Título das seções */
 .sectionTitle {
   font-size: 30px; /* text-3xl */

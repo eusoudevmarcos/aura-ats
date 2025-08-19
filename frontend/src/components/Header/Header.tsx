@@ -2,15 +2,10 @@
 import React from "react";
 import styles from "./Header.module.css"; // Importa o módulo CSS
 import { BellIcon, SearchIcon } from "../icons"; // Importa os ícones
-import { ListIcon } from "../icons/ListIcon"; // Importa um novo ícone para o toggle da sidebar
 import Image from "next/image";
 import Link from "next/link";
 
-interface HeaderProps {
-  toggleSidebar: () => void; // Adicionado: A propriedade toggleSidebar
-}
-
-const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
+const Header: React.FC = () => {
   const [uid, setUid] = React.useState<string | null>(null);
 
   React.useEffect(() => {
@@ -21,10 +16,6 @@ const Header: React.FC<HeaderProps> = ({ toggleSidebar }) => {
 
   return (
     <header className={styles.header}>
-      <button onClick={toggleSidebar} className={styles.sidebarToggleButton}>
-        <ListIcon />
-      </button>
-
       <div className={styles.searchBar}>
         <SearchIcon className={styles.searchIcon} />
         <input

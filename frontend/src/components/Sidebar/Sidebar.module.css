@@ -7,9 +7,9 @@
   flex-direction: column;
   padding: 24px; /* p-6 */
   box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-    0 2px 4px -1px rgba(0, 0, 0, 0.06); /* shadow-lg */
-  transition: width 0.3s ease-in-out; /* Transição para recolher/expandir */
-  flex-shrink: 0; /* Garante que não encolha por padrão */
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: width 0.3s ease-in-out;
+  flex-shrink: 0;
 }
 
 .sidebarCollapsed {

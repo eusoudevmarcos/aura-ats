@@ -403,3 +403,29 @@ export const WhatsAppIcon: React.FC<IconProps> = (props) => (
     />
   </svg>
 );
+
+export const ListIcon: React.FC<IconProps> = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 -960 960 960"
+    width="24px"
+    fill="#48038a"
+  >
+    <path d="M360-120v-720h80v720h-80Zm160-160v-400l200 200-200 200Z" />
+  </svg>
+);
+
+export const ListClosedIcon: React.FC<IconProps> = (props) => (
+  <svg
+    {...props}
+    xmlns="http://www.w3.org/2000/svg"
+    height="24px"
+    viewBox="0 -960 960 960"
+    width="24px"
+    fill="#48038a"
+  >
+    <path d="M440-280v-400L240-480l200 200Zm80 160h80v-720h-80v720Z" />
+  </svg>
+);

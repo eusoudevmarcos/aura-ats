@@ -7,7 +7,6 @@ interface SidebarItemProps {
   label: string;
   active: boolean;
   href: string;
-  onClick: () => void;
   isDropdownItem?: boolean; // Adicionado para diferenciar itens de dropdown
 }
 
@@ -15,19 +14,16 @@ const SidebarItem: React.FC<SidebarItemProps> = ({
   icon,
   label,
   active,
-  onClick,
   href,
   isDropdownItem = false,
 }) => {
   return (
     <Link
       href={href}
-      onClick={onClick}
       className={`${styles.sidebarItem} ${
         active ? styles.sidebarItemActive : ""
       } ${isDropdownItem ? styles.dropdownItem : ""}`}
     >
-      {/* Renderiza o ícone diretamente. A classe 'icon' será aplicada via CSS Module no Sidebar.tsx */}
       {icon}
       <span>{label}</span>
     </Link>

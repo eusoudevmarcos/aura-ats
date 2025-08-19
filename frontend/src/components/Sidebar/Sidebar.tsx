@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import SidebarItem from "./SidebarItem";
 import styles from "./Sidebar.module.css";
 import {
@@ -9,25 +9,28 @@ import {
   ClipboardCheckIcon,
   SettingsIcon,
   ChevronDownIcon,
+  ListIcon,
+  ListClosedIcon,
 } from "../icons";
 import Image from "next/image";
-import Link from "next/link";
 import { useUser } from "@/hook/useUser";
 import { getFirstLetter } from "@/utils/getFirstLetter";
+import Link from "next/link";
+import { useRouter } from "next/router";
 
 interface SidebarProps {
-  setActiveSection: (section: string) => void;
-  activeSection: string;
-  isCollapsed: boolean;
-  toggleSidebar?: () => void;
+  onToggleSidebar: (collapsed: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({
-  setActiveSection,
-  activeSection,
-  isCollapsed,
-}) => {
+const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
+  const [collapsed, setCollapsed] = useState(false);
+  const router = useRouter();
   const user = useUser();
+
+  useEffect(() => {
+    onToggleSidebar(collapsed);
+  }, [collapsed, onToggleSidebar]);
+
   if (!user) return null;
 
   const navItems = [
@@ -85,11 +88,23 @@ const Sidebar: React.FC<SidebarProps> = ({
 
   return (
     <aside
-      className={`sticky ${styles.sidebar} ${
-        isCollapsed ? styles.sidebarCollapsed : ""
-      }`}
+      className={`fixed top-20 left-4 h-[calc(90vh-2rem)] bg-white text-[#474747] flex flex-col shadow-lg rounded-lg
+        transition-all duration-300 ease-in-out z-40 ${
+          collapsed ? "w-20 p-5" : "w-64 p-6"
+        }`}
     >
-      <div className={styles.sidebarLogo}>
+      <button
+        onClick={() => setCollapsed(!collapsed)}
+        className="cursor-pointer absolute right-[-15px] top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200"
+      >
+        {collapsed ? <ListIcon /> : <ListClosedIcon />}
+      </button>
+
+      <div
+        className={`flex items-center gap-2 mb-8 ${
+          collapsed ? "justify-center" : ""
+        }`}
+      >
         <Image
           height={30}
           width={30}
@@ -97,23 +112,31 @@ const Sidebar: React.FC<SidebarProps> = ({
           alt="Logo Aura"
           unoptimized
         />
-        <span className={styles.sidebarLogoText}>Aura ATS</span>
+        {!collapsed && (
+          <span className="text-xl font-semibold text-gray-800">Aura ATS</span>
+        )}
       </div>
 
-      <nav className={styles.sidebarNav}>
-        {navItems.map((item) => (
-          <SidebarItem
-            key={item.label}
-            icon={item.icon}
-            label={item.label}
-            active={activeSection === item.label}
-            href={item.href}
-            onClick={() => setActiveSection(item.label)}
-          />
-        ))}
+      <nav className="flex-grow overflow-y-auto custom-scrollbar">
+        <ul>
+          {navItems.map((item) => (
+            <SidebarItem
+              key={item.label}
+              icon={item.icon}
+              label={item.label}
+              active={router.pathname === item.href}
+              href={item.href}
+            />
+          ))}
+        </ul>
       </nav>
 
-      <Link href={`/profile/${user.id}`} className={styles.sidebarUserCard}>
+      <Link
+        href={`/profile/${user.id}`}
+        className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 ${
+          collapsed ? "justify-center" : ""
+        }`}
+      >
         <Image
           height={30}
           width={30}
@@ -122,13 +145,18 @@ const Sidebar: React.FC<SidebarProps> = ({
           )}`}
           alt="User Avatar"
           unoptimized
+          className="rounded-full"
         />
-        <div className={styles.sidebarUserInfo}>
-          <p>{user?.nome || user?.razaoSocial}</p>
-          <p>{user.email}</p>
-          <p>{user.tipo}</p>
-        </div>
-        <ChevronDownIcon className={styles.chevronDownIcon} />
+        {!collapsed && (
+          <div className="flex-1 overflow-hidden">
+            <p className="text-sm font-medium truncate">
+              {user?.nome || user?.razaoSocial}
+            </p>
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            <p className="text-xs text-gray-500 truncate">{user.tipo}</p>
+          </div>
+        )}
+        {!collapsed && <ChevronDownIcon className="w-4 h-4 text-gray-400" />}
       </Link>
     </aside>
   );
