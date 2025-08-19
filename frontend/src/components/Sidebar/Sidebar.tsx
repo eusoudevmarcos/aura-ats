@@ -82,11 +82,6 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
       label: "Funcionarios",
       href: "/funcionarios/",
     },
-    {
-      icon: <AccountIcon className={styles.icon} />,
-      label: "Perfil",
-      href: `/profile/${user.uid}`,
-    },
   ];
 
   return (
