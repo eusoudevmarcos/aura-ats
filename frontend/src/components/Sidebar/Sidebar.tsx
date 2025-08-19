@@ -11,19 +11,22 @@ import {
   ChevronDownIcon,
   ListIcon,
   ListClosedIcon,
+  AccountIcon,
+  EmployeesIcon,
 } from "../icons";
 import Image from "next/image";
 import { useUser } from "@/hook/useUser";
 import { getFirstLetter } from "@/utils/getFirstLetter";
 import Link from "next/link";
 import { useRouter } from "next/router";
+import logo from "@/assets/logo.svg";
 
 interface SidebarProps {
   onToggleSidebar: (collapsed: boolean) => void;
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const router = useRouter();
   const user = useUser();
 
@@ -75,14 +78,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
       href: "/configuracoes",
     },
     {
-      icon: <SettingsIcon className={styles.icon} />,
-      label: "Perfil",
-      href: `/profile/${user.uid}`,
-    },
-    {
-      icon: <SettingsIcon className={styles.icon} />,
+      icon: <EmployeesIcon className={styles.icon} />,
       label: "Funcionarios",
       href: "/funcionarios/",
+    },
+    {
+      icon: <AccountIcon className={styles.icon} />,
+      label: "Perfil",
+      href: `/profile/${user.uid}`,
     },
   ];
 
@@ -99,38 +102,30 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
       >
         {collapsed ? <ListIcon /> : <ListClosedIcon />}
       </button>
-
-      <div
-        className={`flex items-center gap-2 mb-8 ${
-          collapsed ? "justify-center" : ""
-        }`}
-      >
-        <Image
-          height={30}
-          width={30}
-          src="https://placehold.co/40x40/6366F1/ffffff?text=A"
-          alt="Logo Aura"
-          unoptimized
-        />
-        {!collapsed && (
-          <span className="text-xl font-semibold text-gray-800">Aura ATS</span>
-        )}
-      </div>
-
+      <Image
+        height={80}
+        width={80}
+        src={logo}
+        alt="Logo Aura"
+        className="self-center"
+      />
       <nav className="flex-grow overflow-y-auto custom-scrollbar">
         <ul>
           {navItems.map((item) => (
-            <SidebarItem
-              key={item.label}
-              icon={item.icon}
-              label={item.label}
-              active={router.pathname === item.href}
+            <Link
               href={item.href}
-            />
+              className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
+                router.pathname === item.href
+                  ? "bg-[#8c53ff] text-white"
+                  : "text-[#474747] hover:bg-[#f1eefe] hover:text-[#7839cd]"
+              }`}
+            >
+              {item.icon}
+              <span>{item.label}</span>
+            </Link>
           ))}
         </ul>
       </nav>
-
       <Link
         href={`/profile/${user.id}`}
         className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 ${

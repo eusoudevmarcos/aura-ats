@@ -15,35 +15,37 @@ const Header: React.FC = () => {
   }, []);
 
   return (
-    <header className={styles.header}>
-      <div className={styles.searchBar}>
-        <SearchIcon className={styles.searchIcon} />
-        <input
-          type="text"
-          placeholder="Pesquisar..."
-          className={styles.searchInput}
-        />
-      </div>
-
-      <div className={styles.headerActions}>
-        <Link href="/take-it" className="buttonPrimary">
-          <SearchIcon />
-          TAKE IT
-        </Link>
-        <button className={styles.iconButton}>
-          <BellIcon />
-        </button>
-        <Link href={`/profile/${uid}`}>
-          <Image
-            src="https://placehold.co/40x40/FFD700/000000?text=JD"
-            width={30}
-            height={30}
-            alt="User Avatar"
-            className={styles.userAvatar}
-            unoptimized
+    <header className="fixed bg-white w-full p-4 shadow-md">
+      <section className="flex justify-between mx-auto max-w-[1440px] gap-2">
+        <div className={styles.searchBar}>
+          <SearchIcon className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Pesquisar..."
+            className={styles.searchInput}
           />
-        </Link>
-      </div>
+        </div>
+
+        <div className={styles.headerActions}>
+          <Link href="/take-it" className="buttonPrimary">
+            <SearchIcon />
+            TAKE IT
+          </Link>
+          <button className={styles.iconButton}>
+            <BellIcon />
+          </button>
+          <Link href={`/profile/${uid}`}>
+            <Image
+              src="https://placehold.co/40x40/FFD700/000000?text=JD"
+              width={30}
+              height={30}
+              alt="User Avatar"
+              className={styles.userAvatar}
+              unoptimized
+            />
+          </Link>
+        </div>
+      </section>
     </header>
   );
 };

@@ -9,7 +9,7 @@ interface DashboardProps {
 const DashboardLayout: React.FC<DashboardProps> = ({ children }) => {
   const [activeSection, setActiveSection] = useState("");
 
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
 
   const onToggleSidebar = (collapsedState: boolean) => {
     setIsSidebarCollapsed(collapsedState);
@@ -23,9 +23,13 @@ const DashboardLayout: React.FC<DashboardProps> = ({ children }) => {
 
       <div
         className={`flex-1 overflow-auto transition-all duration-300
-          ${isSidebarCollapsed ? "pl-28" : "pl-72"} pt-4 pr-4`}
+          ${
+            isSidebarCollapsed
+              ? "pl-28 min-[1640px]:pl-0"
+              : "pl-72 min-[1940px]:pl-0"
+          } pt-4 pr-4`}
       >
-        <main className="p-2 rounded-lg">
+        <main className="p-2 rounded-lg mt-14 mx-auto max-w-[1440px]">
           {typeof children === "function"
             ? children({ activeSection }) ?? null
             : React.isValidElement(children)

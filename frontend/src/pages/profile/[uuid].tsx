@@ -52,16 +52,7 @@ const UserPage: React.FC = () => {
   }
 
   return (
-    <div
-      style={{
-        maxWidth: 600,
-        margin: "40px auto",
-        padding: 24,
-        background: "#fff",
-        borderRadius: 8,
-        boxShadow: "0 2px 8px #0001",
-      }}
-    >
+    <div className="bg-white shadow-md p-6">
       <h1 className="text-[#8c53ff] font-bold mb-4">Perfil do Usuário</h1>
       <ul className="[&>li]:mb-1 list-none p-0">
         {Object.entries(userData).map(([key, value]) => {
