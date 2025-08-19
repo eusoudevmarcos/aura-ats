@@ -17,7 +17,7 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>Meu Aplicativo Next.js</title> {/* Título da sua página */}
+        <title>Aura ATS</title> {/* Título da sua página */}
         <link rel="icon" href="/favicon.ico" /> {/* Referência ao favicon */}
         {/* Opcional: Para outros tamanhos ou formatos, adicione mais tags aqui */}
         {/* <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" /> */}
