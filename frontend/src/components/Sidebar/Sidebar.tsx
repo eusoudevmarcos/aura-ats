@@ -109,6 +109,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
         <ul>
           {navItems.map((item) => (
             <Link
+              key={item.label}
               href={item.href}
               className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
                 router.pathname === item.href
