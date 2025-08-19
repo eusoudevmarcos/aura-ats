@@ -5,7 +5,6 @@ import axios from "axios";
 
 const externalBackendApi = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`, // Ex: "https://takeitapi-1.onrender.com"
-  timeout: 10000,
 });
 
 export default async function handler(
