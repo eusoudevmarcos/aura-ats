@@ -27,6 +27,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   const [collapsed, setCollapsed] = useState(true);
+  const [isShowLabel, setIsShowLabel] = useState(false);
   const router = useRouter();
   const user = useUser();
 
@@ -93,7 +94,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
     >
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="cursor-pointer absolute right-[-15px] top-1/2 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200"
+        className="cursor-pointer absolute right-[-20px] top-10 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200"
       >
         {collapsed ? <ListIcon /> : <ListClosedIcon />}
       </button>
@@ -114,9 +115,19 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                   ? "bg-[#8c53ff] text-white"
                   : "text-[#474747] hover:bg-[#f1eefe] hover:text-[#7839cd]"
               }`}
+              onMouseEnter={() => setIsShowLabel(true)}
+              onMouseLeave={() => setIsShowLabel(false)}
             >
               {item.icon}
-              <span>{item.label}</span>
+              <span
+                className={`${
+                  isShowLabel && collapsed
+                    ? "block absolute left-18 bg-white p-1 shadow-md text-[#7839cd] text-bold transition-all duration-200"
+                    : ""
+                }`}
+              >
+                {item.label}
+              </span>
             </Link>
           ))}
         </ul>

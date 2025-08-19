@@ -77,7 +77,10 @@ function TR<T>({
       style={{ cursor: onRowClick ? "pointer" : "default" }}
     >
       {columns.map((col) => (
-        <td key={String(col.key)}>
+        <td
+          key={String(col.key)}
+          className="max-w-xl truncate whitespace-nowrap overflow-ellipsis"
+        >
           {renderCellValue((row as any)[col.key], col, row, index)}
         </td>
       ))}
