@@ -1,7 +1,15 @@
 // pages/api/login.ts
 import { NextApiRequest, NextApiResponse } from "next";
 import { serialize } from "cookie";
+import axios from "axios"; // Importe axios diretamente aqui para clareza
 import api from "@/axios";
+
+// Crie uma instância de axios ESPECÍFICA para o backend externo
+// Isso é crucial para garantir que você chame o destino correto.
+const externalBackendApi = axios.create({
+  baseURL: process.env.YOUR_EXTERNAL_BACKEND_URL, // Assegure-se que esta variável de ambiente está definida (ex: "http://localhost:3001")
+  timeout: 10000,
+});
 
 export default async function handler(
   req: NextApiRequest,
@@ -14,28 +22,30 @@ export default async function handler(
   const { username, password } = req.body;
 
   try {
-    // Chamada para sua API de autenticação
     const response = await api.post("/api/auth/login", {
       username,
       password,
     });
 
-    const { token, uid } = response.data;
+    const { uid } = response.data;
 
-    const serialized = serialize("token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      path: "/",
-      maxAge: 60 * 60 * 2, // 2 horas
-    });
+    const setCookieHeader = response.headers["set-cookie"];
 
-    res.setHeader("Authorization", `Bearer ${token}`);
+    if (setCookieHeader) {
+      res.setHeader("Set-Cookie", setCookieHeader);
+    } else {
+      console.warn(
+        "Backend externo não retornou o cabeçalho 'Set-Cookie' com o token."
+      );
+    }
 
-    res.setHeader("Set-Cookie", serialized);
-    res.status(200).json({ uid });
+    res.status(200).json({ uid }); // Retorne o UID para o frontend
   } catch (err: any) {
     console.error("Erro no login:", err?.response?.data || err);
-    res.status(401).json({ err });
+    // Passe o status e a mensagem de erro do backend externo, se disponíveis
+    res.status(err?.response?.status || 500).json({
+      error: err?.response?.data?.error || "Erro desconhecido no login.",
+      details: err?.response?.data, // Útil para depuração
+    });
   }
 }

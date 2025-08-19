@@ -1,6 +1,7 @@
+// authMiddleware.ts (SUGESTÃO DE MELHORIA)
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
-// import { UserRole } from "./roleMiddleware";
+import { parse } from "cookie"; // Importe o parser de cookie
 
 declare global {
   namespace Express {
@@ -21,17 +22,24 @@ export const authMiddleware = (
   next: NextFunction
 ) => {
   if (!JWT_SECRET) {
-    throw new Error("Token invalido");
+    throw new Error("JWT_SECRET não está definido.");
   }
 
   let token: string | undefined;
-  console.log(req.headers.cookie);
-  if (req.headers.cookie) {
-    token = req.headers.cookie.replace("token=", "");
-  } else if (req.headers.authorization) {
-    const authHeader = req.headers.authorization;
-    if (authHeader && authHeader.startsWith("Bearer ")) {
-      token = authHeader.split(" ")[1];
+
+  // 1. Tentar obter o token do cabeçalho Authorization (Bearer)
+  const authHeader = req.headers.authorization;
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    token = authHeader.split(" ")[1];
+  }
+
+  // 2. Se não encontrou no Authorization, tentar do cabeçalho Cookie
+  if (!token && req.headers.cookie) {
+    try {
+      const cookies = parse(req.headers.cookie);
+      token = cookies.token; // Pega o cookie com nome 'token'
+    } catch (e) {
+      console.warn("Erro ao parsear cookies:", e);
     }
   }
 
@@ -42,13 +50,8 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as {
-      id: string;
-      // role: UserRole;
-    };
-
+    const decoded = jwt.verify(token, JWT_SECRET) as { id: string }; // Tipo simplificado
     req.user = decoded;
-
     next();
   } catch (error) {
     console.error("Erro na validação do token:", error);

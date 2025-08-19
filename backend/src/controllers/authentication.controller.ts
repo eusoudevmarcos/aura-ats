@@ -5,7 +5,7 @@ import { saveLog } from "../lib/logger";
 import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma";
 
-const SECRET = process.env.JWT_SECRET as string;
+const SECRET = process.env.JWT_SECRET;
 
 export default class AuthenticationController {
   async logIn(req: Request, res: Response) {
@@ -70,8 +70,9 @@ export default class AuthenticationController {
       }
 
       // Gera token JWT
-      const token = jwt.sign(infoUser, SECRET, { expiresIn: "2h" });
+      const token = jwt.sign(infoUser, SECRET!, { expiresIn: "2h" });
 
+      const isProduction = process.env.NODE_ENV === "production";
       // Define cookie httpOnly
       res.setHeader(
         "Set-Cookie",
@@ -79,12 +80,14 @@ export default class AuthenticationController {
           httpOnly: true,
           path: "/",
           maxAge: 60 * 60 * 2,
-          secure: process.env.NODE_ENV === "production",
-          sameSite: "strict",
+          secure: isProduction,
+          sameSite: isProduction
+            ? "none"
+            : ("lax" as "lax" | "none" | "strict" | undefined),
         })
       );
 
-      res.setHeader("Authorization", `Bearer ${token}`);
+      // res.setHeader("Authorization", `Bearer ${token}`);
 
       await saveLog({
         type: "login",
@@ -98,7 +101,7 @@ export default class AuthenticationController {
 
       return res
         .status(200)
-        .json({ message: "Login bem-sucedido", token, uid: usuarioSistema.id });
+        .json({ message: "Login bem-sucedido", uid: usuarioSistema.id });
     } catch (error: any) {
       await saveLog({
         type: "login",
