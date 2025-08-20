@@ -1,187 +1,103 @@
-// import {
-//   AreaCandidato,
-//   Candidato,
-//   Cliente,
-//   Habilidade,
-//   Localizacao,
-// } from "@prisma/client"
+import {
+  AreaCandidato,
+  CategoriaVaga,
+  StatusVaga,
+  TipoContrato,
+  NivelExperiencia,
+  Prisma, // Importe o objeto Prisma para usar os tipos gerados
+  Localizacao, // Importe Localizacao se quiser usá-lo no retorno ou em outros contextos
+} from "@prisma/client";
 
-// // ===================== ENUMS =====================
-// export enum CategoriaVaga {
-//   TECNOLOGIA = "TECNOLOGIA",
-//   SAUDE = "SAUDE",
-//   ADMINISTRATIVO = "ADMINISTRATIVO",
-//   FINANCEIRO = "FINANCEIRO",
-//   RECURSOS_HUMANOS = "RECURSOS_HUMANOS",
-//   MARKETING = "MARKETING",
-//   VENDAS = "VENDAS",
-//   OUTROS = "OUTROS",
-// }
+// --- ENUMS (já estão corretos) ---
+export {
+  CategoriaVaga,
+  StatusVaga,
+  TipoContrato,
+  NivelExperiencia,
+  // ... outros enums que você já definiu
+};
 
-// export enum StatusVaga {
-//   ATIVA = "ATIVA",
-//   PAUSADA = "PAUSADA",
-//   ENCERRADA = "ENCERRADA",
-//   ARQUIVADA = "ARQUIVADA",
-// }
+// ===================== INTERFACES DE ENTRADA (INPUT DTOs) =====================
+// Interfaces para dados que vêm do frontend ou são usados para criar/atualizar
 
-// export enum TipoContrato {
-//   CLT = "CLT",
-//   PJ = "PJ",
-//   ESTAGIO = "ESTAGIO",
-//   FREELANCER = "FREELANCER",
-//   TEMPORARIO = "TEMPORARIO",
-// }
+// Benefício de entrada (sem o ID do benefício, já que o Prisma irá gerá-lo na criação)
+export interface BeneficioInput {
+  id?: string; // Opcional para updates
+  nome: string;
+  descricao?: string;
+  // vagaId e vaga não são necessários na entrada aninhada
+}
 
-// export enum NivelExperiencia {
-//   ESTAGIO = "ESTAGIO",
-//   JUNIOR = "JUNIOR",
-//   PLENO = "PLENO",
-//   SENIOR = "SENIOR",
-//   ESPECIALISTA = "ESPECIALISTA",
-//   GERENTE = "GERENTE",
-// }
+// VagaHabilidade de entrada (requer id da Habilidade e nível)
+export interface VagaHabilidadeInput {
+  nome: string;
+  tipoHabilidade: string;
+  nivelExigido: string;
+}
 
-// export enum TipoEtapa {
-//   APLICACAO = "APLICACAO",
-//   TRIAGEM = "TRIAGEM",
-//   TESTE = "TESTE",
-//   ENTREVISTA = "ENTREVISTA",
-//   OFERTA = "OFERTA",
-//   CONTRATACAO = "CONTRATACAO",
-// }
+// VagaAnexo de entrada (requer id do Anexo)
+export interface VagaAnexoInput {
+  anexoId: string;
+}
 
-// export enum StatusCandidatura {
-//   APLICADO = "APLICADO",
-//   EM_ANALISE = "EM_ANALISE",
-//   ENTREVISTA_AGENDADA = "ENTREVISTA_AGENDADA",
-//   ENTREVISTA_CONCLUIDA = "ENTREVISTA_CONCLUIDA",
-//   OFERTA_ENVIADA = "OFERTA_ENVIADA",
-//   OFERTA_ACEITA = "OFERTA_ACEITA",
-//   OFERTA_RECUSADA = "OFERTA_RECUSADA",
-//   DESCLASSIFICADO = "DESCLASSIFICADO",
-//   CONTRATADO = "CONTRATADO",
-// }
+// Localizacao de entrada (se for para criar/atualizar diretamente aninhado)
+// Note que Prisma.LocalizacaoCreateInput e Prisma.LocalizacaoUpdateInput são as melhores
+// fontes de verdade para o que o Prisma espera.
+export type LocalizacaoInput = Omit<
+  Prisma.LocalizacaoCreateInput,
+  "pessoa" | "empresa" | "agendaVaga"
+> & { id?: string };
 
-// export enum TipoEventoAgenda {
-//   TRIAGEM_INICIAL = "TRIAGEM_INICIAL",
-//   ENTREVISTA_RH = "ENTREVISTA_RH",
-//   ENTREVISTA_GESTOR = "ENTREVISTA_GESTOR",
-//   TESTE_TECNICO = "TESTE_TECNICO",
-//   TESTE_PSICOLOGICO = "TESTE_PSICOLOGICO",
-//   DINAMICA_GRUPO = "DINAMICA_GRUPO",
-//   PROPOSTA = "PROPOSTA",
-//   OUTRO = "OUTRO",
-// }
+// Interface principal para a entrada da Vaga (para CREATE ou UPDATE)
+// Usamos Prisma.VagaCreateInput para o base e ajustamos para o UPDATE
+// para garantir compatibilidade com o que o Prisma realmente espera.
+export interface VagaSaveInput {
+  id?: string; // Opcional, indica se é uma atualização ou criação
+  titulo: string;
+  descricao: string;
+  requisitos?: string;
+  responsabilidades?: string;
+  salario?: number; // Ajustado para 'salario' conforme seu schema
+  tipoSalario?: string; // Novo campo
+  dataPublicacao?: Date; // Opcional na criação se @default(now())
+  dataFechamento?: Date;
+  // create_at e update_at são gerenciados pelo Prisma
 
-// // ===================== INTERFACES =====================
+  categoria: CategoriaVaga;
+  status: StatusVaga;
+  tipoContrato: TipoContrato;
+  nivelExperiencia: NivelExperiencia;
+  areaCandidato?: AreaCandidato;
 
-// export interface Vaga {
-//   id: string;
-//   titulo: string;
-//   descricao: string;
-//   requisitos?: string;
-//   responsabilidades?: string;
-//   salarioMinimo?: number;
-//   salarioMaximo?: number;
-//   dataPublicacao: Date;
-//   dataFechamento?: Date;
-//   create_at: Date;
-//   update_at: Date;
+  // Relações que serão manipuladas aninhadamente:
+  // Note que aqui passamos os dados 'brutos' para criar/conectar
+  beneficios?: BeneficioInput[]; // Para criar/atualizar Benefícios relacionados
+  habilidades?: VagaHabilidadeInput[]; // Para criar/atualizar VagaHabilidade
+  anexos?: VagaAnexoInput[]; // Para criar/atualizar VagaAnexo
 
-//   categoria: CategoriaVaga;
-//   status: StatusVaga;
-//   tipoContrato: TipoContrato;
-//   nivelExperiencia: NivelExperiencia;
-//   areaCandidato?: AreaCandidato; // Definir tipagem real dessa entidade
+  // Cliente
+  clienteId: string; // Cliente é obrigatório
 
-//   candidatos: Candidato[];
-//   CandidaturaVaga: CandidaturaVaga[];
-//   agendaVaga: AgendaVaga[];
-//   beneficios: Beneficio[];
-//   habilidades: VagaHabilidade[];
-//   anexos: VagaAnexo[];
+  // Localização
+  localizacao?: LocalizacaoInput; // Se você quiser criar/atualizar a localização junto
+  localizacaoId?: string; // Para conectar uma localização existente
+}
 
-//   cliente: Cliente;
-//   clienteId: string;
+// ===================== INTERFACES DE SAÍDA (Output DTOs - Se precisar de uma representação específica) =====================
+// A interface Vaga que você já tinha é uma boa representação do modelo final do Prisma.
+// Você pode usar 'Prisma.VagaGetPayload' para inferir o tipo do resultado da query do Prisma,
+// o que é mais robusto.
+export type VagaOutput = Prisma.VagaGetPayload<{
+  include: {
+    cliente: true;
+    localizacao: true;
+    beneficios: true;
+    habilidades: { include: { habilidade: true } };
+    anexos: { include: { anexo: true } };
+    // Inclua outras relações que você SEMPRE quer retornar
+  };
+}>;
 
-//   localizacao?: Localizacao;
-//   localizacaoId?: string;
-// }
-
-// export interface VagaHabilidade {
-//   nivelExigido?: string;
-//   vagaId: string;
-//   habilidadeId: string;
-
-//   vaga: Vaga;
-//   habilidade: Habilidade;
-// }
-
-// export interface ProcessoSeletivoEtapa {
-//   id: string;
-//   nome: string;
-//   tipo: TipoEtapa;
-//   ordem: number;
-//   descricao?: string;
-//   ativa: boolean;
-
-//   agendaVaga: AgendaVaga[];
-//   candidaturas: CandidaturaVaga[];
-// }
-
-// export interface AgendaVaga {
-//   id: string;
-//   dataHora: Date;
-//   tipoEvento: TipoEventoAgenda;
-//   localizacao?: Localizacao;
-//   link?: string;
-
-//   vagaId: string;
-//   vaga: Vaga;
-
-//   localizacaoId?: string;
-//   etapaAtualId?: string;
-//   etapaAtual?: ProcessoSeletivoEtapa;
-// }
-
-// export interface CandidaturaVaga {
-//   id: string;
-//   candidatoId: string;
-//   vagaId: string;
-//   status: StatusCandidatura;
-//   dataAplicacao: Date;
-//   observacoes?: string;
-
-//   candidato: Candidato;
-//   vaga: Vaga;
-//   etapaAtualId?: string;
-//   etapaAtual?: ProcessoSeletivoEtapa;
-// }
-
-// export interface Anexo {
-//   id: string;
-//   nomeArquivo: string;
-//   url: string;
-//   tipo?: string;
-//   tamanhoKb?: number;
-
-//   vagas: VagaAnexo[];
-// }
-
-// export interface VagaAnexo {
-//   vagaId: string;
-//   anexoId: string;
-
-//   vaga: Vaga;
-//   anexo: Anexo;
-// }
-
-// export interface Beneficio {
-//   id: string;
-//   nome: string;
-//   descricao?: string;
-
-//   vagaId?: string;
-//   vaga?: Vaga;
-// }
+// Exemplo de como importar e usar
+// import { PrismaClient } from '@prisma/client';
+// const prisma = new PrismaClient();

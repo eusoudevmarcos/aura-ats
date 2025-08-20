@@ -10,7 +10,7 @@ import userRoutes from "./routes/user.routes";
 import candidatoRoutes from "./routes/candidato.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
-// import vagaRoutes from "./routes/vaga.routes";
+import vagaRoutes from "./routes/vaga.routes";
 import clienteRoutes from "./routes/cliente.routes";
 
 const app = express();
@@ -40,6 +40,35 @@ app.use(
 
 app.use(express.json());
 
+if (process.env.NODE_ENV === "development") {
+  app.use((req, res, next) => {
+    // console.clear();
+    const { method, url, headers, body, query } = req;
+    const timestamp = new Date().toISOString();
+
+    // Códigos de escape ANSI para cores
+    const reset = "\x1b[0m";
+    const green = "\x1b[32m";
+    const cyan = "\x1b[36m";
+    const red = "\x1b[31m";
+
+    console.log(`\[${timestamp}\] Request:`);
+    console.log(`${green}${method}${reset} - ${cyan}${url}${reset}`);
+    if (headers.authorization || headers.cookie) {
+      console.log(`${red}${headers.authorization || headers.cookie}${reset}`);
+    }
+    // console.log(`  Method: ${green}${method}${reset}`);
+    // console.log(`  URL: ${cyan}${url}${reset}`);
+    // console.log(`  token: ${JSON.stringify(headers)}`);
+    console.log(`- Query Params: ${JSON.stringify(query)}`);
+    if (Object.keys(body).length > 0) {
+      console.log(`  Body: ${JSON.stringify(body)}`);
+    }
+    console.log("-----------------------------------------------------------");
+    next(); // Continua para a próxima middleware ou rota
+  });
+}
+
 app.use("/api/auth", authenticationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/candidates", candidatoRoutes);
@@ -47,6 +76,7 @@ app.use("/api/take-it", datastoneRoutes);
 app.use("/api/funcionario", funcionarioRoutes);
 app.use("/api/cliente", clienteRoutes);
 app.use("/api/candidato", candidatoRoutes);
+app.use("/api/vaga", vagaRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

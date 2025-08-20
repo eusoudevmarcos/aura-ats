@@ -91,22 +91,22 @@ model Vaga {
     habilidades     VagaHabilidade[]
     anexos          VagaAnexo[]
 
-    cliente   Cliente @relation(fields: [clienteId], references: [id])
-    clienteId String
+    cliente   Cliente? @relation(fields: [clienteId], references: [id])
+    clienteId String?
 
     localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
     localizacaoId String?
 }
 
 model VagaHabilidade {
-    nivelExigido String? // Ex: "Básico", "Intermediário", "Avançado"
+    nivelExigido String?
 
     vaga         Vaga       @relation(fields: [vagaId], references: [id])
     vagaId       String
     habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
     habilidadeId String
 
-    @@id([vagaId, habilidadeId]) // Chave primária composta
+    @@id([vagaId, habilidadeId])
 }
 
 model ProcessoSeletivoEtapa {
