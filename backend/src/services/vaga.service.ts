@@ -108,16 +108,37 @@ export class VagaService {
           });
 
       if (beneficios !== undefined) {
-        await tx.beneficio.deleteMany({ where: { vagaId: vaga.id } });
-        if (beneficios.length > 0) {
-          await tx.beneficio.createMany({
-            data: beneficios.map((b: BeneficioInput) => ({
-              nome: b.nome,
-              descricao: b.descricao,
-              vagaId: vaga.id,
-            })),
+        const beneficioIdsToConnect: string[] = [];
+
+        for (const incomingBeneficio of beneficios) {
+          let existingBeneficio = await tx.beneficio.findUnique({
+            where: { nome: incomingBeneficio.nome },
           });
+
+          if (!existingBeneficio) {
+            existingBeneficio = await tx.beneficio.create({
+              data: {
+                nome: incomingBeneficio.nome,
+                descricao: incomingBeneficio.descricao,
+              },
+            });
+          }
+          beneficioIdsToConnect.push(existingBeneficio.id);
         }
+
+        // 2. Sincroniza os benefícios da vaga.
+        // O comando 'set' no Prisma para relações Many-to-Many faz o seguinte:
+        // - Desconecta todos os benefícios atualmente associados à vaga.
+        // - Conecta apenas os benefícios cujos IDs foram fornecidos na lista `beneficioIdsToConnect`.
+        // Isso garante que apenas os benefícios da lista recebida estejam associados à vaga.
+        await tx.vaga.update({
+          where: { id: vaga.id },
+          data: {
+            beneficios: {
+              set: beneficioIdsToConnect.map((id) => ({ id })), // Conecta benefícios por seus IDs
+            },
+          },
+        });
       }
 
       if (habilidades !== undefined) {
