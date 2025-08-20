@@ -1,6 +1,6 @@
 import { PlusIcon } from "@/components/icons";
 import VagasForm from "@/components/Vagas/VagasForm";
-import VagasList from "@/components/Vagas/VagasList";
+import VagaList from "@/components/list/VagaList";
 import { useState } from "react";
 
 export default function Vagas() {
@@ -12,7 +12,7 @@ export default function Vagas() {
         <PlusIcon />
         Cadastrar Vaga
       </button>
-      <VagasList />
+      <VagaList />
       {showVagasForm && <VagasForm onClose={() => setShowVagasForm(false)} />}
     </>
   );
