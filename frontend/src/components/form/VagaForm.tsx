@@ -43,7 +43,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
   const methods = useSafeForm<VagaInput>({
     mode: "independent",
     useFormProps: {
-      resolver: zodResolver(vagaSchema),
+      resolver: zodResolver(vagaSchema) as any,
       mode: "onTouched",
       // defaultValues: {
       //   ...initialValues,
