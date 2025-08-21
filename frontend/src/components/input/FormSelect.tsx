@@ -36,7 +36,7 @@ export function FormSelect<T extends FieldValues>({
   const id = selectProps?.id || name.toString();
 
   const baseClass =
-    "shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline";
+    "shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border border-[#8c53ff]";
   const errorClass = errorMessage ? "border-red-500" : "";
 
   // Extrai classNameContainer de selectProps, deixando o resto em otherSelectProps

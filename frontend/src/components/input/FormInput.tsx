@@ -1,3 +1,4 @@
+// src/components/input/FormInput.tsx
 import React from "react";
 import { Controller, FieldValues } from "react-hook-form";
 import { IMaskInput } from "react-imask";
@@ -14,6 +15,8 @@ const Container: React.FC<ContainerProps> = ({
   className,
 }) => (
   <div className={`mb-4 ${className || ""}`}>
+    {" "}
+    {/* Container flexível */}
     {label && (
       <label htmlFor={id} className="block text-gray-700 mb-1 font-semibold">
         {label}
@@ -33,12 +36,15 @@ export function FormInput<T extends FieldValues>({
   label,
   placeholder,
   type = "text",
+  value, // Valor controlado externamente
+  onChange, // Função de mudança controlada externamente
 }: FormInputProps<T>) {
-  if (control && register) {
-    throw new Error(
-      `Componente ${name}: 'control' e 'register' não podem estar juntos`
-    );
-  }
+  // A validação de `control` e `register` juntos pode ser removida se a intenção é flexibilidade
+  // if (control && register) {
+  //   throw new Error(
+  //     `Componente ${name}: 'control' e 'register' não podem estar juntos`
+  //   );
+  // }
 
   const errorMessage = getError(errors, name);
 
@@ -56,13 +62,13 @@ export function FormInput<T extends FieldValues>({
 
   const isDateInput = type === "date";
 
-  const onAccept = (valueString: string, mask: any, onChange: any) => {
+  const onAccept = (valueString: any, mask: any, onChangeFn: any) => {
     if (isDateInput) {
       mask.masked.isComplete
-        ? onChange(convertDateToPostgres(valueString))
-        : onChange(undefined);
+        ? onChangeFn(convertDateToPostgres(valueString))
+        : onChangeFn(undefined);
     } else {
-      onChange(valueString);
+      onChangeFn(valueString);
     }
   };
 
@@ -73,10 +79,17 @@ export function FormInput<T extends FieldValues>({
           <Controller
             name={name}
             control={control}
-            render={({ field: { onChange, onBlur, value, ref } }) => {
+            render={({
+              field: {
+                onChange: controllerOnChange,
+                onBlur,
+                value: controllerValue,
+                ref,
+              },
+            }) => {
               const displayValue = isDateInput
-                ? convertDateFromPostgres(value as string)
-                : (value as string);
+                ? convertDateFromPostgres(controllerValue as any)
+                : (controllerValue as any);
 
               return (
                 <IMaskInput
@@ -84,13 +97,13 @@ export function FormInput<T extends FieldValues>({
                   blocks={isDateInput ? dateFullValidate() : undefined}
                   inputRef={ref}
                   id={id}
-                  className={inputClassName} // Usa inputClassName
+                  className={inputClassName}
                   placeholder={
                     placeholder || (isDateInput ? "DD/MM/YYYY" : undefined)
                   }
                   value={(displayValue || "") as any}
-                  onAccept={(valueString: string, mask: any) =>
-                    onAccept(valueString, mask, onChange)
+                  onAccept={(valueString: any, mask: any) =>
+                    onAccept(valueString, mask, controllerOnChange)
                   }
                   onBlur={onBlur}
                   type={isDateInput ? "text" : type}
@@ -101,6 +114,7 @@ export function FormInput<T extends FieldValues>({
             }}
           />
         ) : register ? (
+          // Se register for fornecido, usa-o
           <input
             id={id}
             {...register(name)}
@@ -110,11 +124,14 @@ export function FormInput<T extends FieldValues>({
             type={type}
           />
         ) : (
+          // Caso contrário, usa value e onChange para controle manual
           <input
             id={id}
             type={type}
-            className={inputClassName} // Usa inputClassName
+            className={inputClassName}
             placeholder={placeholder}
+            value={value}
+            onChange={onChange}
             {...(typeof otherInputProps === "object" && otherInputProps !== null
               ? otherInputProps
               : {})}

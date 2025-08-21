@@ -6,7 +6,7 @@ import { getError } from "@/utils/getError";
 type FormTextareaProps = {
   name: string;
   register: UseFormRegister<any>;
-  errors: FieldErrors<any>;
+  errors?: FieldErrors<any>;
   placeholder?: string;
   label?: string;
   textareaProps?: TextareaHTMLAttributes<HTMLTextAreaElement> & {
@@ -39,7 +39,7 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
         id={name}
         {...register(name)}
         placeholder={placeholder}
-        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
+        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-[#8c53ff] ${
           errorMessage ? "border-red-500" : ""
         }`}
         rows={4} // Default rows for a textarea
