@@ -16,7 +16,13 @@ export default function Vagas() {
       </button>
       <VagaList key={refreshKey} />
       {showVagasForm && (
-        <Modal isOpen={showVagasForm} title="Dados da vaga">
+        <Modal
+          isOpen={showVagasForm}
+          onClose={() => {
+            setShowVagasForm(false);
+          }}
+          title="Dados da vaga"
+        >
           <VagaForm
             onSuccess={() => {
               setShowVagasForm(false);

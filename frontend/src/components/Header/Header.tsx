@@ -4,6 +4,7 @@ import styles from "./Header.module.css"; // Importa o módulo CSS
 import { BellIcon, SearchIcon } from "../icons"; // Importa os ícones
 import Image from "next/image";
 import Link from "next/link";
+import logo from "@/assets/logo.svg";
 
 const Header: React.FC = () => {
   const [uid, setUid] = React.useState<string | null>(null);
@@ -17,6 +18,7 @@ const Header: React.FC = () => {
   return (
     <header className="fixed bg-white w-full p-4 shadow-md">
       <section className="flex justify-between mx-auto max-w-[1440px] gap-2">
+        <Image height={0} width={50} src={logo} alt="Logo Aura" />
         <div className={styles.searchBar}>
           <SearchIcon className={styles.searchIcon} />
           <input

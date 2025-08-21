@@ -19,7 +19,6 @@ import { useUser } from "@/hook/useUser";
 import { getFirstLetter } from "@/utils/getFirstLetter";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import logo from "@/assets/logo.svg";
 
 interface SidebarProps {
   onToggleSidebar: (collapsed: boolean) => void;
@@ -87,24 +86,18 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
 
   return (
     <aside
-      className={`fixed top-20 left-4 h-[calc(90vh-2rem)] bg-white text-[#474747] flex flex-col shadow-lg rounded-lg
+      className={`fixed top-24 left-2 h-[calc(90vh-2rem)] bg-white text-[#474747] flex flex-col shadow-lg rounded-lg
         transition-all duration-300 ease-in-out z-40 ${
           collapsed ? "w-20 p-5" : "w-64 p-6"
         }`}
     >
       <button
         onClick={() => setCollapsed(!collapsed)}
-        className="cursor-pointer absolute right-[-20px] top-10 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200"
+        className="cursor-pointer absolute right-[-20px] top-12 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200"
       >
         {collapsed ? <ListIcon /> : <ListClosedIcon />}
       </button>
-      <Image
-        height={80}
-        width={80}
-        src={logo}
-        alt="Logo Aura"
-        className="self-center"
-      />
+
       <nav className="flex-grow overflow-y-auto custom-scrollbar">
         <ul>
           {navItems.map((item) => (
