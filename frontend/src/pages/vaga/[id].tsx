@@ -5,6 +5,7 @@ import api from "@/axios"; // Certifique-se que o caminho está correto
 import { EditPenIcon, TrashIcon } from "@/components/icons"; // Certifique-se que o caminho está correto
 import Modal from "@/components/modal/Modal"; // Certifique-se que o caminho está correto
 import Card from "@/components/Card"; // Certifique-se que o caminho está correto
+import VagaForm from "@/components/form/VagaForm";
 
 // Importe as novas tipagens de vaga
 // import {
@@ -309,8 +310,12 @@ const VagaPage: React.FC = () => {
         onClose={() => setShowModalEdit(false)}
         title="Editar Vaga"
       >
-        {/* Substitua por seu componente de formulário de Vaga */}
-        {/* <VagaForm onSuccess={() => { /* Lógica de sucesso aqui * / }} initialValues={vaga} /> */}
+        <VagaForm
+          onSuccess={() => {
+            setShowModalEdit(false);
+          }}
+          initialValues={vaga}
+        />
         <p>Formulário de edição da vaga viria aqui.</p>
       </Modal>
     </div>
