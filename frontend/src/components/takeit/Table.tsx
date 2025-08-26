@@ -1,8 +1,7 @@
-import React from "react";
-import { useRouter } from "next/router";
+import { useRouter } from 'next/router';
 
 // Tipos para colunas e dados
-export type TypeColumns = "persons" | "companies";
+export type TypeColumns = 'persons' | 'companies';
 
 export interface TableColumn {
   label: string;
@@ -46,20 +45,20 @@ export type TableData = PersonData | CompanyData;
 
 export const columnsByType: Record<TypeColumns, TableColumn[]> = {
   persons: [
-    { label: "Nome", key: "name" },
-    { label: "CPF", key: "cpf" },
-    { label: "Idade", key: "age" },
-    { label: "Data de Nascimento", key: "birthday" },
-    { label: "Genêro", key: "gender" },
-    { label: "Cidade", key: "city" },
-    { label: "Estado", key: "addresses" },
-    { label: "Telefone", key: "phone" },
+    { label: 'Nome', key: 'name' },
+    { label: 'CPF', key: 'cpf' },
+    { label: 'Idade', key: 'age' },
+    { label: 'Data de Nascimento', key: 'birthday' },
+    { label: 'Genêro', key: 'gender' },
+    { label: 'Cidade', key: 'city' },
+    { label: 'Estado', key: 'addresses' },
+    { label: 'Telefone', key: 'phone' },
   ],
   companies: [
-    { label: "Razão Social", key: "company_name" },
-    { label: "CNPJ", key: "cnpj" },
-    { label: "Cidade", key: "city" },
-    { label: "Estado", key: "addresses" },
+    { label: 'Razão Social', key: 'company_name' },
+    { label: 'CNPJ', key: 'cnpj' },
+    { label: 'Cidade', key: 'city' },
+    { label: 'Estado', key: 'addresses' },
   ],
 };
 
@@ -67,19 +66,19 @@ export const columnsByType: Record<TypeColumns, TableColumn[]> = {
 function normalizeDataForTable(data: TableData[] | undefined): unknown[] {
   if (!Array.isArray(data)) return [];
 
-  return data.map((item) => {
+  return data.map(item => {
     const name =
-      (item as PersonData).name || (item as CompanyData).company_name || "-";
-    const cpf = (item as PersonData).cpf ?? "-";
-    const age = (item as PersonData).age ?? "-";
-    const gender = (item as PersonData).gender ?? "-";
+      (item as PersonData).name || (item as CompanyData).company_name || '-';
+    const cpf = (item as PersonData).cpf ?? '-';
+    const age = (item as PersonData).age ?? '-';
+    const gender = (item as PersonData).gender ?? '-';
 
     // Agrupa todos os telefones (mobile + land + simples)
     const phones: Phone[] = [];
 
     if (Array.isArray((item as PersonData).mobile_phones)) {
       phones.push(
-        ...((item as PersonData).mobile_phones as Phone[]).map((p) => ({
+        ...((item as PersonData).mobile_phones as Phone[]).map(p => ({
           ddd: p.ddd,
           number: p.number,
         }))
@@ -88,7 +87,7 @@ function normalizeDataForTable(data: TableData[] | undefined): unknown[] {
 
     if (Array.isArray((item as PersonData).land_lines)) {
       phones.push(
-        ...((item as PersonData).land_lines as Phone[]).map((p) => ({
+        ...((item as PersonData).land_lines as Phone[]).map(p => ({
           ddd: p.ddd,
           number: p.number,
         }))
@@ -113,11 +112,11 @@ function normalizeDataForTable(data: TableData[] | undefined): unknown[] {
       : [];
 
     // Para companies, garantir cnpj e company_name
-    if ("company_name" in item || "cnpj" in item) {
+    if ('company_name' in item || 'cnpj' in item) {
       return {
-        company_name: (item as CompanyData).company_name ?? "-",
-        cnpj: (item as CompanyData).cnpj ?? "-",
-        city: (item as CompanyData).city ?? "-",
+        company_name: (item as CompanyData).company_name ?? '-',
+        cnpj: (item as CompanyData).cnpj ?? '-',
+        city: (item as CompanyData).city ?? '-',
         addresses: Array.isArray((item as CompanyData).addresses)
           ? (item as CompanyData).addresses
           : [],
@@ -140,38 +139,38 @@ function normalizeDataForTable(data: TableData[] | undefined): unknown[] {
 // 🧾 Renderizador de célula com tratamento para arrays
 function renderCellValue(value: unknown, key: string): string {
   if (Array.isArray(value)) {
-    if (value.length === 0) return "-";
+    if (value.length === 0) return '-';
 
-    if (key === "phone") {
+    if (key === 'phone') {
       return value
         .map((p: Phone) =>
-          p.ddd && p.number ? `(${p.ddd}) ${p.number}` : p.number || "-"
+          p.ddd && p.number ? `(${p.ddd}) ${p.number}` : p.number || '-'
         )
-        .join(", ");
+        .join(', ');
     }
 
-    if (key === "addresses") {
+    if (key === 'addresses') {
       return value
         .map((a: Address) =>
-          a.street ? `${a.street}${a.number ? ", " + a.number : ""}` : "-"
+          a.street ? `${a.street}${a.number ? ', ' + a.number : ''}` : '-'
         )
-        .join(" | ");
+        .join(' | ');
     }
 
-    return value.join(", ");
+    return value.join(', ');
   }
 
-  if (typeof value === "object" && value !== null) {
+  if (typeof value === 'object' && value !== null) {
     return JSON.stringify(value);
   }
 
-  if (key === "cpf" && value && value.toString().length < 11) {
-    return value.toString().padStart(11, "0");
+  if (key === 'cpf' && value && value.toString().length < 11) {
+    return value.toString().padStart(11, '0');
   }
 
-  return value !== undefined && value !== null && value !== ""
+  return value !== undefined && value !== null && value !== ''
     ? String(value)
-    : "-";
+    : '-';
 }
 
 // 🧩 Linha da tabela
@@ -190,17 +189,17 @@ function TR({ onSelect, item, columns }: TRProps) {
       onClick={() => {
         let cpf = item.cpf;
         if (cpf && cpf.toString().length < 11) {
-          cpf = cpf.toString().padStart(11, "0");
+          cpf = cpf.toString().padStart(11, '0');
         }
-        let component = "/take-it/view-person";
-        if ("cnpj" in item) {
-          component = "/take-it/view-company";
+        let component = '/take-it/view-person';
+        if ('cnpj' in item) {
+          component = '/take-it/view-company';
         }
         router.push(`${component}/${cpf ?? item.cnpj}`);
       }}
-      style={{ cursor: onSelect ? "pointer" : "default" }}
+      style={{ cursor: onSelect ? 'pointer' : 'default' }}
     >
-      {columns.map((col) => (
+      {columns.map(col => (
         <td key={col.key}>{renderCellValue(item[col.key], col.key)}</td>
       ))}
     </tr>
@@ -220,16 +219,16 @@ function Table({ data, onSelect, typeColumns, loading }: TableProps) {
 
   // Pegamos apenas as colunas fixas que existem em columnsByType
   const columns: TableColumn[] =
-    typeColumns === "persons"
-      ? columnsByType[typeColumns]?.filter((col) =>
+    typeColumns === 'persons'
+      ? columnsByType[typeColumns]?.filter(col =>
           [
-            "name",
-            "cpf",
-            "age",
-            "phone",
-            "city",
-            "addresses",
-            "gender",
+            'name',
+            'cpf',
+            'age',
+            'phone',
+            'city',
+            'addresses',
+            'gender',
           ].includes(col.key)
         )
       : columnsByType[typeColumns] || [];
@@ -238,15 +237,15 @@ function Table({ data, onSelect, typeColumns, loading }: TableProps) {
     <div className="overflow-x-auto w-full ">
       <table
         className="min-w-full border-separate border-spacing-0 bg-white rounded-lg"
-        style={{ borderCollapse: "separate", borderSpacing: 0 }}
+        style={{ borderCollapse: 'separate', borderSpacing: 0 }}
       >
         <thead>
           <tr>
-            {columns.map((col) => (
+            {columns.map(col => (
               <th
                 key={col.key}
-                className="px-4 py-3 text-left font-semibold bg-[#f0f2f5] text-[#48038a]"
-                style={{ position: "sticky", top: 0, zIndex: 1 }}
+                className="px-4 py-3 text-left font-semibold bg-neutral text-primary"
+                style={{ position: 'sticky', top: 0, zIndex: 1 }}
               >
                 {col.label}
               </th>
@@ -258,7 +257,7 @@ function Table({ data, onSelect, typeColumns, loading }: TableProps) {
             <tr>
               <td
                 colSpan={columns.length}
-                style={{ height: "120px", padding: 0 }}
+                style={{ height: '120px', padding: 0 }}
               >
                 <div className="flex justify-center items-center h-[120px] w-full">
                   <svg
@@ -289,7 +288,7 @@ function Table({ data, onSelect, typeColumns, loading }: TableProps) {
             <tr>
               <td
                 colSpan={columns.length}
-                className="text-center py-6 text-[#48038a] font-medium"
+                className="text-center py-6 text-primary font-medium"
               >
                 Nenhum resultado encontrado.
               </td>

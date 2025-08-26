@@ -1,6 +1,7 @@
 import React, { useState } from "react";
-import Sidebar from "../components/Sidebar/Sidebar";
-import Header from "@/components/Header/Header";
+import "material-icons/iconfont/material-icons.css";
+import Sidebar from "../components/sidebar";
+import Header from "@/components/header/Header";
 
 interface DashboardProps {
   children: React.ReactNode | ((data: any) => void);
@@ -29,7 +30,7 @@ const DashboardLayout: React.FC<DashboardProps> = ({ children }) => {
               : "pl-72 min-[1940px]:pl-0"
           } pt-4 pr-4`}
       >
-        <main className="p-2 rounded-lg mt-14 mx-auto max-w-[1440px]">
+        <main className="p-2 rounded-lg mt-18 mx-auto max-w-[1440px]">
           {typeof children === "function"
             ? children({ activeSection }) ?? null
             : React.isValidElement(children)

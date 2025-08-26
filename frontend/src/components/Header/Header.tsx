@@ -1,9 +1,10 @@
 // frontend/components/Header/Header.tsx
 import React from "react";
-import styles from "./Header.module.css"; // Importa o módulo CSS
+import styles from "@/styles/header.module.css"; // Importa o módulo CSS
 import { BellIcon, SearchIcon } from "../icons"; // Importa os ícones
 import Image from "next/image";
 import Link from "next/link";
+("");
 import logo from "@/assets/logo.svg";
 
 const Header: React.FC = () => {

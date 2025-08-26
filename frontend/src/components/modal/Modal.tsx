@@ -1,5 +1,5 @@
 // src/components/Modal.tsx
-import React from "react";
+import React from 'react';
 
 interface ModalProps {
   isOpen: boolean;
@@ -8,7 +8,7 @@ interface ModalProps {
   title?: string;
 }
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from 'react';
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
   const [show, setShow] = useState(isOpen);
@@ -33,15 +33,15 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, children, title }) => {
   return (
     <div
       className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-4 transition-opacity duration-200 ${
-        visible ? "opacity-100" : "opacity-0"
+        visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <div
         className={`bg-white rounded-lg shadow-md relative w-full max-w-2xl max-h-[90vh] overflow-y-scroll transition-transform duration-200 ${
-          visible ? "scale-100" : "scale-95"
+          visible ? 'scale-100' : 'scale-95'
         }`}
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 text-white bg-[#8c53ff]">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 text-white bg-primary">
           {title && <h3 className="text-xl font-semibold ">{title}</h3>}
           <button
             onClick={onClose}

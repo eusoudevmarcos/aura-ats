@@ -1,7 +1,7 @@
 // src/components/input/FormTextarea.tsx
-import React, { TextareaHTMLAttributes } from "react";
-import { FieldErrors, UseFormRegister } from "react-hook-form";
-import { getError } from "@/utils/getError";
+import { getError } from '@/utils/getError';
+import React, { TextareaHTMLAttributes } from 'react';
+import { FieldErrors, UseFormRegister } from 'react-hook-form';
 
 type FormTextareaProps = {
   name: string;
@@ -26,11 +26,11 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
   const { classNameContainer, ...restTextareaProps } = textareaProps || {};
 
   return (
-    <div className={`mb-4 ${classNameContainer || ""}`}>
+    <div className={`mb-4 ${classNameContainer || ''}`}>
       {label && (
         <label
           htmlFor={name}
-          className="block text-[#48038a] text-sm font-bold mb-2"
+          className="block text-primary text-sm font-bold mb-2"
         >
           {label}
         </label>
@@ -39,8 +39,8 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
         id={name}
         {...register(name)}
         placeholder={placeholder}
-        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-[#8c53ff] ${
-          errorMessage ? "border-red-500" : ""
+        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-secondary ${
+          errorMessage ? 'border-red-500' : ''
         }`}
         rows={4} // Default rows for a textarea
         {...restTextareaProps}

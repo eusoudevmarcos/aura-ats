@@ -1,15 +1,13 @@
-import cardsStyles from "@/components/Card/Cards.module.css"; // Para cards gerais e placeholders
+import Card from '@/components/card';
+
 export default function Configuracoes() {
   return (
     <section>
       <h2>Entrevista</h2>
 
-      <div
-        className={cardsStyles.placeholderCard}
-        style={{ marginTop: "32px" }}
-      >
+      <Card>
         <p>Conteúdo da seção Entrevistas (detalhado)</p>
-      </div>
+      </Card>
     </section>
   );
 }

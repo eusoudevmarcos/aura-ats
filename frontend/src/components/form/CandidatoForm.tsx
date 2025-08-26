@@ -1,19 +1,17 @@
-import React, { Children, useEffect, useState } from "react";
-import api from "@/axios";
-import { FormProvider, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useSafeForm } from "@/hook/useSafeForm";
-import { PrimaryButton } from "../button/PrimaryButton";
-import Card from "../Card";
-import { getError } from "@/utils/getError";
-import { candidatoSchema, CandidatoInput } from "@/schemas/candidato.schema";
-import PessoaForm from "@/components/form/PessoaForm";
-import LocalizacaoForm from "@/components/form/LocalizacaoForm";
-import FormacaoForm from "@/components/form/FormacaoForm";
+import api from '@/axios';
+import LocalizacaoForm from '@/components/form/LocalizacaoForm';
+import PessoaForm from '@/components/form/PessoaForm';
+import { useSafeForm } from '@/hook/useSafeForm';
+import { CandidatoInput, candidatoSchema } from '@/schemas/candidato.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useEffect, useState } from 'react';
+import { FormProvider, UseFormReturn } from 'react-hook-form';
+import { PrimaryButton } from '../button/PrimaryButton';
+import Card from '../card';
 
-import { AreaCandidatoEnum } from "@/schemas/candidato.schema";
-import { FormSelect } from "../input/FormSelect";
-import { FormInput } from "../input/FormInput";
+import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
+import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
 
 type CandidatoFormProps = {
   formContexto?: UseFormReturn<CandidatoInput>;
@@ -33,10 +31,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   >([]);
 
   const methods = useSafeForm<CandidatoInput>({
-    mode: "independent",
+    mode: 'independent',
     useFormProps: {
       resolver: zodResolver(candidatoSchema),
-      mode: "onTouched",
+      mode: 'onTouched',
       defaultValues: initialValues,
     },
   });
@@ -51,11 +49,11 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     try {
       // Suponha que você tenha um endpoint para buscar especialidades
       const response = await api.get<{ id: number; nome: string }[]>(
-        "/api/external/candidato/especialidades"
+        '/api/external/candidato/especialidades'
       );
       setEspecialidades(response.data);
     } catch (error) {
-      console.error("Erro ao carregar especialidades:", error);
+      console.error('Erro ao carregar especialidades:', error);
     }
   };
 
@@ -94,19 +92,19 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
     try {
       // Determina se é uma criação (POST) ou atualização (PUT)
-      const endpoint = payload.id ? `/candidato/${payload.id}` : "/candidato";
+      const endpoint = payload.id ? `/candidato/${payload.id}` : '/candidato';
       const method = payload.id ? api.put : api.post;
 
       const response = await method(endpoint, payload);
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
-        alert("Profissional salvo com sucesso!");
+        alert('Profissional salvo com sucesso!');
       }
     } catch (erro: any) {
       // console.error("Erro ao salvar profissional:", erro);
       alert(
-        "Erro ao salvar profissional: " +
-          (erro?.response?.data?.message || "Erro desconhecido")
+        'Erro ao salvar profissional: ' +
+          (erro?.response?.data?.message || 'Erro desconhecido')
       );
     } finally {
       setLoading(false);
@@ -119,7 +117,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         <Card title="Dados Pessoais">
           <PessoaForm
             namePrefix="pessoa"
-            contatoPessoa={{ title: "Contato" }}
+            contatoPessoa={{ title: 'Contato' }}
           />
         </Card>
 
@@ -141,9 +139,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               selectProps={{
                 children: (
                   <>
-                    {AreaCandidatoEnum.options.map((area) => (
+                    {AreaCandidatoEnum.options.map(area => (
                       <option key={area} value={area}>
-                        {area.replaceAll("_", " ")}
+                        {area.replaceAll('_', ' ')}
                       </option>
                     ))}
                   </>
@@ -159,7 +157,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               selectProps={{
                 children: (
                   <>
-                    {especialidades.map((esp) => (
+                    {especialidades.map(esp => (
                       <option key={esp.id} value={esp.id}>
                         {esp.nome}
                       </option>
@@ -177,7 +175,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
         <div className="flex justify-end">
           <PrimaryButton type="submit" disabled={loading}>
-            {loading ? "Salvando..." : "Salvar Profissional"}
+            {loading ? 'Salvando...' : 'Salvar Profissional'}
           </PrimaryButton>
         </div>
       </form>

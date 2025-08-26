@@ -1,11 +1,11 @@
-import React, { useState, useRef, useEffect } from "react";
-import Card from "@/components/takeit/Card";
-import { searchApi } from "@/axios/searchApi";
-import { useRouter } from "next/router";
-import Link from "next/link";
-import TakeitLayout from "@/layout/takeitLayout";
-import { exportToCSV, exportToPDF, mostrarValor } from "@/utils/exportCSV";
-import { SearchIcon, WhatsAppIcon } from "@/components/icons";
+import { searchApi } from '@/axios/searchApi';
+import { SearchIcon, WhatsAppIcon } from '@/components/icons';
+import Card from '@/components/takeit/Card';
+import TakeitLayout from '@/layout/takeitLayout';
+import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useEffect, useRef, useState } from 'react';
 
 export async function getStaticPaths() {
   return {
@@ -22,7 +22,7 @@ export async function getStaticProps(context: any) {
   }
 
   try {
-    const response = await searchApi(cpf, "persons");
+    const response = await searchApi(cpf, 'persons');
     return {
       props: { data: response.data[0] || null },
       revalidate: 60,
@@ -41,11 +41,11 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Função para exportar
-  const handleExport = async (type: "csv" | "pdf") => {
+  const handleExport = async (type: 'csv' | 'pdf') => {
     setShowExportDropdown(false);
-    if (type === "csv") {
+    if (type === 'csv') {
       exportToCSV(data);
-    } else if (type === "pdf") {
+    } else if (type === 'pdf') {
       await exportToPDF(cardRef as React.RefObject<HTMLDivElement>);
     }
   };
@@ -54,14 +54,14 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
     function handleClickOutside(event: MouseEvent) {
       if (
         showExportDropdown &&
-        !(event.target as HTMLElement).closest("#export-dropdown") &&
-        !(event.target as HTMLElement).closest("#export-btn")
+        !(event.target as HTMLElement).closest('#export-dropdown') &&
+        !(event.target as HTMLElement).closest('#export-btn')
       ) {
         setShowExportDropdown(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showExportDropdown]);
 
   if (router.isFallback) {
@@ -82,7 +82,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
         <div>
           <div className="flex justify-between mb-10 px-4 py-2">
             <button
-              onClick={() => router.push("/take-it")}
+              onClick={() => router.push('/take-it')}
               className="buttonPrimary"
             >
               Voltar
@@ -92,7 +92,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
               <button
                 id="export-btn"
                 className="buttonPrimary flex items-center"
-                onClick={() => setShowExportDropdown((prev) => !prev)}
+                onClick={() => setShowExportDropdown(prev => !prev)}
                 type="button"
               >
                 Exportar
@@ -115,13 +115,13 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                 <div className="absolute z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
                   <button
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => handleExport("csv")}
+                    onClick={() => handleExport('csv')}
                   >
                     Exportar CSV
                   </button>
                   <button
                     className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                    onClick={() => handleExport("pdf")}
+                    onClick={() => handleExport('pdf')}
                   >
                     Exportar PDF
                   </button>
@@ -138,7 +138,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
             ref={cardRef}
           >
             {/* Dados Pessoais */}
-            <Card title="Dados Pessoais" className={"col-start-1 col-end-3"}>
+            <Card title="Dados Pessoais" className={'col-start-1 col-end-3'}>
               <div className="flex flex-wrap space-y-4 space-x-9">
                 <p className="font-medium">
                   <strong>CPF:</strong> {mostrarValor(data.cpf)}
@@ -148,11 +148,11 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                 </p>
                 <p className="font-medium">
                   <strong>Sexo:</strong>
-                  {data.gender === "F"
-                    ? "Feminino"
-                    : data.gender === "M"
-                    ? "Masculino"
-                    : "N/A"}
+                  {data.gender === 'F'
+                    ? 'Feminino'
+                    : data.gender === 'M'
+                    ? 'Masculino'
+                    : 'N/A'}
                 </p>
                 <p className="font-medium">
                   <strong>Data de Nascimento:</strong>
@@ -165,27 +165,27 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                   <strong>Falecido:</strong>
                   {data.possibly_dead === null ||
                   data.possibly_dead === undefined
-                    ? "N/A"
+                    ? 'N/A'
                     : data.possibly_dead
-                    ? "Sim"
-                    : "Não"}
+                    ? 'Sim'
+                    : 'Não'}
                 </p>
                 <p className="font-medium">
                   <strong>Aposentado:</strong>
                   {data.retired === null || data.retired === undefined
-                    ? "N/A"
+                    ? 'N/A'
                     : data.retired
-                    ? "Sim"
-                    : "Não"}
+                    ? 'Sim'
+                    : 'Não'}
                 </p>
                 <p className="font-medium">
                   <strong>Bolsa Família:</strong>
                   {data.bolsa_familia === null ||
                   data.bolsa_familia === undefined
-                    ? "N/A"
+                    ? 'N/A'
                     : data.bolsa_familia
-                    ? "Sim"
-                    : "Não"}
+                    ? 'Sim'
+                    : 'Não'}
                 </p>
               </div>
             </Card>
@@ -208,10 +208,10 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                 <p className="font-medium">
                   <strong>PEP:</strong>
                   {data.pep === null || data.pep === undefined
-                    ? "N/A"
+                    ? 'N/A'
                     : data.pep
-                    ? "Sim"
-                    : "Não"}
+                    ? 'Sim'
+                    : 'Não'}
                 </p>
                 {data.pep && (
                   <p className="font-medium">
@@ -279,7 +279,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                             href={
                               phone.number
                                 ? `https://wa.me/${phone.ddd + phone.number}`
-                                : ""
+                                : ''
                             }
                             target="_blank"
                             className="bg-emerald-600 rounded-md p-1"
@@ -347,7 +347,7 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                             href={
                               phone.whatsapp_datetime
                                 ? `https://wa.me/${phone.whatsapp_datetime}`
-                                : ""
+                                : ''
                             }
                           >
                             {mostrarValor(phone.whatsapp_datetime)}
@@ -434,11 +434,11 @@ export default function ViewPersonPage({ data }: any): React.ReactElement {
                           </p>
                           <Link
                             href={`/take-it/view-company/${company.cnpj}`}
-                            className="bg-[#48038a] rounded"
+                            className="bg-primary rounded"
                           >
                             <SearchIcon
                               color="white"
-                              style={{ padding: "2px" }}
+                              style={{ padding: '2px' }}
                             />
                           </Link>
                         </div>

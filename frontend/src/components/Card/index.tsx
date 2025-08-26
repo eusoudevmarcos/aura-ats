@@ -7,8 +7,8 @@ const Card: React.FC<{
   <div
     className={`bg-white rounded-lg shadow-md px-4 py-2 w-full ${classNameContainer}`}
   >
-    {title && <h3 className="text-lg font-bold text-[#48038a]">{title}</h3>}
-    <div className={`text-[#48038a] ${classNameContent}`}>{children}</div>
+    {title && <h3 className="text-lg font-bold text-primary">{title}</h3>}
+    <div className={`text-primary ${classNameContent}`}>{children}</div>
   </div>
 );
 

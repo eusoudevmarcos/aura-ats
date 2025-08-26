@@ -1,12 +1,12 @@
 // src/components/input/FormInput.tsx
-import React from "react";
-import { Controller, FieldValues } from "react-hook-form";
-import { IMaskInput } from "react-imask";
-import { ContainerProps, FormInputProps } from "@/type/formInput.type";
-import { convertDateFromPostgres } from "@/utils/date/convertDateFromPostgres";
-import { convertDateToPostgres } from "@/utils/date/convertDateToPostgres";
-import { getError } from "@/utils/getError";
-import { dateFullValidate } from "@/utils/mask/date";
+import { ContainerProps, FormInputProps } from '@/type/formInput.type';
+import { convertDateFromPostgres } from '@/utils/date/convertDateFromPostgres';
+import { convertDateToPostgres } from '@/utils/date/convertDateToPostgres';
+import { getError } from '@/utils/getError';
+import { dateFullValidate } from '@/utils/mask/date';
+import React from 'react';
+import { Controller, FieldValues } from 'react-hook-form';
+import { IMaskInput } from 'react-imask';
 
 const Container: React.FC<ContainerProps> = ({
   children,
@@ -14,8 +14,8 @@ const Container: React.FC<ContainerProps> = ({
   id,
   className,
 }) => (
-  <div className={`mb-4 ${className || ""}`}>
-    {" "}
+  <div className={`mb-4 ${className || ''}`}>
+    {' '}
     {/* Container flexível */}
     {label && (
       <label htmlFor={id} className="block text-gray-700 mb-1 font-semibold">
@@ -35,7 +35,7 @@ export function FormInput<T extends FieldValues>({
   maskProps,
   label,
   placeholder,
-  type = "text",
+  type = 'text',
   value, // Valor controlado externamente
   onChange, // Função de mudança controlada externamente
 }: FormInputProps<T>) {
@@ -51,16 +51,16 @@ export function FormInput<T extends FieldValues>({
   const id = inputProps?.id || name.toString();
 
   const baseClass =
-    "shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border border-[#8c53ff]";
-  const errorClass = errorMessage ? "border-red-500" : "";
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border border-secondary transition-all duration-200 disabled:opacity-90';
+  const errorClass = errorMessage ? 'border-red-500' : '';
 
   const { classNameContainer, ...otherInputProps } = inputProps || {};
 
   const inputClassName = [baseClass, errorClass, otherInputProps?.className]
     .filter(Boolean)
-    .join(" ");
+    .join(' ');
 
-  const isDateInput = type === "date";
+  const isDateInput = type === 'date';
 
   const onAccept = (valueString: any, mask: any, onChangeFn: any) => {
     if (isDateInput) {
@@ -93,20 +93,20 @@ export function FormInput<T extends FieldValues>({
 
               return (
                 <IMaskInput
-                  mask={isDateInput ? "DD/MM/YYYY" : (maskProps?.mask as any)}
+                  mask={isDateInput ? 'DD/MM/YYYY' : (maskProps?.mask as any)}
                   blocks={isDateInput ? dateFullValidate() : undefined}
                   inputRef={ref}
                   id={id}
                   className={inputClassName}
                   placeholder={
-                    placeholder || (isDateInput ? "DD/MM/YYYY" : undefined)
+                    placeholder || (isDateInput ? 'DD/MM/YYYY' : undefined)
                   }
-                  value={(displayValue || "") as any}
+                  value={(displayValue || '') as any}
                   onAccept={(valueString: any, mask: any) =>
                     onAccept(valueString, mask, controllerOnChange)
                   }
                   onBlur={onBlur}
-                  type={isDateInput ? "text" : type}
+                  type={isDateInput ? 'text' : type}
                   {...otherInputProps}
                   {...(!isDateInput ? maskProps : {})}
                 />
@@ -122,6 +122,8 @@ export function FormInput<T extends FieldValues>({
             className={inputClassName}
             placeholder={placeholder}
             type={type}
+            autoComplete="off"
+            onChange={onChange}
           />
         ) : (
           // Caso contrário, usa value e onChange para controle manual
@@ -132,7 +134,7 @@ export function FormInput<T extends FieldValues>({
             placeholder={placeholder}
             value={value}
             onChange={onChange}
-            {...(typeof otherInputProps === "object" && otherInputProps !== null
+            {...(typeof otherInputProps === 'object' && otherInputProps !== null
               ? otherInputProps
               : {})}
           />

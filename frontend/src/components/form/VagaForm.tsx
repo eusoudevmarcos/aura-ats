@@ -1,29 +1,29 @@
 // src/components/form/VagaForm.tsx
-import React, { useState, useEffect } from "react";
-import { FormProvider, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import api from "@/axios";
-import { useSafeForm } from "@/hook/useSafeForm";
-import { PrimaryButton } from "../button/PrimaryButton";
+import api from '@/axios';
+import { useSafeForm } from '@/hook/useSafeForm';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from 'react';
+import { FormProvider, UseFormReturn, useWatch } from 'react-hook-form';
+import { PrimaryButton } from '../button/PrimaryButton';
 // import Card from "../Card"; // Comentado no seu código, mantendo
-import { FormInput } from "../input/FormInput";
-import { FormSelect } from "../input/FormSelect";
-import { FormTextarea } from "../input/FormTextarea";
+import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
+import { FormTextarea } from '../input/FormTextarea';
 
 import {
-  vagaSchema,
-  VagaInput,
+  BeneficioInput,
   CategoriaVagaEnum,
+  HabilidadeInput,
+  NivelExigidoEnum,
+  NivelExperienciaEnum,
   StatusVagaEnum,
   TipoContratoEnum,
-  NivelExperienciaEnum,
-  NivelExigidoEnum,
   TipoHabilidadeEnum,
-  HabilidadeInput, // Importar para tipagem da renderChipContent
-  BeneficioInput, // Importar para tipagem da renderChipContent
-} from "@/schemas/vaga.schema";
-import LocalizacaoForm from "./LocalizacaoForm";
-import { FormArrayInput } from "../input/FormArrayInput";
+  VagaInput,
+  vagaSchema,
+} from '@/schemas/vaga.schema';
+import { FormArrayInput } from '../input/FormArrayInput';
+import LocalizacaoForm from './LocalizacaoForm';
 
 type VagaFormProps = {
   formContexto?: UseFormReturn<VagaInput>;
@@ -38,18 +38,21 @@ const VagaForm: React.FC<VagaFormProps> = ({
   initialValues,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [habilidadesAllow, setHabilidadesAllow] = useState(false);
+  const [beneficiosAllow, setBeneficiosAllow] = useState(false);
   // const [clientes, setClientes] = useState<{ id: string; nome: string }[]>([]);
 
   const methods = useSafeForm<VagaInput>({
-    mode: "independent",
+    mode: 'independent',
     useFormProps: {
       resolver: zodResolver(vagaSchema) as any,
-      mode: "onTouched",
-      // defaultValues: {
-      //   ...initialValues,
-      //   habilidades: initialValues?.habilidades || [],
-      //   beneficios: initialValues?.beneficios || [],
-      // },
+      mode: 'onTouched',
+      defaultValues: {
+        ...initialValues,
+        tipoSalario: 'A COMBINAR',
+        categoria: 'SAUDE',
+        status: 'ATIVA',
+      },
     },
   });
 
@@ -60,8 +63,20 @@ const VagaForm: React.FC<VagaFormProps> = ({
     formState: { errors },
   } = methods;
 
+  const tipoSalario = useWatch({
+    control,
+    name: 'tipoSalario',
+    defaultValue: initialValues?.tipoSalario,
+  });
+
+  const categoria = useWatch({
+    control,
+    name: 'categoria',
+    defaultValue: initialValues?.categoria,
+  });
+
   const submitHandler = async (data: any) => {
-    console.log("aqui");
+    console.log('aqui');
     if (onSubmit) onSubmit(data);
 
     const payload: VagaInput = { ...data };
@@ -69,17 +84,17 @@ const VagaForm: React.FC<VagaFormProps> = ({
     setLoading(true);
 
     try {
-      const url = "/api/external/vaga";
+      const url = '/api/external/vaga';
       const endpoint = payload.id ? `${url}/${payload.id}` : url;
       const method = payload.id ? api.put : api.post;
 
       const response = await method(endpoint, payload);
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
-        alert("Vaga salva com sucesso!");
+        alert('Vaga salva com sucesso!');
       }
     } catch (erro: any) {
-      console.log("Erro ao salvar vaga:", erro);
+      console.log('Erro ao salvar vaga:', erro);
       // alert(
       //   "Erro ao salvar vaga: " +
       //     (erro?.response?.data?.message || "Erro desconhecido")
@@ -93,22 +108,39 @@ const VagaForm: React.FC<VagaFormProps> = ({
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(submitHandler as any)}
-        className="grid grid-cols-1 md:grid-cols-3 gap-x-1 space-y-2"
+        className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-1 space-y-2"
       >
         <FormInput
           name="titulo"
           register={register}
           placeholder="Título da Vaga"
           errors={errors}
+          inputProps={{ classNameContainer: 'col-span-full' }}
         />
 
-        <FormInput
-          name="salario"
+        <FormSelect
+          name="tipoSalario"
           register={register}
-          placeholder="Salário"
-          errors={errors}
-          inputProps={{ type: "number", step: "0.01" }}
+          placeholder="Tipo de salário"
+          selectProps={{
+            children: (
+              <>
+                <option value="A COMBINAR">A COMBINAR</option>
+                <option value="DIARIA">DIARIA</option>
+                <option value="MENSAL">MENSAL</option>
+              </>
+            ),
+          }}
         />
+
+        {tipoSalario !== 'A COMBINAR' && (
+          <FormInput
+            name="salario"
+            register={register}
+            placeholder="Salário"
+            inputProps={{ type: 'number', step: '0.01' }}
+          />
+        )}
 
         <FormSelect
           name="categoria"
@@ -118,9 +150,9 @@ const VagaForm: React.FC<VagaFormProps> = ({
           selectProps={{
             children: (
               <>
-                {CategoriaVagaEnum.options.map((cat) => (
+                {CategoriaVagaEnum.options.map(cat => (
                   <option key={cat} value={cat}>
-                    {cat.replaceAll("_", " ")}
+                    {cat.replaceAll('_', ' ')}
                   </option>
                 ))}
               </>
@@ -136,9 +168,9 @@ const VagaForm: React.FC<VagaFormProps> = ({
           selectProps={{
             children: (
               <>
-                {StatusVagaEnum.options.map((stat) => (
+                {StatusVagaEnum.options.map(stat => (
                   <option key={stat} value={stat}>
-                    {stat.replaceAll("_", " ")}
+                    {stat.replaceAll('_', ' ')}
                   </option>
                 ))}
               </>
@@ -149,14 +181,13 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <FormSelect
           name="tipoContrato"
           register={register}
-          errors={errors}
           placeholder="Tipo de Contrato"
           selectProps={{
             children: (
               <>
-                {TipoContratoEnum.options.map((tipo) => (
+                {TipoContratoEnum.options.map(tipo => (
                   <option key={tipo} value={tipo}>
-                    {tipo.replaceAll("_", " ")}
+                    {tipo.replaceAll('_', ' ')}
                   </option>
                 ))}
               </>
@@ -164,23 +195,25 @@ const VagaForm: React.FC<VagaFormProps> = ({
           }}
         />
 
-        <FormSelect
-          name="nivelExperiencia"
-          register={register}
-          errors={errors}
-          placeholder="Nível de Experiência"
-          selectProps={{
-            children: (
-              <>
-                {NivelExperienciaEnum.options.map((nivel) => (
-                  <option key={nivel} value={nivel}>
-                    {nivel.replaceAll("_", " ")}
-                  </option>
-                ))}
-              </>
-            ),
-          }}
-        />
+        {categoria !== 'SAUDE' && (
+          <FormSelect
+            name="nivelExperiencia"
+            register={register}
+            errors={errors}
+            placeholder="Nível de Experiência"
+            selectProps={{
+              children: (
+                <>
+                  {NivelExperienciaEnum.options.map(nivel => (
+                    <option key={nivel} value={nivel}>
+                      {nivel.replaceAll('_', ' ')}
+                    </option>
+                  ))}
+                </>
+              ),
+            }}
+          />
+        )}
 
         {/*<FormSelect
           name="clienteId"
@@ -206,7 +239,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           register={register}
           placeholder="Descrição da Vaga"
           errors={errors}
-          textareaProps={{ classNameContainer: "col-span-full" }}
+          textareaProps={{ classNameContainer: 'col-span-full' }}
         />
 
         <FormTextarea
@@ -214,7 +247,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           register={register}
           placeholder="Requisitos (Opcional)"
           errors={errors}
-          textareaProps={{ classNameContainer: "col-span-full" }}
+          textareaProps={{ classNameContainer: 'col-span-full', rows: 2 }}
         />
 
         <FormTextarea
@@ -222,93 +255,116 @@ const VagaForm: React.FC<VagaFormProps> = ({
           register={register}
           placeholder="Responsabilidades (Opcional)"
           errors={errors}
-          textareaProps={{ classNameContainer: "col-span-full" }}
+          textareaProps={{ classNameContainer: 'col-span-full', rows: 2 }}
         />
 
-        <div className="col-span-full">
-          {/* REMOVIDO: register={register} */}
-          <FormArrayInput
-            name="habilidades" // Nome do campo no schema principal
-            title="Habilidades Necessárias"
-            addButtonText="Adicionar Habilidade"
-            fieldConfigs={[
-              {
-                name: "nome",
-                label: "Nome da Habilidade",
-                type: "text",
-                required: true,
-              },
-              {
-                name: "tipoHabilidade",
-                label: "Tipo",
-                component: "select",
-                selectOptions: TipoHabilidadeEnum.options.map((opt) => ({
-                  value: opt,
-                  label: opt.replaceAll("_", " "),
-                })),
-              },
-              {
-                name: "nivelExigido",
-                label: "Nível",
-                component: "select",
-                selectOptions: NivelExigidoEnum.options.map((opt) => ({
-                  value: opt,
-                  label: opt.replaceAll("_", " "),
-                })),
-              },
-            ]}
-            renderChipContent={(habilidade: HabilidadeInput) => (
-              <>
-                <span>{habilidade.nome}</span>
-                {habilidade.tipoHabilidade && (
-                  <span className="ml-1 opacity-80">
-                    ({String(habilidade.tipoHabilidade).replaceAll("_", " ")})
-                  </span>
-                )}
-                {habilidade.nivelExigido && (
-                  <span className="ml-1 opacity-80">
-                    [{String(habilidade.nivelExigido).replaceAll("_", " ")}]
-                  </span>
-                )}
-              </>
-            )}
-            initialItemData={{ nome: "", tipoHabilidade: "", nivelExigido: "" }}
-          />
+        <div className="w-full flex gap-2 items-center col-span-full justify-center">
+          <button
+            className="flex items-center bg-primary text-white text-sm px-3 py-1 rounded-lg shadow-md text-nowrap"
+            onClick={() => {
+              setHabilidadesAllow(!habilidadesAllow);
+            }}
+          >
+            Adicionar Habilidades?
+          </button>
+          <button
+            className="flex items-center bg-primary text-white text-sm px-3 py-1 rounded-lg shadow-md text-nowrap"
+            onClick={() => {
+              setBeneficiosAllow(!beneficiosAllow);
+            }}
+          >
+            Adicionar Beneficios?
+          </button>
         </div>
 
-        <div className="col-span-full">
-          {/* REMOVIDO: register={register} */}
-          <FormArrayInput
-            name="beneficios" // Nome do campo no schema principal
-            title="Benefícios Oferecidos"
-            addButtonText="Adicionar Benefício"
-            fieldConfigs={[
-              {
-                name: "nome",
-                label: "Nome do Benefício",
-                type: "text",
-                required: true,
-              },
-              {
-                name: "descricao",
-                label: "Descrição",
-                type: "text",
-                placeholder: "Ex: R$ 50,00 por dia",
-              },
-            ]}
-            renderChipContent={(beneficio: BeneficioInput) => (
-              <>
-                <span>{beneficio.nome}</span>
-                {beneficio.descricao && (
-                  <span className="ml-1 opacity-80">
-                    : {beneficio.descricao}
-                  </span>
-                )}
-              </>
-            )}
-            initialItemData={{ nome: "", descricao: "" }}
-          />
-        </div>
+        {habilidadesAllow && (
+          <div className="col-span-full">
+            <FormArrayInput
+              name="habilidades"
+              title="Habilidades Necessárias (Opcional)"
+              addButtonText="Adicionar Habilidade"
+              fieldConfigs={[
+                {
+                  name: 'nome',
+                  placeholder: 'Nome da Habilidade',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'tipoHabilidade',
+                  placeholder: 'Tipo',
+                  component: 'select',
+                  selectOptions: TipoHabilidadeEnum.options.map(opt => ({
+                    value: opt,
+                    label: opt.replaceAll('_', ' '),
+                  })),
+                },
+                {
+                  name: 'nivelExigido',
+                  placeholder: 'Nível',
+                  component: 'select',
+                  selectOptions: NivelExigidoEnum.options.map(opt => ({
+                    value: opt,
+                    label: opt.replaceAll('_', ' '),
+                  })),
+                },
+              ]}
+              renderChipContent={(habilidade: HabilidadeInput) => (
+                <>
+                  <span>{habilidade.nome}</span>
+                  {habilidade.tipoHabilidade && (
+                    <span className="ml-1 opacity-80 text-primary">
+                      ({String(habilidade.tipoHabilidade).replaceAll('_', ' ')})
+                    </span>
+                  )}
+                  {habilidade.nivelExigido && (
+                    <span className="ml-1 opacity-80 text-primary">
+                      [{String(habilidade.nivelExigido).replaceAll('_', ' ')}]
+                    </span>
+                  )}
+                </>
+              )}
+              initialItemData={{
+                nome: '',
+                tipoHabilidade: '',
+                nivelExigido: '',
+              }}
+            />
+          </div>
+        )}
+        {beneficiosAllow && (
+          <div className="col-span-full">
+            <FormArrayInput
+              name="beneficios"
+              title="Benefícios Oferecidos (Opcional)"
+              addButtonText="Adicionar Benefício"
+              fieldConfigs={[
+                {
+                  name: 'nome',
+                  placeholder: 'Nome do Benefício',
+                  type: 'text',
+                  required: true,
+                },
+                {
+                  name: 'descricao',
+                  placeholder: 'Descrição',
+                  type: 'text',
+                },
+              ]}
+              renderChipContent={(beneficio: BeneficioInput) => (
+                <>
+                  <span className="text-primary">{beneficio.nome}</span>
+                  {beneficio.descricao && (
+                    <span className="ml-1 opacity-80 text-primary">
+                      : {beneficio.descricao}
+                    </span>
+                  )}
+                </>
+              )}
+              initialItemData={{ nome: '', descricao: '' }}
+            />
+          </div>
+        )}
 
         <div className="col-span-full">
           <LocalizacaoForm namePrefix="localizacao" />
@@ -316,7 +372,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <div className="flex justify-end col-span-full">
           <PrimaryButton type="submit" disabled={loading}>
-            {loading ? "Salvando..." : "Salvar Vaga"}
+            {loading ? 'Salvando...' : 'Salvar Vaga'}
           </PrimaryButton>
         </div>
       </form>

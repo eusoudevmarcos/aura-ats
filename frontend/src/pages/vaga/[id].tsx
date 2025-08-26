@@ -1,11 +1,11 @@
 // pages/vaga/[uuid].tsx
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import api from "@/axios"; // Certifique-se que o caminho está correto
-import { EditPenIcon, TrashIcon } from "@/components/icons"; // Certifique-se que o caminho está correto
-import Modal from "@/components/modal/Modal"; // Certifique-se que o caminho está correto
-import Card from "@/components/Card"; // Certifique-se que o caminho está correto
-import VagaForm from "@/components/form/VagaForm";
+import api from '@/axios'; // Certifique-se que o caminho está correto
+import Card from '@/components/card'; // Certifique-se que o caminho está correto
+import VagaForm from '@/components/form/VagaForm';
+import { EditPenIcon, TrashIcon } from '@/components/icons'; // Certifique-se que o caminho está correto
+import Modal from '@/components/modal/Modal'; // Certifique-se que o caminho está correto
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 
 // Importe as novas tipagens de vaga
 // import {
@@ -40,7 +40,7 @@ const VagaPage: React.FC = () => {
         const res = await api.get(`/api/external/vaga/${id}`);
         setVaga(res.data);
       } catch (_) {
-        setError("Vaga não encontrada ou erro ao buscar dados.");
+        setError('Vaga não encontrada ou erro ao buscar dados.');
         setVaga(null);
       } finally {
         setLoading(false);
@@ -52,35 +52,35 @@ const VagaPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!vaga) return;
-    if (confirm("Tem certeza que deseja excluir esta vaga?")) {
+    if (confirm('Tem certeza que deseja excluir esta vaga?')) {
       try {
         // Altere o endpoint para deletar vaga
         await api.delete(`/api/vaga/${vaga.id}`);
-        router.push("/vagas"); // Redireciona para a lista de vagas
+        router.push('/vagas'); // Redireciona para a lista de vagas
       } catch {
-        alert("Erro ao excluir vaga.");
+        alert('Erro ao excluir vaga.');
       }
     }
   };
 
   const formatCurrency = (value: number | null | undefined): string => {
-    if (value === null || value === undefined) return "N/A";
-    return new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: "BRL",
+    if (value === null || value === undefined) return 'N/A';
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
     }).format(value);
   };
 
   const formatDate = (date: string | Date | null | undefined): string => {
-    if (!date) return "N/A";
-    return new Date(date).toLocaleDateString("pt-BR");
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('pt-BR');
   };
 
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#48038a]"></div>
-        <span className="ml-4 text-[#48038a] text-lg">Carregando...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <span className="ml-4 text-primary text-lg">Carregando...</span>
       </div>
     );
   }
@@ -100,12 +100,12 @@ const VagaPage: React.FC = () => {
       <section className="bg-white p-4 rounded-2xl shadow-md">
         <div className="flex justify-between items-center mb-8">
           <button
-            className="px-4 py-2 bg-[#8c53ff] text-white rounded shadow-md hover:scale-105 transition-transform"
+            className="px-4 py-2 bg-primary text-white rounded shadow-md hover:scale-105 transition-transform"
             onClick={() => router.back()}
           >
             Voltar
           </button>
-          <h1 className="text-2xl font-bold text-center text-[#48038a] flex-grow">
+          <h1 className="text-2xl font-bold text-center text-primary flex-grow">
             Detalhes da Vaga
           </h1>
           <div className="flex gap-2">
@@ -167,32 +167,32 @@ const VagaPage: React.FC = () => {
             <section className="flex justify-between">
               <div>
                 <span className="font-medium mr-2">Categoria:</span>
-                <span className="bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                   {vaga.categoria}
                 </span>
               </div>
               <div>
                 <span className="font-medium mr-2">Status:</span>
-                <span className="bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                   {vaga.status}
                 </span>
               </div>
               <div>
                 <span className="font-medium mr-2">Tipo Contrato:</span>
-                <span className="bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                   {vaga.tipoContrato}
                 </span>
               </div>
               <div>
                 <span className="font-medium mr-2">Nível Experiência:</span>
-                <span className="bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                   {vaga.nivelExperiencia}
                 </span>
               </div>
               {vaga.areaCandidato && (
                 <div>
                   <span className="font-medium mr-2">Área Candidato:</span>
-                  <span className="bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+                  <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                     {vaga.areaCandidato}
                   </span>
                 </div>
@@ -222,10 +222,10 @@ const VagaPage: React.FC = () => {
                 <span className="ml-2">
                   {vaga.localizacao.logradouro
                     ? `${vaga.localizacao.logradouro}, `
-                    : ""}
+                    : ''}
                   {vaga.localizacao.bairro
                     ? `${vaga.localizacao.bairro}, `
-                    : ""}
+                    : ''}
                   {vaga.localizacao.cidade} - {vaga.localizacao.uf}
                 </span>
               </div>
@@ -256,9 +256,9 @@ const VagaPage: React.FC = () => {
               {vaga.beneficios.map((beneficio: any) => (
                 <div key={beneficio.id} className="mb-2">
                   <span className="font-medium">
-                    {beneficio.nome || "N/A"}:
+                    {beneficio.nome || 'N/A'}:
                   </span>
-                  <span className="ml-2">{beneficio.descricao || "N/A"}</span>
+                  <span className="ml-2">{beneficio.descricao || 'N/A'}</span>
                 </div>
               ))}
             </Card>
@@ -269,10 +269,10 @@ const VagaPage: React.FC = () => {
             <Card title="Habilidades Exigidas">
               {vaga.habilidades.map((vh: any) => (
                 <div key={vh.habilidadeId} className="mb-2">
-                  <span>{vh.nivelExigido || "Não especificado"}</span>-
-                  <span>{vh.habilidade.nome || "Não especificado"}</span>-
+                  <span>{vh.nivelExigido || 'Não especificado'}</span>-
+                  <span>{vh.habilidade.nome || 'Não especificado'}</span>-
                   <span>
-                    {vh.habilidade.tipoHabilidade || "Não especificado"}
+                    {vh.habilidade.tipoHabilidade || 'Não especificado'}
                   </span>
                 </div>
               ))}

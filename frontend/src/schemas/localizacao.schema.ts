@@ -52,5 +52,6 @@ export const localizacaoSchema = z.object({
     .optional(),
   complemento: z.string().optional(),
   logradouro: z.string().optional(),
+  // descricao: z.string().optional(),
 });
 export type LocalizacaoInput = z.infer<typeof localizacaoSchema>;

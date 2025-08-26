@@ -1,24 +1,22 @@
-import React, { useEffect, useState } from "react";
-import SidebarItem from "./SidebarItem";
-import styles from "./Sidebar.module.css";
+import { useUser } from '@/hook/useUser';
+import styles from '@/styles/sidebar.module.css';
+import { getFirstLetter } from '@/utils/getFirstLetter';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 import {
   BriefcaseIcon,
-  UsersIcon,
   CalendarIcon,
-  HandshakeIcon,
-  ClipboardCheckIcon,
-  SettingsIcon,
   ChevronDownIcon,
-  ListIcon,
-  ListClosedIcon,
-  AccountIcon,
+  ClipboardCheckIcon,
   EmployeesIcon,
-} from "../icons";
-import Image from "next/image";
-import { useUser } from "@/hook/useUser";
-import { getFirstLetter } from "@/utils/getFirstLetter";
-import Link from "next/link";
-import { useRouter } from "next/router";
+  HandshakeIcon,
+  ListClosedIcon,
+  ListIcon,
+  SettingsIcon,
+  UsersIcon,
+} from '../icons';
 
 interface SidebarProps {
   onToggleSidebar: (collapsed: boolean) => void;
@@ -39,56 +37,56 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   const navItems = [
     {
       icon: <CalendarIcon className={styles.icon} />,
-      label: "Atividade",
-      href: "/atividades/agendas",
+      label: 'Atividade',
+      href: '/atividades/agendas',
     },
     {
       icon: <BriefcaseIcon className={styles.icon} />,
-      label: "Vagas",
-      href: "/vagas",
+      label: 'Vagas',
+      href: '/vagas',
     },
     {
       icon: <UsersIcon className={styles.icon} />,
-      label: "Prospecções",
-      href: "/prospeccoes/",
+      label: 'Prospecções',
+      href: '/prospeccoes/',
     },
     {
       icon: <UsersIcon className={styles.icon} />,
-      label: "Profissionais",
-      href: "/profissionais",
+      label: 'Profissionais',
+      href: '/profissionais',
     },
     {
       icon: <HandshakeIcon className={styles.icon} />,
-      label: "Clientes",
-      href: "/clientes",
+      label: 'Clientes',
+      href: '/clientes',
     },
     {
       icon: <HandshakeIcon className={styles.icon} />,
-      label: "Entrevistas",
-      href: "/entrevistas",
+      label: 'Entrevistas',
+      href: '/entrevistas',
     },
     {
       icon: <ClipboardCheckIcon className={styles.icon} />,
-      label: "Testes",
-      href: "/testes",
+      label: 'Testes',
+      href: '/testes',
     },
     {
       icon: <SettingsIcon className={styles.icon} />,
-      label: "Configurações",
-      href: "/configuracoes",
+      label: 'Configurações',
+      href: '/configuracoes',
     },
     {
       icon: <EmployeesIcon className={styles.icon} />,
-      label: "Funcionarios",
-      href: "/funcionarios/",
+      label: 'Funcionarios',
+      href: '/funcionarios/',
     },
   ];
 
   return (
     <aside
-      className={`fixed top-24 left-2 h-[calc(90vh-2rem)] bg-white text-[#474747] flex flex-col shadow-lg rounded-lg
+      className={`fixed top-24 left-2 h-[calc(90vh-2rem)] bg-white text-primary flex flex-col shadow-lg rounded-lg
         transition-all duration-300 ease-in-out z-40 ${
-          collapsed ? "w-20 p-5" : "w-64 p-6"
+          collapsed ? 'w-20 p-5' : 'w-64 p-6'
         }`}
     >
       <button
@@ -100,14 +98,14 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
 
       <nav className="flex-grow overflow-y-auto custom-scrollbar">
         <ul>
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <Link
               key={item.label}
               href={item.href}
               className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
                 router.pathname === item.href
-                  ? "bg-[#8c53ff] text-white"
-                  : "text-[#474747] hover:bg-[#f1eefe] hover:text-[#7839cd]"
+                  ? 'bg-primary text-white'
+                  : 'text-primary hover:bg-neutral hover:text-primary'
               }`}
               onMouseEnter={() => setIsShowLabel(true)}
               onMouseLeave={() => setIsShowLabel(false)}
@@ -116,8 +114,8 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
               <span
                 className={`${
                   isShowLabel && collapsed
-                    ? "block absolute left-18 bg-white p-1 shadow-md text-[#7839cd] text-bold transition-all duration-200"
-                    : ""
+                    ? 'block absolute left-18 bg-white p-1 shadow-md text-primary text-bold transition-all duration-200'
+                    : ''
                 }`}
               >
                 {item.label}
@@ -129,7 +127,7 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
       <Link
         href={`/profile/${user.id}`}
         className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 ${
-          collapsed ? "justify-center" : ""
+          collapsed ? 'justify-center' : ''
         }`}
       >
         <Image

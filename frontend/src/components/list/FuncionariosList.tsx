@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from "react";
-import Table, { TableColumn } from "../Table";
-import api from "@/axios";
-import { Pagination } from "@/type/pagination.type";
-import { useRouter } from "next/router";
-import Card from "../Card";
+import api from '@/axios';
+import { Pagination } from '@/type/pagination.type';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import Card from '../card';
+import Table, { TableColumn } from '../Table';
 
 // Tipos para Pessoa e Empresa
 interface Contato {
@@ -48,53 +48,53 @@ type FuncionarioTabela = {
 };
 
 function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
-  return funcionarios.map((f) => {
-    if ("pessoa" in f) {
+  return funcionarios.map(f => {
+    if ('pessoa' in f) {
       return {
         nome: f.pessoa?.nome,
         email: f.pessoa?.contatos?.[0]?.email || f.email,
         tipoUsuario: f.tipoUsuario,
         dataNascimento: f.pessoa?.dataNascimento
-          ? new Date(f.pessoa?.dataNascimento).toLocaleDateString("pt-BR")
-          : "-",
+          ? new Date(f.pessoa?.dataNascimento).toLocaleDateString('pt-BR')
+          : '-',
         id: f.id,
       };
-    } else if ("empresa" in f) {
+    } else if ('empresa' in f) {
       return {
         nome: f.empresa?.razaoSocial,
         email: f.empresa?.contatos?.[0]?.email || f.email,
         tipoUsuario: f.tipoUsuario,
         dataNascimento: f.empresa?.dataAbertura
-          ? new Date(f.empresa?.dataAbertura).toLocaleDateString("pt-BR")
-          : "-",
+          ? new Date(f.empresa?.dataAbertura).toLocaleDateString('pt-BR')
+          : '-',
         id: f.id,
       };
     }
     return {
-      nome: "-",
-      email: "-",
-      tipoUsuario: "-",
-      dataNascimento: "-",
+      nome: '-',
+      email: '-',
+      tipoUsuario: '-',
+      dataNascimento: '-',
     };
   });
 }
 
 // Colunas da tabela
 const columns: TableColumn<FuncionarioTabela>[] = [
-  { label: "Nome", key: "nome" },
-  { label: "Email", key: "email" },
-  { label: "Tipo Usuário", key: "tipoUsuario" },
-  { label: "Data de Nascimento", key: "dataNascimento" },
+  { label: 'Nome', key: 'nome' },
+  { label: 'Email', key: 'email' },
+  { label: 'Tipo Usuário', key: 'tipoUsuario' },
+  { label: 'Data de Nascimento', key: 'dataNascimento' },
 ];
 
 const FuncionariosList: React.FC = () => {
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState('');
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Estados para paginação
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(5);
   const [total, setTotal] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
 
@@ -105,7 +105,7 @@ const FuncionariosList: React.FC = () => {
       setLoading(true);
       try {
         const response = await api.get<Pagination<Funcionario[]>>(
-          "/api/external/funcionario",
+          '/api/external/funcionario',
           {
             params: {
               page,
@@ -131,7 +131,7 @@ const FuncionariosList: React.FC = () => {
   const dadosTabela = normalizarTable(funcionarios);
 
   const dadosFiltrados = dadosTabela.filter(
-    (f) =>
+    f =>
       f.nome?.toLowerCase().includes(search.toLowerCase()) ||
       f.email?.toLowerCase().includes(search.toLowerCase()) ||
       f.tipoUsuario.toLowerCase().includes(search.toLowerCase())
@@ -149,7 +149,7 @@ const FuncionariosList: React.FC = () => {
           type="text"
           placeholder="Buscar cliente..."
           value={search}
-          onChange={(e) => setSearch(e.target.value)}
+          onChange={e => setSearch(e.target.value)}
           className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
         />
       </div>
@@ -157,7 +157,7 @@ const FuncionariosList: React.FC = () => {
         type="text"
         placeholder="Buscar por nome, email ou tipo de usuário..."
         value={search}
-        onChange={(e) => setSearch(e.target.value)}
+        onChange={e => setSearch(e.target.value)}
         className="mb-4 p-2 border border-gray-300 rounded w-full max-w-md"
       />
       <Table

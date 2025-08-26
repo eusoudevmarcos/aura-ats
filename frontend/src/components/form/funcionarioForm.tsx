@@ -13,7 +13,7 @@ import EmpresaForm from "@/components/form/EmpresaForm";
 import { makeName } from "@/utils/makeName";
 import { FormInput } from "../input/FormInput";
 import { FormSelect } from "../input/FormSelect";
-import Card from "../Card";
+import Card from "../card";
 import { PessoaInput } from "@/schemas/pessoa.schema";
 
 type FuncionarioFormProps = {

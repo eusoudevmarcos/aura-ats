@@ -1,4 +1,4 @@
-import React, { ButtonHTMLAttributes, useState, useEffect } from "react";
+import React, { ButtonHTMLAttributes, useEffect, useState } from 'react';
 
 export type SimpleButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
@@ -8,9 +8,9 @@ const PrimaryButton: React.FC<SimpleButtonProps> = ({
   loading: loadingProp = false,
   disabled,
   children,
-  className = "",
+  className = '',
   onClick,
-  type = "button",
+  type = 'button',
   ...rest
 }) => {
   const [loading, setLoading] = useState<boolean>(loadingProp);
@@ -23,7 +23,7 @@ const PrimaryButton: React.FC<SimpleButtonProps> = ({
   return (
     <button
       type={type}
-      className={`buttonPrimary flex items-center justify-center gap-2 ${className}`}
+      className={`bg-[#8c53ff] text-white py-[10px] px-[20px] rounded-[12px] text-[14px] font-medium flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-[#8c53ff] ${className}`}
       disabled={loading || disabled}
       onClick={onClick}
       {...rest}

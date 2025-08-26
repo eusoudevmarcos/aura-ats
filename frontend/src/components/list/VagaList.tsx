@@ -1,51 +1,51 @@
-import React, { useState, useEffect } from "react";
-import Table, { TableColumn } from "../Table"; // Certifique-se que o caminho está correto
-import api from "@/axios";
-import { Pagination } from "@/type/pagination.type"; // Se este é o seu tipo de paginação
-import { useRouter } from "next/router";
-import Card from "../Card";
+import api from '@/axios';
+import { Pagination } from '@/type/pagination.type'; // Se este é o seu tipo de paginação
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
+import Card from '../card';
+import Table, { TableColumn } from '../Table'; // Certifique-se que o caminho está correto
 
 // ===================== ENUMS (Adaptadas para o Frontend) =====================
 export enum CategoriaVaga {
-  TECNOLOGIA = "TECNOLOGIA",
-  SAUDE = "SAUDE",
-  ADMINISTRATIVO = "ADMINISTRATIVO",
-  FINANCEIRO = "FINANCEIRO",
-  RECURSOS_HUMANOS = "RECURSOS_HUMANOS",
-  MARKETING = "MARKETING",
-  VENDAS = "VENDAS",
-  OUTROS = "OUTROS",
+  TECNOLOGIA = 'TECNOLOGIA',
+  SAUDE = 'SAUDE',
+  ADMINISTRATIVO = 'ADMINISTRATIVO',
+  FINANCEIRO = 'FINANCEIRO',
+  RECURSOS_HUMANOS = 'RECURSOS_HUMANOS',
+  MARKETING = 'MARKETING',
+  VENDAS = 'VENDAS',
+  OUTROS = 'OUTROS',
 }
 
 export enum StatusVaga {
-  ATIVA = "ATIVA",
-  PAUSADA = "PAUSADA",
-  ENCERRADA = "ENCERRADA",
-  ARQUIVADA = "ARQUIVADA",
+  ATIVA = 'ATIVA',
+  PAUSADA = 'PAUSADA',
+  ENCERRADA = 'ENCERRADA',
+  ARQUIVADA = 'ARQUIVADA',
 }
 
 export enum TipoContrato {
-  CLT = "CLT",
-  PJ = "PJ",
-  ESTAGIO = "ESTAGIO",
-  FREELANCER = "FREELANCER",
-  TEMPORARIO = "TEMPORARIO",
+  CLT = 'CLT',
+  PJ = 'PJ',
+  ESTAGIO = 'ESTAGIO',
+  FREELANCER = 'FREELANCER',
+  TEMPORARIO = 'TEMPORARIO',
 }
 
 export enum NivelExperiencia {
-  ESTAGIO = "ESTAGIO",
-  JUNIOR = "JUNIOR",
-  PLENO = "PLENO",
-  SENIOR = "SENIOR",
-  ESPECIALISTA = "ESPECIALISTA",
-  GERENTE = "GERENTE",
+  ESTAGIO = 'ESTAGIO',
+  JUNIOR = 'JUNIOR',
+  PLENO = 'PLENO',
+  SENIOR = 'SENIOR',
+  ESPECIALISTA = 'ESPECIALISTA',
+  GERENTE = 'GERENTE',
 }
 
 export enum AreaCandidato { // Assumindo que você tem um enum para isso
-  TI = "TI",
-  ENGENHARIA = "ENGENHARIA",
-  MEDICINA = "MEDICINA",
-  ADMINISTRACAO = "ADMINISTRACAO",
+  TI = 'TI',
+  ENGENHARIA = 'ENGENHARIA',
+  MEDICINA = 'MEDICINA',
+  ADMINISTRACAO = 'ADMINISTRACAO',
   // ... outras áreas
 }
 
@@ -122,42 +122,42 @@ export interface VagaWithRelations {
 
 // ===================== COMPONENTE VagaList =====================
 const columns: TableColumn<VagaWithRelations>[] = [
-  { label: "Título", key: "titulo" },
+  { label: 'Título', key: 'titulo' },
   {
-    label: "Salário",
-    key: "salario",
+    label: 'Salário',
+    key: 'salario',
     render: (value, row) =>
       row.salario
-        ? `R$ ${row.salario.toFixed(2)} (${row.tipoSalario || "N/A"})`
-        : "N/A",
+        ? `R$ ${row.salario.toFixed(2)} (${row.tipoSalario || 'N/A'})`
+        : 'N/A',
   },
   {
-    label: "Data Publicação",
-    key: "dataPublicacao",
+    label: 'Data Publicação',
+    key: 'dataPublicacao',
     render: (value, row) =>
       row.dataPublicacao
-        ? new Date(row.dataPublicacao).toLocaleDateString("pt-BR")
-        : "N/A",
+        ? new Date(row.dataPublicacao).toLocaleDateString('pt-BR')
+        : 'N/A',
   },
-  { label: "Status", key: "status" },
-  { label: "Área Candidato", key: "areaCandidato" },
+  { label: 'Status', key: 'status' },
+  { label: 'Área Candidato', key: 'areaCandidato' },
   {
-    label: "Localização",
-    key: "localizacao.cidade",
+    label: 'Localização',
+    key: 'localizacao.cidade',
     render: (_, row) =>
       row.localizacao
         ? `${row.localizacao.cidade} - ${row.localizacao.uf}`
-        : "N/A",
+        : 'N/A',
   },
 ];
 
 const VagaList: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState('');
   const [vagas, setVagas] = useState<VagaWithRelations[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(10);
+  const [pageSize, setPageSize] = useState<number>(5);
   const [totalRecords, setTotalRecords] = useState<number>(0);
   const [totalPages, setTotalPages] = useState<number>(1);
 
@@ -168,12 +168,12 @@ const VagaList: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await api.get<Pagination<VagaWithRelations[]>>(
-          "/api/external/vaga",
+          '/api/external/vaga',
           {
             params: {
               page,
               pageSize,
-              search: searchQuery, // O backend deve filtrar por titulo, descricao, etc.
+              search: searchQuery,
             },
           }
         );
@@ -181,7 +181,7 @@ const VagaList: React.FC = () => {
         setTotalRecords(response.data.total);
         setTotalPages(response.data.totalPages);
       } catch (error) {
-        console.error("Erro ao buscar vagas:", error);
+        console.error('Erro ao buscar vagas:', error);
         setVagas([]);
         setTotalRecords(0);
         setTotalPages(1);
@@ -196,7 +196,7 @@ const VagaList: React.FC = () => {
   // A filtragem local é mantida caso o backend não suporte 'search'
   // mas o ideal é que o 'search' seja tratado pelo backend na API.
   const filteredVagas = vagas.filter(
-    (vaga) =>
+    vaga =>
       vaga.titulo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vaga.descricao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       vaga.areaCandidato?.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -217,7 +217,7 @@ const VagaList: React.FC = () => {
           type="text"
           placeholder="Buscar por título, descrição, área ou cliente..."
           value={searchQuery}
-          onChange={(e) => setSearchQuery(e.target.value)}
+          onChange={e => setSearchQuery(e.target.value)}
           className="flex-grow w-full max-w-[400px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
         />
       </div>

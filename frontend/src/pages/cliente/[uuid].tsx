@@ -1,12 +1,12 @@
 // pages/cliente/[uuid].tsx
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import api from "@/axios";
-import { EditPenIcon, TrashIcon } from "@/components/icons";
-import Modal from "@/components/modal/Modal";
-import Card from "@/components/Card";
-import ClienteForm from "@/components/form/ClienteForm";
-import { ClienteInput } from "@/schemas/cliente.schema";
+import api from '@/axios';
+import Card from '@/components/card';
+import ClienteForm from '@/components/form/ClienteForm';
+import { EditPenIcon, TrashIcon } from '@/components/icons';
+import Modal from '@/components/modal/Modal';
+import { ClienteInput } from '@/schemas/cliente.schema';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 
 const ClientePage: React.FC = () => {
   const router = useRouter();
@@ -24,10 +24,10 @@ const ClientePage: React.FC = () => {
       setLoading(true);
       setErro(null);
       try {
-        const res = await api.get(`/api/cliente/${uuid}`);
+        const res = await api.get(`/api/external/cliente/${uuid}`);
         setCliente(res.data);
       } catch (_) {
-        setErro("Cliente não encontrado ou erro ao buscar dados.");
+        setErro('Cliente não encontrado ou erro ao buscar dados.');
         setCliente(null);
       } finally {
         setLoading(false);
@@ -39,12 +39,12 @@ const ClientePage: React.FC = () => {
 
   const handleTrash = async () => {
     if (!cliente) return;
-    if (confirm("Tem certeza que deseja excluir este cliente?")) {
+    if (confirm('Tem certeza que deseja excluir este cliente?')) {
       try {
         await api.delete(`/api/cliente/${cliente.id}`);
-        router.push("/clientes");
+        router.push('/clientes');
       } catch {
-        alert("Erro ao excluir cliente.");
+        alert('Erro ao excluir cliente.');
       }
     }
   };
@@ -52,8 +52,8 @@ const ClientePage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#48038a]"></div>
-        <span className="ml-4 text-[#48038a] text-lg">Carregando...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <span className="ml-4 text-primary text-lg">Carregando...</span>
       </div>
     );
   }
@@ -73,12 +73,12 @@ const ClientePage: React.FC = () => {
       <section className="bg-white p-4 rounded-2xl">
         <div className="flex mb-8">
           <button
-            className="px-2 py-2 bg-[#8c53ff] text-white rounded shadow-md hover:scale-110"
+            className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110"
             onClick={() => router.back()}
           >
             Voltar
           </button>
-          <h1 className="text-2xl font-bold text-center text-[#48038a] w-full">
+          <h1 className="text-2xl font-bold text-center text-primary w-full">
             Detalhes do Cliente
           </h1>
 
@@ -103,7 +103,7 @@ const ClientePage: React.FC = () => {
             <div>
               <span className="font-medium">Status:</span>
 
-              <span className="ml-2 bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]">
+              <span className="ml-2 bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                 {cliente.status}
               </span>
             </div>
@@ -112,9 +112,9 @@ const ClientePage: React.FC = () => {
               {cliente.tipoServico.map((tipo, idx) => (
                 <span
                   key={idx}
-                  className="ml-2 bg-[#ede9fe] text-[#48038a] text-xs font-semibold px-3 py-1 rounded-full border border-[#8c53ff]"
+                  className="ml-2 bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary"
                 >
-                  {tipo.replace(/_/g, " ")}
+                  {tipo.replace(/_/g, ' ')}
                 </span>
               ))}
             </div>
@@ -134,7 +134,7 @@ const ClientePage: React.FC = () => {
                 <div>
                   <span className="font-medium">Data de Abertura:</span>
                   {new Date(cliente.empresa.dataAbertura).toLocaleDateString(
-                    "pt-BR"
+                    'pt-BR'
                   )}
                 </div>
               )}

@@ -1,6 +1,6 @@
 // frontend/pages/login.tsx
 import React, { useState } from "react";
-import styles from "../styles/Login.module.css";
+import styles from "@/styles/login.module.css";
 import { useRouter } from "next/router";
 import Image from "next/image";
 import Link from "next/link";
@@ -34,9 +34,29 @@ const LoginPage: React.FC = () => {
       } else {
         setError(data.error || "Erro ao fazer login.");
       }
-    } catch (error) {
-      console.error("Erro ao fazer login:", error);
-      setError("Erro ao fazer login. Verifique suas credenciais.");
+    } catch (error: any) {
+      if (error?.response) {
+        const status = error.response.status;
+        if (status === 401) {
+          setError("Usuário ou senha incorretos. Por favor, tente novamente.");
+        } else if (status === 404) {
+          setError(
+            "Serviço de autenticação não encontrado. Tente novamente mais tarde."
+          );
+        } else if (status === 500) {
+          setError(
+            "Erro interno do servidor. Por favor, tente novamente mais tarde."
+          );
+        } else if (error.response.data?.error) {
+          setError(error.response.data.error);
+        } else {
+          setError("Ocorreu um erro inesperado. Por favor, tente novamente.");
+        }
+      } else {
+        setError(
+          "Não foi possível conectar ao servidor. Verifique sua conexão."
+        );
+      }
     } finally {
       setLoading(false);
     }

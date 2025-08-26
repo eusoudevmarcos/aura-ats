@@ -1,17 +1,17 @@
 // src/components/form/FormArrayInput.tsx
-import React, { useState } from "react";
-import { useFieldArray, useFormContext } from "react-hook-form";
-import { FormInput } from "../input/FormInput";
-import { FormSelect } from "../input/FormSelect";
-import { PrimaryButton } from "../button/PrimaryButton";
+import React, { useState } from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import { PrimaryButton } from '../button/PrimaryButton';
+import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
 
 // Definição genérica para a configuração de cada campo do item
 interface FieldConfig {
   name: string; // Nome interno para o campo do item (ex: 'nome', 'descricao', 'tipoHabilidade')
-  label: string;
+  label?: string;
   placeholder?: string;
   type?: string; // ex: 'text', 'number', 'date'
-  component?: "input" | "select"; // Para decidir qual componente usar
+  component?: 'input' | 'select'; // Para decidir qual componente usar
   selectOptions?: { value: any; label: string }[]; // Para componentes select
   required?: boolean; // Adicionar flag de obrigatoriedade
 }
@@ -59,7 +59,7 @@ export function FormArrayInput({
       if (
         config.required &&
         (!newItemValues[config.name] ||
-          String(newItemValues[config.name]).trim() === "")
+          String(newItemValues[config.name]).trim() === '')
       ) {
         setItemError(`O campo '${config.label}' é obrigatório.`);
         return;
@@ -72,15 +72,15 @@ export function FormArrayInput({
   };
 
   return (
-    <div className="border p-4 rounded-lg shadow-sm">
-      <h3 className="text-lg font-semibold mb-3">{title}</h3>
+    <div className="border border-primary p-4 rounded-lg shadow-sm">
+      <h3 className="text-md font-semibold mb-3 text-primary">{title}</h3>
 
       <div
-        className={`grid grid-cols-1 md:grid-cols-${fieldConfigs.length} gap-4 mb-4`}
+        className={`grid grid-cols-1 md:grid-cols-${fieldConfigs.length} gap-4 mb-4 `}
       >
-        {fieldConfigs.map((config) => (
+        {fieldConfigs.map(config => (
           <React.Fragment key={config.name}>
-            {config.component === "select" ? (
+            {config.component === 'select' ? (
               <FormSelect
                 name={`_temp_${name}.${config.name}`} // Nome fictício para controle de estado local
                 label={config.label}
@@ -93,10 +93,7 @@ export function FormArrayInput({
                 selectProps={{
                   children: (
                     <>
-                      <option value="">
-                        {config.placeholder || `Selecione ${config.label}`}
-                      </option>
-                      {config.selectOptions?.map((opt) => (
+                      {config.selectOptions?.map(opt => (
                         <option key={opt.value} value={opt.value}>
                           {opt.label}
                         </option>
@@ -137,7 +134,7 @@ export function FormArrayInput({
           {fields.map((item: any, index: any) => (
             <div
               key={item.id || index}
-              className="flex items-center bg-[#8c53ff] text-white text-sm px-3 py-1 rounded-full shadow-md"
+              className="flex items-center bg-primary text-white text-sm px-3 py-1 rounded-full shadow-md"
             >
               {renderChipContent(item, index)}
               <button

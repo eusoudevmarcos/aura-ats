@@ -1,8 +1,9 @@
-import cardsStyles from "@/components/Card/Cards.module.css"; // Para cards gerais e placeholders
+import Card from '@/components/card';
+
 export default function Testes() {
   return (
-    <div className={cardsStyles.placeholderCard} style={{ marginTop: "32px" }}>
+    <Card>
       <p>Conteúdo da seção Testes</p>
-    </div>
+    </Card>
   );
 }

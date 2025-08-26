@@ -1,13 +1,13 @@
-import React from "react";
-import { useFormContext, useFieldArray } from "react-hook-form";
-import { FormInput } from "../input/FormInput";
-import { PrimaryButton } from "../button/PrimaryButton";
+import React from 'react';
+import { useFieldArray, useFormContext } from 'react-hook-form';
+import { PrimaryButton } from '../button/PrimaryButton';
+import { FormInput } from '../input/FormInput';
 
 type FormacaoFormProps = {
   namePrefix?: string;
 };
 
-const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = "" }) => {
+const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = '' }) => {
   const {
     register,
     control,
@@ -25,7 +25,7 @@ const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = "" }) => {
           key={field.id}
           className="border p-4 rounded-md space-y-2 relative"
         >
-          <h4 className="font-semibold text-lg text-[#48038a]">
+          <h4 className="font-semibold text-lg text-primary">
             Formação #{index + 1}
           </h4>
           <FormInput
@@ -33,14 +33,14 @@ const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = "" }) => {
             register={register}
             placeholder="Data Conclusão Medicina"
             errors={errors}
-            inputProps={{ type: "date" }}
+            inputProps={{ type: 'date' }}
           />
           <FormInput
             name={`${namePrefix}formacoes.${index}.dataConclusaoResidencia`}
             register={register}
             placeholder="Data Conclusão Residência"
             errors={errors}
-            inputProps={{ type: "date" }}
+            inputProps={{ type: 'date' }}
           />
           {fields.length > 0 && (
             <button
@@ -57,7 +57,7 @@ const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = "" }) => {
       <PrimaryButton
         type="button"
         onClick={() =>
-          append({ dataConclusaoMedicina: "", dataConclusaoResidencia: "" })
+          append({ dataConclusaoMedicina: '', dataConclusaoResidencia: '' })
         }
         className="mt-4"
       >

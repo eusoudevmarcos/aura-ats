@@ -77,15 +77,17 @@ export const vagaSchema = z.object({
     .min(20, "A descrição da vaga deve ter no mínimo 20 caracteres."),
   requisitos: z.string().optional(),
   responsabilidades: z.string().optional(),
-  localizacao: localizacaoSchema,
   categoria: CategoriaVagaEnum.optional(),
   status: StatusVagaEnum.default("ATIVA").optional(),
-  tipoContrato: TipoContratoEnum,
+  tipoContrato: TipoContratoEnum.optional(),
   nivelExperiencia: NivelExperienciaEnum.optional(),
 
-  habilidades: z.array(habilidadeSchema),
-  beneficios: z.array(beneficioSchema),
+  localizacao: localizacaoSchema,
 
+  // habilidades: z.array(habilidadeSchema),
+  // beneficios: z.array(beneficioSchema),
+
+  tipoSalario: z.string().optional(),
   salario: z
     .string()
     .trim()

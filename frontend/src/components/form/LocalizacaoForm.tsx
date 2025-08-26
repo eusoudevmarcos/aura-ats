@@ -47,39 +47,54 @@ const LocalizacaoFormInner: React.FC<{
 
   const [isLoadingCep, setIsLoadingCep] = useState(false);
 
-  const cepFieldName = makeName<LocalizacaoInput>(namePrefix, "cep");
-  const cepValue = watch(cepFieldName);
-
   const lastProcessedCep = useRef<string | null>(null);
 
+  const cepFieldName = makeName<LocalizacaoInput>(namePrefix, "cep");
   const cidadeFieldName = makeName<LocalizacaoInput>(namePrefix, "cidade");
-  const regiaoFieldName = makeName<LocalizacaoInput>(namePrefix, "regiao");
+  // const regiaoFieldName = makeName<LocalizacaoInput>(namePrefix, "regiao");
   const complementoFieldName = makeName<LocalizacaoInput>(
     namePrefix,
     "complemento"
   );
+  const bairroFieldName = makeName<LocalizacaoInput>(namePrefix, "bairro");
+  const ufFieldName = makeName<LocalizacaoInput>(namePrefix, "uf");
   const logradouroFieldName = makeName<LocalizacaoInput>(
     namePrefix,
     "logradouro"
   );
-  const bairroFieldName = makeName<LocalizacaoInput>(namePrefix, "bairro");
-  const ufFieldName = makeName<LocalizacaoInput>(namePrefix, "uf");
 
+  const cepValue = watch(cepFieldName);
+
+  // const descricaoFiledName = makeName<LocalizacaoInput>(
+  //   namePrefix,
+  //   "descricao"
+  // );
   const getLocalization = useCallback(
-    async (cep: string) => {
+    async (event: any) => {
+      const cep = event.target.value;
       const normalizedCep = cep.replace(/\D/g, "");
+      console.log(cep);
+      console.log("aqui");
 
       if (!normalizedCep || normalizedCep.length !== 8) return;
-
-      if (lastProcessedCep.current === normalizedCep) {
-        return;
-      }
+      console.log("aqui");
+      // if (lastProcessedCep.current === normalizedCep) {
+      //   return;
+      // }
 
       setIsLoadingCep(true);
+
       try {
         const response = await axios.get<ViaCep>(
           `https://viacep.com.br/ws/${normalizedCep}/json/`
         );
+        console.log(response.data);
+
+        if (response.data.erro) {
+          console.log("Erro");
+          throw new Error("CEP Invalido");
+        }
+
         if (response.data && !response.data.erro) {
           setValue(logradouroFieldName, response.data.logradouro, {
             shouldValidate: true,
@@ -140,10 +155,9 @@ const LocalizacaoFormInner: React.FC<{
             },
             { shouldFocus: true }
           );
-          lastProcessedCep.current = null;
+          // lastProcessedCep.current = null;
         }
       } catch (error) {
-        console.error("Erro ao consultar o ViaCEP:", error);
         setValue(logradouroFieldName, "", {
           shouldValidate: true,
           shouldDirty: true,
@@ -172,7 +186,7 @@ const LocalizacaoFormInner: React.FC<{
           },
           { shouldFocus: true }
         );
-        lastProcessedCep.current = null;
+        // lastProcessedCep.current = null;
       } finally {
         setIsLoadingCep(false);
       }
@@ -189,30 +203,31 @@ const LocalizacaoFormInner: React.FC<{
     ]
   );
 
-  useEffect(() => {
-    const numericCep = cepValue?.replace(/\D/g, "");
+  // useEffect(() => {
+  //   const numericCep = cepValue?.replace(/\D/g, "");
 
-    const handler = setTimeout(() => {
-      if (numericCep && numericCep.length === 8) {
-        getLocalization(numericCep);
-      } else if (
-        numericCep &&
-        numericCep.length < 8 &&
-        lastProcessedCep.current
-      ) {
-        // Limpa o último CEP processado se o usuário apagar ou digitar um CEP incompleto
-        lastProcessedCep.current = null;
-      }
-    }, 300);
+  //   const handler = setTimeout(() => {
+  //     console.log(!errors["localizacao.cep"]);
+  //     if (numericCep && numericCep.length === 8 && !errors["localizacao.cep"]) {
+  //       getLocalization(numericCep);
+  //     } else if (
+  //       numericCep &&
+  //       numericCep.length < 8 &&
+  //       lastProcessedCep.current
+  //     ) {
+  //       // Limpa o último CEP processado se o usuário apagar ou digitar um CEP incompleto
+  //       lastProcessedCep.current = null;
+  //     }
+  //   }, 300);
 
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [cepValue, getLocalization]);
+  //   return () => {
+  //     clearTimeout(handler);
+  //   };
+  // }, [cepValue, getLocalization]);
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-x-2">
+      <div className="grid grid-cols-1 md:grid-cols-8 gap-x-2">
         <FormInput
           name={cepFieldName}
           register={register}
@@ -220,9 +235,10 @@ const LocalizacaoFormInner: React.FC<{
           errors={errors}
           maskProps={{ mask: "00000-000" }}
           inputProps={{
-            classNameContainer: "col-span-1",
+            classNameContainer: "col-span-2",
             disabled: isLoadingCep,
           }}
+          onChange={getLocalization}
         />
         <FormSelect
           name={ufFieldName}
@@ -254,7 +270,7 @@ const LocalizacaoFormInner: React.FC<{
             disabled: isLoadingCep,
           }}
         />
-        <FormInput
+        {/* <FormInput
           name={regiaoFieldName}
           register={register}
           placeholder="Região"
@@ -263,27 +279,39 @@ const LocalizacaoFormInner: React.FC<{
             classNameContainer: "col-span-2",
             disabled: isLoadingCep,
           }}
-        />
+        /> */}
         <FormInput
           name={bairroFieldName}
           register={register}
           placeholder="Bairro"
           errors={errors}
           inputProps={{
-            classNameContainer: "col-span-2",
+            classNameContainer: "col-span-3",
             disabled: isLoadingCep,
           }}
         />
         <FormInput
           name={complementoFieldName}
           register={register}
-          placeholder="Complemento"
+          placeholder="Complemento (EX: Hospital Santa Lúcia)"
           errors={errors}
           inputProps={{
-            classNameContainer: "col-span-2",
+            classNameContainer: "col-span-6",
             disabled: isLoadingCep,
           }}
         />
+
+        {/* <FormInput
+          name={descricaoFiledName}
+          register={register}
+          placeholder="Descrição (EX: Hospital Santa Lúcia)"
+          errors={errors}
+          inputProps={{
+            classNameContainer: "col-span-3",
+            disabled: isLoadingCep,
+          }}
+        /> */}
+
         <FormInput
           name={logradouroFieldName}
           register={register}

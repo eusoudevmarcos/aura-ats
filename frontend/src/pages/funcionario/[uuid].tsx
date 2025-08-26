@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import api from "@/axios";
-import { useRouter } from "next/router";
-import { EditPenIcon, TrashIcon } from "@/components/icons";
-import { FuncionarioForm } from "@/components/form/funcionarioForm";
-import { FuncionarioInput } from "@/schemas/funcionario.schema";
-import Modal from "@/components/modal/Modal";
-import Card from "@/components/Card";
+import api from '@/axios';
+import Card from '@/components/card';
+import { FuncionarioForm } from '@/components/form/FuncionarioForm';
+import { EditPenIcon, TrashIcon } from '@/components/icons';
+import Modal from '@/components/modal/Modal';
+import { FuncionarioInput } from '@/schemas/funcionario.schema';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 
 const FuncionarioPage: React.FC = () => {
   const router = useRouter();
@@ -26,7 +26,7 @@ const FuncionarioPage: React.FC = () => {
         const response = await api.get(`/api/funcionario/${uuid}`);
         setFuncionario(response.data);
       } catch (_: any) {
-        setErro("Funcionário não encontrado ou erro ao buscar dados.");
+        setErro('Funcionário não encontrado ou erro ao buscar dados.');
         setFuncionario(null);
       } finally {
         setLoading(false);
@@ -39,8 +39,8 @@ const FuncionarioPage: React.FC = () => {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#48038a]"></div>
-        <span className="ml-4 text-[#48038a] text-lg">Carregando...</span>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        <span className="ml-4 text-primary text-lg">Carregando...</span>
       </div>
     );
   }
@@ -62,12 +62,12 @@ const FuncionarioPage: React.FC = () => {
       <section className="bg-white p-4 rounded-2xl">
         <div className="flex mb-8">
           <button
-            className="px-2 py-2 bg-[#8c53ff] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
+            className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
             onClick={() => router.back()}
           >
             Voltar
           </button>
-          <h1 className="text-2xl font-bold text-center text-[#48038a] w-full">
+          <h1 className="text-2xl font-bold text-center text-primary w-full">
             Detalhes do Funcionário
           </h1>
 
@@ -92,7 +92,7 @@ const FuncionarioPage: React.FC = () => {
               <span className="font-medium">Email:</span> {funcionario.email}
             </div>
             <div>
-              <span className="font-medium">Tipo de Usuário:</span>{" "}
+              <span className="font-medium">Tipo de Usuário:</span>{' '}
               {funcionario.tipoUsuario}
             </div>
             {funcionario.setor && (
@@ -109,25 +109,25 @@ const FuncionarioPage: React.FC = () => {
           {funcionario.pessoa && (
             <Card title="Dados da Pessoa">
               <div>
-                <span className="font-medium">Nome:</span>{" "}
+                <span className="font-medium">Nome:</span>{' '}
                 {funcionario.pessoa.nome}
               </div>
               <div>
-                <span className="font-medium">CPF:</span>{" "}
+                <span className="font-medium">CPF:</span>{' '}
                 {funcionario.pessoa.cpf}
               </div>
               <div>
-                <span className="font-medium">Data de Nascimento:</span>{" "}
+                <span className="font-medium">Data de Nascimento:</span>{' '}
                 {funcionario?.pessoa?.dataNascimento &&
                   new Date(
                     funcionario?.pessoa?.dataNascimento
-                  ).toLocaleDateString("pt-BR")}
+                  ).toLocaleDateString('pt-BR')}
               </div>
               <div>
                 <span className="font-medium">RG:</span> {funcionario.pessoa.rg}
               </div>
               <div>
-                <span className="font-medium">Estado Civil:</span>{" "}
+                <span className="font-medium">Estado Civil:</span>{' '}
                 {funcionario.pessoa.estadoCivil}
               </div>
             </Card>
@@ -135,19 +135,19 @@ const FuncionarioPage: React.FC = () => {
           {funcionario.empresa && (
             <Card title="Dados da Empresa">
               <div>
-                <span className="font-medium">Razão Social:</span>{" "}
+                <span className="font-medium">Razão Social:</span>{' '}
                 {funcionario.empresa.razaoSocial}
               </div>
               <div>
-                <span className="font-medium">CNPJ:</span>{" "}
+                <span className="font-medium">CNPJ:</span>{' '}
                 {funcionario.empresa.cnpj}
               </div>
               {funcionario?.empresa?.dataAbertura && (
                 <div>
-                  <span className="font-medium">Data de Abertura:</span>{" "}
+                  <span className="font-medium">Data de Abertura:</span>{' '}
                   {new Date(
                     funcionario.empresa.dataAbertura as string
-                  ).toLocaleDateString("pt-BR")}
+                  ).toLocaleDateString('pt-BR')}
                 </div>
               )}
             </Card>

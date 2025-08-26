@@ -1,4 +1,4 @@
-// frontend/components/Clients/ClientList.tsx
+// frontend/components/Agenda/AgendaList.tsx
 import api from '@/axios';
 import styles from '@/styles/clients.module.css';
 import { Pagination } from '@/type/pagination.type';
@@ -7,52 +7,49 @@ import React, { useEffect, useMemo, useState } from 'react';
 import Card from '../card';
 import Table, { TableColumn } from '../Table';
 
-interface EmpresaContato {
-  telefone?: string;
-  whatsapp?: string;
-  email?: string;
-}
-interface EmpresaLocalizacao {
-  cidade: string;
-  estado: string;
-}
-interface Empresa {
-  id: string;
-  razaoSocial: string;
-  cnpj: string;
-  dataAbertura?: string;
-  contatos?: EmpresaContato[];
-  localizacoes?: EmpresaLocalizacao[];
-}
-interface Cliente {
-  id: string;
-  tipoServico: string[];
-  empresa: Empresa;
-  status: string;
+interface Localizacao {
+  cidade?: string;
+  uf?: string;
+  logradouro?: string;
 }
 
-function normalizarTable(clientes: Cliente[]) {
-  return clientes.map(c => ({
-    id: c.id,
-    nome: c.empresa?.razaoSocial ?? '-',
-    email: c.empresa?.contatos?.[0]?.email ?? '-',
-    cnpj: c.empresa?.cnpj ?? '-',
-    dataAbertura: c.empresa?.dataAbertura
-      ? new Date(c.empresa.dataAbertura).toLocaleDateString('pt-BR')
+interface EtapaAtual {
+  nome: string;
+  tipo: string;
+}
+
+interface AgendaVaga {
+  id: string;
+  dataHora: string;
+  link?: string;
+  tipoEvento: string;
+  localizacao?: Localizacao;
+  vagaId?: string;
+  etapaAtual?: EtapaAtual;
+}
+
+function normalizarTable(agendas: AgendaVaga[]) {
+  return agendas.map(a => ({
+    id: a.id,
+    dataHora: a.dataHora ? new Date(a.dataHora).toLocaleString('pt-BR') : '-',
+    tipoEvento: a.tipoEvento,
+    link: a.link ?? '-',
+    localizacao: a.localizacao
+      ? `${a.localizacao.logradouro ?? '-'}, ${a.localizacao.cidade ?? '-'} - ${
+          a.localizacao.uf ?? '-'
+        }`
       : '-',
-    servicos: Array.isArray(c.tipoServico)
-      ? c.tipoServico.join(', ')
-      : String(c.tipoServico ?? '-'),
-    status: c.status,
+    etapa: a.etapaAtual?.nome ?? '-',
+    tipoEtapa: a.etapaAtual?.tipo ?? '-',
   }));
 }
 
-const ClientList: React.FC = () => {
+const AgendaList: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [agendas, setAgendas] = useState<AgendaVaga[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Paginação (ajuste quando backend suportar paginação de clientes)
+  // Paginação
   const [page, setPage] = useState<number>(1);
   const pageSize = 5;
   const [total, setTotal] = useState<number>(0);
@@ -61,60 +58,60 @@ const ClientList: React.FC = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const fetchClientes = async () => {
+    const fetchAgendas = async () => {
       setLoading(true);
       try {
-        const response = await api.get<Pagination<Cliente[]>>(
-          '/api/external/cliente'
+        const response = await api.get<Pagination<AgendaVaga[]>>(
+          '/api/external/agenda'
         );
         const data = Array.isArray(response.data?.data)
           ? response.data.data
           : [];
-        setClientes(data);
+        setAgendas(data);
         setTotal(data.length);
         setTotalPages(Math.max(1, Math.ceil(data.length / pageSize)));
       } catch (_) {
-        setClientes([]);
+        setAgendas([]);
         setTotal(0);
         setTotalPages(1);
       } finally {
         setLoading(false);
       }
     };
-    fetchClientes();
+    fetchAgendas();
   }, []);
 
-  const dadosTabela = useMemo(() => normalizarTable(clientes), [clientes]);
+  const dadosTabela = useMemo(() => normalizarTable(agendas), [agendas]);
 
   const dadosFiltrados = useMemo(() => {
     const s = search.toLowerCase();
-    return dadosTabela.filter((c: any) =>
-      [c.nome, c.email, c.cnpj, c.servicos, c.status]
+    return dadosTabela.filter((a: any) =>
+      [a.dataHora, a.tipoEvento, a.link, a.localizacao, a.etapa, a.tipoEtapa]
         .filter(Boolean)
         .some((v: string) => String(v).toLowerCase().includes(s))
     );
   }, [dadosTabela, search]);
 
   const columns: TableColumn<any>[] = [
-    { label: 'Nome', key: 'nome' },
-    { label: 'Email', key: 'email' },
-    { label: 'CNPJ', key: 'cnpj' },
-    { label: 'Abertura', key: 'dataAbertura' },
-    { label: 'Serviços', key: 'servicos' },
-    { label: 'Status', key: 'status' },
+    { label: 'Data e Hora', key: 'dataHora' },
+    { label: 'Tipo de Evento', key: 'tipoEvento' },
+    { label: 'Link', key: 'link' },
+    { label: 'Localização', key: 'localizacao' },
+    { label: 'Etapa', key: 'etapa' },
+    { label: 'Tipo Etapa', key: 'tipoEtapa' },
   ];
 
   const onRowClick = (row: any) => {
-    router.push(`/cliente/${row.id}`);
+    router.push(`/agenda/${row.id}`);
   };
 
   return (
     <Card classNameContainer="mt-6 px-6 py-8">
       <div className="flex justify-between p-2">
-        <h3 className={styles.clientsTitle}>Lista de Clientes</h3>
+        <h3 className={styles.clientsTitle}>Lista de Agendas</h3>
         <input
           type="text"
-          placeholder="Buscar cliente..."
+          placeholder="Buscar agenda..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
@@ -124,7 +121,7 @@ const ClientList: React.FC = () => {
         columns={columns}
         data={dadosFiltrados}
         loading={loading}
-        emptyMessage="Nenhum cliente encontrado."
+        emptyMessage="Nenhuma agenda encontrada."
         pagination={{
           page,
           pageSize,
@@ -138,4 +135,4 @@ const ClientList: React.FC = () => {
   );
 };
 
-export default ClientList;
+export default AgendaList;

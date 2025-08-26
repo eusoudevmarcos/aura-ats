@@ -1,15 +1,15 @@
-"use client";
+'use client';
 
 // frontend/src/components/SearchForm.tsx
-import React, { useState, ChangeEvent, FormEvent } from "react";
-import { sanitize } from "@/utils/sanitize";
-import styles from "@/styles/animations.module.css"; // Importação correta do CSS Modules no Next.js
-import takeitStyles from "@/styles/takeit.module.scss";
-import { UF_MODEL } from "@/utils/UF";
-import { mask } from "@/utils/mask/mask";
+import styles from '@/styles/animations.module.css'; // Importação correta do CSS Modules no Next.js
+import takeitStyles from '@/styles/takeit.module.scss';
+import { UF_MODEL } from '@/utils/UF';
+import { mask } from '@/utils/mask/mask';
+import { sanitize } from '@/utils/sanitize';
+import React, { ChangeEvent, FormEvent, useState } from 'react';
 
 // Definindo os tipos para as props
-type TypeColumns = "persons" | "companies";
+type TypeColumns = 'persons' | 'companies';
 
 interface SearchFormProps {
   handleSearch: (
@@ -26,10 +26,10 @@ const SearchForm: React.FC<SearchFormProps> = ({
   loading,
   typeColumns,
 }) => {
-  const [input, setInput] = useState<string>("");
-  const [descriptionData, setDescriptionData] = useState<string>("");
+  const [input, setInput] = useState<string>('');
+  const [descriptionData, setDescriptionData] = useState<string>('');
   const [disableBtn, setDisableBtn] = useState<boolean>(true);
-  const [uf, setUf] = useState<string>("");
+  const [uf, setUf] = useState<string>('');
   const [isFiliar, setIsFiliar] = useState<boolean>(false);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -40,11 +40,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
     // Se isFiliar for true, só aceita CNPJ
     if (isFiliar) {
-      if (textSanitize?.tipo === "cnpj") {
-        setDescriptionData("CNPJ");
+      if (textSanitize?.tipo === 'cnpj') {
+        setDescriptionData('CNPJ');
         setDisableBtn(false);
       } else {
-        setDescriptionData("");
+        setDescriptionData('');
         setDisableBtn(true);
       }
       setInput(maskedValue);
@@ -54,13 +54,13 @@ const SearchForm: React.FC<SearchFormProps> = ({
     if (textSanitize?.tipo) {
       setDescriptionData(textSanitize?.tipo.toUpperCase());
 
-      if (textSanitize?.tipo.includes("name")) {
-        setDescriptionData("NOME");
+      if (textSanitize?.tipo.includes('name')) {
+        setDescriptionData('NOME');
       }
 
       setDisableBtn(false);
     } else {
-      setDescriptionData("");
+      setDescriptionData('');
     }
 
     setInput(maskedValue);
@@ -86,14 +86,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
       <section className="flex relative w-full max-w-[400px]">
         {!!descriptionData && (
           <div
-            className={`absolute top-0 right-0 border-r-2 border-[#48038a60] bg-[#48038a20] h-full flex justify-center items-center px-2 font-bold transition-all duration-300 ease-in-out rounded-lg
+            className={`absolute top-0 right-0 border-r-2 border-primary bg-neutral-50 h-full flex justify-center items-center px-2 font-bold transition-all duration-300 ease-in-out rounded-lg
             ${
               descriptionData
-                ? "translate-x-0 opacity-100"
-                : "translate-x-full opacity-0"
+                ? 'translate-x-0 opacity-100'
+                : 'translate-x-full opacity-0'
             } ${styles.slideInFromRight}`}
             style={{
-              transform: "translateX(100%)",
+              transform: 'translateX(100%)',
               opacity: 0,
               // A animação agora é aplicada via classe do CSS Module
             }}
@@ -110,13 +110,13 @@ const SearchForm: React.FC<SearchFormProps> = ({
           disabled={loading}
           autoComplete="off"
           className={`w-full rounded-lg pl-4 border-2 ${
-            input !== "" ? " border-[#48038a]" : ""
+            input !== '' ? ' border-primary' : ''
           }`}
         />
       </section>
 
       <div className="flex gap-2 ">
-        {typeColumns === "companies" && (
+        {typeColumns === 'companies' && (
           <section className="flex items-center gap-2 cursor-pointer">
             <input
               id="filial"
@@ -141,7 +141,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
             onChange={handleUfChange}
           >
             {UF_MODEL.map(({ value, label }, index) => (
-              <option key={index} value={value ?? ""}>
+              <option key={index} value={value ?? ''}>
                 {label}
               </option>
             ))}
@@ -152,11 +152,11 @@ const SearchForm: React.FC<SearchFormProps> = ({
           <button
             type="submit"
             disabled={loading || disableBtn}
-            className="bg-[#48038a] rounded-lg p-4 w-15 flex justify-center items-center disabled:bg-[#48038a70]"
+            className="bg-primary rounded-lg p-4 w-15 flex justify-center items-center disabled:bg-[#48038a70]"
           >
             {loading ? (
               <svg
-                className="animate-spin h-6 w-6 text-[#48038a]"
+                className="animate-spin h-6 w-6 text-primary"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"

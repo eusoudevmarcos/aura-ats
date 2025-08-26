@@ -1,15 +1,17 @@
-import cardsStyles from "@/components/Card/Cards.module.css";
-import { PlusIcon } from "@/components/icons";
-import AtividadeLayout from "@/layout/AtividadesLayout";
+import Card from '@/components/card';
+import { PlusIcon } from '@/components/icons';
+import AtividadeLayout from '@/layout/AtividadesLayout';
 
 export default function tarefas() {
   return (
     <AtividadeLayout>
-      <button className="buttonPrimary">
-        <PlusIcon />
-        Cadastrar tarefa
-      </button>
-      <p>Conteúdo da seção Entrevistas (detalhado)</p>
+      <Card>
+        <button className="buttonPrimary">
+          <PlusIcon />
+          Cadastrar tarefa
+        </button>
+        <p>Conteúdo da seção Entrevistas (detalhado)</p>
+      </Card>
     </AtividadeLayout>
   );
 }

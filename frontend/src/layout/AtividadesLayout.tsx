@@ -1,6 +1,6 @@
-import styles from "@/components/Card/Cards.module.css";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Card from "@/components/card";
 
 export default function AtividadeLayout({ children }: any) {
   const router = useRouter();
@@ -26,14 +26,15 @@ export default function AtividadeLayout({ children }: any) {
   };
 
   return (
-    <div className={styles.activitySection}>
-      <h2 className={styles.activityHeader}>{activeSubMenu}</h2>
-      <nav className={styles.activityNav}>
+    <Card title={activeSubMenu}>
+      <nav className="flex gap-4 mb-6 border-b border-gray-200">
         {["Agendas", "Tarefas", "Vagas", "Entrevistas"].map((item) => (
           <button
             key={item}
-            className={`${styles.activityNavItem} ${
-              activeSubMenu === item ? styles.activityNavItemActive : ""
+            className={`py-3 text-base font-medium border-b-2 transition-all duration-200 ${
+              activeSubMenu === item
+                ? "text-indigo-600 border-indigo-600"
+                : "text-gray-500 border-transparent hover:text-gray-800"
             }`}
             onClick={() => handleSubMenuClick(item)}
           >
@@ -41,7 +42,8 @@ export default function AtividadeLayout({ children }: any) {
           </button>
         ))}
       </nav>
-      <div className={styles.activityContent}>{children}</div>
-    </div>
+
+      {children}
+    </Card>
   );
 }

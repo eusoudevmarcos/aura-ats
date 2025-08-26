@@ -1,4 +1,4 @@
-import { FuncionarioForm } from "@/components/form/funcionarioForm";
+import { FuncionarioForm } from "@/components/form/FuncionarioForm";
 import { PlusIcon } from "@/components/icons";
 import FuncionariosList from "@/components/list/FuncionariosList";
 import Modal from "@/components/modal/Modal";

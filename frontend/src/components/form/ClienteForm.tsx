@@ -1,15 +1,15 @@
-import React, { useState } from "react";
-import api from "@/axios";
-import { FormProvider, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { clienteSchema, ClienteInput } from "@/schemas/cliente.schema";
-import EmpresaForm from "@/components/form/EmpresaForm";
-import { TipoServicoEnum } from "@/schemas/tipoServicoEnum.schema";
-import { StatusClienteEnum } from "@/schemas/statusClienteEnum.schema";
-import { useSafeForm } from "@/hook/useSafeForm";
-import { PrimaryButton } from "../button/PrimaryButton";
-import Card from "../Card";
-import { getError } from "@/utils/getError";
+import api from '@/axios';
+import EmpresaForm from '@/components/form/EmpresaForm';
+import { useSafeForm } from '@/hook/useSafeForm';
+import { ClienteInput, clienteSchema } from '@/schemas/cliente.schema';
+import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
+import { TipoServicoEnum } from '@/schemas/tipoServicoEnum.schema';
+import { getError } from '@/utils/getError';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useState } from 'react';
+import { FormProvider, UseFormReturn } from 'react-hook-form';
+import { PrimaryButton } from '../button/PrimaryButton';
+import Card from '../card';
 
 type ClienteFormProps = {
   formContexto?: UseFormReturn<ClienteInput>;
@@ -25,10 +25,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
   const methods = useSafeForm<ClienteInput>({
-    mode: "independent",
+    mode: 'independent',
     useFormProps: {
       resolver: zodResolver(clienteSchema),
-      mode: "onTouched",
+      mode: 'onTouched',
       defaultValues: initialValues,
     },
   });
@@ -52,14 +52,14 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     setLoading(true);
 
     try {
-      const response = await api.post("/api/external/cliente/save", payload);
+      const response = await api.post('/api/external/cliente/save', payload);
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
       alert(
-        "Erro ao criar cliente: " + erro?.response?.data?.message ||
-          "Erro não encontrado"
+        'Erro ao criar cliente: ' + erro?.response?.data?.message ||
+          'Erro não encontrado'
       );
     } finally {
       setLoading(true);
@@ -68,7 +68,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
 
   const getErrorByPath = (path: string) => {
     try {
-      const parts = path.replace(/\[(\d+)\]/g, ".$1").split(".");
+      const parts = path.replace(/\[(\d+)\]/g, '.$1').split('.');
       let obj: any = errors;
       for (const p of parts) obj = obj?.[p];
       return obj?.message as string | undefined;
@@ -84,47 +84,47 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           <EmpresaForm namePrefix="empresa" />
         </Card>
 
-        <label className="block text-[#48038a] text-xl font-bold mb-2">
+        <label className="block text-primary text-xl font-bold mb-2">
           Tipo de Serviço:
         </label>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-          {TipoServicoEnum.options.map((serv) => (
+          {TipoServicoEnum.options.map(serv => (
             <label key={serv} className="inline-flex items-center gap-2">
               <input
                 type="checkbox"
                 value={serv}
-                {...register("tipoServico")}
+                {...register('tipoServico')}
               />
-              <span>{serv.replaceAll("_", " ")}</span>
+              <span>{serv.replaceAll('_', ' ')}</span>
             </label>
           ))}
         </div>
-        {getError(errors, "tipoServico") && (
+        {getError(errors, 'tipoServico') && (
           <p className="text-red-500 text-xs italic">
-            {getError(errors, "tipoServico")}
+            {getError(errors, 'tipoServico')}
           </p>
         )}
 
         <label
           htmlFor="status"
-          className="block text-[#48038a] text-xl font-bold mb-2"
+          className="block text-primary text-xl font-bold mb-2"
         >
           Status
         </label>
         <select
           id="status"
-          {...register("status")}
+          {...register('status')}
           className="shadow border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
         >
-          {StatusClienteEnum.options.map((st) => (
+          {StatusClienteEnum.options.map(st => (
             <option key={st} value={st}>
               {st}
             </option>
           ))}
         </select>
-        {getErrorByPath("status") && (
+        {getErrorByPath('status') && (
           <p className="text-red-500 text-xs italic">
-            {getErrorByPath("status")}
+            {getErrorByPath('status')}
           </p>
         )}
 
