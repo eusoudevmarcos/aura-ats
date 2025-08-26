@@ -54,24 +54,13 @@ enum StatusCandidatura {
     CONTRATADO // Candidato foi contratado (pode ser um status final)
 }
 
-enum TipoEventoAgenda {
-    TRIAGEM_INICIAL
-    ENTREVISTA_RH
-    ENTREVISTA_GESTOR
-    TESTE_TECNICO
-    TESTE_PSICOLOGICO
-    DINAMICA_GRUPO
-    PROPOSTA
-    OUTRO
-}
-
 model Vaga {
     id                String    @id @default(uuid())
     titulo            String
     descricao         String
     requisitos        String?
     responsabilidades String?
-    salario           Float?
+    salario           Float? // A COMBINAR
     tipoSalario       String?
     dataPublicacao    DateTime  @default(now())
     dataFechamento    DateTime?
@@ -80,8 +69,8 @@ model Vaga {
 
     categoria        CategoriaVaga
     status           StatusVaga
-    tipoContrato     TipoContrato
-    nivelExperiencia NivelExperiencia
+    tipoContrato     TipoContrato?
+    nivelExperiencia NivelExperiencia?
     areaCandidato    AreaCandidato?
 
     candidatos      Candidato[]
@@ -109,32 +98,27 @@ model VagaHabilidade {
     @@id([vagaId, habilidadeId])
 }
 
-model ProcessoSeletivoEtapa {
-    id        String    @id @default(uuid())
-    nome      String
-    tipo      TipoEtapa
-    ordem     Int
-    descricao String?
-    ativa     Boolean   @default(true)
+// model Agenda {
+//     id         String           @id @default(uuid())
+//     dataHora   DateTime
+//     tipoEvento TipoEventoAgenda
+// }
 
-    agendaVaga   AgendaVaga[]
-    candidaturas CandidaturaVaga[]
-}
+// model AgendaVaga {
+//     id         String           @id @default(uuid())
+//     dataHora   DateTime
+//     link       String?
+//     tipoEvento TipoEventoAgenda
 
-model AgendaVaga {
-    id          String           @id @default(uuid())
-    dataHora    DateTime
-    tipoEvento  TipoEventoAgenda
-    localizacao Localizacao?     @relation(fields: [localizacaoId], references: [id])
-    link        String?
+//     localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
+//     localizacaoId String?
 
-    vaga          Vaga    @relation(fields: [vagaId], references: [id])
-    vagaId        String
-    localizacaoId String?
+//     vaga   Vaga   @relation(fields: [vagaId], references: [id])
+//     vagaId String
 
-    etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
-    etapaAtualId String?
-}
+//     etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
+//     etapaAtualId String?
+// }
 
 model CandidaturaVaga {
     id            String            @id @default(uuid())

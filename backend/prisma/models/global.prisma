@@ -30,6 +30,7 @@ model Localizacao {
     complemento String?
     logradouro  String?
     regiao      String?
+    descricao   String?
 
     pessoaId String?
     pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])

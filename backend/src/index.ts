@@ -12,6 +12,7 @@ import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
 import vagaRoutes from "./routes/vaga.routes";
 import clienteRoutes from "./routes/cliente.routes";
+import agendaRoute from "./routes/agenda.routes";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -77,6 +78,7 @@ app.use("/api/funcionario", funcionarioRoutes);
 app.use("/api/cliente", clienteRoutes);
 app.use("/api/candidato", candidatoRoutes);
 app.use("/api/vaga", vagaRoutes);
+app.use("/api/agenda", agendaRoute);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

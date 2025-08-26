@@ -1,7 +1,7 @@
 // src/controllers/VagaController.ts
 import { Request, Response } from "express";
-import { VagaService } from "../services/vaga.service";
 import { inject, injectable } from "tsyringe";
+import { VagaService } from "../services/vaga.service";
 
 @injectable()
 export class VagaController {
@@ -26,7 +26,8 @@ export class VagaController {
       const pageSize = req.query.pageSize
         ? parseInt(req.query.pageSize as string, 10)
         : 10;
-      const vagas = await this.service.getAll({ page, pageSize });
+      const search = req.query.search as string;
+      const vagas = await this.service.getAll({ page, pageSize, search });
       return res.status(200).json(vagas);
     } catch (error: any) {
       console.error("Error fetching vagas:", error);

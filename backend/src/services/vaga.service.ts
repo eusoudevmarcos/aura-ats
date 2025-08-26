@@ -1,17 +1,15 @@
 import { injectable } from "tsyringe";
+import { save } from "../helper/buildSave";
 import prisma from "../lib/prisma";
-import {
-  BeneficioInput,
-  VagaAnexoInput,
-  VagaHabilidadeInput,
-  VagaSaveInput,
-} from "../types/vaga.type";
+import { VagaSaveInput } from "../types/vaga.type";
 
-import { Beneficio, Prisma, VagaAnexo, VagaHabilidade } from "@prisma/client";
+import { Prisma } from "@prisma/client";
+import { buildWhere } from "../helper/buildWhere";
 
 interface Pagination {
   page?: number;
   pageSize?: number;
+  search?: string;
 }
 
 @injectable()
@@ -33,168 +31,77 @@ export class VagaService {
     } = vagaData;
 
     return await prisma.$transaction(async (tx) => {
-      if (titulo && clienteId) {
-        const tituloExiste = await tx.vaga.findFirst({
-          where: {
-            titulo: titulo,
-            clienteId: clienteId,
-            NOT: id ? { id } : undefined,
-          },
-        });
+      const dataToSave: any = {
+        id,
+        titulo,
+        responsabilidades,
+        clienteId: clienteId || undefined,
+        localizacao:
+          localizacao || (localizacaoId ? { id: localizacaoId } : undefined),
+        ...rest,
+      };
 
-        if (tituloExiste) {
-          throw new Error(
-            "Já existe uma vaga com este título para este cliente."
-          );
-        }
+      // Adiciona benefícios apenas se for um array válido
+      if (beneficios && Array.isArray(beneficios) && beneficios.length > 0) {
+        dataToSave.beneficios = beneficios;
       }
 
-      let localizacaoConnectOrCreateOrUpdate:
-        | Prisma.LocalizacaoCreateNestedOneWithoutVagaInput
-        | Prisma.LocalizacaoUpdateOneWithoutVagaNestedInput
-        | undefined;
-
-      if (localizacao?.id) {
-        localizacaoConnectOrCreateOrUpdate = {
-          upsert: {
-            create: localizacao as Prisma.LocalizacaoCreateWithoutVagaInput,
-            update: localizacao as Prisma.LocalizacaoUpdateWithoutVagaInput,
-            where: { id: localizacao.id },
-          },
-        };
-      } else if (localizacao) {
-        localizacaoConnectOrCreateOrUpdate = {
-          create: localizacao as Prisma.LocalizacaoCreateWithoutVagaInput,
-        };
-      } else if (localizacaoId) {
-        localizacaoConnectOrCreateOrUpdate = {
-          connect: { id: localizacaoId },
-        };
+      // Adiciona habilidades apenas se for um array válido
+      if (habilidades && Array.isArray(habilidades) && habilidades.length > 0) {
+        dataToSave.habilidades = habilidades;
       }
 
-      const vaga = id
-        ? await tx.vaga.update({
-            where: { id },
-            data: {
-              titulo,
-              responsabilidades,
-              ...rest,
-              cliente: clienteId ? { connect: { id: clienteId } } : undefined,
-              localizacao: localizacaoConnectOrCreateOrUpdate,
-            },
-            include: {
-              beneficios: true,
-              habilidades: true,
-              anexos: true,
-              localizacao: true,
-              cliente: true,
-            },
-          })
-        : await tx.vaga.create({
-            data: {
-              titulo,
-              // 'dataPublicacao' pode ser omitida se @default(now()) no schema
-              ...rest,
-              cliente: clienteId ? { connect: { id: clienteId } } : undefined,
-              localizacao: localizacaoConnectOrCreateOrUpdate,
-            },
-            include: {
-              beneficios: true,
-              habilidades: true,
-              anexos: true,
-              localizacao: true,
-              cliente: true,
-            },
-          });
+      // Adiciona anexos apenas se for um array válido
+      if (anexos && Array.isArray(anexos) && anexos.length > 0) {
+        dataToSave.anexos = anexos;
+      }
 
-      if (beneficios !== undefined) {
-        const beneficioIdsToConnect: string[] = [];
-
-        for (const incomingBeneficio of beneficios) {
-          let existingBeneficio = await tx.beneficio.findUnique({
-            where: { nome: incomingBeneficio.nome },
-          });
-
-          if (!existingBeneficio) {
-            existingBeneficio = await tx.beneficio.create({
-              data: {
-                nome: incomingBeneficio.nome,
-                descricao: incomingBeneficio.descricao,
-              },
-            });
-          }
-          beneficioIdsToConnect.push(existingBeneficio.id);
-        }
-
-        // 2. Sincroniza os benefícios da vaga.
-        // O comando 'set' no Prisma para relações Many-to-Many faz o seguinte:
-        // - Desconecta todos os benefícios atualmente associados à vaga.
-        // - Conecta apenas os benefícios cujos IDs foram fornecidos na lista `beneficioIdsToConnect`.
-        // Isso garante que apenas os benefícios da lista recebida estejam associados à vaga.
-        await tx.vaga.update({
-          where: { id: vaga.id },
-          data: {
-            beneficios: {
-              set: beneficioIdsToConnect.map((id) => ({ id })), // Conecta benefícios por seus IDs
+      const vaga = await save({
+        prisma,
+        tx,
+        model: "vaga",
+        idField: "id",
+        data: dataToSave,
+        relations: {
+          // Relação one-to-one com localização
+          localizacao: {
+            type: "one-to-one",
+            validation: {
+              uniqueKeys: ["cidade", "uf"],
             },
           },
-        });
-      }
-
-      if (habilidades !== undefined) {
-        await tx.vagaHabilidade.deleteMany({ where: { vagaId: vaga.id } });
-        if (habilidades.length > 0) {
-          const vagaHabilidadesData = [];
-          for (const hInput of habilidades) {
-            const habilidade = await tx.habilidade.upsert({
-              where: { nome: hInput.nome },
-              update: { tipoHabilidade: hInput.tipoHabilidade },
-              create: {
-                nome: hInput.nome,
-                tipoHabilidade: hInput.tipoHabilidade,
-              },
-            });
-            console.log(habilidade);
-            vagaHabilidadesData.push({
-              vagaId: vaga.id,
-              habilidadeId: habilidade.id,
-              nivelExigido: hInput.nivelExigido ?? undefined,
-            });
-          }
-          await tx.vagaHabilidade.createMany({
-            data: vagaHabilidadesData,
-          });
-        }
-      }
-
-      if (anexos !== undefined) {
-        await tx.vagaAnexo.deleteMany({ where: { vagaId: vaga.id } });
-        if (anexos.length > 0) {
-          await tx.vagaAnexo.createMany({
-            data: anexos.map((a: VagaAnexoInput) => ({
-              vagaId: vaga.id,
-              anexoId: a.anexoId,
-            })),
-          });
-        }
-      }
-
-      const finalVaga = await tx.vaga.findUnique({
-        where: { id: vaga.id },
+          // Relação one-to-many com benefícios (Beneficio tem vagaId)
+          beneficios: {
+            type: "one-to-many",
+            validation: {
+              uniqueKeys: ["nome"],
+            },
+          },
+          // Relação many-to-many com habilidades (via VagaHabilidade)
+          habilidades: {
+            type: "many-to-many",
+            validation: {
+              uniqueKeys: ["nome"],
+            },
+          },
+          // Relação many-to-many com anexos (via VagaAnexo)
+          anexos: {
+            type: "many-to-many",
+            validation: {
+              uniqueKeys: ["anexoId"],
+            },
+          },
+        },
         include: {
-          cliente: true,
           localizacao: true,
           beneficios: true,
-          habilidades: { include: { habilidade: true } },
-          anexos: { include: { anexo: true } },
+          habilidades: true,
+          anexos: true,
+          cliente: true,
         },
       });
 
-      if (!finalVaga) {
-        throw new Error("Erro ao recuperar a vaga após a transação.");
-      }
-
-      return finalVaga;
+      return vaga;
     });
   }
 
@@ -208,13 +115,15 @@ export class VagaService {
       prisma.vaga.findMany({
         where: { clienteId },
         skip,
+        orderBy: {
+          create_at: "desc",
+        },
         take: pageSize,
         include: {
           beneficios: true,
           habilidades: true,
           anexos: true,
           localizacao: true,
-          //   areaCandidato: true,
         },
       }),
       prisma.vaga.count({ where: { clienteId } }),
@@ -229,22 +138,31 @@ export class VagaService {
     };
   }
 
-  /**
-   * Busca todas as vagas do sistema com paginação
-   */
-  async getAll({ page = 1, pageSize = 10 }: Pagination) {
+  async getAll({ page = 1, pageSize = 10, search = "" }: Pagination) {
     const skip = (page - 1) * pageSize;
+
+    const where = buildWhere<Prisma.VagaWhereInput>(search, [
+      "titulo",
+      "descricao",
+      "localizacao.cidade",
+      "localizacao.uf",
+      "beneficios.nome",
+      "habilidades.nome",
+    ]);
 
     const [vagas, total] = await prisma.$transaction([
       prisma.vaga.findMany({
         skip,
         take: pageSize,
+        orderBy: {
+          create_at: "desc",
+        },
+        where,
         include: {
           beneficios: true,
           habilidades: true,
           anexos: true,
           localizacao: true,
-          //   areaCandidato: true,
         },
       }),
       prisma.vaga.count(),
@@ -259,9 +177,6 @@ export class VagaService {
     };
   }
 
-  /**
-   * Busca vaga por ID
-   */
   async getById(id: string) {
     const vaga = await prisma.vaga.findUnique({
       where: { id },
@@ -271,7 +186,6 @@ export class VagaService {
         anexos: true,
         localizacao: true,
         cliente: true,
-        // areaCandidato: true,
       },
     });
 
