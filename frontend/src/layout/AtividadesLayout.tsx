@@ -1,4 +1,4 @@
-import Card from '@/components/card';
+import Card from '@/components/Card';
 import { useRouter } from 'next/router';
 import { useEffect, useState } from 'react';
 

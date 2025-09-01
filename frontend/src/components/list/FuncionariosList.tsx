@@ -1,8 +1,8 @@
 import api from '@/axios';
+import Card from '@/components/Card';
 import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import Card from '../card';
 import Table, { TableColumn } from '../Table';
 
 // Tipos para Pessoa e Empresa

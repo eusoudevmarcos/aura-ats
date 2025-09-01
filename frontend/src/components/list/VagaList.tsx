@@ -1,8 +1,8 @@
 import api from '@/axios';
+import Card from '@/components/Card';
 import { Pagination } from '@/type/pagination.type'; // Se este é o seu tipo de paginação
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import Card from '../card';
 import Table, { TableColumn } from '../Table'; // Certifique-se que o caminho está correto
 
 // ===================== ENUMS (Adaptadas para o Frontend) =====================

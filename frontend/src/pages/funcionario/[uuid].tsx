@@ -1,5 +1,5 @@
 import api from '@/axios';
-import Card from '@/components/card';
+import Card from '@/components/Card';
 import { FuncionarioForm } from '@/components/form/FuncionarioForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';

@@ -1,4 +1,5 @@
 import api from '@/axios';
+import Card from '@/components/Card';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import PessoaForm from '@/components/form/PessoaForm';
 import { useSafeForm } from '@/hook/useSafeForm';
@@ -7,7 +8,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { FormProvider, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
-import Card from '../card';
 
 import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
 import { FormInput } from '../input/FormInput';

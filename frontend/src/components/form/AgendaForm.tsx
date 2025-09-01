@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 
-import Card from '@/components/card';
+import Card from '@/components/Card';
 import { FormInput } from '@/components/input/FormInput';
 import { FormSelect } from '@/components/input/FormSelect';
 

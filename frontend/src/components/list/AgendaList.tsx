@@ -1,9 +1,9 @@
 // frontend/components/Agenda/AgendaList.tsx
 import api from '@/axios';
+import Card from '@/components/Card';
 import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
-import Card from '../card';
 import Table, { TableColumn } from '../Table';
 
 interface Localizacao {

@@ -13,7 +13,7 @@ import PessoaForm from '@/components/form/PessoaForm';
 import { PessoaInput } from '@/schemas/pessoa.schema';
 import { makeName } from '@/utils/makeName';
 import { PrimaryButton } from '../button/PrimaryButton';
-import Card from '../card';
+import Card from '@/components/Card';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 

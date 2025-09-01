@@ -1,4 +1,5 @@
 import api from '@/axios';
+import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import { useSafeForm } from '@/hook/useSafeForm';
 import { ClienteInput, clienteSchema } from '@/schemas/cliente.schema';
@@ -9,7 +10,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { FormProvider, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
-import Card from '../card';
 import { FormSelect } from '../input/FormSelect';
 
 type ClienteFormProps = {

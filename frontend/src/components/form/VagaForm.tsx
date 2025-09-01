@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import { FormProvider, UseFormReturn, useWatch } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
-// import Card from "../Card"; // Comentado no seu código, mantendo
+// import Card from "@/components/Card"; // Comentado no seu código, mantendo
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 import { FormTextarea } from '../input/FormTextarea';

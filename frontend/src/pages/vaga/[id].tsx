@@ -1,6 +1,6 @@
 // pages/vaga/[uuid].tsx
 import api from '@/axios'; // Certifique-se que o caminho está correto
-import Card from '@/components/card'; // Certifique-se que o caminho está correto
+import Card from '@/components/Card'; // Certifique-se que o caminho está correto
 import VagaForm from '@/components/form/VagaForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons'; // Certifique-se que o caminho está correto
 import Modal from '@/components/modal/Modal'; // Certifique-se que o caminho está correto

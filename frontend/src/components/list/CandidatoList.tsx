@@ -1,11 +1,11 @@
 import api from '@/axios';
+import Card from '@/components/Card';
 import { ContatoInput } from '@/schemas/contato.schema';
 import { Candidato } from '@/type/candidato.type';
 import { Especialidade } from '@/type/especialidade.type';
 import { Pessoa } from '@/type/pessoa.type';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import Card from '../card';
 import Table, { TableColumn } from '../Table'; // Certifique-se que o caminho está correto
 
 export type CandidatoWithRelations = Candidato & {

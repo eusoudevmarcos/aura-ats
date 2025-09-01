@@ -1,11 +1,11 @@
 // frontend/components/Clients/ClientList.tsx
 import api from '@/axios';
+import Card from '@/components/Card';
 import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
-import Card from '../card';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 import Modal from '../modal/Modal';

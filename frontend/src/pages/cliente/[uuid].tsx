@@ -1,6 +1,6 @@
 // pages/cliente/[uuid].tsx
 import api from '@/axios';
-import Card from '@/components/card';
+import Card from '@/components/Card';
 import ClienteForm from '@/components/form/ClienteForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';

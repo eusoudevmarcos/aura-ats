@@ -1,4 +1,4 @@
-import Card from '@/components/card';
+import Card from '@/components/Card';
 import AtividadeLayout from '@/layout/AtividadesLayout';
 
 export default function tarefas() {
