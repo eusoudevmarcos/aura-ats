@@ -49,17 +49,4 @@ export class VagaController {
         .json({ message: "Internal server error", error: error.message });
     }
   }
-
-  //   async delete(req: Request, res: Response): Promise<Response> {
-  //     const { id } = req.params;
-  //     try {
-  //       const vaga = await this.service.deleteVaga(id);
-  //       return res.status(204).send(vaga);
-  //     } catch (error: any) {
-  //       console.error("Error deleting vaga:", error);
-  //       return res
-  //         .status(500)
-  //         .json({ message: "Internal server error", error: error.message });
-  //     }
-  //   }
 }

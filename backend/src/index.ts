@@ -1,18 +1,18 @@
-import "reflect-metadata";
+import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
-import cors from "cors";
+import "reflect-metadata";
 
 dotenv.config();
 
+import agendaRoute from "./routes/agenda.routes";
 import authenticationRoutes from "./routes/authentication.routes";
-import userRoutes from "./routes/user.routes";
 import candidatoRoutes from "./routes/candidato.routes";
+import clienteRoutes from "./routes/cliente.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
+import userRoutes from "./routes/user.routes";
 import vagaRoutes from "./routes/vaga.routes";
-import clienteRoutes from "./routes/cliente.routes";
-import agendaRoute from "./routes/agenda.routes";
 
 const app = express();
 const PORT = process.env.PORT;
@@ -55,12 +55,11 @@ if (process.env.NODE_ENV === "development") {
 
     console.log(`\[${timestamp}\] Request:`);
     console.log(`${green}${method}${reset} - ${cyan}${url}${reset}`);
+
     if (headers.authorization || headers.cookie) {
       console.log(`${red}${headers.authorization || headers.cookie}${reset}`);
     }
-    // console.log(`  Method: ${green}${method}${reset}`);
-    // console.log(`  URL: ${cyan}${url}${reset}`);
-    // console.log(`  token: ${JSON.stringify(headers)}`);
+
     console.log(`- Query Params: ${JSON.stringify(query)}`);
     if (Object.keys(body).length > 0) {
       console.log(`  Body: ${JSON.stringify(body)}`);

@@ -8,6 +8,7 @@ model Empresa {
     id             String           @id @default(uuid())
     razaoSocial    String
     cnpj           String           @unique
+    nomeFantasia   String           @default("")
     dataAbertura   DateTime?
     contatos       Contato[]
     localizacoes   Localizacao[]

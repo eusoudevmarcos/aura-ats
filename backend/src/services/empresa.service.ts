@@ -1,9 +1,9 @@
 import { Empresa } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
-import { splitCreateConnect } from "../utils/splitCreateConnect";
 import prisma from "../lib/prisma";
-import { EmpresaCreateInput, EmpresaUpdateInput } from "../types/prisma.types";
 import { PessoaRepository } from "../repository/pessoa.repository";
+import { EmpresaCreateInput, EmpresaUpdateInput } from "../types/prisma.types";
+import { splitCreateConnect } from "../utils/splitCreateConnect";
 
 @injectable()
 export class EmpresaRepository {
@@ -15,6 +15,7 @@ export class EmpresaRepository {
     const baseData = {
       razaoSocial: empresaData.razaoSocial,
       cnpj: empresaData.cnpj,
+      nomeFantasia: empresaData.nomeFantasia,
       dataAbertura: empresaData.dataAbertura
         ? new Date(empresaData.dataAbertura)
         : null,
@@ -48,6 +49,7 @@ export class EmpresaRepository {
     if (empresaData.id) {
       return { id: empresaData.id, ...baseData } as EmpresaUpdateInput;
     }
+
     return baseData as EmpresaCreateInput;
   }
 

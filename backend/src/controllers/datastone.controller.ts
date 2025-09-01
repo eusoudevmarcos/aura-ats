@@ -1,7 +1,7 @@
 // src/controllers/DatastoneController.ts
 
-import { Request, Response } from "express";
 import axios from "axios";
+import { Request, Response } from "express";
 import { sanitize } from "../utils/sanitize";
 import CacheController from "./cache.controller";
 
@@ -108,13 +108,15 @@ export class DatastoneController {
       res.status(200).json({ status: 200, data, saveCache });
     } catch (error: any) {
       await log(error);
-      console.error(
+      console.log(
         "Erro ao consultar DataStone:",
-        error.message ?? JSON.stringify(error)
+        error?.message ?? JSON.stringify(error)
       );
-      res
-        .status(500)
-        .json({ error: true, mensagem: "Erro interno na consulta da API." });
+
+      res.status(error?.status).json({
+        error: true,
+        mensagem: `Erro interno na consulta da API. Verifique sua conta ou entre me contato com um Administrador. STATUS: ${error?.status}`,
+      });
     }
   }
 

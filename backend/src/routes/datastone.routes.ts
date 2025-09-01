@@ -2,7 +2,6 @@
 
 import { Router } from "express";
 import { DatastoneController } from "../controllers/datastone.controller";
-import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();
 

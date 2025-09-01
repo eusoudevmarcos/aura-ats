@@ -5,12 +5,7 @@ import { VagaSaveInput } from "../types/vaga.type";
 
 import { Prisma } from "@prisma/client";
 import { buildWhere } from "../helper/buildWhere";
-
-interface Pagination {
-  page?: number;
-  pageSize?: number;
-  search?: string;
-}
+import { Pagination } from "../types/pagination";
 
 @injectable()
 export class VagaService {

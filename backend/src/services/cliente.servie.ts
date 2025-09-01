@@ -1,7 +1,8 @@
+import { Cliente, Empresa, StatusCliente, TipoServico } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
-import { StatusCliente, TipoServico, Empresa, Cliente } from "@prisma/client";
+import { Pagination } from "../types/pagination";
 
 @injectable()
 export class ClienteService {
@@ -151,11 +152,45 @@ export class ClienteService {
     });
   }
 
-  async getAll(): Promise<Cliente[]> {
-    return await prisma.cliente.findMany({
-      include: {
-        empresa: true,
-      },
-    });
+  async getAll({
+    page = 1,
+    pageSize = 10,
+    search,
+  }: Pagination<{
+    status?: StatusCliente;
+    cpf?: string;
+    razaoSocial?: string;
+  }>) {
+    const skip = (page - 1) * pageSize;
+
+    const [vagas, total] = await prisma.$transaction([
+      prisma.cliente.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          empresa: {
+            createdAt: "desc",
+          },
+        },
+        where: {
+          status: { equals: search?.status },
+          empresa: {
+            razaoSocial: { contains: search?.razaoSocial, mode: "insensitive" },
+          },
+        },
+        include: {
+          empresa: true,
+        },
+      }),
+      prisma.cliente.count(),
+    ]);
+
+    return {
+      data: vagas,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
   }
 }

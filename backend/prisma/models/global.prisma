@@ -22,9 +22,9 @@ model Contato {
 
 model Localizacao {
     id          String  @id @default(uuid())
-    cep         String
-    cidade      String
-    bairro      String
+    cep         String?
+    cidade      String?
+    bairro      String?
     uf          String
     estado      String?
     complemento String?
