@@ -1,6 +1,6 @@
 // src/layouts/MainLayout.tsx
 import Footer from '@/components/site/Footer/Footer';
-import Header from '@/components/site/Header/Header';
+import HeaderLadingPage from '@/components/site/Header/HeaderLadingPage';
 import styles from '@/styles/MainLayout.module.css';
 import React from 'react';
 
@@ -11,7 +11,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
     <div className={styles.container}>
-      <Header />
+      <HeaderLadingPage />
       <main className={styles.mainContent}>{children}</main>
       <Footer />
     </div>

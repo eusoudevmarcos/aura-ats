@@ -7,7 +7,7 @@ import React, { useEffect, useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import styles from './Header.module.css';
 
-const Header: React.FC = () => {
+const HeaderLadingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const { scrollToSection } = useSmoothScroll();
@@ -190,4 +190,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default HeaderLadingPage;
