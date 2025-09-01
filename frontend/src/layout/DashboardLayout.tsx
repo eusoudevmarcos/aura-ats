@@ -1,4 +1,4 @@
-import Header from '@/components/header/Header';
+import Header from '@/components/header/HeaderLayout';
 import 'material-icons/iconfont/material-icons.css';
 import React, { useState } from 'react';
 import Sidebar from '../components/sidebar';

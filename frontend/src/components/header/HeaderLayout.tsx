@@ -25,7 +25,7 @@ const BurgerIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const Header: React.FC = () => {
+const HeaderLayout: React.FC = () => {
   const [uid, setUid] = React.useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
@@ -174,4 +174,4 @@ const Header: React.FC = () => {
   );
 };
 
-export default Header;
+export default HeaderLayout;

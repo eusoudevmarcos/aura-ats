@@ -1,6 +1,6 @@
 // src/layouts/MainLayout.tsx
 import Footer from '@/components/site/Footer/Footer';
-import HeaderLadingPage from '@/components/site/Header/HeaderLadingPage';
+import HeaderLadingPage from '@/components/site/HeaderLadingPage/HeaderLadingPage';
 import styles from '@/styles/MainLayout.module.css';
 import React from 'react';
 
