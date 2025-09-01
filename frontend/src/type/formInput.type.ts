@@ -1,12 +1,11 @@
-import { DetailedHTMLProps, InputHTMLAttributes } from "react";
 import {
   Control,
   FieldErrors,
   FieldValues,
   Path,
   UseFormRegister,
-} from "react-hook-form";
-import { IMaskInputProps } from "react-imask";
+} from 'react-hook-form';
+import { IMaskInputProps } from 'react-imask';
 
 export type CommonProps<T extends FieldValues> = {
   name: Path<T>;
@@ -16,7 +15,7 @@ export type CommonProps<T extends FieldValues> = {
   };
   maskProps?: Omit<
     IMaskInputProps<any>,
-    "name" | "value" | "onChange" | "onAccept" | "ref"
+    'name' | 'value' | 'onChange' | 'onAccept' | 'ref'
   >;
   label?: React.ReactNode | string;
   placeholder?: string;
