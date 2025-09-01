@@ -1,7 +1,7 @@
 import Header from '@/components/header/HeaderLayout';
+import Sidebar from '@/components/sidebar/SidebarLayout';
 import 'material-icons/iconfont/material-icons.css';
 import React, { useState } from 'react';
-import Sidebar from '../components/sidebar';
 
 interface DashboardProps {
   children: React.ReactNode | ((data: any) => void);

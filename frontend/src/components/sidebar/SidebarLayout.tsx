@@ -22,7 +22,7 @@ interface SidebarProps {
   onToggleSidebar: (collapsed: boolean) => void;
 }
 
-const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
+const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   const [collapsed, setCollapsed] = useState(true);
   const [isShowLabel, setIsShowLabel] = useState(false);
   const router = useRouter();
@@ -219,4 +219,4 @@ const Sidebar: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   );
 };
 
-export default Sidebar;
+export default SidebarLayout;
