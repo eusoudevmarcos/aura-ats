@@ -1,9 +1,9 @@
-import React from "react";
-import Image from "next/image";
-import styles from "./HeroSection.module.css";
 import Button from "@/components/Button/Button";
 import Slider from "@/components/Slider/Slider";
 import { useScrollToSection } from "@/hooks/UseScrollToSection";
+import Image from "next/image";
+import React from "react";
+import styles from "./HeroSection.module.css";
 
 interface SlideItem {
   id: string;
@@ -50,7 +50,7 @@ const HeroSection: React.FC = () => {
 
   return (
     <section className={styles.hero} id="hero-section">
-      <Slider slides={heroSlides} autoPlay interval={5000}>
+      <Slider slides={heroSlides} autoPlay interval={10000}>
         {(slide: SlideItem) => (
           <div className={styles.slideContent} key={slide.id}>
             <div className={styles.imageWrapper}>
@@ -60,7 +60,12 @@ const HeroSection: React.FC = () => {
                 fill
                 priority
                 sizes="100vw"
-                style={{ objectFit: "cover" }}
+                style={{
+                  objectFit: "cover",
+                  filter: "blur(4px)",
+                  boxShadow:
+                    "0 8px 32px 0 rgba(0,0,0,0.18), 0 1.5px 6px 0 rgba(0,0,0,0.10)",
+                }}
               />
               <div className={styles.overlay}></div>
             </div>

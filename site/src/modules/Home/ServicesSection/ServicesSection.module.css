@@ -4,7 +4,7 @@
   max-width: 1420px;
   margin: 0 auto;
   text-align: center;
-  background-color: var(--secondary-color); /* Fundo branco para contraste */
+  /* background-color: var(--secondary-color); Fundo branco para contraste */
   color: var(--text-color-primary);
 }
 

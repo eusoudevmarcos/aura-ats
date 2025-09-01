@@ -5,12 +5,21 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.7);
+  background-color: rgba(0, 0, 0, 0);
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 2000; /* Garante que o modal fique acima de tudo */
   padding: var(--spacing-md); /* Padding para telas pequenas */
+  transition: background-color 0.3s ease-out;
+}
+
+.overlayOpen {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.overlayClose {
+  background-color: rgba(0, 0, 0, 0);
 }
 
 .modalContent {
@@ -21,7 +30,19 @@
   max-width: 600px; /* Largura máxima do modal */
   width: 100%;
   box-shadow: var(--box-shadow-lg);
-  animation: fadeInScale 0.3s ease-out; /* Animação de entrada */
+  transform: scale(0.8) translateY(20px);
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.modalOpen {
+  transform: scale(1) translateY(0);
+  opacity: 1;
+}
+
+.modalClose {
+  transform: scale(0.8) translateY(20px);
+  opacity: 0;
 }
 
 .closeButton {
@@ -33,11 +54,23 @@
   font-size: var(--font-size-xl);
   color: var(--text-color-secondary);
   cursor: pointer;
-  transition: color var(--transition-speed);
+  transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
 }
 
 .closeButton:hover {
   color: var(--primary-color);
+  background-color: rgba(0, 0, 0, 0.1);
+  transform: scale(1.1);
+}
+
+.closeButton:active {
+  transform: scale(0.95);
 }
 
 .modalTitle {
@@ -45,33 +78,67 @@
   margin-bottom: var(--spacing-md);
   color: var(--text-color-primary);
   text-align: center;
+  margin-top: var(--spacing-sm);
 }
 
 .modalBody {
   /* Estilos para o conteúdo do modal */
   max-height: 70vh; /* Limita a altura do conteúdo se for muito grande */
   overflow-y: auto; /* Adiciona scroll se o conteúdo exceder a altura */
-  padding-right: var(--spacing-xxs); /* Para evitar que o scrollbar sobreponha o conteúdo */
+  padding-right: var(
+    --spacing-xxs
+  ); /* Para evitar que o scrollbar sobreponha o conteúdo */
 }
 
-/* Animação de entrada do modal */
-@keyframes fadeInScale {
-  from {
-    opacity: 0;
-    transform: scale(0.95);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+/* Estilos para vídeos dentro do modal */
+.modalBody iframe {
+  border-radius: var(--border-radius-md);
+  box-shadow: var(--box-shadow-sm);
+}
+
+/* Estilos para botões dentro do modal */
+.modalBody button {
+  transition: all 0.2s ease;
+}
+
+.modalBody button:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--box-shadow-md);
 }
 
 /* Media Queries */
 @media (max-width: 600px) {
   .modalContent {
     padding: var(--spacing-md);
+    margin: var(--spacing-sm);
   }
   .modalTitle {
     font-size: var(--font-size-h4);
+  }
+  .overlay {
+    padding: var(--spacing-sm);
+  }
+}
+
+/* Animações de entrada e saída */
+@keyframes modalSlideIn {
+  from {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes modalSlideOut {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateY(30px);
   }
 }

@@ -1,0 +1,36 @@
+/* src/components/ExampleModal/ExampleModal.module.css */
+.container {
+  padding: var(--spacing-lg);
+  text-align: center;
+}
+
+.modalContent {
+  text-align: center;
+}
+
+.modalContent p {
+  margin-bottom: var(--spacing-md);
+  color: var(--text-color-secondary);
+  line-height: 1.6;
+}
+
+.buttonGroup {
+  display: flex;
+  gap: var(--spacing-md);
+  justify-content: center;
+  margin-top: var(--spacing-lg);
+  flex-wrap: wrap;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .buttonGroup {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .buttonGroup button {
+    width: 100%;
+    max-width: 200px;
+  }
+}

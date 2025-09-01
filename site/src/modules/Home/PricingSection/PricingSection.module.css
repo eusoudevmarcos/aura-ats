@@ -34,9 +34,9 @@
 }
 
 .pricingCard {
-  background-color: var(
+  /* background-color: var(
     --secondary-color
-  ); /* Fundo branco para os cards de preço */
+  ); Fundo branco para os cards de preço */
   border-radius: var(--border-radius-lg);
   padding: var(--spacing-xl);
   box-shadow: var(--box-shadow-md);

@@ -4,7 +4,7 @@
   max-width: 1420px;
   margin: 0 auto;
   text-align: center;
-  background-color: var(--secondary-color); /* Fundo branco para contraste */
+  /* background-color: var(--secondary-color); Fundo branco para contraste */
   color: var(--text-color-primary);
 }
 
@@ -39,7 +39,6 @@
   transform: scale(1.1);
   color: var(--whatsapp-green-dark); /* Uma versão mais escura no hover */
 }
-
 /* Media Queries para Responsividade */
 @media (max-width: 768px) {
   .sectionContainer {

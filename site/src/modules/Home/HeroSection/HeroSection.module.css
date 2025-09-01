@@ -1,10 +1,14 @@
 .hero {
   position: relative;
   width: 100%;
-  height: 85vh; /* altura padrão de destaque, menor que 100vh para não ultrapassar o viewport */
+  height: 100vh;
   max-height: 800px;
   min-height: 500px;
   overflow: hidden;
+  max-width: 1440px;
+  margin: 0 auto;
+  border-radius: 20px;
+  margin-top: 40px;
 }
 
 @media (max-width: 768px) {

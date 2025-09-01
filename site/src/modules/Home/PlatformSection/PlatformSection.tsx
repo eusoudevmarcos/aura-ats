@@ -1,22 +1,28 @@
 // src/modules/Home/PlatformSection/PlatformSection.tsx
-import React, { useState } from "react";
-import styles from "./PlatformSection.module.css";
 import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
+import VideoPlayer from "@/components/VideoPlayer/VideoPlayer";
+import { useModal } from "@/hooks/useModal";
 import Image from "next/image"; // Para imagens descritivas na seção
+import React from "react";
+import styles from "./PlatformSection.module.css";
 
 const PlatformSection: React.FC = () => {
-  const [isVideoModalOpen, setIsVideoModalOpen] = useState(false);
-  const [isPlansModalOpen, setIsPlansModalOpen] = useState(false);
+  const {
+    isOpen: isVideoModalOpen,
+    openModal: openVideoModal,
+    closeModal: closeVideoModal,
+  } = useModal();
+  const {
+    isOpen: isPlansModalOpen,
+    openModal: openPlansModal,
+    closeModal: closePlansModal,
+  } = useModal();
 
-  const openVideoModal = () => setIsVideoModalOpen(true);
-  const closeVideoModal = () => setIsVideoModalOpen(false);
-
-  const openPlansModal = () => {
+  const handleOpenPlansModal = () => {
     closeVideoModal(); // Fecha o modal de vídeo antes de abrir o de planos
-    setIsPlansModalOpen(true);
+    openPlansModal();
   };
-  const closePlansModal = () => setIsPlansModalOpen(false);
 
   const handleSelectPlan = (planName: string, price: string) => {
     // Lógica futura para redirecionar para a área de assinatura/pagamento
@@ -68,8 +74,8 @@ const PlatformSection: React.FC = () => {
           <Button
             onClick={openVideoModal}
             variant="primary"
+            fullWidth
             size="large"
-            className={styles.callToActionButton}
           >
             *EM BREVE* Assista ao Vídeo Demonstrativo
           </Button>
@@ -83,116 +89,140 @@ const PlatformSection: React.FC = () => {
         title="Plataforma Aura: Tour Completo"
       >
         <div className={styles.videoModalContent}>
-          {/* O iframe do YouTube ou Vimeo para o vídeo demonstrativo */}
-          <div className={styles.videoWrapper}>
-            <iframe
-              width="560"
-              height="315"
-              src="https://www.youtube.com/embed/SUA_Link_Do_Seu_Video_Aqui?autoplay=1" // Substitua pelo link real do seu vídeo e adicione ?autoplay=1
-              title="Vídeo Demonstrativo Plataforma Aura"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              allowFullScreen
-            ></iframe>
-          </div>
+          {/* Componente de vídeo personalizado com reprodução automática */}
+          <VideoPlayer
+            src="https://www.youtube.com/watch?v=SUA_Link_Do_Seu_Video_Aqui"
+            title="Vídeo Demonstrativo Plataforma Aura"
+            width={560}
+            height={315}
+            autoplay={true}
+            muted={true}
+            controls={true}
+          />
           <p className={styles.modalDescription}>
             Explore todos os recursos da nossa plataforma de recrutamento e veja
             como é fácil encontrar o Profissional perfeito.
           </p>
-          <Button
-            onClick={openPlansModal}
-            variant="accent"
-            size="medium"
-            fullWidth
+          <a
+            onClick={handleOpenPlansModal}
+            href="#planos_medicos"
+            style={{
+              display: "inline-block",
+              background: "var(--primary-color)",
+              color: "#fff",
+              padding: "1rem 2.2rem",
+              borderRadius: "var(--border-radius-lg)",
+              fontWeight: 600,
+              fontSize: "1.1rem",
+              textDecoration: "none",
+              marginTop: "1.5rem",
+              boxShadow: "var(--box-shadow-sm)",
+              transition: "background 0.2s, box-shadow 0.2s, transform 0.2s",
+              cursor: "pointer",
+              border: "none",
+              textAlign: "center",
+            }}
+            onMouseOver={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                "var(--box-shadow-md)";
+              (e.currentTarget as HTMLAnchorElement).style.transform =
+                "translateY(-2px)";
+            }}
+            onMouseOut={(e) => {
+              (e.currentTarget as HTMLAnchorElement).style.background =
+                "var(--primary-color)";
+              (e.currentTarget as HTMLAnchorElement).style.boxShadow =
+                "var(--box-shadow-sm)";
+              (e.currentTarget as HTMLAnchorElement).style.transform = "none";
+            }}
           >
             Quero Contratar a Plataforma Agora!
-          </Button>
+          </a>
         </div>
       </Modal>
 
       {/* Modal de Planos de Contratação */}
-      <Modal
+      {/* <Modal
         isOpen={isPlansModalOpen}
         onClose={closePlansModal}
         title="Escolha seu Plano Aura"
-      >
-        <div className={styles.plansModalContent}>
-          <p className={styles.modalDescription}>
-            Selecione o plano que melhor se adapta às suas necessidades de busca
-            por profissionais médicos. Todos os planos incluem acesso completo
-            aos filtros e à nossa base de dados qualificada.
-          </p>
-          <div className={styles.planCardsContainer}>
-            {/* Card do Plano Essencial */}
-            <div className={styles.planCard}>
-              <h3>Plano Essencial</h3>
-              <p className={styles.planPrice}>R$ 989,00/mês</p>
-              <p className={styles.planFeature}>Até **40 pesquisas** por mês</p>
-              <ul>
-                <li>Acesso completo à base de médicos</li>
-                <li>Filtros de especialidade e localização</li>
-                <li>Suporte básico</li>
-              </ul>
-              <Button
-                onClick={() => handleSelectPlan("Plano Essencial", "R$ 989,00")}
-                variant="primary"
-                fullWidth
-              >
-                Selecionar Plano
-              </Button>
-            </div>
-
-            {/* Card do Plano Profissional */}
-            <div className={styles.planCard}>
-              <h3>Plano Profissional</h3>
-              <p className={styles.planPrice}>R$ 1949,00/mês</p>
-              <p className={styles.planFeature}>
-                Até **100 pesquisas** por mês
-              </p>
-              <ul>
-                <li>Tudo do Plano Essencial</li>
-                <li>Suporte prioritário</li>
-                <li>Relatórios de atividade</li>
-              </ul>
-              <Button
-                onClick={() =>
-                  handleSelectPlan("Plano Profissional", "R$ 1949,00")
-                }
-                variant="primary"
-                fullWidth
-              >
-                Selecionar Plano
-              </Button>
-            </div>
-
-            {/* Card do Plano Premium */}
-            <div className={styles.planCard}>
-              <h3>Plano Premium</h3>
-              <p className={styles.planPrice}>R$ 2499,00/mês</p>
-              <p className={styles.planFeature}>
-                Até **150 pesquisas** por mês
-              </p>
-              <ul>
-                <li>Tudo do Plano Profissional</li>
-                <li>Consultoria especializada (1h/mês)</li>
-                <li>Recursos avançados de IA (futuro)</li>
-              </ul>
-              <Button
-                onClick={() => handleSelectPlan("Plano Premium", "R$ 2499,00")}
-                variant="primary"
-                fullWidth
-              >
-                Selecionar Plano
-              </Button>
-            </div>
+      > */}
+      <div id="planos_medicos" className={styles.plansModalContent}>
+        <p className={styles.modalDescription}>
+          Selecione o plano que melhor se adapta às suas necessidades de busca
+          por profissionais médicos. Todos os planos incluem acesso completo aos
+          filtros e à nossa base de dados qualificada.
+        </p>
+        <div className={styles.planCardsContainer}>
+          {/* Card do Plano Essencial */}
+          <div className={styles.planCard}>
+            <h3>Plano Essencial</h3>
+            <p className={styles.planPrice}>R$ 989,00/mês</p>
+            <p className={styles.planFeature}>Até **40 pesquisas** por mês</p>
+            <ul>
+              <li>Acesso completo à base de médicos</li>
+              <li>Filtros de especialidade e localização</li>
+              <li>Suporte básico</li>
+            </ul>
+            <Button
+              onClick={() => handleSelectPlan("Plano Essencial", "R$ 989,00")}
+              variant="accent"
+              size="large"
+              fullWidth
+            >
+              Selecionar Plano
+            </Button>
           </div>
-          <p className={styles.contractNote}>
-            Ao selecionar um plano, você será redirecionado para a área de
-            assinatura do termo de contrato e opções de pagamento (PayPal,
-            Mercado Pago, etc.).
-          </p>
+
+          {/* Card do Plano Profissional */}
+          <div className={styles.planCard}>
+            <h3>Plano Profissional</h3>
+            <p className={styles.planPrice}>R$ 1949,00/mês</p>
+            <p className={styles.planFeature}>Até **100 pesquisas** por mês</p>
+            <ul>
+              <li>Tudo do Plano Essencial</li>
+              <li>Suporte prioritário</li>
+              <li>Relatórios de atividade</li>
+            </ul>
+            <Button
+              onClick={() =>
+                handleSelectPlan("Plano Profissional", "R$ 1949,00")
+              }
+              variant="primary"
+              size="large"
+              fullWidth
+            >
+              Selecionar Plano
+            </Button>
+          </div>
+
+          {/* Card do Plano Premium */}
+          <div className={styles.planCard}>
+            <h3>Plano Premium</h3>
+            <p className={styles.planPrice}>R$ 2499,00/mês</p>
+            <p className={styles.planFeature}>Até **150 pesquisas** por mês</p>
+            <ul>
+              <li>Tudo do Plano Profissional</li>
+              <li>Consultoria especializada (1h/mês)</li>
+              <li>Recursos avançados de IA (futuro)</li>
+            </ul>
+            <Button
+              onClick={() => handleSelectPlan("Plano Premium", "R$ 2499,00")}
+              variant="accent"
+              size="large"
+              fullWidth
+            >
+              Selecionar Plano
+            </Button>
+          </div>
         </div>
-      </Modal>
+        <p className={styles.contractNote}>
+          Ao selecionar um plano, você será redirecionado para a área de
+          assinatura do termo de contrato e opções de pagamento (PayPal, Mercado
+          Pago, etc.).
+        </p>
+      </div>
+      {/* </Modal> */}
     </section>
   );
 };

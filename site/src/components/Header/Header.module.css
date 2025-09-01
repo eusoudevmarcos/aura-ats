@@ -144,9 +144,9 @@
     padding: var(--spacing-xs) 0;
   }
 
-  .headerActions {
+  /* .headerActions {
     display: none;
-  }
+  } */
 
   .menuToggle {
     display: block;

@@ -10,7 +10,11 @@ body {
   color: var(--text-color-primary);
   background-color: var(--bg-color-light);
   scroll-behavior: smooth; /* Para rolagem suave do menu */
+  scroll-padding-top: 80px; /* Offset para o header fixo */
   line-height: 1.6;
+  /* Melhorias para scroll suave */
+  -webkit-overflow-scrolling: touch; /* Scroll suave no iOS */
+  scroll-behavior: smooth; /* Scroll suave nativo */
 }
 
 a {
@@ -18,8 +22,28 @@ a {
   text-decoration: none;
 }
 
+/* Melhorias para scroll suave em todos os elementos */
 * {
   box-sizing: border-box;
+  scroll-behavior: smooth;
+}
+
+/* Scroll personalizado para webkit browsers */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-color-light);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--primary-color);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--accent-color);
 }
 
 /* Estilos básicos para acessibilidade e consistência */

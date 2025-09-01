@@ -1,14 +1,16 @@
 // src/components/Header/Header.tsx
-import React, { useState, useEffect } from "react";
+import Button from "@/components/Button/Button";
+import { useSmoothScroll } from "@/hooks/useSmoothScroll";
 import Image from "next/image";
 import Link from "next/link";
-import styles from "./Header.module.css";
-import Button from "@/components/Button/Button";
+import React, { useEffect, useState } from "react";
 import { FaBars, FaTimes } from "react-icons/fa";
+import styles from "./Header.module.css";
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const { scrollToSection } = useSmoothScroll();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -29,16 +31,13 @@ const Header: React.FC = () => {
     };
   }, []);
 
-  const scrollToSection = (
+  const handleSectionClick = (
     e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
     sectionId: string
   ) => {
     e.preventDefault();
-    const section = document.getElementById(sectionId);
-    if (section) {
-      section.scrollIntoView({ behavior: "smooth", block: "start" });
-      setIsMenuOpen(false);
-    }
+    scrollToSection(sectionId, { offset: 80, duration: 800 });
+    setIsMenuOpen(false);
   };
 
   const handleLoginRedirect = () => {
@@ -58,7 +57,7 @@ const Header: React.FC = () => {
           <Link
             href="/"
             onClick={(e) =>
-              scrollToSection(
+              handleSectionClick(
                 e as React.MouseEvent<HTMLAnchorElement>,
                 "hero-section"
               )
@@ -80,7 +79,7 @@ const Header: React.FC = () => {
               <Link
                 href="#platform-section"
                 onClick={(e) =>
-                  scrollToSection(
+                  handleSectionClick(
                     e as React.MouseEvent<HTMLAnchorElement>,
                     "platform-section"
                   )
@@ -93,7 +92,7 @@ const Header: React.FC = () => {
               <Link
                 href="#about-section"
                 onClick={(e) =>
-                  scrollToSection(
+                  handleSectionClick(
                     e as React.MouseEvent<HTMLAnchorElement>,
                     "about-section"
                   )
@@ -106,7 +105,7 @@ const Header: React.FC = () => {
               <Link
                 href="#services-section"
                 onClick={(e) =>
-                  scrollToSection(
+                  handleSectionClick(
                     e as React.MouseEvent<HTMLAnchorElement>,
                     "services-section"
                   )
@@ -119,7 +118,7 @@ const Header: React.FC = () => {
               <Link
                 href="#pricing-section"
                 onClick={(e) =>
-                  scrollToSection(
+                  handleSectionClick(
                     e as React.MouseEvent<HTMLAnchorElement>,
                     "pricing-section"
                   )
@@ -132,7 +131,7 @@ const Header: React.FC = () => {
               <Link
                 href="#success-cases-section"
                 onClick={(e) =>
-                  scrollToSection(
+                  handleSectionClick(
                     e as React.MouseEvent<HTMLAnchorElement>,
                     "success-cases-section"
                   )
@@ -145,7 +144,7 @@ const Header: React.FC = () => {
               <Link
                 href="#contact-section"
                 onClick={(e) =>
-                  scrollToSection(
+                  handleSectionClick(
                     e as React.MouseEvent<HTMLAnchorElement>,
                     "contact-section"
                   )
@@ -170,7 +169,7 @@ const Header: React.FC = () => {
           <Button
             variant="outlined"
             size="medium"
-            onClick={handleLoginRedirect} // ALTERADO: Redireciona para a página de login
+            onClick={handleLoginRedirect}
             className={`${styles.enterButton} ${
               isScrolled ? styles.scrolledEnter : ""
             }`}
