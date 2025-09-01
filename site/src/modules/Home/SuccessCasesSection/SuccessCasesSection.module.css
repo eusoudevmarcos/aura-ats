@@ -1,6 +1,5 @@
 /* src/modules/Home/SuccessCasesSection/SuccessCasesSection.module.css */
 .sectionContainer {
-  padding: var(--spacing-xxl) var(--spacing-xl);
   max-width: 1420px;
   margin: 0 auto;
   text-align: center;

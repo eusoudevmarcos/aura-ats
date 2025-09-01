@@ -1,6 +1,5 @@
 /* src/modules/Home/ContactSection/ContactSection.module.css */
 .sectionContainer {
-  padding: var(--spacing-xxl) var(--spacing-xl);
   max-width: 1420px;
   margin: 0 auto;
   text-align: center;
@@ -41,9 +40,6 @@
 }
 /* Media Queries para Responsividade */
 @media (max-width: 768px) {
-  .sectionContainer {
-    padding: var(--spacing-xl) var(--spacing-md);
-  }
   .sectionContainer h2 {
     font-size: var(--font-size-h3);
   }

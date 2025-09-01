@@ -28,11 +28,9 @@
 }
 
 .mainContent {
-  flex-grow: 1; /* Faz o conteúdo principal preencher o espaço restante */
-  /* padding: var(--spacing-lg); */
-  /* max-width: 1200px; Largura máxima para o conteúdo central */
-  margin: 0 auto; /* Centraliza o conteúdo */
-  width: 100%; /* Garante que ocupe 100% da largura disponível até o max-width */
+  flex-grow: 1;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .footer {
@@ -58,7 +56,7 @@
   }
 
   .mainContent {
-    padding: var(--spacing-md);
+    padding: 6px;
   }
 }
 

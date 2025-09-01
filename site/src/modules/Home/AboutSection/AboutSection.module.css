@@ -1,6 +1,5 @@
 /* src/modules/Home/AboutSection/AboutSection.module.css */
 .sectionContainer {
-  padding: var(--spacing-xxl) var(--spacing-xl);
   max-width: 1420px;
   margin: 0 auto;
   text-align: center;
@@ -111,9 +110,6 @@
 }
 
 @media (max-width: 768px) {
-  .sectionContainer {
-    padding: var(--spacing-xl) var(--spacing-md);
-  }
   .title {
     font-size: var(--font-size-h3);
   }
