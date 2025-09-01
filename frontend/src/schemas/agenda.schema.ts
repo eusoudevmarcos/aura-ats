@@ -28,7 +28,13 @@ const etapaAtualSchema = z.object({
 // Schema principal da Agenda
 export const agendaSchema = z
   .object({
-    dataHora: z.iso.datetime({ local: true }),
+    data: z.iso
+      .date('Data invalida')
+      .max(new Date().getDate())
+      .regex(/^\d{2}-\d{2}-\d{4}$/i, 'Data deve ser DD-MM-AAAA'),
+    hora: z
+      .string()
+      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Hora deve ser HH:mm (24h)'),
     tipoEvento: tipoEventoEnum,
     link: z.url('Link inválido').optional(),
     localizacao: localizacaoSchema.optional(),

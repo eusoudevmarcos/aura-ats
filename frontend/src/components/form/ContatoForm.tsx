@@ -1,10 +1,9 @@
-import React from "react";
-import { FormProvider, UseFormReturn } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ContatoInput, contatoSchema } from "@/schemas/contato.schema";
-import { useSafeForm } from "@/hook/useSafeForm";
-import { makeName } from "@/utils/makeName";
-import { FormInput } from "../input/FormInput";
+import { useSafeForm } from '@/hook/useSafeForm';
+import { ContatoInput, contatoSchema } from '@/schemas/contato.schema';
+import { makeName } from '@/utils/makeName';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { FormProvider, UseFormReturn } from 'react-hook-form';
+import { FormInput } from '../input/FormInput';
 
 type ContatoFormProps = {
   namePrefix: string; // ex: "empresa.contatos[0]"
@@ -22,16 +21,17 @@ function ContatoFormInner({
   const { control, formState } = methods;
   const { errors } = formState;
 
-  const telefoneName = makeName<ContatoInput>(namePrefix, "telefone");
-  const whatsappName = makeName<ContatoInput>(namePrefix, "whatsapp");
-  const emailName = makeName<ContatoInput>(namePrefix, "email");
+  const telefoneName = makeName<ContatoInput>(namePrefix, 'telefone');
+  const whatsappName = makeName<ContatoInput>(namePrefix, 'whatsapp');
+  const emailName = makeName<ContatoInput>(namePrefix, 'email');
 
   return (
     <>
       <FormInput
         name={telefoneName}
         control={control}
-        maskProps={{ mask: "(00) 0000-0000" }}
+        maskProps={{ mask: '(00) 0000-0000' }}
+        label="Telefone"
         placeholder="(00) 0000-0000"
         errors={errors}
       />
@@ -39,7 +39,8 @@ function ContatoFormInner({
       <FormInput
         name={whatsappName}
         control={control}
-        maskProps={{ mask: "(00) 00000-0000" }}
+        maskProps={{ mask: '(00) 00000-0000' }}
+        label="Celular/WhatsApp"
         placeholder="(00) 00000-0000"
         errors={errors}
       />
@@ -47,7 +48,8 @@ function ContatoFormInner({
       <FormInput
         name={emailName}
         control={control}
-        placeholder="Email"
+        label="E-mail"
+        placeholder="comercialaura@gmail.com"
         type="email"
         errors={errors}
       />
@@ -55,19 +57,19 @@ function ContatoFormInner({
   );
 }
 export function ContatoForm({
-  namePrefix = "contatos[0]",
+  namePrefix = 'contatos[0]',
   onSubmit,
 }: ContatoFormProps) {
-  const mode = "context";
+  const mode = 'context';
   const methods = useSafeForm<ContatoInput>({
     useFormProps: { resolver: zodResolver(contatoSchema) },
     mode,
   });
 
-  if (mode !== "context") {
+  if (mode !== 'context') {
     return (
       <FormProvider {...methods}>
-        <form onSubmit={methods.handleSubmit((d) => onSubmit?.(d))}>
+        <form onSubmit={methods.handleSubmit(d => onSubmit?.(d))}>
           <ContatoFormInner namePrefix={namePrefix} methods={methods} />
           <button
             type="submit"

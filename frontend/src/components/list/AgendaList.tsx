@@ -1,6 +1,5 @@
 // frontend/components/Agenda/AgendaList.tsx
 import api from '@/axios';
-import styles from '@/styles/clients.module.css';
 import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
@@ -106,9 +105,9 @@ const AgendaList: React.FC = () => {
   };
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-8">
-      <div className="flex justify-between p-2">
-        <h3 className={styles.clientsTitle}>Lista de Agendas</h3>
+    <Card classNameContainer="mt-6 px-6 py-2">
+      <div className="flex justify-between items-center flex-wrap p-2">
+        <h3 className="text-xl font-bold mb-4">Lista de Agendas</h3>
         <input
           type="text"
           placeholder="Buscar agenda..."

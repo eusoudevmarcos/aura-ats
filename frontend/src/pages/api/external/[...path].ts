@@ -1,7 +1,7 @@
 // pages/api/external/[...path].ts (Ajuste AQUI)
-import { NextApiRequest, NextApiResponse } from "next";
-import { parse } from "cookie";
-import axios from "axios";
+import axios from 'axios';
+import { parse } from 'cookie';
+import { NextApiRequest, NextApiResponse } from 'next';
 
 const externalBackendApi = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`, // Ex: "https://takeitapi-1.onrender.com"
@@ -16,45 +16,47 @@ export default async function handler(
     const token = cookies.token;
 
     if (!token) {
-      return res.status(401).json({ error: "Não autenticado." });
+      return res.status(401).json({ error: 'Não autenticado.' });
     }
 
     const { path } = req.query;
-    const externalPath = Array.isArray(path) ? path.join("/") : path;
+    const externalPath = Array.isArray(path) ? path.join('/') : path;
 
     const urlToExternalBackend = `/${externalPath}`;
-
+    const reset = '\x1b[0m';
+    const green = '\x1b[32m';
     console.log(
-      `${process.env.NEXT_PUBLIC_API_URL}/api${urlToExternalBackend}`
+      `${green}${process.env.NEXT_PUBLIC_API_URL}/api${urlToExternalBackend}${reset}`
     );
+
     const headers = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
     };
 
     let externalResponse;
     switch (req.method) {
-      case "GET":
+      case 'GET':
         externalResponse = await externalBackendApi.get(urlToExternalBackend, {
           headers,
           params: req.query,
         });
         break;
-      case "POST":
+      case 'POST':
         externalResponse = await externalBackendApi.post(
           urlToExternalBackend,
           req.body,
           { headers }
         );
         break;
-      case "PUT":
+      case 'PUT':
         externalResponse = await externalBackendApi.put(
           urlToExternalBackend,
           req.body,
           { headers }
         );
         break;
-      case "DELETE":
+      case 'DELETE':
         externalResponse = await externalBackendApi.delete(
           urlToExternalBackend,
           { headers, data: req.body }
@@ -63,18 +65,18 @@ export default async function handler(
       default:
         return res
           .status(405)
-          .json({ error: "Método não permitido nesta rota de proxy." });
+          .json({ error: 'Método não permitido nesta rota de proxy.' });
     }
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {
     console.error(
-      "Erro no proxy da API externa:",
+      'Erro no proxy da API externa:',
       error.response?.data || error.message
     );
     const statusCode = error.response?.status || 500;
     res.status(statusCode).json({
-      error: "Erro ao se comunicar com a API externa.",
+      error: 'Erro ao se comunicar com a API externa.',
       details: error.response?.data || error.message,
     });
   }

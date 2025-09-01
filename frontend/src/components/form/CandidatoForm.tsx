@@ -64,34 +64,11 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
 
-    // Cria uma cópia mutável do payload para formatação de datas
     const payload: CandidatoInput = { ...data };
-
-    // Formatação de datas para ISOString antes de enviar para a API
-    // Assegura que o campo 'pessoa' e 'dataNascimento' existam antes de tentar acessá-los.
-    if (payload.pessoa?.dataNascimento) {
-      payload.pessoa.dataNascimento = new Date(
-        payload.pessoa.dataNascimento
-      ).toISOString();
-    }
-
-    // payload.formacoes?.forEach((formacao: any) => {
-    //   if (formacao.dataConclusaoMedicina) {
-    //     formacao.dataConclusaoMedicina = new Date(
-    //       formacao.dataConclusaoMedicina
-    //     ).toISOString();
-    //   }
-    //   if (formacao.dataConclusaoResidencia) {
-    //     formacao.dataConclusaoResidencia = new Date(
-    //       formacao.dataConclusaoResidencia
-    //     ).toISOString();
-    //   }
-    // });
 
     setLoading(true);
 
     try {
-      // Determina se é uma criação (POST) ou atualização (PUT)
       const endpoint = payload.id ? `/candidato/${payload.id}` : '/candidato';
       const method = payload.id ? api.put : api.post;
 
@@ -101,7 +78,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         alert('Profissional salvo com sucesso!');
       }
     } catch (erro: any) {
-      // console.error("Erro ao salvar profissional:", erro);
       alert(
         'Erro ao salvar profissional: ' +
           (erro?.response?.data?.message || 'Erro desconhecido')

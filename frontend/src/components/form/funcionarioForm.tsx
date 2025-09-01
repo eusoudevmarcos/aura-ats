@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from "react";
-import api from "@/axios";
-import { FormProvider } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import api from '@/axios';
+import { useSafeForm } from '@/hook/useSafeForm';
 import {
   FuncionarioInput,
   funcionarioSchema,
-} from "@/schemas/funcionario.schema";
-import { useSafeForm } from "@/hook/useSafeForm";
+} from '@/schemas/funcionario.schema';
+import { zodResolver } from '@hookform/resolvers/zod';
+import React, { useEffect } from 'react';
+import { FormProvider } from 'react-hook-form';
 
-import PessoaForm from "@/components/form/PessoaForm";
-import EmpresaForm from "@/components/form/EmpresaForm";
-import { makeName } from "@/utils/makeName";
-import { FormInput } from "../input/FormInput";
-import { FormSelect } from "../input/FormSelect";
-import Card from "../card";
-import { PessoaInput } from "@/schemas/pessoa.schema";
+import EmpresaForm from '@/components/form/EmpresaForm';
+import PessoaForm from '@/components/form/PessoaForm';
+import { PessoaInput } from '@/schemas/pessoa.schema';
+import { makeName } from '@/utils/makeName';
+import { PrimaryButton } from '../button/PrimaryButton';
+import Card from '../card';
+import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
 
 type FuncionarioFormProps = {
   onSuccess: (msg: boolean) => void;
@@ -26,10 +27,10 @@ export const FuncionarioForm = ({
   funcionarioData,
 }: FuncionarioFormProps) => {
   const methods = useSafeForm<FuncionarioInput>({
-    mode: "independent",
+    mode: 'independent',
     useFormProps: {
       resolver: zodResolver(funcionarioSchema),
-      mode: "onTouched",
+      mode: 'onTouched',
     },
   });
 
@@ -41,28 +42,28 @@ export const FuncionarioForm = ({
   } = methods;
 
   const [tipoPessoaOuEmpresa, setTipoPessoaOuEmpresa] =
-    React.useState("pessoa");
+    React.useState('pessoa');
 
-  const email = makeName<FuncionarioInput>("usuarioSistema", "email");
-  const senha = makeName<FuncionarioInput>("usuarioSistema", "senha");
+  const email = makeName<FuncionarioInput>('usuarioSistema', 'email');
+  const senha = makeName<FuncionarioInput>('usuarioSistema', 'senha');
   const setor = makeName<FuncionarioInput>(
-    "usuarioSistema.funcionario",
-    "setor"
+    'usuarioSistema.funcionario',
+    'setor'
   );
   const cargo = makeName<FuncionarioInput>(
-    "usuarioSistema.funcionario",
-    "cargo"
+    'usuarioSistema.funcionario',
+    'cargo'
   );
-  const tipoPessoa = makeName<FuncionarioInput>("usuarioSistema", "tipoPessoa");
+  const tipoPessoa = makeName<FuncionarioInput>('usuarioSistema', 'tipoPessoa');
 
   useEffect(() => {
     if (funcionarioData) {
       Object.entries(funcionarioData).forEach(([key, value]) => {
-        if (key === "pessoa" && value) {
+        if (key === 'pessoa' && value) {
           Object.entries(value as PessoaInput).forEach(([k, v]) => {
             setValue(`pessoa.${k}` as any, v);
           });
-        } else if (key === "empresa" && value) {
+        } else if (key === 'empresa' && value) {
           Object.entries(value as PessoaInput).forEach(([k, v]) => {
             setValue(`empresa.${k}` as any, v);
           });
@@ -84,7 +85,7 @@ export const FuncionarioForm = ({
   async function onSubmit(data: FuncionarioInput): Promise<void> {
     // Monta os dados para validação e envio
     const validationData: any = { ...data };
-    if (data.tipoPessoaOuEmpresa === "pessoa") {
+    if (data.tipoPessoaOuEmpresa === 'pessoa') {
       Object.assign(validationData.empresa, undefined);
     } else {
       Object.assign(validationData.pessoa, undefined);
@@ -107,7 +108,7 @@ export const FuncionarioForm = ({
       onSuccess(true);
     } catch (error: any) {
       onSuccess(false);
-      console.error("Erro ao criar funcionário:", error);
+      console.error('Erro ao criar funcionário:', error);
     }
   }
 
@@ -126,9 +127,9 @@ export const FuncionarioForm = ({
             name={tipoPessoa}
             register={register}
             errors={errors}
-            placeholder="Tipo de funcionario"
+            label="Tipo de funcionario"
             selectProps={{
-              classNameContainer: "col-span-4",
+              classNameContainer: 'col-span-4',
               children: (
                 <>
                   <option value="ADMIN">ADMIN</option>
@@ -142,59 +143,59 @@ export const FuncionarioForm = ({
           <FormInput
             name={email}
             register={register}
-            placeholder="email de login"
+            label="Email de login"
             errors={errors}
           />
 
           <FormInput
             name={senha}
             register={register}
-            placeholder="Senha"
+            label="Senha"
             errors={errors}
           />
 
           <FormInput
             name={setor}
             register={register}
-            placeholder="Setor"
+            label="Setor"
             errors={errors}
           />
 
           <FormInput
             name={cargo}
             register={register}
-            placeholder="Cargo"
+            label="Cargo"
             errors={errors}
           />
         </Card>
 
-        <FormSelect
-          name="tipoPessoaOuEmpresa"
-          label="Tipo de Funcionário (Pessoa ou Empresa)*"
-          value={tipoPessoaOuEmpresa}
-          onChange={handleChange}
-          required
-          selectProps={{
-            classNameContainer: "px-4",
-            children: (
-              <>
-                <option value="pessoa">Pessoa</option>
-                <option value="empresa">Empresa</option>
-              </>
-            ),
-          }}
-        />
+        <Card>
+          <FormSelect
+            name="tipoPessoaOuEmpresa"
+            label="Tipo de Funcionário (Pessoa ou Empresa)*"
+            value={tipoPessoaOuEmpresa}
+            onChange={handleChange}
+            selectProps={{
+              children: (
+                <>
+                  <option value="pessoa">Pessoa</option>
+                  <option value="empresa">Empresa</option>
+                </>
+              ),
+            }}
+          />
 
-        {tipoPessoaOuEmpresa === "pessoa" && <PessoaForm />}
+          {tipoPessoaOuEmpresa === 'pessoa' && <PessoaForm />}
 
-        {tipoPessoaOuEmpresa === "empresa" && <EmpresaForm />}
+          {tipoPessoaOuEmpresa === 'empresa' && <EmpresaForm />}
+        </Card>
 
-        <button
+        <PrimaryButton
           type="submit"
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
+          className="w-full  text-white font-semibold py-3 rounded-md transition-colors"
         >
-          {funcionarioData ? "Salvar Alterações" : "Cadastrar Funcionário"}
-        </button>
+          {funcionarioData ? 'Salvar Alterações' : 'Cadastrar Funcionário'}
+        </PrimaryButton>
       </form>
     </FormProvider>
   );

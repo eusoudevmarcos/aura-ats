@@ -4,6 +4,7 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
+import { Container } from './Container';
 
 // Definição genérica para a configuração de cada campo do item
 interface FieldConfig {
@@ -72,9 +73,10 @@ export function FormArrayInput({
   };
 
   return (
-    <div className="border border-primary p-4 rounded-lg shadow-sm">
-      <h3 className="text-md font-semibold mb-3 text-primary">{title}</h3>
-
+    <Container
+      label={title}
+      className="border border-primary p-4 rounded-lg shadow-sm"
+    >
       <div
         className={`grid grid-cols-1 md:grid-cols-${fieldConfigs.length} gap-4 mb-4 `}
       >
@@ -154,6 +156,6 @@ export function FormArrayInput({
           {(errors[name] as any)?.message as string}
         </p>
       )}
-    </div>
+    </Container>
   );
 }

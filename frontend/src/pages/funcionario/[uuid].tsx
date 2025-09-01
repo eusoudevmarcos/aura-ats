@@ -145,9 +145,7 @@ const FuncionarioPage: React.FC = () => {
               {funcionario?.empresa?.dataAbertura && (
                 <div>
                   <span className="font-medium">Data de Abertura:</span>{' '}
-                  {new Date(
-                    funcionario.empresa.dataAbertura as string
-                  ).toLocaleDateString('pt-BR')}
+                  {funcionario.empresa.dataAbertura.toISOString()}
                 </div>
               )}
             </Card>

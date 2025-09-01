@@ -8,17 +8,24 @@ import { ClienteInput } from '@/schemas/cliente.schema';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
-const ClientePage: React.FC = () => {
+const ClientePage: React.FC<{
+  initialValues?: ClienteInput;
+}> = ({ initialValues }) => {
   const router = useRouter();
   const { uuid } = router.query;
 
-  const [cliente, setCliente] = useState<ClienteInput | null>(null);
+  const [cliente, setCliente] = useState<ClienteInput | null>(
+    initialValues ?? null
+  );
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
 
   useEffect(() => {
-    if (!uuid) return;
+    if (!uuid || initialValues) {
+      setLoading(false);
+      return;
+    }
 
     const fetchCliente = async () => {
       setLoading(true);
@@ -69,34 +76,36 @@ const ClientePage: React.FC = () => {
   if (!cliente) return null;
 
   return (
-    <div className="max-w-6xl mx-auto p-6">
+    <div className="max-w-6xl mx-auto p-1">
       <section className="bg-white p-4 rounded-2xl">
-        <div className="flex mb-8">
-          <button
-            className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110"
-            onClick={() => router.back()}
-          >
-            Voltar
-          </button>
-          <h1 className="text-2xl font-bold text-center text-primary w-full">
-            Detalhes do Cliente
-          </h1>
+        {!initialValues && (
+          <div className="flex mb-8">
+            <button
+              className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110"
+              onClick={() => router.back()}
+            >
+              Voltar
+            </button>
+            <h1 className="text-2xl font-bold text-center text-primary w-full">
+              Detalhes do Cliente
+            </h1>
 
-          <div className="flex gap-2">
-            <button
-              className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
-              onClick={() => setShowModalEdit(true)}
-            >
-              <EditPenIcon />
-            </button>
-            <button
-              className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110"
-              onClick={handleTrash}
-            >
-              <TrashIcon />
-            </button>
+            <div className="flex gap-2">
+              <button
+                className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
+                onClick={() => setShowModalEdit(true)}
+              >
+                <EditPenIcon />
+              </button>
+              <button
+                className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110"
+                onClick={handleTrash}
+              >
+                <TrashIcon />
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         <div className="flex flex-wrap gap-4">
           <Card title="Informações do Cliente">

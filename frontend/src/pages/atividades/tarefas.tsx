@@ -1,15 +1,14 @@
 import Card from '@/components/card';
-import { PlusIcon } from '@/components/icons';
 import AtividadeLayout from '@/layout/AtividadesLayout';
 
 export default function tarefas() {
   return (
     <AtividadeLayout>
       <Card>
-        <button className="buttonPrimary">
+        {/* <button className="buttonPrimary">
           <PlusIcon />
           Cadastrar tarefa
-        </button>
+        </button> */}
         <p>Conteúdo da seção Entrevistas (detalhado)</p>
       </Card>
     </AtividadeLayout>

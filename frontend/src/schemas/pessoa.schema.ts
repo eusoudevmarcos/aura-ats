@@ -1,34 +1,33 @@
-import { z } from "zod";
-import { contatoSchema } from "./contato.schema";
-import { localizacaoSchema } from "./localizacao.schema";
-import { formacaoSchema } from "./formacao.schame";
-import { zDateValidate } from "./util/dateValidation";
-import { isValidCPF } from "@/utils/validateCpf";
+import { isValidCPF } from '@/utils/validateCpf';
+import { z } from 'zod';
+import { contatoSchema } from './contato.schema';
+import { formacaoSchema } from './formacao.schame';
+import { localizacaoSchema } from './localizacao.schema';
 
 export const pessoaSchema = z.object({
-  nome: z.string().min(1, "Nome é obrigatório"),
+  nome: z.string().min(1, 'Nome é obrigatório'),
   cpf: z
     .string()
-    .min(1, "CPF é obrigatório")
+    .min(1, 'CPF é obrigatório')
     .refine(
-      (val) => {
+      val => {
         // Remove a máscara antes de validar
-        const unmaskedCpf = val.replace(/\D/g, "");
+        const unmaskedCpf = val.replace(/\D/g, '');
         return isValidCPF(unmaskedCpf);
       },
       {
-        message: "CPF inválido",
+        message: 'CPF inválido',
       }
     ),
-  dataNascimento: zDateValidate.optional(),
+  dataNascimento: z.date().optional(),
   estadoCivil: z
     .enum([
-      "SOLTEIRO",
-      "CASADO",
-      "DIVORCIADO",
-      "VIUVO",
-      "SEPARADO",
-      "UNIAO_ESTAVEL",
+      'SOLTEIRO',
+      'CASADO',
+      'DIVORCIADO',
+      'VIUVO',
+      'SEPARADO',
+      'UNIAO_ESTAVEL',
     ])
     .optional(),
   rg: z.string().optional(),

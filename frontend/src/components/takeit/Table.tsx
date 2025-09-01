@@ -234,7 +234,7 @@ function Table({ data, onSelect, typeColumns, loading }: TableProps) {
       : columnsByType[typeColumns] || [];
 
   return (
-    <div className="overflow-x-auto w-full ">
+    <div className="overflow-x-auto w-full">
       <table
         className="min-w-full border-separate border-spacing-0 bg-white rounded-lg"
         style={{ borderCollapse: 'separate', borderSpacing: 0 }}

@@ -2,6 +2,7 @@
 import { getError } from '@/utils/getError';
 import React, { TextareaHTMLAttributes } from 'react';
 import { FieldErrors, UseFormRegister } from 'react-hook-form';
+import { Container } from './Container';
 
 type FormTextareaProps = {
   name: string;
@@ -26,28 +27,20 @@ export const FormTextarea: React.FC<FormTextareaProps> = ({
   const { classNameContainer, ...restTextareaProps } = textareaProps || {};
 
   return (
-    <div className={`mb-4 ${classNameContainer || ''}`}>
-      {label && (
-        <label
-          htmlFor={name}
-          className="block text-primary text-sm font-bold mb-2"
-        >
-          {label}
-        </label>
-      )}
+    <Container label={label} className={classNameContainer}>
       <textarea
         id={name}
         {...register(name)}
         placeholder={placeholder}
-        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline border-secondary ${
+        className={`shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline ${
           errorMessage ? 'border-red-500' : ''
         }`}
-        rows={4} // Default rows for a textarea
+        rows={4}
         {...restTextareaProps}
       />
       {errorMessage && (
         <p className="text-red-500 text-xs italic mt-1">{errorMessage}</p>
       )}
-    </div>
+    </Container>
   );
 };

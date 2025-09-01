@@ -11,6 +11,9 @@ import { FormSelect } from '@/components/input/FormSelect';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import { AgendaInput, agendaSchema } from '@/schemas/agenda.schema';
+import { CreateEventRequestBody } from '@/type/calendar.type';
+import { useSession } from 'next-auth/react';
+import { ConnectGoogleButton } from '../button/GoogleAuth';
 
 type AgendaFormProps = {
   onSuccess: (msg: boolean) => void;
@@ -22,6 +25,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     null
   );
   const [isEtapa, setIsEtapa] = useState<boolean>(false);
+  const { data: session } = useSession();
 
   const methods = useSafeForm<AgendaInput>({
     mode: 'independent',
@@ -33,6 +37,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
   const {
     register,
+    control,
     handleSubmit,
     setValue,
     formState: { errors },
@@ -56,6 +61,45 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     }
   }, [agendaData, setValue]);
 
+  useEffect(() => {
+    register('dataHora' as any);
+  }, [register]);
+
+  // removido sincronização anterior de dataHora
+
+  const CreateEventForm = async (event: React.FormEvent) => {
+    event.preventDefault();
+
+    if (!session) {
+      alert('Você precisa estar logado para criar um evento.');
+      return;
+    }
+
+    const eventData: CreateEventRequestBody = {
+      summary: 'Reunião de Equipe',
+      description: 'Discutir o progresso do projeto.',
+      start: '2025-08-27T10:00:00',
+      end: '2025-08-27T11:00:00',
+    };
+
+    const response = await fetch('/api/create-event', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(eventData),
+    });
+
+    const result = await response.json();
+
+    if (response.ok) {
+      alert(result.message);
+      console.log('Evento criado:', result.event);
+    } else {
+      alert(`Erro: ${result.message}`);
+    }
+  };
+
   async function onSubmit(data: AgendaInput) {
     const validationData: any = { ...data };
     const result = agendaSchema.safeParse(validationData);
@@ -66,10 +110,14 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
       const isEdit = !!agendaData;
       const url = isEdit ? '/api/external/agenda' : '/api/external/agenda';
 
-      await api.post(url, result.data);
+      // monta dataHora string final para backend
+      const { data: d, hora: h, ...rest } = result.data as any;
+      const dataHora = `${d} ${h}:00`;
+      const payload = { ...rest, dataHora };
+
+      await api.post(url, payload);
       onSuccess(true);
     } catch (error: any) {
-      // console.error('Erro ao criar agenda:', error);
       onSuccess(false);
     }
   }
@@ -85,21 +133,35 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           title="Dados da Agenda"
           classNameContent="grid grid-cols-1 md:grid-cols-2 gap-4"
         >
+          <input type="hidden" {...register('dataHora' as any)} />
+
           <FormInput
-            name="dataHora"
+            name={'data' as any}
             register={register}
-            placeholder="Data e Hora"
-            type="datetime-local"
+            label="Data"
+            type="date"
+            placeholder="DD-MM-YYYY"
             errors={errors}
+            inputProps={{ pattern: '^\\d{2}-\\d{2}-\\d{4}$' }}
+          />
+
+          <FormInput
+            name={'hora' as any}
+            control={control}
+            label="Hora"
+            type="text"
+            placeholder="HH:mm"
+            errors={errors}
+            maskProps={{ mask: '00:00' }}
             inputProps={{
-              pattern: '[0-9]{2}-[0-9]{2}-[0-9]{4} [0-9]{2}:[0-9]{2}',
+              pattern: '^([01]\\d|2[0-3]):[0-5]\\d$',
             }}
           />
 
           <FormSelect
             name="tipoEvento"
             register={register}
-            placeholder="Tipo de Evento"
+            label="Tipo de Evento"
             errors={errors}
             selectProps={{
               children: (
@@ -120,6 +182,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
         <FormSelect
           name="selectLocalizacao"
+          label="Qual preferencia de localização?"
           onChange={e => {
             setSelectLocalizacao(e.target.value);
           }}
@@ -139,7 +202,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           <FormInput
             name="link"
             register={register}
-            placeholder="Link da Reunião"
+            label="Link da Reunião"
             errors={errors}
           />
         )}
@@ -166,32 +229,32 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
             <FormInput
               name="etapaAtual.nome"
               register={register}
-              placeholder="Nome da Etapa"
+              label="Nome da Etapa"
               errors={errors}
             />
             <FormInput
               name="etapaAtual.tipo"
               register={register}
-              placeholder="Tipo de Etapa"
+              label="Tipo de Etapa"
               errors={errors}
             />
             <FormInput
               name="etapaAtual.ordem"
               register={register}
-              placeholder="Ordem"
+              label="Ordem"
               type="number"
               errors={errors}
             />
             <FormInput
               name="etapaAtual.descricao"
               register={register}
-              placeholder="Descrição"
+              label="Descrição"
               errors={errors}
             />
             <FormSelect
               name="etapaAtual.ativa"
               register={register}
-              placeholder="Ativa?"
+              label="Ativa?"
               errors={errors}
               selectProps={{
                 children: (
@@ -210,6 +273,16 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
         >
           {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda'}
+        </button>
+
+        <ConnectGoogleButton />
+
+        <button
+          onClick={CreateEventForm}
+          type="button"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
+        >
+          {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda  no google'}
         </button>
       </form>
     </FormProvider>

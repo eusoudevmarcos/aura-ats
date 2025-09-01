@@ -210,8 +210,8 @@ const VagaList: React.FC = () => {
   };
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-8">
-      <div className="flex justify-between p-2">
+    <Card classNameContainer="mt-6 px-6 py-2">
+      <div className="flex justify-between items-center flex-wrap p-2">
         <h2 className="text-xl font-bold mb-4">Lista de Vagas</h2>
         <input
           type="text"

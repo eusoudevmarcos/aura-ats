@@ -1,35 +1,36 @@
 import { PrimaryButton } from '@/components/button/PrimaryButton';
-import CandidatoForm from '@/components/form/CandidatoForm';
+import ClienteForm from '@/components/form/ClienteForm';
 import { PlusIcon } from '@/components/icons';
-import CandidatoList from '@/components/list/CandidatoList';
+import ClientList from '@/components/list/ClientList';
 import Modal from '@/components/modal/Modal';
 import { useState } from 'react';
 
-export default function Profissionais() {
+export default function Clientes() {
   const [showClientForm, setShowClientForm] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // chave para forçar atualização
 
   return (
     <>
-      <CandidatoList key={refreshKey} />
+      <ClientList key={refreshKey} onlyProspects />
 
       <PrimaryButton
         className="float-right mt-4"
         onClick={() => setShowClientForm(true)}
       >
         <PlusIcon />
-        Cadastrar Profissional
+        Cadastrar Prospects
       </PrimaryButton>
 
       <Modal
-        title="Cadastrar Profissionais"
+        title="Cadastrar Prospects"
         isOpen={showClientForm}
         onClose={() => setShowClientForm(false)}
       >
-        <CandidatoForm
+        <ClienteForm
+          initialValues={{ status: 'PROSPECT' }}
           onSuccess={() => {
             setShowClientForm(false);
-            setRefreshKey(prev => prev + 1); // força re-render do ClientList
+            setRefreshKey(prev => prev + 1);
           }}
         />
       </Modal>

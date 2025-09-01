@@ -31,14 +31,16 @@ const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = '' }) => {
           <FormInput
             name={`${namePrefix}formacoes.${index}.dataConclusaoMedicina`}
             register={register}
-            placeholder="Data Conclusão Medicina"
+            label="Data Conclusão Medicina"
+            placeholder="00/00/0000"
             errors={errors}
             inputProps={{ type: 'date' }}
           />
           <FormInput
             name={`${namePrefix}formacoes.${index}.dataConclusaoResidencia`}
             register={register}
-            placeholder="Data Conclusão Residência"
+            label="Data Conclusão Residência"
+            placeholder="00/00/0000"
             errors={errors}
             inputProps={{ type: 'date' }}
           />

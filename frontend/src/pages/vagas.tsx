@@ -1,8 +1,9 @@
-import { PlusIcon } from "@/components/icons";
-import VagaForm from "@/components/form/VagaForm";
-import VagaList from "@/components/list/VagaList";
-import { useState } from "react";
-import Modal from "@/components/modal/Modal";
+import { PrimaryButton } from '@/components/button/PrimaryButton';
+import VagaForm from '@/components/form/VagaForm';
+import { PlusIcon } from '@/components/icons';
+import VagaList from '@/components/list/VagaList';
+import Modal from '@/components/modal/Modal';
+import { useState } from 'react';
 
 export default function Vagas() {
   const [showVagasForm, setShowVagasForm] = useState(false);
@@ -10,11 +11,16 @@ export default function Vagas() {
 
   return (
     <>
-      <button className="buttonPrimary" onClick={() => setShowVagasForm(true)}>
+      <VagaList key={refreshKey} />
+
+      <PrimaryButton
+        className="float-right mt-4"
+        onClick={() => setShowVagasForm(true)}
+      >
         <PlusIcon />
         Cadastrar Vaga
-      </button>
-      <VagaList key={refreshKey} />
+      </PrimaryButton>
+
       {showVagasForm && (
         <Modal
           isOpen={showVagasForm}
@@ -26,7 +32,7 @@ export default function Vagas() {
           <VagaForm
             onSuccess={() => {
               setShowVagasForm(false);
-              setRefreshKey((prev) => prev + 1);
+              setRefreshKey(prev => prev + 1);
             }}
           />
         </Modal>

@@ -1,8 +1,9 @@
-import { FuncionarioForm } from "@/components/form/FuncionarioForm";
-import { PlusIcon } from "@/components/icons";
-import FuncionariosList from "@/components/list/FuncionariosList";
-import Modal from "@/components/modal/Modal";
-import { useState } from "react";
+import { PrimaryButton } from '@/components/button/PrimaryButton';
+import { FuncionarioForm } from '@/components/form/FuncionarioForm';
+import { PlusIcon } from '@/components/icons';
+import FuncionariosList from '@/components/list/FuncionariosList';
+import Modal from '@/components/modal/Modal';
+import { useState } from 'react';
 
 export default function Funcionarios() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -16,12 +17,15 @@ export default function Funcionarios() {
   };
   return (
     <>
-      <button className="buttonPrimary" onClick={() => setIsModalOpen(true)}>
+      <FuncionariosList />
+
+      <PrimaryButton
+        className="float-right mt-4"
+        onClick={() => setIsModalOpen(true)}
+      >
         <PlusIcon />
         Cadastrar Funcionario
-      </button>
-
-      <FuncionariosList />
+      </PrimaryButton>
 
       <Modal
         isOpen={isModalOpen}

@@ -1,10 +1,14 @@
 // frontend/components/Clients/ClientList.tsx
 import api from '@/axios';
-import styles from '@/styles/clients.module.css';
+import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import { PrimaryButton } from '../button/PrimaryButton';
 import Card from '../card';
+import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
+import Modal from '../modal/Modal';
 import Table, { TableColumn } from '../Table';
 
 interface EmpresaContato {
@@ -31,10 +35,16 @@ interface Cliente {
   status: string;
 }
 
+interface Search {
+  cpf?: string;
+  status?: string;
+  razaoSocial?: string;
+}
+
 function normalizarTable(clientes: Cliente[]) {
   return clientes.map(c => ({
     id: c.id,
-    nome: c.empresa?.razaoSocial ?? '-',
+    razaoSocial: c.empresa?.razaoSocial ?? '-',
     email: c.empresa?.contatos?.[0]?.email ?? '-',
     cnpj: c.empresa?.cnpj ?? '-',
     dataAbertura: c.empresa?.dataAbertura
@@ -47,12 +57,14 @@ function normalizarTable(clientes: Cliente[]) {
   }));
 }
 
-const ClientList: React.FC = () => {
-  const [search, setSearch] = useState('');
+const ClientList: React.FC<{
+  onlyProspects?: boolean;
+}> = ({ onlyProspects }) => {
+  const [search, setSearch] = useState<Search>({});
   const [clientes, setClientes] = useState<Cliente[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [filter, setFilter] = useState<boolean>(false);
 
-  // Paginação (ajuste quando backend suportar paginação de clientes)
   const [page, setPage] = useState<number>(1);
   const pageSize = 5;
   const [total, setTotal] = useState<number>(0);
@@ -63,10 +75,34 @@ const ClientList: React.FC = () => {
   useEffect(() => {
     const fetchClientes = async () => {
       setLoading(true);
+
       try {
+        const params: Record<string, any> = {
+          page,
+          pageSize,
+        };
+
+        if (onlyProspects) {
+          params.status = 'PROSPECT';
+        } else if (search.status) {
+          params.status = search.status;
+        }
+
+        if (search.cpf) {
+          params.cpf = search.cpf;
+        }
+
+        if (search.razaoSocial) {
+          params.razaoSocial = search.razaoSocial;
+        }
+
         const response = await api.get<Pagination<Cliente[]>>(
-          '/api/external/cliente'
+          '/api/external/cliente',
+          {
+            params,
+          }
         );
+
         const data = Array.isArray(response.data?.data)
           ? response.data.data
           : [];
@@ -82,21 +118,39 @@ const ClientList: React.FC = () => {
       }
     };
     fetchClientes();
-  }, []);
+  }, [search, onlyProspects, page, pageSize]);
 
   const dadosTabela = useMemo(() => normalizarTable(clientes), [clientes]);
 
   const dadosFiltrados = useMemo(() => {
-    const s = search.toLowerCase();
-    return dadosTabela.filter((c: any) =>
-      [c.nome, c.email, c.cnpj, c.servicos, c.status]
-        .filter(Boolean)
-        .some((v: string) => String(v).toLowerCase().includes(s))
-    );
+    if (!search || (!search.cpf && !search.status)) {
+      return dadosTabela;
+    }
+    return dadosTabela.filter((c: any) => {
+      let match = true;
+      if (search.cpf) {
+        match =
+          match &&
+          String(c.cnpj).toLowerCase().includes(search.cpf?.toLowerCase());
+      }
+      if (search.status) {
+        match =
+          match &&
+          String(c.status).toLowerCase().includes(search.status?.toLowerCase());
+      }
+      if (search.razaoSocial) {
+        match =
+          match &&
+          String(c.status)
+            .toLowerCase()
+            .includes(search.razaoSocial?.toLowerCase());
+      }
+      return match;
+    });
   }, [dadosTabela, search]);
 
   const columns: TableColumn<any>[] = [
-    { label: 'Nome', key: 'nome' },
+    { label: 'razaoSocial', key: 'razaoSocial' },
     { label: 'Email', key: 'email' },
     { label: 'CNPJ', key: 'cnpj' },
     { label: 'Abertura', key: 'dataAbertura' },
@@ -109,16 +163,81 @@ const ClientList: React.FC = () => {
   };
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-8">
-      <div className="flex justify-between p-2">
-        <h3 className={styles.clientsTitle}>Lista de Clientes</h3>
-        <input
-          type="text"
-          placeholder="Buscar cliente..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
-        />
+    <Card classNameContainer="mt-6 px-6 py-2">
+      <div className="flex justify-between itesm-center flex-wrap p-2">
+        <h3 className="text-xl font-bold">Lista de Clientes</h3>
+
+        <div className="flex gap-2">
+          <PrimaryButton onClick={() => setFilter(!filter)}>
+            FILTROS
+          </PrimaryButton>
+
+          <FormInput
+            name="buscar"
+            type="text"
+            placeholder="Buscar CNPJ"
+            value={search.cpf || ''}
+            inputProps={{
+              classNameContainer: 'w-full max-w-[300px]',
+            }}
+            onChange={(e: ChangeEvent<HTMLInputElement>) =>
+              setSearch(prev => ({
+                ...prev,
+                cpf: e.target.value || undefined,
+              }))
+            }
+          />
+        </div>
+        <Modal
+          isOpen={filter}
+          title="FILTROS"
+          onClose={() => setFilter(!filter)}
+          backdropClose
+        >
+          <div className="flex gap-2">
+            <FormInput
+              label="Razão Social"
+              name="razaoSocial"
+              type="text"
+              placeholder="Buscar Razão Social"
+              value={search.razaoSocial || ''}
+              inputProps={{
+                classNameContainer: 'w-full max-w-[300px]',
+              }}
+              onChange={(e: ChangeEvent<HTMLInputElement>) =>
+                setSearch(prev => ({
+                  ...prev,
+                  razaoSocial: e.target.value || undefined,
+                }))
+              }
+            />
+
+            <FormSelect
+              label="Filtrar Status"
+              name="status"
+              placeholder="TUDO"
+              onChange={e =>
+                setSearch(prev => ({
+                  ...prev,
+                  status: e.target.value || undefined,
+                }))
+              }
+              selectProps={{
+                classNameContainer: 'max-w-[300px] w-full',
+                value: search.status || '',
+                children: (
+                  <>
+                    {StatusClienteEnum.options.map(st => (
+                      <option key={st} value={st}>
+                        {st}
+                      </option>
+                    ))}
+                  </>
+                ),
+              }}
+            ></FormSelect>
+          </div>
+        </Modal>
       </div>
       <Table
         columns={columns}

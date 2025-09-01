@@ -1,30 +1,12 @@
 // src/components/input/FormInput.tsx
-import { ContainerProps, FormInputProps } from '@/type/formInput.type';
+import { FormInputProps } from '@/type/formInput.type';
 import { convertDateFromPostgres } from '@/utils/date/convertDateFromPostgres';
 import { convertDateToPostgres } from '@/utils/date/convertDateToPostgres';
 import { getError } from '@/utils/getError';
 import { dateFullValidate } from '@/utils/mask/date';
-import React from 'react';
 import { Controller, FieldValues } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
-
-const Container: React.FC<ContainerProps> = ({
-  children,
-  label,
-  id,
-  className,
-}) => (
-  <div className={`mb-4 ${className || ''}`}>
-    {' '}
-    {/* Container flexível */}
-    {label && (
-      <label htmlFor={id} className="block text-gray-700 mb-1 font-semibold">
-        {label}
-      </label>
-    )}
-    {children}
-  </div>
-);
+import { Container } from './Container';
 
 export function FormInput<T extends FieldValues>({
   name,
@@ -36,22 +18,15 @@ export function FormInput<T extends FieldValues>({
   label,
   placeholder,
   type = 'text',
-  value, // Valor controlado externamente
-  onChange, // Função de mudança controlada externamente
+  value,
+  onChange,
 }: FormInputProps<T>) {
-  // A validação de `control` e `register` juntos pode ser removida se a intenção é flexibilidade
-  // if (control && register) {
-  //   throw new Error(
-  //     `Componente ${name}: 'control' e 'register' não podem estar juntos`
-  //   );
-  // }
-
   const errorMessage = getError(errors, name);
 
   const id = inputProps?.id || name.toString();
 
   const baseClass =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border border-secondary transition-all duration-200 disabled:opacity-90';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90';
   const errorClass = errorMessage ? 'border-red-500' : '';
 
   const { classNameContainer, ...otherInputProps } = inputProps || {};
@@ -114,7 +89,6 @@ export function FormInput<T extends FieldValues>({
             }}
           />
         ) : register ? (
-          // Se register for fornecido, usa-o
           <input
             id={id}
             {...register(name)}
@@ -126,7 +100,6 @@ export function FormInput<T extends FieldValues>({
             onChange={onChange}
           />
         ) : (
-          // Caso contrário, usa value e onChange para controle manual
           <input
             id={id}
             type={type}

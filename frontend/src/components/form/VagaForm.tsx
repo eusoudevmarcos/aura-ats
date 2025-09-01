@@ -23,6 +23,7 @@ import {
   vagaSchema,
 } from '@/schemas/vaga.schema';
 import { FormArrayInput } from '../input/FormArrayInput';
+import ClienteSearch from '../search/ClienteSearch';
 import LocalizacaoForm from './LocalizacaoForm';
 
 type VagaFormProps = {
@@ -95,10 +96,6 @@ const VagaForm: React.FC<VagaFormProps> = ({
       }
     } catch (erro: any) {
       console.log('Erro ao salvar vaga:', erro);
-      // alert(
-      //   "Erro ao salvar vaga: " +
-      //     (erro?.response?.data?.message || "Erro desconhecido")
-      // );
     } finally {
       setLoading(false);
     }
@@ -110,10 +107,15 @@ const VagaForm: React.FC<VagaFormProps> = ({
         onSubmit={handleSubmit(submitHandler as any)}
         className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-1 space-y-2"
       >
+        <div className="col-span-full">
+          <ClienteSearch />
+        </div>
+
         <FormInput
           name="titulo"
           register={register}
-          placeholder="Título da Vaga"
+          label="Título da Vaga"
+          placeholder="Medico residente"
           errors={errors}
           inputProps={{ classNameContainer: 'col-span-full' }}
         />
@@ -121,7 +123,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <FormSelect
           name="tipoSalario"
           register={register}
-          placeholder="Tipo de salário"
+          label="Tipo de salário"
+          placeholder="Selecione o tipo de salário"
           selectProps={{
             children: (
               <>
@@ -137,7 +140,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           <FormInput
             name="salario"
             register={register}
-            placeholder="Salário"
+            label="Salário"
             inputProps={{ type: 'number', step: '0.01' }}
           />
         )}
@@ -146,7 +149,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
           name="categoria"
           register={register}
           errors={errors}
-          placeholder="Categoria da Vaga"
+          label="Categoria da Vaga"
+          placeholder="Selecione o categoria"
           selectProps={{
             children: (
               <>
@@ -164,7 +168,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           name="status"
           register={register}
           errors={errors}
-          placeholder="Status da Vaga"
+          label="Status da Vaga"
           selectProps={{
             children: (
               <>
@@ -181,7 +185,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <FormSelect
           name="tipoContrato"
           register={register}
-          placeholder="Tipo de Contrato"
+          label="Tipo de Contrato"
+          placeholder="Selecione o tipo de contratação"
           selectProps={{
             children: (
               <>
@@ -200,7 +205,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
             name="nivelExperiencia"
             register={register}
             errors={errors}
-            placeholder="Nível de Experiência"
+            label="Nível de Experiência"
+            placeholder="Selecione o nível de experiência"
             selectProps={{
               children: (
                 <>
@@ -237,7 +243,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <FormTextarea
           name="descricao"
           register={register}
-          placeholder="Descrição da Vaga"
+          label="Descrição da Vaga"
+          placeholder="Ex: Medico residente com mais de 5 anos de experiência"
           errors={errors}
           textareaProps={{ classNameContainer: 'col-span-full' }}
         />
@@ -245,7 +252,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <FormTextarea
           name="requisitos"
           register={register}
-          placeholder="Requisitos (Opcional)"
+          label="Requisitos (Opcional)"
+          placeholder="Ex: 5 anos de experiência, ter RQN."
           errors={errors}
           textareaProps={{ classNameContainer: 'col-span-full', rows: 2 }}
         />
@@ -253,10 +261,15 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <FormTextarea
           name="responsabilidades"
           register={register}
-          placeholder="Responsabilidades (Opcional)"
+          label="Responsabilidades (Opcional)"
+          placeholder="Ex: Atuar como médico em clinicas locais."
           errors={errors}
           textareaProps={{ classNameContainer: 'col-span-full', rows: 2 }}
         />
+
+        <div className="col-span-full">
+          <LocalizacaoForm namePrefix="localizacao" />
+        </div>
 
         <div className="w-full flex gap-2 items-center col-span-full justify-center">
           <button
@@ -365,10 +378,6 @@ const VagaForm: React.FC<VagaFormProps> = ({
             />
           </div>
         )}
-
-        <div className="col-span-full">
-          <LocalizacaoForm namePrefix="localizacao" />
-        </div>
 
         <div className="flex justify-end col-span-full">
           <PrimaryButton type="submit" disabled={loading}>

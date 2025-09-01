@@ -1,9 +1,9 @@
-import { useState } from "react";
-import { searchApi } from "@/axios/searchApi";
-import SearchForm from "@/components/takeit/SearchForm";
-import styles from "@/styles/takeit.module.scss";
+import api from '@/axios';
+import SearchForm from '@/components/takeit/SearchForm';
+import styles from '@/styles/takeit.module.scss';
+import { useState } from 'react';
 
-type TypeColumns = "persons" | "companies";
+type TypeColumns = 'persons' | 'companies';
 
 interface SearchOptions {
   [key: string]: any;
@@ -21,7 +21,7 @@ interface Props {
 }
 
 export default function TakeitLayout({ children, fit }: Props) {
-  const [typeColumns, setTypeColumns] = useState<TypeColumns>("persons");
+  const [typeColumns, setTypeColumns] = useState<TypeColumns>('persons');
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState(null);
@@ -42,10 +42,23 @@ export default function TakeitLayout({ children, fit }: Props) {
     setResults(null);
 
     try {
-      const data = await searchApi(input, typeColumns, { ...options, uf });
-      setResults(data.data);
+      const response = await api.get('/api/external/take-it/search', {
+        params: {
+          query: input,
+          tipo: typeColumns,
+          ...options,
+          uf,
+        },
+      });
+      const data = Array.isArray(response.data?.data) ? response.data.data : [];
+      setResults(data);
     } catch (erro: any) {
-      setError(erro?.message || "Erro ao buscar dados.");
+      console.log(erro);
+      setError(
+        erro?.response?.data?.details?.mensagem ||
+          erro?.response?.data.error ||
+          'Erro ao buscar dados.'
+      );
       setResults(null);
     } finally {
       setLoading(false);
@@ -60,7 +73,7 @@ export default function TakeitLayout({ children, fit }: Props) {
     <section
       className="flex flex-col bg-white max-w-7xl p-4 rounded-2xl mx-auto mt-4 shadow-md"
       style={{
-        padding: "16px",
+        padding: '16px',
       }}
     >
       <div className="flex justify-between items-center">
@@ -69,9 +82,9 @@ export default function TakeitLayout({ children, fit }: Props) {
 
       <div
         className={`${styles.container} shadow-md`}
-        style={{ marginBottom: "20px", padding: "16px" }}
+        style={{ marginBottom: '20px', padding: '16px' }}
       >
-        {typeColumns === "persons" ? (
+        {typeColumns === 'persons' ? (
           <p>Pesquise CPF, Nome completo, CEP, Endereço completo, Email</p>
         ) : (
           <p>Pesquise CNPJ, Razão social, Email</p>
@@ -87,17 +100,17 @@ export default function TakeitLayout({ children, fit }: Props) {
           <div className={styles.categoryNavigation}>
             <button
               className={`${styles.categoryButton} ${
-                typeColumns === "persons" ? styles.active : ""
+                typeColumns === 'persons' ? styles.active : ''
               }`}
-              onClick={() => handleCategoryChange("persons")}
+              onClick={() => handleCategoryChange('persons')}
             >
               Consumidores
             </button>
             <button
               className={`${styles.categoryButton} ${
-                typeColumns === "companies" ? styles.active : ""
+                typeColumns === 'companies' ? styles.active : ''
               }`}
-              onClick={() => handleCategoryChange("companies")}
+              onClick={() => handleCategoryChange('companies')}
             >
               Empresas
             </button>

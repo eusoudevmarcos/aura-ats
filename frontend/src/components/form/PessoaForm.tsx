@@ -1,10 +1,9 @@
-import React from "react";
-import { FormProvider } from "react-hook-form";
-import { useSafeForm } from "@/hook/useSafeForm";
-import { makeName } from "@/utils/makeName";
-import { PessoaInput } from "@/schemas/pessoa.schema";
-import { FormInput } from "../input/FormInput";
-import ContatoForm from "./ContatoForm";
+import { useSafeForm } from '@/hook/useSafeForm';
+import { PessoaInput } from '@/schemas/pessoa.schema';
+import { makeName } from '@/utils/makeName';
+import { FormProvider } from 'react-hook-form';
+import { FormInput } from '../input/FormInput';
+import ContatoForm from './ContatoForm';
 
 type PessoaFormProps = {
   namePrefix?: string;
@@ -13,11 +12,11 @@ type PessoaFormProps = {
 };
 
 const PessoaForm = ({
-  namePrefix = "pessoa",
+  namePrefix = 'pessoa',
   onSubmit,
   contatoPessoa,
 }: PessoaFormProps) => {
-  const mode = "context";
+  const mode = 'context';
   const methods = useSafeForm({ mode, debug: true });
   const {
     register,
@@ -25,32 +24,34 @@ const PessoaForm = ({
     formState: { errors },
   } = methods;
 
-  const nome = makeName<PessoaInput>(namePrefix, "nome");
-  const cpf = makeName<PessoaInput>(namePrefix, "cpf");
-  const rg = makeName<PessoaInput>(namePrefix, "rg");
-  const dataNascimento = makeName<PessoaInput>(namePrefix, "dataNascimento");
+  const nome = makeName<PessoaInput>(namePrefix, 'nome');
+  const cpf = makeName<PessoaInput>(namePrefix, 'cpf');
+  const rg = makeName<PessoaInput>(namePrefix, 'rg');
+  const dataNascimento = makeName<PessoaInput>(namePrefix, 'dataNascimento');
 
   const formContent = (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-2">
       <FormInput
         name={nome}
         register={register}
-        placeholder="Nome Completo"
+        label="Nome Completo"
         errors={errors}
       />
 
       <FormInput
         name={cpf}
         control={control}
-        maskProps={{ mask: "000.000.000-00" }}
-        placeholder="CPF"
+        maskProps={{ mask: '000.000.000-00' }}
+        label="CPF"
+        placeholder="000.000.000-00"
         errors={errors}
       />
 
       <FormInput
         name={dataNascimento}
         control={control}
-        placeholder="Data de Nascimento"
+        label="Data de Nascimento"
+        placeholder="00/00/0000"
         errors={errors}
         type="date"
       />
@@ -58,7 +59,8 @@ const PessoaForm = ({
       <FormInput
         name={rg}
         register={register}
-        placeholder="RG"
+        label="RG"
+        placeholder="00000-000"
         errors={errors}
       />
 
@@ -73,7 +75,7 @@ const PessoaForm = ({
     </section>
   );
 
-  if (mode !== "context") {
+  if (mode !== 'context') {
     return (
       <FormProvider {...methods}>
         <form onSubmit={methods.handleSubmit((data: any) => onSubmit?.(data))}>

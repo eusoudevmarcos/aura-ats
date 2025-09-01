@@ -2,6 +2,7 @@
 
 @import 'tailwindcss';
 @import './color.css';
+@import './inputs.css';
 @import './animations.module.css';
 
 body {
