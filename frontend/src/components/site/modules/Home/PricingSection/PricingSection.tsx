@@ -2,11 +2,9 @@
 import Button from '@/components/site/Button/Button';
 import React from 'react';
 import { FaCheckCircle } from 'react-icons/fa'; // Ícone de check
-import styles from './PricingSection.module.css';
 
 const PricingSection: React.FC = () => {
   const handleContactClick = (planName: string) => {
-    // Aqui você pode rolar para a seção de contato ou disparar um modal de formulário
     document
       .getElementById('contact-section')
       ?.scrollIntoView({ behavior: 'smooth' });
@@ -16,41 +14,54 @@ const PricingSection: React.FC = () => {
   };
 
   return (
-    <section id="pricing-section" className={styles.sectionContainer}>
-      <h2>
+    <section
+      id="pricing-section"
+      className="max-w-[1420px] mx-auto text-center bg-bg-color-light text-text-color-primary px-4 py-16"
+    >
+      <h2 className="font-black text-2xl md:text-4xl text-primary">
         Planos de Contratação: Encontre o Talento Ideal para Seu Orçamento
       </h2>
-      <p className={styles.subtitle}>
+      <p className="text-lg text-text-color-secondary mb-16 max-w-[800px] mx-auto">
         A Take It oferece soluções flexíveis de recrutamento e seleção para
         atender às necessidades específicas da sua empresa, seja qual for o
         tamanho da sua demanda.
       </p>
 
-      <div className={styles.pricingGrid}>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8">
         {/* Plano Básico */}
-        <div className={styles.pricingCard}>
-          <h3>Plano Essencial</h3>
-          <p className={styles.tagline}>Ideal para primeiras contratações</p>
-          <p className={styles.price}>
-            60%/Salário<span>/vaga</span>
+        <div className="rounded-lg p-8 shadow-md flex flex-col items-center text-center border border-primary transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-lg bg-white">
+          <h3 className="text-primary text-2xl font-bold mb-1">
+            Plano Essencial
+          </h3>
+          <p className="text-sm text-text-color-secondary mb-4 min-h-[2em]">
+            Ideal para primeiras contratações
           </p>
-          <ul className={styles.featuresList}>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Publicação de vaga
+          <p className="text-3xl font-bold text-accent mb-8">
+            60%/Salário
+            <span className="text-base font-normal text-text-color-secondary">
+              /vaga
+            </span>
+          </p>
+          <ul className="list-none p-0 text-left w-full mb-8 flex-grow">
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Publicação de vaga
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Triagem inicial de
-              currículos
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Triagem inicial de currículos
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Entrevistas com 3
-              candidatos finalistas
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Entrevistas com 3 candidatos finalistas
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Suporte via e-mail
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Suporte via e-mail
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Garantia de 30 dias
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Garantia de 30 dias
             </li>
           </ul>
           <Button
@@ -64,34 +75,49 @@ const PricingSection: React.FC = () => {
         </div>
 
         {/* Plano Padrão */}
-        <div className={styles.pricingCard}>
-          <h3>Plano Profissional</h3>
-          <p className={styles.tagline}>Para volume moderado de contratações</p>
-          <p className={styles.price}>
-            80%/Salário<span>/vaga</span>
+        <div
+          className="
+            rounded-lg p-8 shadow-md flex flex-col items-center text-center border border-primary
+            transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-lg
+            bg-white
+          "
+        >
+          <h3 className="text-primary text-2xl font-bold mb-1">
+            Plano Profissional
+          </h3>
+          <p className="text-sm text-text-color-secondary mb-4 min-h-[2em]">
+            Para volume moderado de contratações
           </p>
-          <ul className={styles.featuresList}>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Tudo do Plano
-              Essencial
+          <p className="text-3xl font-bold text-accent mb-8">
+            80%/Salário
+            <span className="text-base font-normal text-text-color-secondary">
+              /vaga
+            </span>
+          </p>
+          <ul className="list-none p-0 text-left w-full mb-8 flex-grow">
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Tudo do Plano Essencial
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Avaliação de perfil
-              comportamental
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Avaliação de perfil comportamental
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Entrevistas com 5
-              candidatos finalistas
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Entrevistas com 5 candidatos finalistas
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Headhunting
-              estratégico
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Headhunting estratégico
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Suporte prioritário
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Suporte prioritário
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Garantia de 60 dias
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Garantia de 60 dias
             </li>
           </ul>
           <Button
@@ -105,36 +131,44 @@ const PricingSection: React.FC = () => {
         </div>
 
         {/* Plano Premium */}
-        <div className={styles.pricingCard}>
-          <h3>Plano Premium</h3>
-          <p className={styles.tagline}>
+        <div
+          className="
+            rounded-lg p-8 shadow-md flex flex-col items-center text-center border border-primary
+            transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-lg
+            bg-white
+          "
+        >
+          <h3 className="text-primary text-2xl font-bold mb-1">
+            Plano Premium
+          </h3>
+          <p className="text-sm text-text-color-secondary mb-4 min-h-[2em]">
             Solução completa para grandes demandas
           </p>
-          <p className={styles.price}>A Consultar</p>{' '}
-          {/* Preço flexível para este plano */}
-          <ul className={styles.featuresList}>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Tudo do Plano
-              Profissional
+          <p className="text-3xl font-bold text-accent mb-8">A Consultar</p>
+          <ul className="list-none p-0 text-left w-full mb-8 flex-grow">
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />
+              Tudo do Plano Profissional
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Hunting exclusivo
-              (hunting passivo e ativo)
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Hunting exclusivo (hunting passivo e ativo)
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Mapeamento de
-              mercado
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Mapeamento de mercado
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Avaliação de testes
-              técnicos personalizados
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Avaliação de testes técnicos personalizados
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Consultoria de R&S
-              dedicada
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Consultoria de R&S dedicada
             </li>
-            <li>
-              <FaCheckCircle className={styles.checkIcon} /> Garantia de 90 dias
+            <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
+              <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />{' '}
+              Garantia de 90 dias
             </li>
           </ul>
           <Button
@@ -148,7 +182,11 @@ const PricingSection: React.FC = () => {
         </div>
       </div>
 
-      <p className={styles.note}>
+      <p
+        className="
+          text-sm text-text-color-secondary mt-16 text-center
+        "
+      >
         *Os valores são sobre o salário mensal proposto por vaga contratada.
         Para grandes volumes ou pacotes personalizados, entre em contato para
         uma proposta exclusiva.
