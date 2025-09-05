@@ -26,12 +26,6 @@ export default function TakeitLayout({ children, fit }: Props) {
   const [error, setError] = useState<string | null>(null);
   const [results, setResults] = useState(null);
 
-  /**
-   * Realiza a busca usando a API.
-   * @param {string} input
-   * @param {string} uf
-   * @param {Object} options
-   */
   const handleSearch = async (
     input: string,
     uf: string,
@@ -70,45 +64,43 @@ export default function TakeitLayout({ children, fit }: Props) {
   };
 
   return (
-    <section
-      className="flex flex-col bg-white max-w-7xl p-4 rounded-2xl mx-auto mt-4 shadow-md"
-      style={{
-        padding: '16px',
-      }}
-    >
-      <div className="flex justify-between items-center">
-        <h1 className={`w-full text-center ${styles.h1}`}>TAKE IT</h1>
-      </div>
-
-      <div
-        className={`${styles.container} shadow-md`}
-        style={{ marginBottom: '20px', padding: '16px' }}
+    <section className="flex flex-col bg-white max-w-7xl rounded-2xl mx-auto shadow-md">
+      <h1
+        className={`w-full text-center text-primary font-black text-4xl my-4`}
       >
-        {typeColumns === 'persons' ? (
-          <p>Pesquise CPF, Nome completo, CEP, Endereço completo, Email</p>
-        ) : (
-          <p>Pesquise CNPJ, Razão social, Email</p>
-        )}
+        TAKE IT
+      </h1>
 
-        <SearchForm
-          handleSearch={handleSearch}
-          loading={loading}
-          typeColumns={typeColumns}
-        />
+      <div className="transition-all duration-2000 bg-white rounded-xl w-full shadow-md mb-5 flex flex-col-reverse md:flex-col">
+        <div className="p-4">
+          {typeColumns === 'persons' ? (
+            <p>Pesquise CPF, Nome completo, CEP, Endereço completo, Email</p>
+          ) : (
+            <p>Pesquise CNPJ, Razão social, Email</p>
+          )}
+
+          <SearchForm
+            handleSearch={handleSearch}
+            loading={loading}
+            typeColumns={typeColumns}
+          />
+        </div>
 
         {!fit && (
-          <div className={styles.categoryNavigation}>
+          <div className="flex md:mt-6 md:mb-0 mb-4 w-full justify-center">
             <button
-              className={`${styles.categoryButton} ${
-                typeColumns === 'persons' ? styles.active : ''
+              className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 flex-grow max-w-[200px] ${
+                typeColumns === 'persons' &&
+                'font-black border-b-primary border-b-2'
               }`}
               onClick={() => handleCategoryChange('persons')}
             >
               Consumidores
             </button>
             <button
-              className={`${styles.categoryButton} ${
-                typeColumns === 'companies' ? styles.active : ''
+              className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 flex-grow max-w-[200px] ${
+                typeColumns === 'companies' &&
+                'font-black border-b-primary border-b-2'
               }`}
               onClick={() => handleCategoryChange('companies')}
             >

@@ -1,94 +1,11 @@
 /* --------------------------------------------------- */
-/* Container Principal */
-/* --------------------------------------------------- */
-.container {
-  transition: all ease-in-out 2s;
-  background-color: #fff;
-  border-radius: 12px;
-  width: 100%;
-}
-
-/* --------------------------------------------------- */
-/* Navegação de Categorias (Consumidores/Empresas) */
-/* --------------------------------------------------- */
-.categoryNavigation {
-  display: flex;
-  justify-content: center;
-}
-
-.h1 {
-  color: #48038a;
-  font-weight: bold;
-  font-size: 2rem;
-}
-
-.categoryButton {
-  background: none;
-  border: none;
-  padding: 15px 30px;
-  font-size: 1.3em;
-  font-weight: 600;
-  cursor: pointer;
-  color: #48038a;
-  transition: color 0.3s, border-bottom 0.3s;
-  border-bottom: 4px solid transparent;
-  margin: 0 10px;
-  flex-grow: 1;
-  max-width: 200px;
-}
-
-.categoryButton.active {
-  color: #48038a;
-  border-bottom-color: #48038a;
-  font-weight: 700;
-}
-
-.categoryButton:hover:not(.active) {
-  color: #8c1df5;
-}
-
-/* --------------------------------------------------- */
-/* Navegação por Abas */
-/* --------------------------------------------------- */
-.tabNavigation {
-  display: flex;
-  justify-content: center;
-  margin: 25px 0 30px 0;
-  border-bottom: 1px solid #dee2e6;
-  flex-wrap: wrap;
-}
-
-.tabButton {
-  background: none;
-  border: none;
-  padding: 12px 20px;
-  font-size: 1.05em;
-  font-weight: 500;
-  cursor: pointer;
-  color: #495057;
-  transition: color 0.3s, border-bottom 0.3s;
-  border-bottom: 2px solid transparent;
-  margin: 0 5px;
-
-  &.active {
-    color: #48038a;
-    border-bottom-color: #48038a;
-    font-weight: 600;
-  }
-
-  &:hover:not(.active) {
-    color: #8f24f3;
-  }
-}
-
-/* --------------------------------------------------- */
 /* Formulários de Busca */
 /* --------------------------------------------------- */
 .searchForm {
   display: flex;
   flex-wrap: nowrap;
 
-  input[type="text"] {
+  input[type='text'] {
     font-size: 1rem;
     transition: border-color 0.2s, box-shadow 0.2s;
   }
@@ -314,11 +231,6 @@
 /* Responsividade */
 /* --------------------------------------------------- */
 @media (max-width: 768px) {
-  .categoryNavigation {
-    flex-direction: column;
-    border-bottom: none;
-  }
-
   .categoryButton {
     max-width: 100%;
     margin: 6px 0;
@@ -331,7 +243,7 @@
     gap: 8px;
   }
 
-  .searchForm input[type="text"] {
+  .searchForm input[type='text'] {
     min-width: 100%;
   }
 

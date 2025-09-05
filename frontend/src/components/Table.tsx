@@ -79,20 +79,76 @@ function ButtonCopy({ valorCompleto }: any) {
   }, [copiado]);
 
   return (
-    <>
-      <PrimaryButton
-        title={copiado ? 'Copiado!' : 'Copiar'}
-        className="!p-1"
-        onClick={handleCopy}
-      >
-        <span className="material-icons" style={{ fontSize: 16 }}>
-          {copiado ? 'done' : 'content_copy'}
-        </span>
-      </PrimaryButton>
-    </>
+    <PrimaryButton
+      title={copiado ? 'Copiado!' : 'Copiar'}
+      className="!p-1 !min-w-0 flex-shrink-0"
+      onClick={handleCopy}
+    >
+      <span className="material-icons text-sm">
+        {copiado ? 'done' : 'content_copy'}
+      </span>
+    </PrimaryButton>
   );
 }
 
+// Componente Card para Mobile
+function MobileCard<T>({
+  row,
+  columns,
+  onRowClick,
+  index,
+}: {
+  row: T;
+  columns: TableColumn<T>[];
+  onRowClick?: (row: T) => void;
+  index: number;
+}) {
+  const handleRowClick = () => {
+    if (onRowClick) {
+      onRowClick(row);
+    }
+  };
+
+  return (
+    <div
+      className={`bg-white border border-gray-200 rounded-lg p-4 mb-3 shadow-sm hover:shadow-md transition-all duration-200 ${
+        onRowClick ? 'cursor-pointer hover:bg-gray-50' : ''
+      }`}
+      onClick={handleRowClick}
+    >
+      {columns.map((col, colIndex) => {
+        const valorCelula = renderCellValue(
+          (row as any)[col.key],
+          col,
+          row,
+          index
+        );
+        const valorCompleto = (row as any)[col.key] ?? valorCelula;
+
+        return (
+          <div
+            key={String(col.key)}
+            className={`flex justify-between items-start gap-2 ${
+              colIndex !== columns.length - 1 ? 'mb-3' : ''
+            }`}
+          >
+            <div className="flex-1 min-w-0">
+              <div className="text-xs font-medium text-gray-600 mb-1">
+                {col.label}
+              </div>
+              <div className="text-sm text-gray-900 break-words">
+                {valorCelula}
+              </div>
+            </div>
+            <ButtonCopy valorCompleto={valorCompleto} />
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// Componente TR para Desktop
 function TR<T>({
   row,
   columns,
@@ -104,7 +160,6 @@ function TR<T>({
   onRowClick?: (row: T) => void;
   index: number;
 }) {
-  // Função que será chamada ao clicar na linha
   const handleRowClick = () => {
     if (onRowClick) {
       onRowClick(row);
@@ -133,14 +188,13 @@ function TR<T>({
               onRowClick ? 'cursor-pointer' : 'cursor-default'
             }`}
           >
-            {/* Valor resumido (ellipsis) */}
             <span className="cell-ellipsis block whitespace-nowrap overflow-hidden text-ellipsis w-full transition-colors duration-200">
               {valorCelula}
             </span>
 
             <span
               title={valorCompleto}
-              className="cell-full absolute left-0 top-0 z-20 bg-white shadow-lg px-2 py-2 min-w-full max-w-[400px] whitespace-pre-line overflow-x-auto text-primary font-medium rounded-lg border border-gray-200 word-break-normal group-hover:block "
+              className="cell-full absolute left-0 top-0 z-20 bg-white shadow-lg px-2 py-2 min-w-full max-w-[400px] whitespace-pre-line overflow-x-auto text-primary font-medium rounded-lg border border-gray-200 word-break-normal group-hover:block"
             >
               <div className="flex flex-row items-center justify-between gap-2">
                 <p className="fit m-0">{valorCompleto}</p>
@@ -167,7 +221,7 @@ function TR<T>({
   );
 }
 
-// Componente de paginação simples
+// Componente de paginação
 const Pagination: React.FC<PaginationProps> = ({
   page,
   total,
@@ -194,41 +248,128 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex justify-center items-center gap-2 mt-4">
-      <button
-        className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50"
-        onClick={() => onPageChange && onPageChange(page - 1)}
-        disabled={page === 1}
-      >
-        {'<'}
-      </button>
-      {getPages().map(p => (
+    <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4">
+      <div className="flex items-center gap-2">
         <button
-          key={p}
-          className={`px-3 py-1 rounded border ${
-            p === page
-              ? 'bg-primary text-white border-primary'
-              : 'text-primary border-primary bg-white'
-          }`}
-          onClick={() => onPageChange && onPageChange(p)}
-          disabled={p === page}
+          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm"
+          onClick={() => onPageChange && onPageChange(page - 1)}
+          disabled={page === 1}
         >
-          {p}
+          {'<'}
         </button>
-      ))}
-      <button
-        className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50"
-        onClick={() => onPageChange && onPageChange(page + 1)}
-        disabled={page === totalPages}
-      >
-        {'>'}
-      </button>
-      <span className="ml-4 text-primary text-sm">
+        {getPages().map(p => (
+          <button
+            key={p}
+            className={`px-3 py-1 rounded border text-sm ${
+              p === page
+                ? 'bg-primary text-white border-primary'
+                : 'text-primary border-primary bg-white'
+            }`}
+            onClick={() => onPageChange && onPageChange(p)}
+            disabled={p === page}
+          >
+            {p}
+          </button>
+        ))}
+        <button
+          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm"
+          onClick={() => onPageChange && onPageChange(page + 1)}
+          disabled={page === totalPages}
+        >
+          {'>'}
+        </button>
+      </div>
+      <span className="text-primary text-sm text-center">
         Página {page} de {totalPages} ({total} registros)
       </span>
     </div>
   );
 };
+
+// Componente Loading
+const LoadingState = ({ columns }: { columns: TableColumn[] }) => (
+  <>
+    {/* Desktop Loading */}
+    <div className="hidden md:block">
+      <tr>
+        <td colSpan={columns.length} style={{ height: '120px', padding: 0 }}>
+          <div className="flex justify-center items-center h-[120px] w-full">
+            <svg
+              className="animate-spin h-8 w-8 text-primary"
+              xmlns="http://www.w3.org/2000/svg"
+              fill="none"
+              viewBox="0 0 24 24"
+            >
+              <circle
+                className="opacity-25"
+                cx="12"
+                cy="12"
+                r="10"
+                stroke="currentColor"
+                strokeWidth="4"
+              ></circle>
+              <path
+                className="opacity-75"
+                fill="currentColor"
+                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+              ></path>
+            </svg>
+          </div>
+        </td>
+      </tr>
+    </div>
+    {/* Mobile Loading */}
+    <div className="md:hidden flex justify-center items-center py-12">
+      <svg
+        className="animate-spin h-8 w-8 text-primary"
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+      >
+        <circle
+          className="opacity-25"
+          cx="12"
+          cy="12"
+          r="10"
+          stroke="currentColor"
+          strokeWidth="4"
+        ></circle>
+        <path
+          className="opacity-75"
+          fill="currentColor"
+          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+        ></path>
+      </svg>
+    </div>
+  </>
+);
+
+// Componente Empty State
+const EmptyState = ({
+  columns,
+  emptyMessage,
+}: {
+  columns: TableColumn[];
+  emptyMessage: string;
+}) => (
+  <>
+    {/* Desktop Empty */}
+    <div className="hidden md:block">
+      <tr>
+        <td
+          colSpan={columns.length}
+          className="text-center py-6 text-secondary font-medium"
+        >
+          {emptyMessage}
+        </td>
+      </tr>
+    </div>
+    {/* Mobile Empty */}
+    <div className="md:hidden text-center py-12">
+      <div className="text-secondary font-medium">{emptyMessage}</div>
+    </div>
+  </>
+);
 
 function Table<T>({
   data,
@@ -240,7 +381,8 @@ function Table<T>({
 }: TableProps<T>) {
   return (
     <>
-      <div className="overflow-x-auto w-full">
+      {/* Desktop Table */}
+      <div className="hidden md:block overflow-x-auto w-full">
         <table
           className="min-w-full border-separate border-spacing-0 bg-white rounded-lg"
           style={{ borderCollapse: 'separate', borderSpacing: 0 }}
@@ -264,48 +406,11 @@ function Table<T>({
             </tr>
           </thead>
           <tbody className="relative">
-            {loading && (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  style={{ height: '120px', padding: 0 }}
-                >
-                  <div className="flex justify-center items-center h-[120px] w-full">
-                    <svg
-                      className="animate-spin h-8 w-8 text-primary"
-                      xmlns="http://www.w3.org/2000/svg"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                    >
-                      <circle
-                        className="opacity-25"
-                        cx="12"
-                        cy="12"
-                        r="10"
-                        stroke="currentColor"
-                        strokeWidth="4"
-                      ></circle>
-                      <path
-                        className="opacity-75"
-                        fill="currentColor"
-                        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-                      ></path>
-                    </svg>
-                  </div>
-                </td>
-              </tr>
-            )}
-            {!loading && (!data || data.length === 0) ? (
-              <tr>
-                <td
-                  colSpan={columns.length}
-                  className="text-center py-6 text-secondary font-medium"
-                >
-                  {emptyMessage}
-                </td>
-              </tr>
+            {loading ? (
+              <LoadingState columns={columns} />
+            ) : !data || data.length === 0 ? (
+              <EmptyState columns={columns} emptyMessage={emptyMessage} />
             ) : (
-              data &&
               data.map((row, i) => (
                 <TR
                   row={row}
@@ -320,6 +425,27 @@ function Table<T>({
         </table>
       </div>
 
+      {/* Mobile Cards */}
+      <div className="md:hidden">
+        {loading ? (
+          <LoadingState columns={columns} />
+        ) : !data || data.length === 0 ? (
+          <EmptyState columns={columns} emptyMessage={emptyMessage} />
+        ) : (
+          <div className="space-y-0">
+            {data.map((row, i) => (
+              <MobileCard
+                row={row}
+                columns={columns}
+                onRowClick={onRowClick}
+                key={i}
+                index={i}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+
       {pagination && (
         <Pagination
           page={pagination.page}
@@ -330,28 +456,20 @@ function Table<T>({
         />
       )}
 
-      <style>
-        {`
-          .result-row:not(:last-child) td {
-            border-bottom: 1px solid rgba(72, 3, 138, 0.2);
-          }
-          .result-row td, .result-row th {
-            vertical-align: middle;
-            padding: 12px 16px;
-          }
-          .result-row:hover {
-            background-color: #f3eafd;
-            transition: background 0.2s;
-          }
-          @media (max-width: 768px) {
-            .result-row td, .result-row th {
-              padding: 8px 8px;
-              font-size: 13px;
-              max-width: 90vw;
-            }
-          }
-        `}
-      </style>
+      <style jsx>{`
+        .result-row:not(:last-child) td {
+          border-bottom: 1px solid rgba(72, 3, 138, 0.2);
+        }
+        .result-row td,
+        .result-row th {
+          vertical-align: middle;
+          padding: 12px 16px;
+        }
+        .result-row:hover {
+          background-color: #f3eafd;
+          transition: background 0.2s;
+        }
+      `}</style>
     </>
   );
 }

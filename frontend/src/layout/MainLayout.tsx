@@ -1,7 +1,6 @@
 // src/layouts/MainLayout.tsx
 import Footer from '@/components/site/Footer/Footer';
 import HeaderLadingPage from '@/components/site/HeaderLadingPage/HeaderLadingPage';
-import styles from '@/styles/MainLayout.module.css';
 import React from 'react';
 
 interface MainLayoutProps {
@@ -10,9 +9,9 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <div className={styles.container}>
+    <div className="flex flex-col min-h-screen bg-[var(--bg-color-light)] pt-14">
       <HeaderLadingPage />
-      <main className={styles.mainContent}>{children}</main>
+      <main className="flex-grow mx-auto w-full px-2">{children}</main>
       <Footer />
     </div>
   );

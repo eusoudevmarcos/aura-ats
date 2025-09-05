@@ -81,11 +81,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
   return (
     <form
-      className={`
-        ${takeitStyles.searchForm}
+      className={`${takeitStyles.searchForm}
         flex flex-col gap-2 w-full justify-between
-        md:flex-row md:items-end
-      `}
+        md:flex-row md:items-end`}
       onSubmit={handleSubmit}
     >
       <section className="flex relative w-full max-w-full flex-wrap md:max-w-[400px]">

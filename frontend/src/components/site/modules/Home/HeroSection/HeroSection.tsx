@@ -3,7 +3,6 @@ import Slider from '@/components/site/Slider/Slider';
 import { useScrollToSection } from '@/hook/UseScrollToSection';
 import Image from 'next/image';
 import React from 'react';
-import styles from './HeroSection.module.css';
 
 interface SlideItem {
   id: string;
@@ -49,29 +48,54 @@ const HeroSection: React.FC = () => {
   };
 
   return (
-    <section className={styles.hero} id="hero-section">
+    <section
+      id="hero-section"
+      className="relative w-full h-[100vh] max-h-[800px] min-h-[500px] overflow-hidden max-w-[1440px] mx-auto rounded-[20px] mt-[20px] md:h-[90vh] md:min-h-[400px]"
+    >
       <Slider slides={heroSlides} autoPlay interval={10000}>
         {(slide: SlideItem) => (
-          <div className={styles.slideContent} key={slide.id}>
-            <div className={styles.imageWrapper}>
+          <div
+            key={slide.id}
+            className="relative w-full h-full flex items-center justify-center text-secondary"
+          >
+            <div className="absolute inset-0 w-full h-full">
               <Image
                 src={slide.imageSrc}
                 alt={slide.altText}
                 fill
                 priority
                 sizes="100vw"
+                className="object-cover w-full h-full blur-[4px]"
                 style={{
-                  objectFit: 'cover',
-                  filter: 'blur(4px)',
                   boxShadow:
                     '0 8px 32px 0 rgba(0,0,0,0.18), 0 1.5px 6px 0 rgba(0,0,0,0.10)',
                 }}
               />
-              <div className={styles.overlay}></div>
+              <div
+                className="
+                  absolute top-0 left-0 w-full h-full
+                  bg-gradient-to-t from-black/60 to-black/20
+                  z-[1]
+                "
+              ></div>
             </div>
-            <div className={styles.textContainer}>
-              <h1>{slide.title}</h1>
-              <p>{slide.description}</p>
+            <div
+              className="
+                relative z-[2] text-center max-w-[900px]
+                px-[var(--spacing-md)] py-[var(--spacing-lg)]
+              "
+            >
+              <h1 className="text-[2.75rem] text-white font-black text-shadow-2xs">
+                {slide.title}
+              </h1>
+              <p
+                className="
+                  text-[1.25rem] mb-[var(--spacing-md)]
+                  text-[var(--bg-color-light)]
+                "
+              >
+                {slide.description}
+              </p>
               <Button
                 onClick={handleContratarClick}
                 variant="primary"

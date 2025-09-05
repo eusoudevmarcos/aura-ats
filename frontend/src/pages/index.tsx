@@ -14,31 +14,31 @@ import ScrollToTop from '@/components/site/ScrollToTop/ScrollToTop';
 const HomePage: React.FC = () => {
   return (
     <>
-      <section id="hero-section">
+      <section className="mb-8" id="hero-section">
         <HeroSection />
       </section>
 
-      <section id="platform-section">
+      <section className="mb-8" id="platform-section">
         <PlatformSection />
       </section>
 
-      <section id="about-section">
+      <section className="mb-8" id="about-section">
         <AboutSection />
       </section>
 
-      <section id="services-section">
+      <section className="mb-8" id="services-section">
         <ServicesSection />
       </section>
 
-      <section id="pricing-section">
+      <section className="mb-8" id="pricing-section">
         <PricingSection />
       </section>
 
-      <section id="success-cases-section">
+      <section className="mb-8" id="success-cases-section">
         <SuccessCasesSection />
       </section>
 
-      <section id="contact-section">
+      <section className="mb-8" id="contact-section">
         <ContactSection />
       </section>
 
