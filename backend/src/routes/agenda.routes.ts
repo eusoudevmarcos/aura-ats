@@ -18,8 +18,8 @@ candidatoRouter.get("/", authMiddleware, (req, res) =>
   candidatoController.getAll(req, res)
 );
 
-// candidatoRouter.get("/:id", authMiddleware, (req, res) =>
-//   candidatoController.get(req, res)
-// );
+candidatoRouter.get("/:id", authMiddleware, (req, res) =>
+  candidatoController.findById(req, res)
+);
 
 export default candidatoRouter;
