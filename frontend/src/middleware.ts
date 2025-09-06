@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const ALWAYS_PUBLIC_PATHS = ['/'];
 
 // Apenas rotas de login podem ser acessadas sem autenticação
-const LOGIN_PATHS = ['/login', '/api/login'];
+const LOGIN_PATHS = ['/login', '/api/auth/login'];
 
 const DASHBOARD_PATH = '/atividades/agendas';
 
