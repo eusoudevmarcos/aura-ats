@@ -20,17 +20,20 @@ const LoginPage: React.FC = () => {
 
     try {
       // Chamada para API externa
-      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          username,
-          password,
-        }),
-        credentials: 'include',
-      });
+      const res = await fetch(
+        process.env.NEXT_PUBLIC_API_URL + '/api/auth/login',
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            username,
+            password,
+          }),
+          credentials: 'include',
+        }
+      );
 
       const data = await res.json();
 
