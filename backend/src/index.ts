@@ -21,6 +21,7 @@ const allowedOrigins = [
   "http://localhost:3000", // frontend local
   "https://takeitapi-1.onrender.com", // produção
   "https://aura-ats-frontend.vercel.app", // produção
+  "https://www.aurareslabs.com", // produção
 ];
 
 app.use(
