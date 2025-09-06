@@ -286,89 +286,85 @@ const Pagination: React.FC<PaginationProps> = ({
   );
 };
 
-// Componente Loading
-const LoadingState = ({ columns }: { columns: TableColumn[] }) => (
-  <>
-    {/* Desktop Loading */}
-    <div className="hidden md:block">
-      <tr>
-        <td colSpan={columns.length} style={{ height: '120px', padding: 0 }}>
-          <div className="flex justify-center items-center h-[120px] w-full">
-            <svg
-              className="animate-spin h-8 w-8 text-primary"
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-            >
-              <circle
-                className="opacity-25"
-                cx="12"
-                cy="12"
-                r="10"
-                stroke="currentColor"
-                strokeWidth="4"
-              ></circle>
-              <path
-                className="opacity-75"
-                fill="currentColor"
-                d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-              ></path>
-            </svg>
-          </div>
-        </td>
-      </tr>
-    </div>
-    {/* Mobile Loading */}
-    <div className="md:hidden flex justify-center items-center py-12">
-      <svg
-        className="animate-spin h-8 w-8 text-primary"
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
-        <circle
-          className="opacity-25"
-          cx="12"
-          cy="12"
-          r="10"
-          stroke="currentColor"
-          strokeWidth="4"
-        ></circle>
-        <path
-          className="opacity-75"
-          fill="currentColor"
-          d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-        ></path>
-      </svg>
-    </div>
-  </>
+// Componente Loading para Desktop
+const DesktopLoadingState = ({ columns }: { columns: TableColumn[] }) => (
+  <tr>
+    <td colSpan={columns.length} style={{ height: '120px', padding: 0 }}>
+      <div className="flex justify-center items-center h-[120px] w-full">
+        <svg
+          className="animate-spin h-8 w-8 text-primary"
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+        >
+          <circle
+            className="opacity-25"
+            cx="12"
+            cy="12"
+            r="10"
+            stroke="currentColor"
+            strokeWidth="4"
+          ></circle>
+          <path
+            className="opacity-75"
+            fill="currentColor"
+            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+          ></path>
+        </svg>
+      </div>
+    </td>
+  </tr>
 );
 
-// Componente Empty State
-const EmptyState = ({
+// Componente Loading para Mobile
+const MobileLoadingState = () => (
+  <div className="flex justify-center items-center py-12">
+    <svg
+      className="animate-spin h-8 w-8 text-primary"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="none"
+      viewBox="0 0 24 24"
+    >
+      <circle
+        className="opacity-25"
+        cx="12"
+        cy="12"
+        r="10"
+        stroke="currentColor"
+        strokeWidth="4"
+      ></circle>
+      <path
+        className="opacity-75"
+        fill="currentColor"
+        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+      ></path>
+    </svg>
+  </div>
+);
+
+// Componente Empty State para Desktop
+const DesktopEmptyState = ({
   columns,
   emptyMessage,
 }: {
   columns: TableColumn[];
   emptyMessage: string;
 }) => (
-  <>
-    {/* Desktop Empty */}
-    <div className="hidden md:block">
-      <tr>
-        <td
-          colSpan={columns.length}
-          className="text-center py-6 text-secondary font-medium"
-        >
-          {emptyMessage}
-        </td>
-      </tr>
-    </div>
-    {/* Mobile Empty */}
-    <div className="md:hidden text-center py-12">
-      <div className="text-secondary font-medium">{emptyMessage}</div>
-    </div>
-  </>
+  <tr>
+    <td
+      colSpan={columns.length}
+      className="text-center py-6 text-secondary font-medium"
+    >
+      {emptyMessage}
+    </td>
+  </tr>
+);
+
+// Componente Empty State para Mobile
+const MobileEmptyState = ({ emptyMessage }: { emptyMessage: string }) => (
+  <div className="text-center py-12 text-secondary font-medium">
+    {emptyMessage}
+  </div>
 );
 
 function Table<T>({
@@ -407,9 +403,12 @@ function Table<T>({
           </thead>
           <tbody className="relative">
             {loading ? (
-              <LoadingState columns={columns} />
+              <DesktopLoadingState columns={columns} />
             ) : !data || data.length === 0 ? (
-              <EmptyState columns={columns} emptyMessage={emptyMessage} />
+              <DesktopEmptyState
+                columns={columns}
+                emptyMessage={emptyMessage}
+              />
             ) : (
               data.map((row, i) => (
                 <TR
@@ -428,9 +427,9 @@ function Table<T>({
       {/* Mobile Cards */}
       <div className="md:hidden">
         {loading ? (
-          <LoadingState columns={columns} />
+          <MobileLoadingState />
         ) : !data || data.length === 0 ? (
-          <EmptyState columns={columns} emptyMessage={emptyMessage} />
+          <MobileEmptyState emptyMessage={emptyMessage} />
         ) : (
           <div className="space-y-0">
             {data.map((row, i) => (
