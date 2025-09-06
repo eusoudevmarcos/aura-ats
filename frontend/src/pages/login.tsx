@@ -1,6 +1,5 @@
 // frontend/pages/login.tsx
 import logo from '@/assets/logo.svg';
-import api from '@/axios';
 import styles from '@/styles/login.module.css';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -21,12 +20,19 @@ const LoginPage: React.FC = () => {
 
     try {
       // Chamada para API externa
-      const res = await api.post('/api/login', {
-        username,
-        password,
+      const res = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          username,
+          password,
+        }),
+        credentials: 'include',
       });
 
-      const data = await res.data;
+      const data = await res.json();
 
       if (res.status === 200) {
         localStorage.setItem('uid', data.uid);
