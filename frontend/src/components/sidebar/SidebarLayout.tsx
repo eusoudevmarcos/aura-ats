@@ -1,5 +1,4 @@
 import { useUser } from '@/hook/useUser';
-import styles from '@/styles/sidebar.module.css';
 import { getFirstLetter } from '@/utils/getFirstLetter';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -41,58 +40,58 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
 
   const navItems = [
     {
-      icon: <CalendarIcon className={styles.icon} />,
+      icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
       label: 'Atividade',
       href: '/atividades/agendas',
     },
     {
-      icon: <BriefcaseIcon className={styles.icon} />,
+      icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
       label: 'Vagas',
       href: '/vagas',
     },
     {
-      icon: <UsersIcon className={styles.icon} />,
+      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
       label: 'Prospecções',
       href: '/prospeccoes/',
     },
     {
-      icon: <UsersIcon className={styles.icon} />,
+      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
       label: 'Profissionais',
       href: '/profissionais',
     },
     {
-      icon: <HandshakeIcon className={styles.icon} />,
+      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
       label: 'Clientes',
       href: '/clientes',
     },
     {
-      icon: <HandshakeIcon className={styles.icon} />,
+      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
       label: 'Entrevistas',
       href: '/entrevistas',
     },
     {
-      icon: <ClipboardCheckIcon className={styles.icon} />,
+      icon: <ClipboardCheckIcon className="w-5 h-5 text-inherit" />,
       label: 'Testes',
       href: '/testes',
     },
     {
-      icon: <SettingsIcon className={styles.icon} />,
+      icon: <SettingsIcon className="w-5 h-5 text-inherit" />,
       label: 'Configurações',
       href: '/configuracoes',
     },
     {
-      icon: <EmployeesIcon className={styles.icon} />,
+      icon: <EmployeesIcon className="w-5 h-5 text-inherit" />,
       label: 'Funcionarios',
-      href: '/funcionarios/',
+      href: `/funcionarios`,
     },
   ];
 
   return (
     <>
+      {/* Sidebar Desktop */}
       <aside
-        className={`hidden fixed top-24 left-2 h-[calc(90vh-2rem)] bg-white text-primary md:flex flex-col shadow-lg rounded-lg
-        transition-all duration-300 ease-in-out z-40  ${
-          collapsed ? 'w-20 p-5' : 'w-64 p-6'
+        className={`hidden fixed top-24 left-2 h-[calc(90vh-2rem)] bg-white text-[#474747] md:flex flex-col shadow-lg rounded-lg transition-all duration-300 ease-in-out z-40 ${
+          collapsed ? 'w-20 p-5 items-center' : 'w-64 p-6'
         }`}
       >
         <button
@@ -102,55 +101,72 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
           {collapsed ? <ListIcon /> : <ListClosedIcon />}
         </button>
 
-        <nav className="flex-grow overflow-y-auto custom-scrollbar">
+        {/* Navegação */}
+        <nav className="flex-grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
           <ul>
             {navItems.map(item => (
-              <Link
-                key={item.label}
-                href={item.href}
-                className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
-                  router.pathname === item.href
-                    ? 'bg-primary text-white'
-                    : 'text-primary hover:bg-neutral hover:text-primary'
-                }`}
-                onMouseEnter={() => setIsShowLabel(true)}
-                onMouseLeave={() => setIsShowLabel(false)}
-              >
-                {item.icon}
-                <span>{item.label}</span>
-              </Link>
+              <li key={item.label}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
+                    router.pathname === item.href
+                      ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
+                      : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                  } ${collapsed ? 'justify-center px-3' : ''}`}
+                  onMouseEnter={() => setIsShowLabel(true)}
+                  onMouseLeave={() => setIsShowLabel(false)}
+                >
+                  <p>{item.icon}</p>
+                  <span
+                    className={`whitespace-nowrap overflow-hidden transition duration-100 ${
+                      collapsed && 'hidden w-0'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </Link>
+              </li>
             ))}
           </ul>
         </nav>
+
+        {/* Usuário */}
         <Link
-          href={`/profile/${user.id}`}
-          className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 ${
+          href={`/profile`}
+          className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 transition-all duration-200 ${
             collapsed ? 'justify-center' : ''
           }`}
         >
           <Image
-            height={30}
-            width={30}
+            height={40}
+            width={40}
             src={`https://placehold.co/40x40/FFD700/000000?text=${getFirstLetter(
               user?.nome || user?.razaoSocial
             )}`}
             alt="User Avatar"
             unoptimized
-            className="rounded-full"
+            className="rounded-full object-cover flex-shrink-0"
           />
-          {!collapsed && (
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-medium truncate">
-                {user?.nome || user?.razaoSocial}
-              </p>
-              <p className="text-xs text-gray-500 truncate">{user.email}</p>
-              <p className="text-xs text-gray-500 truncate">{user.tipo}</p>
-            </div>
-          )}
-          {!collapsed && <ChevronDownIcon className="w-4 h-4 text-gray-400" />}
+          <div
+            className={`flex-grow whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
+              collapsed ? 'opacity-0 w-0' : 'opacity-100 ml-2'
+            }`}
+          >
+            <p className="text-sm font-medium truncate">
+              {user?.nome || user?.razaoSocial}
+            </p>
+            <p className="text-xs text-gray-500 truncate">{user.email}</p>
+            <p className="text-xs text-gray-500 truncate">{user.tipo}</p>
+          </div>
+          <ChevronDownIcon
+            className={`w-4 h-4 text-gray-400 transition-all duration-300 ${
+              collapsed ? 'hidden' : 'block'
+            }`}
+          />
         </Link>
       </aside>
 
+      {/* Sidebar Mobile */}
       <div className="fixed top-24 left-2 h-[calc(90vh-2rem)] z-40 md:hidden">
         <button
           onClick={() => setCollapsed(!collapsed)}
@@ -159,59 +175,69 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
           {collapsed ? <ListIcon /> : <ListClosedIcon />}
         </button>
         <aside
-          className={`bg-white text-primary h-[calc(90vh-2rem)] flex flex-col shadow-lg rounded-lg
-        transition-all duration-300 ease-in-out z-40 ${
-          collapsed ? 'w-0 p-0' : 'w-64 p-6'
-        }`}
+          className={`bg-white text-[#474747] h-[calc(90vh-2rem)] flex flex-col shadow-lg rounded-lg transition-all duration-300 ease-in-out z-40 ${
+            collapsed ? 'w-0 p-0' : 'w-64 p-6'
+          }`}
         >
-          <nav className="flex-grow overflow-y-auto custom-scrollbar">
+          <nav className="flex-grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
             <ul>
               {navItems.map(item => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
-                    router.pathname === item.href
-                      ? 'bg-primary text-white'
-                      : 'text-primary hover:bg-neutral hover:text-primary'
-                  }`}
-                  onMouseEnter={() => setIsShowLabel(true)}
-                  onMouseLeave={() => setIsShowLabel(false)}
-                >
-                  {item.icon}
-                  <span>{item.label}</span>
-                </Link>
+                <li key={item.label}>
+                  <Link
+                    href={item.href}
+                    className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
+                      router.pathname === item.href
+                        ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
+                        : 'text-gray-400 hover:bg-gray-700 hover:text-white'
+                    } ${collapsed ? 'justify-center px-0' : ''}`}
+                    onMouseEnter={() => setIsShowLabel(true)}
+                    onMouseLeave={() => setIsShowLabel(false)}
+                  >
+                    {item.icon}
+                    <span
+                      className={`whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
+                        collapsed ? 'opacity-0 w-0' : 'opacity-100'
+                      }`}
+                    >
+                      {item.label}
+                    </span>
+                  </Link>
+                </li>
               ))}
             </ul>
           </nav>
           <Link
-            href={`/profile/${user.id}`}
-            className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 ${
+            href={`/profile`}
+            className={`flex items-center gap-2 mt-auto p-2 rounded-md hover:bg-gray-100 transition-all duration-200 ${
               collapsed ? 'justify-center' : ''
             }`}
           >
             <Image
-              height={30}
-              width={30}
+              height={40}
+              width={40}
               src={`https://placehold.co/40x40/FFD700/000000?text=${getFirstLetter(
                 user?.nome || user?.razaoSocial
               )}`}
               alt="User Avatar"
               unoptimized
-              className="rounded-full"
+              className="rounded-full object-cover flex-shrink-0"
             />
-            {!collapsed && (
-              <div className="flex-1 overflow-hidden">
-                <p className="text-sm font-medium truncate">
-                  {user?.nome || user?.razaoSocial}
-                </p>
-                <p className="text-xs text-gray-500 truncate">{user.email}</p>
-                <p className="text-xs text-gray-500 truncate">{user.tipo}</p>
-              </div>
-            )}
-            {!collapsed && (
-              <ChevronDownIcon className="w-4 h-4 text-gray-400" />
-            )}
+            <div
+              className={`flex-grow whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
+                collapsed ? 'opacity-0 w-0' : 'opacity-100 ml-2'
+              }`}
+            >
+              <p className="text-sm font-medium truncate">
+                {user?.nome || user?.razaoSocial}
+              </p>
+              <p className="text-xs text-gray-500 truncate">{user.email}</p>
+              <p className="text-xs text-gray-500 truncate">{user.tipo}</p>
+            </div>
+            <ChevronDownIcon
+              className={`w-4 h-4 text-gray-400 transition-all duration-300 ${
+                collapsed ? 'hidden' : 'block'
+              }`}
+            />
           </Link>
         </aside>
       </div>

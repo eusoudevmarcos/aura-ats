@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { useRouter } from "next/router";
-import api from "@/axios";
+import api from '@/axios';
+import { useUser } from '@/hook/useUser';
+import { useRouter } from 'next/router';
+import React, { useEffect, useState } from 'react';
 
 interface UserData {
   name?: string;
@@ -15,22 +16,25 @@ const UserPage: React.FC = () => {
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
+  const user = useUser();
 
   useEffect(() => {
-    if (uuid) {
+    console.log(user);
+    if (user?.uid) {
+      console.log(user);
       const fetchUser = async () => {
         setLoading(true);
         setErro(null);
         try {
-          const resp = await api.get("/funcionario/" + uuid);
+          const resp = await api.get('/funcionario/' + user.uid);
 
           if (resp.status === 200) {
             setUserData(resp.data);
           } else {
-            setErro("Usuário não encontrado.");
+            setErro('Usuário não encontrado.');
           }
         } catch (error: any) {
-          setErro("Erro ao buscar usuário: " + error.message);
+          setErro('Erro ao buscar usuário: ' + error.message);
         } finally {
           setLoading(false);
         }
@@ -44,7 +48,7 @@ const UserPage: React.FC = () => {
   }
 
   if (erro) {
-    return <div style={{ color: "red" }}>{erro}</div>;
+    return <div style={{ color: 'red' }}>{erro}</div>;
   }
 
   if (!userData) {
@@ -56,15 +60,15 @@ const UserPage: React.FC = () => {
       <h1 className="text-[#8c53ff] font-bold mb-4">Perfil do Usuário</h1>
       <ul className="[&>li]:mb-1 list-none p-0">
         {Object.entries(userData).map(([key, value]) => {
-          if (value === null || value === undefined || value === "")
+          if (value === null || value === undefined || value === '')
             return null;
 
           // Função recursiva para iterar sobre objetos aninhados
           const renderObject = (obj: any) => (
-            <ul style={{ listStyle: "none", paddingLeft: 16 }}>
+            <ul style={{ listStyle: 'none', paddingLeft: 16 }}>
               {Object.entries(obj).map(([k, v]) => {
-                if (v === null || v === undefined || v === "") return null;
-                if (typeof v === "object" && v !== null) {
+                if (v === null || v === undefined || v === '') return null;
+                if (typeof v === 'object' && v !== null) {
                   return (
                     <li key={k} style={{ marginBottom: 8 }}>
                       <strong>{k}:</strong>
@@ -81,7 +85,7 @@ const UserPage: React.FC = () => {
             </ul>
           );
 
-          if (typeof value === "object" && value !== null) {
+          if (typeof value === 'object' && value !== null) {
             return (
               <li key={key}>
                 <strong>{key}:</strong>
