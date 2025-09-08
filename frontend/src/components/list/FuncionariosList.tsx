@@ -144,7 +144,7 @@ const FuncionariosList: React.FC = () => {
   return (
     <Card classNameContainer="mt-6 px-6 py-2">
       <div className="flex justify-between items-center flex-wrap p-2">
-        <h2 className="text-xl font-bold mb-4">Lista de Candidatos</h2>
+        <h2 className="text-xl font-bold mb-4">Lista de Funcionarios</h2>
         <input
           type="text"
           placeholder="Buscar cliente..."
@@ -153,13 +153,7 @@ const FuncionariosList: React.FC = () => {
           className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
         />
       </div>
-      <input
-        type="text"
-        placeholder="Buscar por nome, email ou tipo de usuário..."
-        value={search}
-        onChange={e => setSearch(e.target.value)}
-        className="mb-4 p-2 border border-gray-300 rounded w-full max-w-md"
-      />
+
       <Table
         data={search ? dadosFiltrados : dadosTabela}
         columns={columns}
