@@ -5,6 +5,7 @@ enum TipoUsuario {
     RECRUTADOR
     VENDEDOR
     CLIENTE_ATS
+    CLIENTE_CRM
     CLIENTE_ATS_CRM
 }
 
