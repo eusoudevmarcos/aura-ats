@@ -1,8 +1,9 @@
 export const convertDateFromPostgres = (
   dateString: string | undefined
-): string | undefined => {
+): Date | undefined => {
   if (!dateString || dateString.length !== 10) return undefined;
-  const parts = dateString.split("-");
+
+  const parts = dateString.split('-');
   if (parts.length === 3) {
     const [year, month, day] = parts.map(Number);
 
@@ -21,15 +22,16 @@ export const convertDateFromPostgres = (
     }
 
     const date = new Date(year, month - 1, day);
+
+    // Verifica se a data é válida comparando os valores
     if (
       date.getFullYear() === year &&
       date.getMonth() + 1 === month &&
       date.getDate() === day
     ) {
-      const formattedMonth = month < 10 ? `0${month}` : `${month}`;
-      const formattedDay = day < 10 ? `0${day}` : `${day}`;
-      return `${formattedDay}/${formattedMonth}/${year}`;
+      return date;
     }
   }
+
   return undefined;
 };

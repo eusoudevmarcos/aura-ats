@@ -1,16 +1,17 @@
 import api from '@/axios';
 import { useSafeForm } from '@/hook/useSafeForm';
-import {
-  FuncionarioInput,
-  funcionarioSchema,
-} from '@/schemas/funcionario.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 import { FormProvider } from 'react-hook-form';
 
 import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import PessoaForm from '@/components/form/PessoaForm';
+import {
+  FuncionarioInput,
+  funcionarioSchema,
+  TipoUsuarioEnum,
+} from '@/schemas/funcionario.schema';
 import { PessoaInput } from '@/schemas/pessoa.schema';
 import { makeName } from '@/utils/makeName';
 import { PrimaryButton } from '../button/PrimaryButton';
@@ -31,6 +32,18 @@ export const FuncionarioForm = ({
     useFormProps: {
       resolver: zodResolver(funcionarioSchema),
       mode: 'onTouched',
+      defaultValues: {
+        tipoUsuario: 'RECRUTADOR',
+        email: '',
+        password: '',
+        funcionario: {
+          setor: '',
+          cargo: '',
+        },
+        tipoPessoaOuEmpresa: 'pessoa',
+        pessoa: undefined,
+        empresa: undefined,
+      },
     },
   });
 
@@ -38,23 +51,15 @@ export const FuncionarioForm = ({
     register,
     handleSubmit,
     setValue,
+    watch,
     formState: { errors },
   } = methods;
 
-  const [tipoPessoaOuEmpresa, setTipoPessoaOuEmpresa] =
-    React.useState('pessoa');
+  // Watch para o tipo de pessoa ou empresa
+  const tipoPessoaOuEmpresa = watch('tipoPessoaOuEmpresa') || 'pessoa';
 
-  const email = makeName<FuncionarioInput>('usuarioSistema', 'email');
-  const senha = makeName<FuncionarioInput>('usuarioSistema', 'senha');
-  const setor = makeName<FuncionarioInput>(
-    'usuarioSistema.funcionario',
-    'setor'
-  );
-  const cargo = makeName<FuncionarioInput>(
-    'usuarioSistema.funcionario',
-    'cargo'
-  );
-  const tipoPessoa = makeName<FuncionarioInput>('usuarioSistema', 'tipoPessoa');
+  const setor = makeName<FuncionarioInput>('funcionario', 'setor');
+  const cargo = makeName<FuncionarioInput>('funcionario', 'cargo');
 
   useEffect(() => {
     if (funcionarioData) {
@@ -64,8 +69,12 @@ export const FuncionarioForm = ({
             setValue(`pessoa.${k}` as any, v);
           });
         } else if (key === 'empresa' && value) {
-          Object.entries(value as PessoaInput).forEach(([k, v]) => {
+          Object.entries(value as any).forEach(([k, v]) => {
             setValue(`empresa.${k}` as any, v);
+          });
+        } else if (key === 'funcionario' && value) {
+          Object.entries(value as any).forEach(([k, v]) => {
+            setValue(`funcionario.${k}` as any, v);
           });
         } else {
           setValue(key as keyof FuncionarioInput, value as any);
@@ -74,41 +83,35 @@ export const FuncionarioForm = ({
     }
   }, [funcionarioData, setValue]);
 
-  function handleChange(
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) {
-    setTipoPessoaOuEmpresa(e.target.value);
-  }
+  // Limpa os dados quando muda o tipo
+  useEffect(() => {
+    if (tipoPessoaOuEmpresa === 'pessoa') {
+      setValue('empresa', undefined);
+    } else {
+      setValue('pessoa', undefined);
+    }
+  }, [tipoPessoaOuEmpresa, setValue]);
 
   async function onSubmit(data: FuncionarioInput): Promise<void> {
-    // Monta os dados para validação e envio
-    const validationData: any = { ...data };
-    if (data.tipoPessoaOuEmpresa === 'pessoa') {
-      Object.assign(validationData.empresa, undefined);
-    } else {
-      Object.assign(validationData.pessoa, undefined);
-    }
-
-    const result = funcionarioSchema.safeParse(validationData);
-
-    if (!result.success) {
-      return;
-    }
-
     try {
+      // Remove o campo não usado
+      const cleanData = { ...data };
+      if (data.tipoPessoaOuEmpresa === 'pessoa') {
+        delete (cleanData as any).empresa;
+      } else {
+        delete (cleanData as any).pessoa;
+      }
+
       const isEdit = !!funcionarioData;
       const url = isEdit
-        ? `/api/funcionario/update/${data.tipoPessoaOuEmpresa}`
-        : `/api/funcionario/create/${data.tipoPessoaOuEmpresa}`;
+        ? `/api/external/funcionario/update/${data.tipoPessoaOuEmpresa}`
+        : `/api/external/funcionario/create/${data.tipoPessoaOuEmpresa}`;
 
-      await api.post(url, result.data);
-
+      await api.post(url, cleanData);
       onSuccess(true);
     } catch (error: any) {
       onSuccess(false);
-      console.error('Erro ao criar funcionário:', error);
+      console.log('Erro ao processar funcionário:', error);
     }
   }
 
@@ -124,34 +127,59 @@ export const FuncionarioForm = ({
           classNameContent="grid grid-cols-1 md:grid-cols-4 gap-2"
         >
           <FormSelect
-            name={tipoPessoa}
+            name="tipoUsuario"
             register={register}
             errors={errors}
-            label="Tipo de funcionario"
+            label="Tipo de funcionário"
             selectProps={{
               classNameContainer: 'col-span-4',
               children: (
                 <>
-                  <option value="ADMIN">ADMIN</option>
-                  <option value="MODERADOR">MODERADOR</option>
-                  <option value="ATENDENTE">ATENDENTE</option>
+                  {TipoUsuarioEnum.options.map(tipo => (
+                    <option key={tipo} value={tipo}>
+                      {(() => {
+                        switch (tipo) {
+                          case 'ADMIN_SISTEMA':
+                            return 'Administrador do Sistema';
+                          case 'ADMINISTRATIVO':
+                            return 'Administrativo';
+                          case 'MODERADOR':
+                            return 'Moderador (Gerente)';
+                          case 'RECRUTADOR':
+                            return 'Recrutador';
+                          case 'VENDEDOR':
+                            return 'Vendedor';
+                          case 'CLIENTE_ATS':
+                            return 'Cliente ATS';
+                          case 'CLIENTE_CRM':
+                            return 'Cliente CRM';
+                          case 'CLIENTE_ATS_CRM':
+                            return 'Cliente ATS + CRM';
+                          default:
+                            return tipo;
+                        }
+                      })()}
+                    </option>
+                  ))}
                 </>
               ),
             }}
           />
 
           <FormInput
-            name={email}
+            name="email"
             register={register}
             label="Email de login"
             errors={errors}
+            inputProps={{ type: 'email' }}
           />
 
           <FormInput
-            name={senha}
+            name="password"
             register={register}
             label="Senha"
             errors={errors}
+            inputProps={{ type: 'password' }}
           />
 
           <FormInput
@@ -172,9 +200,9 @@ export const FuncionarioForm = ({
         <Card>
           <FormSelect
             name="tipoPessoaOuEmpresa"
+            register={register}
             label="Tipo de Funcionário (Pessoa ou Empresa)*"
-            value={tipoPessoaOuEmpresa}
-            onChange={handleChange}
+            errors={errors}
             selectProps={{
               children: (
                 <>
@@ -186,13 +214,12 @@ export const FuncionarioForm = ({
           />
 
           {tipoPessoaOuEmpresa === 'pessoa' && <PessoaForm />}
-
           {tipoPessoaOuEmpresa === 'empresa' && <EmpresaForm />}
         </Card>
 
         <PrimaryButton
           type="submit"
-          className="w-full  text-white font-semibold py-3 rounded-md transition-colors"
+          className="w-full text-white font-semibold py-3 rounded-md transition-colors"
         >
           {funcionarioData ? 'Salvar Alterações' : 'Cadastrar Funcionário'}
         </PrimaryButton>

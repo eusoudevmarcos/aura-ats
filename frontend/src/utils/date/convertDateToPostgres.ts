@@ -7,7 +7,7 @@ export const convertDateToPostgres = (
   if (!dateString || dateString.length !== 10) {
     return undefined;
   }
-  const parts = dateString.split("/");
+  const parts = dateString.split('/');
   if (parts.length === 3) {
     const [day, month, year] = parts.map(Number);
 

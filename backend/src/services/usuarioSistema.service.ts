@@ -1,10 +1,10 @@
 // src/services/usuarioSistema.service.ts
+import { TipoUsuario, UsuarioSistema } from "@prisma/client";
+import bcrypt from "bcryptjs";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import bcrypt from "bcryptjs";
-import { PessoaRepository } from "../repository/pessoa.repository";
 import { EmpresaRepository } from "../repository/empresa.repository";
-import { Empresa, Pessoa, UsuarioSistema, TipoUsuario } from "@prisma/client";
+import { PessoaRepository } from "../repository/pessoa.repository";
 
 @injectable()
 export class UsuarioSistemaService {
@@ -14,6 +14,7 @@ export class UsuarioSistemaService {
   ) {}
 
   async getById(id: string) {
+    console.log(id);
     return await prisma.usuarioSistema.findFirst({
       where: { id },
       include: {
@@ -43,18 +44,20 @@ export class UsuarioSistemaService {
         take: pageSize,
         include: {
           funcionario: true,
-          pessoa: {
-            include: {
-              contatos: true,
-              localizacoes: true,
-            },
-          },
-          empresa: {
-            include: {
-              contatos: true,
-              localizacoes: true,
-            },
-          },
+          pessoa: true,
+          // {
+          //   include: {
+          //     contatos: true,
+          //     localizacoes: true,
+          //   },
+          // },
+          empresa: true,
+          // {
+          //   include: {
+          //     contatos: true,
+          //     localizacoes: true,
+          //   },
+          // },
         },
       });
 
@@ -71,8 +74,6 @@ export class UsuarioSistemaService {
       console.error("Erro ao buscar usuários do sistema:", error);
       throw new Error("Não foi possível buscar os usuários do sistema.");
     }
-    // Removido `finally { await prisma.$disconnect(); }`
-    // Gerenciamento de conexão é feito pelo Tsyringe/singleton de Prisma.
   }
 
   async save(data: any): Promise<UsuarioSistema> {

@@ -1,3 +1,4 @@
+import { dateSchema } from '@/utils/date/DateSchemas';
 import { isValidCPF } from '@/utils/validateCpf';
 import { z } from 'zod';
 import { contatoSchema } from './contato.schema';
@@ -19,7 +20,7 @@ export const pessoaSchema = z.object({
         message: 'CPF inválido',
       }
     ),
-  dataNascimento: z.date().optional(),
+  dataNascimento: dateSchema,
   estadoCivil: z
     .enum([
       'SOLTEIRO',

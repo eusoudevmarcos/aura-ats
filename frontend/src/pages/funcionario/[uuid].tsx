@@ -22,8 +22,9 @@ const FuncionarioPage: React.FC = () => {
     const fetchFuncionario = async () => {
       setLoading(true);
       setErro(null);
+      console.log(uuid);
       try {
-        const response = await api.get(`/api/funcionario/${uuid}`);
+        const response = await api.get(`/api/external/funcionario/${uuid}`);
         setFuncionario(response.data);
       } catch (_: any) {
         setErro('Funcionário não encontrado ou erro ao buscar dados.');
@@ -95,7 +96,7 @@ const FuncionarioPage: React.FC = () => {
               <span className="font-medium">Tipo de Usuário:</span>{' '}
               {funcionario.tipoUsuario}
             </div>
-            {funcionario.setor && (
+            {/* {funcionario.setor && (
               <div>
                 <span className="font-medium">Setor:</span> {funcionario.setor}
               </div>
@@ -104,7 +105,7 @@ const FuncionarioPage: React.FC = () => {
               <div>
                 <span className="font-medium">Cargo:</span> {funcionario.cargo}
               </div>
-            )}
+            )} */}
           </Card>
           {funcionario.pessoa && (
             <Card title="Dados da Pessoa">

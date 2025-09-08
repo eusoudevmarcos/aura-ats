@@ -78,7 +78,7 @@ const CandidatoList: React.FC = () => {
         setTotal(response.data.total);
         setTotalPages(response.data.totalPages);
       } catch (error) {
-        // console.error("Erro ao buscar candidatos:", error);
+        console.log('Erro ao buscar candidatos:', error);
         setCandidatos([]);
         setTotal(0);
         setTotalPages(1);

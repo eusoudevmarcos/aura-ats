@@ -4,18 +4,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
-import {
-  BriefcaseIcon,
-  CalendarIcon,
-  ChevronDownIcon,
-  ClipboardCheckIcon,
-  EmployeesIcon,
-  HandshakeIcon,
-  ListClosedIcon,
-  ListIcon,
-  SettingsIcon,
-  UsersIcon,
-} from '../icons';
+import { ChevronDownIcon, ListClosedIcon, ListIcon } from '../icons';
+import { getNavItems } from './SidebarList';
 
 interface SidebarProps {
   onToggleSidebar: (collapsed: boolean) => void;
@@ -38,54 +28,6 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
 
   if (!user) return null;
 
-  const navItems = [
-    {
-      icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
-      label: 'Atividade',
-      href: '/atividades/agendas',
-    },
-    {
-      icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
-      label: 'Vagas',
-      href: '/vagas',
-    },
-    {
-      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
-      label: 'Prospecções',
-      href: '/prospeccoes/',
-    },
-    {
-      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
-      label: 'Profissionais',
-      href: '/profissionais',
-    },
-    {
-      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-      label: 'Clientes',
-      href: '/clientes',
-    },
-    {
-      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-      label: 'Entrevistas',
-      href: '/entrevistas',
-    },
-    {
-      icon: <ClipboardCheckIcon className="w-5 h-5 text-inherit" />,
-      label: 'Testes',
-      href: '/testes',
-    },
-    {
-      icon: <SettingsIcon className="w-5 h-5 text-inherit" />,
-      label: 'Configurações',
-      href: '/configuracoes',
-    },
-    {
-      icon: <EmployeesIcon className="w-5 h-5 text-inherit" />,
-      label: 'Funcionarios',
-      href: `/funcionarios`,
-    },
-  ];
-
   return (
     <>
       {/* Sidebar Desktop */}
@@ -104,7 +46,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
         {/* Navegação */}
         <nav className="flex-grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
           <ul>
-            {navItems.map(item => (
+            {getNavItems(user).map(item => (
               <li key={item.label}>
                 <Link
                   href={item.href}
@@ -181,7 +123,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
         >
           <nav className="flex-grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
             <ul>
-              {navItems.map(item => (
+              {getNavItems(user).map(item => (
                 <li key={item.label}>
                   <Link
                     href={item.href}

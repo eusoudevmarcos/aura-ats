@@ -1,8 +1,8 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useRouter } from "next/router";
-import Card from "@/components/takeit/Card";
-import { searchApi } from "@/axios/searchApi";
-import { exportToCSV, exportToPDF } from "@/utils/exportCSV";
+import { searchApi } from '@/axios/searchApi';
+import Card from '@/components/takeit/Card';
+import { exportToCSV, exportToPDF } from '@/utils/exportCSV';
+import { useRouter } from 'next/router';
+import React, { useEffect, useRef, useState } from 'react';
 
 interface Company {
   // ... interfaces iguais às que você já tem
@@ -105,10 +105,10 @@ const ViewCompanyPage: React.FC = () => {
     setCompany(null);
 
     try {
-      const data = await searchApi(cnpj || "", "companies");
+      const data = await searchApi(cnpj || '', 'companies');
       setCompany(data.data[0]);
     } catch (error) {
-      console.error("error:" + error);
+      console.log('error:' + error);
       setCompany(null);
     } finally {
       setLoading(false);
@@ -125,23 +125,23 @@ const ViewCompanyPage: React.FC = () => {
     function handleClickOutside(event: MouseEvent) {
       if (
         showExportDropdown &&
-        !(event.target as HTMLElement).closest("#export-dropdown") &&
-        !(event.target as HTMLElement).closest("#export-btn")
+        !(event.target as HTMLElement).closest('#export-dropdown') &&
+        !(event.target as HTMLElement).closest('#export-btn')
       ) {
         setShowExportDropdown(false);
       }
     }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => document.removeEventListener("mousedown", handleClickOutside);
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
   }, [showExportDropdown]);
 
-  const handleExport = async (type: "csv" | "pdf") => {
+  const handleExport = async (type: 'csv' | 'pdf') => {
     setShowExportDropdown(false);
     if (!company) return;
 
-    if (type === "csv") {
+    if (type === 'csv') {
       exportToCSV(company);
-    } else if (type === "pdf") {
+    } else if (type === 'pdf') {
       await exportToPDF(cardRef as React.RefObject<HTMLDivElement>);
     }
   };
@@ -168,7 +168,7 @@ const ViewCompanyPage: React.FC = () => {
           <button
             id="export-btn"
             className="buttonPrimary flex items-center"
-            onClick={() => setShowExportDropdown((prev) => !prev)}
+            onClick={() => setShowExportDropdown(prev => !prev)}
             type="button"
           >
             Exportar
@@ -191,13 +191,13 @@ const ViewCompanyPage: React.FC = () => {
             <div className="absolute right-0 z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
               <button
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => handleExport("csv")}
+                onClick={() => handleExport('csv')}
               >
                 Exportar CSV
               </button>
               <button
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                onClick={() => handleExport("pdf")}
+                onClick={() => handleExport('pdf')}
               >
                 Exportar PDF
               </button>
@@ -249,7 +249,7 @@ const ViewCompanyPage: React.FC = () => {
               <strong>Situação Cadastral:</strong> {company.registry_situation}
             </p>
             <p className="font-medium">
-              <strong>CNAE:</strong> {company.cnae_code} -{" "}
+              <strong>CNAE:</strong> {company.cnae_code} -{' '}
               {company.cnae_description}
             </p>
             <p className="font-medium">

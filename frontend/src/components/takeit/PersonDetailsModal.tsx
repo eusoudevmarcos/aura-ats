@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
-import axios from "axios";
-import styles from "@/styles/takeit.module.scss";
+import styles from '@/styles/takeit.module.scss';
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 // Tipos para os detalhes
-type TipoPessoa = "persons" | "companies";
+type TipoPessoa = 'persons' | 'companies';
 
 interface Endereco {
   logradouro: string;
@@ -48,8 +48,8 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
 }) => {
   const [details, setDetails] = useState<DetalhesPessoa | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<string>("");
-  const [activeTab, setActiveTab] = useState<string>("dadosBasicos");
+  const [error, setError] = useState<string>('');
+  const [activeTab, setActiveTab] = useState<string>('dadosBasicos');
 
   useEffect(() => {
     if (itemId && type) {
@@ -60,10 +60,10 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
 
   const fetchDetails = async () => {
     setLoading(true);
-    setError("");
+    setError('');
     try {
       const endpoint =
-        type === "persons"
+        type === 'persons'
           ? `http://localhost:3001/api/persons/details/${itemId}`
           : `http://localhost:3001/api/companies/details/${itemId}`;
 
@@ -72,29 +72,29 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
       if (response.data.success) {
         setDetails(response.data.data as DetalhesPessoa);
       } else {
-        setError(response.data.message || "Erro ao carregar detalhes.");
+        setError(response.data.message || 'Erro ao carregar detalhes.');
       }
     } catch (err) {
-      console.error(err);
-      setError("Erro ao conectar com o servidor.");
+      console.log(err);
+      setError('Erro ao conectar com o servidor.');
     } finally {
       setLoading(false);
     }
   };
 
   const tabs: string[] = [
-    "dadosBasicos",
-    "enderecos",
-    "telefones",
-    "emails",
-    "documentos",
+    'dadosBasicos',
+    'enderecos',
+    'telefones',
+    'emails',
+    'documentos',
   ];
 
   const renderTabContent = () => {
     if (!details) return null;
 
     switch (activeTab) {
-      case "dadosBasicos":
+      case 'dadosBasicos':
         return (
           <div>
             {Object.entries(details.dadosBasicos || {}).map(([key, value]) => (
@@ -104,7 +104,7 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
             ))}
           </div>
         );
-      case "enderecos":
+      case 'enderecos':
         return (
           <ul>
             {(details.enderecos || []).map((end: Endereco, idx: number) => (
@@ -115,7 +115,7 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
             ))}
           </ul>
         );
-      case "telefones":
+      case 'telefones':
         return (
           <ul>
             {(details.telefones || []).map((tel: Telefone, idx: number) => (
@@ -125,7 +125,7 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
             ))}
           </ul>
         );
-      case "emails":
+      case 'emails':
         return (
           <ul>
             {(details.emails || []).map((email: string, idx: number) => (
@@ -133,7 +133,7 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
             ))}
           </ul>
         );
-      case "documentos":
+      case 'documentos':
         return (
           <ul>
             {(details.documentos || []).map((doc: Documento, idx: number) => (
@@ -157,19 +157,19 @@ const PersonDetailsModal: React.FC<PersonDetailsModalProps> = ({
           Fechar
         </button>
 
-        <h2>Detalhes do {type === "persons" ? "Consumidor" : "Empresa"}</h2>
+        <h2>Detalhes do {type === 'persons' ? 'Consumidor' : 'Empresa'}</h2>
 
         {loading && <p>Carregando detalhes...</p>}
-        {error && <p style={{ color: "red" }}>{error}</p>}
+        {error && <p style={{ color: 'red' }}>{error}</p>}
 
         {!loading && !error && details && (
           <>
             <div className={styles.tabNavigation}>
-              {tabs.map((tab) => (
+              {tabs.map(tab => (
                 <button
                   key={tab}
                   className={`${styles.tabButton} ${
-                    activeTab === tab ? styles.active : ""
+                    activeTab === tab ? styles.active : ''
                   }`}
                   onClick={() => setActiveTab(tab)}
                 >

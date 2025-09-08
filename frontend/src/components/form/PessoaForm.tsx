@@ -51,7 +51,7 @@ const PessoaForm = ({
         name={dataNascimento}
         control={control}
         label="Data de Nascimento"
-        placeholder="00/00/0000"
+        placeholder="DD/MM/AAAA"
         errors={errors}
         type="date"
       />

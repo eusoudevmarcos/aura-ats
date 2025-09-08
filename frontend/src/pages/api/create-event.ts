@@ -58,7 +58,7 @@ export default async function handler(
       event: response.data,
     });
   } catch (error: any) {
-    console.error('Erro ao criar evento:', error.message);
+    console.log('Erro ao criar evento:', error.message);
     res.status(500).json({
       message: 'Erro interno ao criar o evento.',
       error: error.message,

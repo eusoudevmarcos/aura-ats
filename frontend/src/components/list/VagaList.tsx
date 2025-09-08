@@ -181,7 +181,7 @@ const VagaList: React.FC = () => {
         setTotalRecords(response.data.total);
         setTotalPages(response.data.totalPages);
       } catch (error) {
-        console.error('Erro ao buscar vagas:', error);
+        console.log('Erro ao buscar vagas:', error);
         setVagas([]);
         setTotalRecords(0);
         setTotalPages(1);

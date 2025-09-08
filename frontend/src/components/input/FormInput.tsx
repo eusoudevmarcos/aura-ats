@@ -1,7 +1,5 @@
 // src/components/input/FormInput.tsx
 import { FormInputProps } from '@/type/formInput.type';
-import { convertDateFromPostgres } from '@/utils/date/convertDateFromPostgres';
-import { convertDateToPostgres } from '@/utils/date/convertDateToPostgres';
 import { getError } from '@/utils/getError';
 import { dateFullValidate } from '@/utils/mask/date';
 import { Controller, FieldValues } from 'react-hook-form';
@@ -22,7 +20,6 @@ export function FormInput<T extends FieldValues>({
   onChange,
 }: FormInputProps<T>) {
   const errorMessage = getError(errors, name);
-
   const id = inputProps?.id || name.toString();
 
   const baseClass =
@@ -30,18 +27,72 @@ export function FormInput<T extends FieldValues>({
   const errorClass = errorMessage ? 'border-red-500' : '';
 
   const { classNameContainer, ...otherInputProps } = inputProps || {};
-
   const inputClassName = [baseClass, errorClass, otherInputProps?.className]
     .filter(Boolean)
     .join(' ');
 
   const isDateInput = type === 'date';
 
+  // Função para converter Date para string DD/MM/YYYY
+  const formatDateToDisplay = (date: any): string => {
+    if (!date) return '';
+
+    if (date instanceof Date && !isNaN(date.getTime())) {
+      const day = date.getDate().toString().padStart(2, '0');
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const year = date.getFullYear();
+      return `${day}/${month}/${year}`;
+    }
+
+    return '';
+  };
+
+  // Função para converter string DD/MM/YYYY para Date
+  const parseDisplayToDate = (dateString: string): Date | null => {
+    if (!dateString || dateString.length !== 10) return null;
+
+    const parts = dateString.split('/');
+    if (parts.length !== 3) return null;
+
+    const [day, month, year] = parts.map(Number);
+
+    // Validações básicas
+    if (
+      isNaN(day) ||
+      isNaN(month) ||
+      isNaN(year) ||
+      day < 1 ||
+      day > 31 ||
+      month < 1 ||
+      month > 12 ||
+      year < 1900 ||
+      year > 2100
+    ) {
+      return null;
+    }
+
+    const date = new Date(year, month - 1, day);
+
+    // Verifica se a data é válida
+    if (
+      date.getFullYear() === year &&
+      date.getMonth() + 1 === month &&
+      date.getDate() === day
+    ) {
+      return date;
+    }
+
+    return null;
+  };
+
   const onAccept = (valueString: any, mask: any, onChangeFn: any) => {
     if (isDateInput) {
-      mask.masked.isComplete
-        ? onChangeFn(convertDateToPostgres(valueString))
-        : onChangeFn(undefined);
+      if (mask.masked.isComplete && valueString.length === 10) {
+        const parsedDate = parseDisplayToDate(valueString);
+        onChangeFn(parsedDate);
+      } else {
+        onChangeFn(null);
+      }
     } else {
       onChangeFn(valueString);
     }
@@ -63,7 +114,7 @@ export function FormInput<T extends FieldValues>({
               },
             }) => {
               const displayValue = isDateInput
-                ? convertDateFromPostgres(controllerValue as any)
+                ? formatDateToDisplay(controllerValue)
                 : (controllerValue as any);
 
               return (
@@ -76,14 +127,13 @@ export function FormInput<T extends FieldValues>({
                   placeholder={
                     placeholder || (isDateInput ? 'DD/MM/YYYY' : undefined)
                   }
-                  value={(displayValue || '') as any}
+                  value={displayValue || ''}
                   onAccept={(valueString: any, mask: any) =>
                     onAccept(valueString, mask, controllerOnChange)
                   }
                   onBlur={onBlur}
-                  type={isDateInput ? 'text' : type}
+                  type="text" // Sempre text para usar a máscara
                   {...otherInputProps}
-                  {...(!isDateInput ? maskProps : {})}
                 />
               );
             }}
@@ -95,14 +145,14 @@ export function FormInput<T extends FieldValues>({
             {...otherInputProps}
             className={inputClassName}
             placeholder={placeholder}
-            type={type}
+            type={isDateInput ? 'text' : type}
             autoComplete="off"
             onChange={onChange}
           />
         ) : (
           <input
             id={id}
-            type={type}
+            type={isDateInput ? 'text' : type}
             className={inputClassName}
             placeholder={placeholder}
             value={value}

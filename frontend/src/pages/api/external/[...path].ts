@@ -70,7 +70,7 @@ export default async function handler(
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {
-    console.error(
+    console.log(
       'Erro no proxy da API externa:',
       error.response?.data || error.message
     );

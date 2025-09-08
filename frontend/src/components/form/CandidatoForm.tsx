@@ -53,7 +53,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       );
       setEspecialidades(response.data);
     } catch (error) {
-      console.error('Erro ao carregar especialidades:', error);
+      console.log('Erro ao carregar especialidades:', error);
     }
   };
 
