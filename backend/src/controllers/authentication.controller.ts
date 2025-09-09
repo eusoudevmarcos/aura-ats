@@ -1,8 +1,8 @@
-import { Request, Response } from "express";
+import bcrypt from "bcryptjs";
 import { serialize } from "cookie";
+import { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { saveLog } from "../lib/logger";
-import bcrypt from "bcryptjs";
 import prisma from "../lib/prisma";
 
 const SECRET = process.env.JWT_SECRET;
@@ -101,7 +101,7 @@ export default class AuthenticationController {
 
       return res
         .status(200)
-        .json({ message: "Login bem-sucedido", uid: usuarioSistema.id });
+        .json({ message: "Login bem-sucedido", uid: usuarioSistema.id, token });
     } catch (error: any) {
       await saveLog({
         type: "login",
