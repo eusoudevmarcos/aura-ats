@@ -71,7 +71,7 @@ const HeaderLayout: React.FC = () => {
             <button className={styles.iconButton}>
               <BellIcon />
             </button>
-            <Link href={`/profile/${uid}`}>
+            <Link href={`/profile`}>
               <Image
                 src="https://placehold.co/40x40/FFD700/000000?text=JD"
                 width={30}
@@ -138,7 +138,7 @@ const HeaderLayout: React.FC = () => {
                 </Link>
 
                 <Link
-                  href={`/profile/${uid}`}
+                  href={`/profile`}
                   className="flex items-center gap-2 justify-center"
                   onClick={() => setIsMenuOpen(false)}
                 >

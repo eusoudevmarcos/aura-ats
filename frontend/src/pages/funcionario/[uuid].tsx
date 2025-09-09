@@ -98,12 +98,14 @@ const FuncionarioPage: React.FC = () => {
             </div>
             {funcionario.funcionario.setor && (
               <div>
-                <span className="font-medium">Setor:</span> {funcionario.setor}
+                <span className="font-medium">Setor:</span>{' '}
+                {funcionario.funcionario.setor}
               </div>
             )}
             {funcionario.funcionario.cargo && (
               <div>
-                <span className="font-medium">Cargo:</span> {funcionario.cargo}
+                <span className="font-medium">Cargo:</span>{' '}
+                {funcionario.funcionario.cargo}
               </div>
             )}
           </Card>

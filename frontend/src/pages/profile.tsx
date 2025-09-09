@@ -26,7 +26,7 @@ const UserPage: React.FC = () => {
         setLoading(true);
         setErro(null);
         try {
-          const resp = await api.get('/funcionario/' + user.uid);
+          const resp = await api.get('/api/external/funcionario/' + user.uid);
 
           if (resp.status === 200) {
             setUserData(resp.data);
@@ -41,7 +41,7 @@ const UserPage: React.FC = () => {
       };
       fetchUser();
     }
-  }, [uuid]);
+  }, [user]);
 
   if (loading) {
     return <div>Carregando dados do usuário...</div>;

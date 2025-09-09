@@ -1,10 +1,10 @@
+import { TipoUsuarioEnum } from '@/schemas/funcionario.schema';
 import {
   BriefcaseIcon,
   CalendarIcon,
   ClipboardCheckIcon,
   EmployeesIcon,
   HandshakeIcon,
-  SettingsIcon,
   UsersIcon,
 } from '../icons';
 
@@ -16,50 +16,58 @@ export const getNavItems = (user: any) => {
       label: 'Atividade',
       href: '/atividades/agendas',
     },
-    {
-      icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
-      label: 'Vagas',
-      href: '/vagas',
-    },
-    {
-      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
-      label: 'Prospecções',
-      href: '/prospeccoes/',
-    },
-    {
-      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
-      label: 'Profissionais',
-      href: '/profissionais',
-    },
-    {
-      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-      label: 'Clientes',
-      href: '/clientes',
-    },
-    {
-      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-      label: 'Entrevistas',
-      href: '/entrevistas',
-    },
-    {
-      icon: <ClipboardCheckIcon className="w-5 h-5 text-inherit" />,
-      label: 'Testes',
-      href: '/testes',
-    },
-    {
-      icon: <SettingsIcon className="w-5 h-5 text-inherit" />,
-      label: 'Configurações',
-      href: '/configuracoes',
-    },
   ];
 
-  // Adiciona o item "Funcionarios" apenas se o usuário for ADMIN_SISTEMA
-  if (user?.tipo === 'ADMIN_SISTEMA') {
+  if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
     navItems.push({
       icon: <EmployeesIcon className="w-5 h-5 text-inherit" />,
       label: 'Funcionarios',
       href: `/funcionarios`,
     });
+  }
+
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
+    user?.tipo === TipoUsuarioEnum.enum.VENDEDOR
+  ) {
+    navItems.push({
+      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
+      label: 'Prospecções',
+      href: '/prospeccoes/',
+    });
+  }
+
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
+    user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
+  ) {
+    navItems.push(
+      {
+        icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
+        label: 'Vagas',
+        href: '/vagas',
+      },
+      {
+        icon: <UsersIcon className="w-5 h-5 text-inherit" />,
+        label: 'Profissionais',
+        href: '/profissionais',
+      },
+      {
+        icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
+        label: 'Clientes',
+        href: '/clientes',
+      },
+      {
+        icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
+        label: 'Entrevistas',
+        href: '/entrevistas',
+      },
+      {
+        icon: <ClipboardCheckIcon className="w-5 h-5 text-inherit" />,
+        label: 'Testes',
+        href: '/testes',
+      }
+    );
   }
 
   return navItems;
