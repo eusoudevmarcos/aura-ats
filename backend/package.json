@@ -6,17 +6,22 @@
   "license": "MIT",
   "scripts": {
     "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
-    "build": "npm run db:generate && tsc && cpx \"src/public/**/*\" dist/public",
+    "build": "npm run db:generate:safe && tsc && cpx \"src/public/**/*\" dist/public",
     "start": "cross-env NODE_ENV=production node dist/src/index.js",
     "seed-script": "tsx prisma/seed.ts",
     "seed": "npm run seed-script",
     "migrate:dev": "npx prisma migrate dev --schema ./prisma",
     "migrate:prod": "npx prisma migrate deploy --schema ./prisma",
-    "prisma:generate": "npx prisma generate --schema ./prisma",
+    "prisma:generate": "npm run db:generate:safe",
     "db:generate": "npx prisma generate --schema ./prisma",
+    "db:generate:safe": "npm run db:kill-processes && npx prisma generate --schema ./prisma",
+    "db:kill-processes": "taskkill /f /im node.exe 2>nul || true",
     "db:push": "npx prisma db push --schema ./prisma",
     "db:pull": "npx prisma db pull --schema ./prisma",
-    "db:studio": "npxprisma studio --schema ./prisma"
+    "db:reset": "npx prisma migrate reset --schema ./prisma",
+    "db:studio": "npx prisma studio --schema ./prisma",
+    "db:setup": "npm run db:generate:safe && npm run migrate:prod",
+    "db:dev": "npm run db:generate:safe && npm run migrate:dev"
   },
   "dependencies": {
     "@prisma/client": "^6.13.0",

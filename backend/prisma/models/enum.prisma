@@ -1,7 +1,7 @@
 enum StatusCliente {
-    PROSPECT
-    LEAD
-    ATIVO
-    INATIVO
-    PENDENTE
+  PROSPECT
+  LEAD
+  ATIVO
+  INATIVO
+  PENDENTE
 }

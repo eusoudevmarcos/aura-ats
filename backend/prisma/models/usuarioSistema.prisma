@@ -1,38 +1,35 @@
-enum TipoUsuario {
-    ADMIN_SISTEMA
-    ADMINISTRATIVO
-    MODERADOR // Gerente
-    RECRUTADOR
-    VENDEDOR
-    CLIENTE_ATS
-    CLIENTE_CRM
-    CLIENTE_ATS_CRM
-}
-
-enum TipoPessoa {
-    FISICA
-    JURIDICA
-}
-
 model UsuarioSistema {
-    id          String      @id @default(uuid())
-    email       String      @unique
-    password    String
-    tipoUsuario TipoUsuario
-
-    pessoaId String? @unique
-    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
-
-    empresaId String?  @unique
-    empresa   Empresa? @relation(fields: [empresaId], references: [id])
-
-    funcionario Funcionario?
+  id          String       @id @default(uuid())
+  email       String       @unique
+  password    String
+  tipoUsuario TipoUsuario
+  pessoaId    String?      @unique
+  empresaId   String?      @unique
+  funcionario Funcionario?
+  empresa     Empresa?     @relation(fields: [empresaId], references: [id])
+  pessoa      Pessoa?      @relation(fields: [pessoaId], references: [id])
 }
 
 model Funcionario {
-    id               String         @id @default(uuid())
-    setor            String?        @db.VarChar(100)
-    cargo            String?        @db.VarChar(100)
-    usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
-    usuarioSistemaId String         @unique
+  id               String         @id @default(uuid())
+  setor            String?        @db.VarChar(100)
+  cargo            String?        @db.VarChar(100)
+  usuarioSistemaId String         @unique
+  usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
+}
+
+enum TipoUsuario {
+  ADMIN_SISTEMA
+  ADMINISTRATIVO
+  MODERADOR
+  RECRUTADOR
+  VENDEDOR
+  CLIENTE_ATS
+  CLIENTE_ATS_CRM
+  CLIENTE_CRM
+}
+
+enum TipoPessoa {
+  FISICA
+  JURIDICA
 }

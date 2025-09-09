@@ -1,33 +1,32 @@
-enum TipoSocio {
-    REPRESENTANTE
-    SOCIO
-    ADMINISTRADOR
-}
-
 model Empresa {
-    id             String           @id @default(uuid())
-    razaoSocial    String
-    cnpj           String           @unique
-    nomeFantasia   String           @default("")
-    dataAbertura   DateTime?
-    contatos       Contato[]
-    localizacoes   Localizacao[]
-    usuarioSistema UsuarioSistema[]
-    socios         Socio[]
-    representantes Pessoa[]         @relation("EmpresaRepresentantes")
-    cliente        Cliente?
-    createdAt      DateTime         @default(now())
-    updatedAt      DateTime         @updatedAt
+  id             String          @id @default(uuid())
+  razaoSocial    String
+  cnpj           String          @unique
+  dataAbertura   DateTime?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+  nomeFantasia   String          @default("")
+  cliente        Cliente?
+  contatos       Contato[]
+  localizacoes   Localizacao[]
+  representantes Pessoa[]        @relation("EmpresaRepresentantes")
+  socios         Socio[]
+  usuarioSistema UsuarioSistema?
 }
 
 model Socio {
-    id        String    @id @default(uuid())
-    pessoaId  String
-    empresaId String
-    tipoSocio TipoSocio
+  id        String    @id @default(uuid())
+  pessoaId  String
+  empresaId String
+  tipoSocio TipoSocio
+  empresa   Empresa   @relation(fields: [empresaId], references: [id])
+  pessoa    Pessoa    @relation(fields: [pessoaId], references: [id])
 
-    pessoa  Pessoa  @relation(fields: [pessoaId], references: [id])
-    empresa Empresa @relation(fields: [empresaId], references: [id])
+  @@unique([pessoaId, empresaId])
+}
 
-    @@unique([pessoaId, empresaId])
+enum TipoSocio {
+  REPRESENTANTE
+  SOCIO
+  ADMINISTRADOR
 }
