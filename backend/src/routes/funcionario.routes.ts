@@ -1,6 +1,6 @@
 import { Router } from "express";
-import { FuncionarioController } from "../controllers/funcionario.controller";
 import { container } from "tsyringe";
+import { FuncionarioController } from "../controllers/funcionario.controller";
 import { authMiddleware } from "../middleware/authMiddleware";
 
 const router = Router();
@@ -14,7 +14,7 @@ router.get("/:uid", authMiddleware, (req, res) =>
   funcionarioController.getById(req, res)
 );
 
-router.post("/create/pessoa", authMiddleware, (req, res) =>
+router.post("/create/pessoa", (req, res) =>
   funcionarioController.createPessoa(req, res)
 );
 router.post("/create/empresa", authMiddleware, (req, res) =>
