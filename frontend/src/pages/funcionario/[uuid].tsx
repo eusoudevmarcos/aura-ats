@@ -96,18 +96,15 @@ const FuncionarioPage: React.FC = () => {
               <span className="font-medium">Tipo de Usuário:</span>{' '}
               {funcionario.tipoUsuario}
             </div>
-            {funcionario.funcionario.setor && (
-              <div>
-                <span className="font-medium">Setor:</span>{' '}
-                {funcionario.funcionario.setor}
-              </div>
-            )}
-            {funcionario.funcionario.cargo && (
-              <div>
-                <span className="font-medium">Cargo:</span>{' '}
-                {funcionario.funcionario.cargo}
-              </div>
-            )}
+
+            <div>
+              <span className="font-medium">Setor:</span>
+              {funcionario?.funcionario?.setor ?? 'N/A'}
+            </div>
+            <div>
+              <span className="font-medium">Cargo:</span>
+              {funcionario?.funcionario?.cargo ?? 'N/A'}
+            </div>
           </Card>
           {funcionario.pessoa && (
             <Card title="Dados da Pessoa">
