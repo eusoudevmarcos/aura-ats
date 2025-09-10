@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import usuarioSistemaDTO from "../dto/funcionario.dto";
 import { UsuarioSistemaService } from "../services/usuarioSistema.service";
 
 @injectable()
@@ -28,10 +29,22 @@ export class FuncionarioController {
   async getById(req: Request, res: Response) {
     try {
       const funcionario = await this.service.getById(req.params.uid as string);
-      return res.status(200).json(funcionario);
+      return res.status(200).json(usuarioSistemaDTO(funcionario));
     } catch (error: any) {
       return res.status(400).json({
         error: "Erro ao buscar funcionários",
+        message: error.message,
+      });
+    }
+  }
+
+  async save(req: Request, res: Response) {
+    try {
+      const funcionario = await this.service.save(req.body);
+      return res.status(201).json(usuarioSistemaDTO(funcionario));
+    } catch (error: any) {
+      return res.status(400).json({
+        error: "Erro ao criar funcionário",
         message: error.message,
       });
     }

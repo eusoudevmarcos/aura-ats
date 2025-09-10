@@ -1,6 +1,6 @@
+import { Funcionario } from "@prisma/client";
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { Funcionario } from "@prisma/client";
 
 @injectable()
 export class FuncionarioRepository {

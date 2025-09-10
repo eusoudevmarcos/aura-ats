@@ -1,9 +1,10 @@
 // src/services/candidato.service.ts
+import { AreaCandidato, Candidato, Especialidade } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import { CandidatoRepository } from "../repository/candidato.repository";
-import { Candidato, AreaCandidato, Especialidade } from "@prisma/client";
 import { PessoaRepository } from "../repository/pessoa.repository";
+import { CandidatoUpdateInput } from "../types/prisma.types";
 
 @injectable()
 export class CandidatoService {
@@ -59,84 +60,61 @@ export class CandidatoService {
   }
 
   async save(candidatoData: any): Promise<Candidato> {
-    return await prisma.$transaction(async (tx) => {
-      candidatoData.pessoa.cpf = candidatoData.pessoa.cpf.replace(/\D/g, "");
-
-      if (!candidatoData.areaCandidato) {
-        throw new Error("A área do candidato é obrigatória.");
-      }
-
-      if (!Object.values(AreaCandidato).includes(candidatoData.areaCandidato)) {
-        throw new Error(
-          `Área do candidato inválida: ${candidatoData.areaCandidato}`
-        );
-      }
-
-      if (!candidatoData.pessoa || !candidatoData.pessoa.cpf) {
-        throw new Error(
-          "Dados da pessoa e CPF são obrigatórios para um candidato."
-        );
-      }
-
-      if (
-        !!candidatoData.especialidadeId &&
-        candidatoData.especialidadeId !== ""
-      ) {
-        candidatoData.especialidadeId = Number(candidatoData.especialidadeId);
-      }
-
-      const cpfLimpo = candidatoData.pessoa.cpf.replace(/\D/g, "");
-      let existingPessoaByCpf;
-      try {
-        existingPessoaByCpf =
-          await this.pessoaRepository.findByCpfWithTransaction(cpfLimpo, tx);
-      } catch (error) {
-        throw new Error("Erro interno ao validar pessoa.");
-      }
-
-      let candidatoToUpdateId: string | null = null;
-      let pessoaToConnectId: string | null = null;
-
-      if (existingPessoaByCpf) {
-        pessoaToConnectId = existingPessoaByCpf.id;
-
-        const existingCandidatoForPessoa = await tx.candidato.findUnique({
-          where: { pessoaId: existingPessoaByCpf.id },
-          select: { id: true },
-        });
-
-        if (existingCandidatoForPessoa) {
-          if (
-            candidatoData.id &&
-            candidatoData.id === existingCandidatoForPessoa.id
-          ) {
-            candidatoToUpdateId = candidatoData.id;
-          } else if (!candidatoData.id) {
-            throw new Error(
-              `O CPF '${candidatoData.pessoa.cpf}' já está associado a um candidato existente.`
-            );
-          } else {
-            throw new Error(
-              `O CPF '${candidatoData.pessoa.cpf}' já está associado a outro candidato.`
-            );
-          }
-        }
-      }
-
-      let dataToSave = { ...candidatoData };
-
-      if (candidatoToUpdateId) {
-        dataToSave.id = candidatoToUpdateId;
-        dataToSave.pessoa = { connect: { id: pessoaToConnectId } };
-      } else if (pessoaToConnectId) {
-        dataToSave.pessoa = { connect: { id: pessoaToConnectId } };
-      }
-
-      const result = await this.candidatoRepository.saveWithTransaction(
-        dataToSave,
-        tx
+    if (!candidatoData.pessoa || !candidatoData.pessoa.cpf) {
+      throw new Error(
+        "Dados da pessoa e CPF são obrigatórios para um candidato."
       );
-      return result;
-    });
+    }
+
+    const cpfLimpo = candidatoData.pessoa.cpf.replace(/\D/g, "");
+    const existingPessoaByCpf = await this.pessoaRepository.findByCpf(cpfLimpo);
+
+    if (existingPessoaByCpf) {
+      throw new Error("Candidato já existe");
+    }
+
+    if (!candidatoData.areaCandidato) {
+      throw new Error("A área do candidato é obrigatória.");
+    }
+
+    if (!Object.values(AreaCandidato).includes(candidatoData.areaCandidato)) {
+      throw new Error(
+        `Área do candidato inválida: ${candidatoData.areaCandidato}`
+      );
+    }
+
+    if (
+      !!candidatoData.especialidadeId &&
+      candidatoData.especialidadeId !== ""
+    ) {
+      candidatoData.especialidadeId = Number(candidatoData.especialidadeId);
+    }
+
+    candidatoData.pessoa.cpf = candidatoData.pessoa.cpf.replace(/\D/g, "");
+
+    const includeRelations = {
+      pessoa: {
+        include: {
+          contatos: true,
+          localizacoes: true,
+        },
+      },
+      especialidade: true,
+      formacoes: true,
+    };
+
+    if (candidatoData.id) {
+      const { id, ...updateData } = candidatoData as CandidatoUpdateInput;
+      return await prisma.candidato.update({
+        where: { id: id },
+        data: updateData as any,
+        include: includeRelations,
+      });
+    } else {
+      return await prisma.candidato.create({
+        data: candidatoData as any,
+        include: includeRelations,
+      });
+    }
   }
 }

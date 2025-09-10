@@ -5,13 +5,16 @@ import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
+import { buildNestedOperation } from "../utils/buildNestedOperation";
 
 @injectable()
-export class UsuarioSistemaService {
+export class UsuarioSistemaService extends buildNestedOperation {
   constructor(
     @inject(PessoaRepository) private pessoaRepository: PessoaRepository,
     @inject(EmpresaRepository) private empresaRepository: EmpresaRepository
-  ) {}
+  ) {
+    super();
+  }
 
   async getById(id: string) {
     console.log(id);
@@ -24,13 +27,13 @@ export class UsuarioSistemaService {
             localizacoes: true,
           },
         },
-        funcionario: true,
         empresa: {
           include: {
             contatos: true,
             localizacoes: true,
           },
         },
+        funcionario: true,
       },
     });
   }
@@ -80,14 +83,11 @@ export class UsuarioSistemaService {
     this.validateBasicFields(data);
 
     const normalizedData = this.normalizeData(data);
+    if (!data.id) {
+      await this.checkDuplicates(normalizedData);
+    }
 
-    await this.checkDuplicates(normalizedData);
-
-    // Operação única com Prisma nested
-    // return await prisma.$transaction(
-    //   async (tx: any) => {
     const usuarioData = await this.buildUsuarioData(normalizedData);
-
     if (!data.id) {
       return await prisma.usuarioSistema.create({
         data: usuarioData,
@@ -100,13 +100,6 @@ export class UsuarioSistemaService {
         include: this.getIncludeRelations(),
       });
     }
-    //   },
-    //   {
-    //     maxWait: 5000,
-    //     timeout: 10000,
-    //     isolationLevel: "ReadCommitted",
-    //   }
-    // );
   }
 
   private validateBasicFields(data: any): void {
@@ -124,49 +117,14 @@ export class UsuarioSistemaService {
     }
   }
 
-  private normalizeDataNascimento(dataNascimento: any): Date | null {
-    if (typeof dataNascimento !== "string") return null;
-
-    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
-    if (!regex.test(dataNascimento)) return null;
-
-    const [dia, mes, ano] = dataNascimento.split("/").map(Number);
-
-    // Validação básica
-    if (
-      dia < 1 ||
-      dia > 31 ||
-      mes < 1 ||
-      mes > 12 ||
-      ano < 1900 ||
-      ano > 2100
-    ) {
-      return null;
-    }
-
-    // Cria o objeto Date (mês começa do zero)
-    const data = new Date(ano, mes - 1, dia);
-
-    // Confirma se a data realmente existe
-    if (
-      data.getFullYear() !== ano ||
-      data.getMonth() !== mes - 1 ||
-      data.getDate() !== dia
-    ) {
-      return null;
-    }
-
-    return data;
-  }
-
   private normalizeData(data: any) {
     return {
       ...data,
       pessoa: {
         ...data.pessoa,
-        dataNascimento: this.normalizeDataNascimento(
-          data.pessoa.dataNascimento
-        ),
+        // dataNascimento: this.normalizeDataNascimento(
+        //   data.pessoa.dataNascimento
+        // ),
         cpf: data.pessoa.cpf?.replace(/\D/g, ""),
       },
       empresa: data.empresa
@@ -226,18 +184,38 @@ export class UsuarioSistemaService {
       tipoUsuario: data.tipoUsuario as TipoUsuario,
     };
 
-    // Hash da senha apenas se fornecida
     if (data.password) {
       usuarioData.password = await bcrypt.hash(data.password, 10);
     }
 
-    // Usa operações nested do Prisma para relacionamentos
     if (data.pessoa) {
       usuarioData.pessoa = this.buildNestedOperation(data.pessoa);
+
+      if (data.pessoa.contatos) {
+        usuarioData.pessoa.contatos = this.buildNestedOperation(
+          data.pessoa.contatos
+        );
+      }
+      if (data.pessoa.localizacoes) {
+        usuarioData.pessoa.localizacoes = this.buildNestedOperation(
+          data.pessoa.localizacoes
+        );
+      }
     }
 
     if (data.empresa) {
       usuarioData.empresa = this.buildNestedOperation(data.empresa);
+
+      if (data.empresa.contatos) {
+        usuarioData.empresa.contatos = this.buildNestedOperation(
+          data.empresa.contatos
+        );
+      }
+      if (data.empresa.localizacoes) {
+        usuarioData.empresa.localizacoes = this.buildNestedOperation(
+          data.empresa.localizacoes
+        );
+      }
     }
 
     // Funcionário (sempre opcional)
@@ -250,35 +228,6 @@ export class UsuarioSistemaService {
     }
 
     return usuarioData;
-  }
-
-  private buildNestedOperation(entityData: any) {
-    if (!entityData) return undefined;
-
-    // Se tem ID, é update ou connect
-    if (entityData.id) {
-      // Se tem outros campos além do ID, é update
-      const hasOtherFields = Object.keys(entityData).some(
-        (key) => key !== "id" && entityData[key] !== undefined
-      );
-
-      if (hasOtherFields) {
-        const { id, ...updateData } = entityData;
-        return {
-          upsert: {
-            where: { id },
-            create: entityData,
-            update: updateData,
-          },
-        };
-      } else {
-        // Apenas connect se só tem ID
-        return { connect: { id: entityData.id } };
-      }
-    } else {
-      // Sem ID = create
-      return { create: entityData };
-    }
   }
 
   private getIncludeRelations() {
@@ -300,4 +249,39 @@ export class UsuarioSistemaService {
       funcionario: true,
     };
   }
+
+  // private normalizeDataNascimento(dataNascimento: any): Date | null {
+  //   if (typeof dataNascimento !== "string") return null;
+
+  //   const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+  //   if (!regex.test(dataNascimento)) return null;
+
+  //   const [dia, mes, ano] = dataNascimento.split("/").map(Number);
+
+  //   // Validação básica
+  //   if (
+  //     dia < 1 ||
+  //     dia > 31 ||
+  //     mes < 1 ||
+  //     mes > 12 ||
+  //     ano < 1900 ||
+  //     ano > 2100
+  //   ) {
+  //     return null;
+  //   }
+
+  //   // Cria o objeto Date (mês começa do zero)
+  //   const data = new Date(ano, mes - 1, dia);
+
+  //   // Confirma se a data realmente existe
+  //   if (
+  //     data.getFullYear() !== ano ||
+  //     data.getMonth() !== mes - 1 ||
+  //     data.getDate() !== dia
+  //   ) {
+  //     return null;
+  //   }
+
+  //   return data;
+  // }
 }

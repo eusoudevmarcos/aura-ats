@@ -14,6 +14,8 @@ router.get("/:uid", authMiddleware, (req, res) =>
   funcionarioController.getById(req, res)
 );
 
+router.post("/save", (req, res) => funcionarioController.save(req, res));
+
 router.post("/create/pessoa", (req, res) =>
   funcionarioController.createPessoa(req, res)
 );

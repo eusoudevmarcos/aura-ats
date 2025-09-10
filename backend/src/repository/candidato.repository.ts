@@ -1,11 +1,11 @@
 // src/repository/candidato.repository.ts
+import { Candidato, Pessoa } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { Candidato, Pessoa } from "@prisma/client";
 import {
-  PrismaTransactionClient,
   CandidatoCreateInput,
   CandidatoUpdateInput,
+  PrismaTransactionClient,
 } from "../types/prisma.types";
 import { PessoaRepository } from "./pessoa.repository";
 
@@ -117,43 +117,6 @@ export class CandidatoRepository {
       return { id: data.id, ...baseData } as CandidatoUpdateInput;
     }
     return baseData as CandidatoCreateInput;
-  }
-
-  async saveWithTransaction(
-    data: any,
-    tx: PrismaTransactionClient
-  ): Promise<Candidato> {
-    const isUpdate = !!data.id;
-    const candidatoData = await this.prepareCandidatoData(data, isUpdate, tx);
-
-    const includeRelations = {
-      pessoa: {
-        include: {
-          contatos: true,
-          localizacoes: true,
-        },
-      },
-      especialidade: true,
-      formacoes: true,
-    };
-
-    if (isUpdate) {
-      const { id, ...updateData } = candidatoData as CandidatoUpdateInput;
-      return await tx.candidato.update({
-        where: { id: id },
-        data: updateData as any,
-        include: includeRelations,
-      });
-    } else {
-      return await tx.candidato.create({
-        data: candidatoData as any,
-        include: includeRelations,
-      });
-    }
-  }
-
-  async save(data: any): Promise<Candidato> {
-    return await this.saveWithTransaction(data, prisma);
   }
 
   async findByIdWithTransaction(
