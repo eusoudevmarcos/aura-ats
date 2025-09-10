@@ -13,13 +13,10 @@ export function FormSelect<T extends FieldValues>({
   onChange,
   required,
   children,
-  control: externalControl,
-  register: externalRegister,
-  errors: externalErrors,
 }: FormSelectProps<T>) {
   const formContext = useFormContext<T>();
-  const control = externalControl || formContext?.control;
-  const errors = externalErrors || formContext?.formState?.errors;
+  const control = formContext?.control;
+  const errors = formContext?.formState?.errors;
 
   const errorMessage = getError(errors, name);
   const id = selectProps?.id || name.toString();

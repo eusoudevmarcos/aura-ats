@@ -2,7 +2,7 @@ import { isValidCPF } from '@/utils/validateCpf';
 import { z } from 'zod';
 
 export const pessoaSchema = z.object({
-  id: z.string().nullable(),
+  id: z.string().nullable().optional(),
   nome: z.string().min(1, 'Nome é obrigatório'),
   cpf: z
     .string()
@@ -16,9 +16,13 @@ export const pessoaSchema = z.object({
         message: 'CPF inválido',
       }
     ),
-  // dataNascimento: z
-  //   .string()
-  //   .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
+  rg: z.string().optional(),
+  dataNascimento: z.union([
+    z
+      .string()
+      .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
+    z.date(),
+  ]),
   // estadoCivil: z
   //   .enum([
   //     'SOLTEIRO',
@@ -29,7 +33,6 @@ export const pessoaSchema = z.object({
   //     'UNIAO_ESTAVEL',
   //   ])
   //   .optional(),
-  rg: z.string().optional(),
   // contatos: z.array(contatoSchema).optional(),
   // localizacoes: z.array(localizacaoSchema).optional(),
   // formacoes: z.array(formacaoSchema).optional(),

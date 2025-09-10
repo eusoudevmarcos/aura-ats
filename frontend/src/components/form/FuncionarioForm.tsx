@@ -1,9 +1,9 @@
-import api from '@/axios';
-import { useSafeForm } from '@/hook/useSafeForm';
+// src/components/form/FuncionarioForm.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect } from 'react';
-import { FormProvider } from 'react-hook-form';
+import { useEffect, useMemo } from 'react';
+import { FormProvider, useForm } from 'react-hook-form';
 
+import api from '@/axios';
 import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import PessoaForm from '@/components/form/PessoaForm';
@@ -12,7 +12,7 @@ import {
   funcionarioSchema,
   TipoUsuarioEnum,
 } from '@/schemas/funcionario.schema';
-import { PessoaInput } from '@/schemas/pessoa.schema';
+import { convertDateToPostgres } from '@/utils/date/convertDateToPostgres';
 import { makeName } from '@/utils/makeName';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
@@ -27,98 +27,105 @@ export const FuncionarioForm = ({
   onSuccess,
   funcionarioData,
 }: FuncionarioFormProps) => {
-  const methods = useSafeForm<FuncionarioInput>({
-    mode: 'independent',
-    useFormProps: {
-      resolver: zodResolver(funcionarioSchema),
-      mode: 'onBlur',
-      defaultValues: funcionarioData
-        ? {
-            ...funcionarioData,
-            tipoPessoaOuEmpresa: funcionarioData?.pessoa ? 'pessoa' : 'empresa',
-          }
-        : {
-            tipoUsuario: 'RECRUTADOR',
-            email: '',
-            password: '',
-            funcionario: {
-              setor: '',
-              cargo: '',
-            },
-            tipoPessoaOuEmpresa: 'pessoa',
-            pessoa: undefined,
-            empresa: undefined,
-          },
-    },
+  const defaultValues = useMemo(() => {
+    if (funcionarioData) {
+      return {
+        ...funcionarioData,
+        tipoPessoaOuEmpresa: funcionarioData?.pessoa ? 'pessoa' : 'empresa',
+      } as FuncionarioInput;
+    }
+    return {
+      tipoPessoaOuEmpresa: 'pessoa',
+      funcionario: {
+        setor: '',
+        cargo: '',
+      },
+    } as Partial<FuncionarioInput>;
+  }, [funcionarioData]);
+
+  const methods = useForm<FuncionarioInput>({
+    resolver: zodResolver(funcionarioSchema),
+    mode: 'onChange',
+    defaultValues: defaultValues,
   });
 
   const {
-    register,
     handleSubmit,
     setValue,
     watch,
-    formState: { errors },
+    trigger,
+    reset,
+    formState: { isValid, errors },
   } = methods;
 
-  // Watch para o tipo de pessoa ou empresa
-  const tipoPessoaOuEmpresa = watch('tipoPessoaOuEmpresa') || 'pessoa';
-
+  const tipoPessoaOuEmpresa = watch('tipoPessoaOuEmpresa');
+  const tipoUsuario = watch('tipoUsuario');
   const setor = makeName<FuncionarioInput>('funcionario', 'setor');
   const cargo = makeName<FuncionarioInput>('funcionario', 'cargo');
 
   useEffect(() => {
     if (funcionarioData) {
-      Object.entries(funcionarioData).forEach(([key, value]) => {
-        if (key === 'pessoa' && value) {
-          Object.entries(value as PessoaInput).forEach(([k, v]) => {
-            setValue(`pessoa.${k}` as any, v);
-          });
-        } else if (key === 'empresa' && value) {
-          Object.entries(value as any).forEach(([k, v]) => {
-            setValue(`empresa.${k}` as any, v);
-          });
-        } else if (key === 'funcionario' && value) {
-          Object.entries(value as any).forEach(([k, v]) => {
-            setValue(`funcionario.${k}` as any, v);
-          });
-        } else {
-          setValue(key as keyof FuncionarioInput, value as any);
-        }
-      });
+      reset(defaultValues);
     }
-  }, [funcionarioData, setValue]);
+  }, [funcionarioData, reset, defaultValues]);
 
-  // Limpa os dados quando muda o tipo
+  useEffect(() => {
+    setValue(setor, tipoUsuario, { shouldValidate: true });
+    setValue(cargo, tipoUsuario, { shouldValidate: true });
+  }, [tipoUsuario, setValue, setor, cargo]);
+
   useEffect(() => {
     if (tipoPessoaOuEmpresa === 'pessoa') {
-      setValue('empresa', undefined);
+      setValue('empresa', undefined, { shouldValidate: true });
     } else {
-      setValue('pessoa', undefined);
+      setValue('pessoa', undefined, { shouldValidate: true });
     }
-  }, [tipoPessoaOuEmpresa, setValue]);
+    trigger('tipoPessoaOuEmpresa');
+  }, [tipoPessoaOuEmpresa, setValue, trigger]);
 
   async function onSubmit(data: FuncionarioInput): Promise<void> {
     try {
-      // Remove o campo não usado
-      const cleanData = { ...data };
+      const cleanData = {
+        ...data,
+      };
       if (data.tipoPessoaOuEmpresa === 'pessoa') {
+        Object.assign(cleanData, {
+          pessoa: {
+            ...data.pessoa,
+            dataNascimento: convertDateToPostgres(
+              data.pessoa?.dataNascimento as string
+            ),
+          },
+        });
         delete (cleanData as any).empresa;
       } else {
+        Object.assign(cleanData, {
+          empresa: {
+            ...data.empresa,
+            dataAbertura: convertDateToPostgres(
+              data.empresa?.dataAbertura as string
+            ),
+          },
+        });
         delete (cleanData as any).pessoa;
       }
 
-      const isEdit = !!funcionarioData;
       const url = `/api/external/funcionario/save`;
-
       const response = await api.post(url, cleanData);
       onSuccess(response.data);
     } catch (error: any) {
-      onSuccess(false);
-
       console.log('Erro ao processar funcionário:', error);
       alert(error.response.data.details.message);
     }
   }
+
+  // UseEffect para depurar erros
+  useEffect(() => {
+    console.log('isValid:', isValid);
+    if (Object.keys(errors).length > 0) {
+      console.log('Errors:', errors);
+    }
+  }, [isValid, errors]);
 
   return (
     <FormProvider {...methods}>
@@ -136,6 +143,7 @@ export const FuncionarioForm = ({
             name="tipoUsuario"
             label="Tipo de funcionário"
             selectProps={{ classNameContainer: 'col-span-full' }}
+            placeholder="Selecione o Tipo de Usuario"
           >
             <>
               {TipoUsuarioEnum.options.map(tipo => (
@@ -175,7 +183,6 @@ export const FuncionarioForm = ({
 
           <FormInput
             name="password"
-            register={register}
             label="Senha"
             inputProps={{
               type: 'password',
@@ -183,26 +190,30 @@ export const FuncionarioForm = ({
             }}
           />
 
-          <FormInput
-            name={setor}
-            register={register}
-            label="Setor"
-            inputProps={{ classNameContainer: 'col-span-2' }}
-          />
-
-          <FormInput
-            name={cargo}
-            register={register}
-            label="Cargo"
-            inputProps={{ classNameContainer: 'col-span-2' }}
-          />
+          {tipoUsuario !== TipoUsuarioEnum.enum.CLIENTE_ATS &&
+          tipoUsuario !== TipoUsuarioEnum.enum.CLIENTE_ATS_CRM &&
+          tipoUsuario !== TipoUsuarioEnum.enum.CLIENTE_CRM ? (
+            <>
+              <FormInput
+                name={setor}
+                label="Setor"
+                inputProps={{ classNameContainer: 'col-span-2' }}
+              />
+              <FormInput
+                name={cargo}
+                label="Cargo"
+                inputProps={{ classNameContainer: 'col-span-2' }}
+              />
+            </>
+          ) : (
+            <></>
+          )}
         </Card>
 
-        <Card>
+        <Card title="Tipo de Funcionário (Pessoa ou Empresa)">
           <FormSelect
             name="tipoPessoaOuEmpresa"
-            register={register}
-            label="Tipo de Funcionário (Pessoa ou Empresa)*"
+            selectProps={{ classNameContainer: 'mb-4' }}
           >
             <>
               <option value="pessoa">Pessoa</option>
@@ -217,6 +228,7 @@ export const FuncionarioForm = ({
         <PrimaryButton
           type="submit"
           className="w-full text-white font-semibold py-3 rounded-md transition-colors"
+          disabled={!isValid}
         >
           {funcionarioData ? 'Salvar Alterações' : 'Cadastrar Funcionário'}
         </PrimaryButton>

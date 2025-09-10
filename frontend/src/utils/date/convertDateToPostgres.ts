@@ -1,6 +1,6 @@
 export const convertDateToPostgres = (
   dateString: string | undefined
-): string | undefined => {
+): Date | undefined => {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
 
@@ -39,7 +39,7 @@ export const convertDateToPostgres = (
     ) {
       const formattedMonth = month < 10 ? `0${month}` : `${month}`;
       const formattedDay = day < 10 ? `0${day}` : `${day}`;
-      return `${year}-${formattedMonth}-${formattedDay}`;
+      return new Date(`${year}-${formattedMonth}-${formattedDay}`);
     }
   }
   return undefined;

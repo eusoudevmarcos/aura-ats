@@ -36,7 +36,6 @@ export function FormInput<T extends FieldValues>({
 
   const hasMask = Boolean(maskProps?.mask);
 
-  // Se tem contexto do form, usa Controller
   if (control) {
     return (
       <Container id={id} label={label} className={classNameContainer}>
@@ -60,7 +59,7 @@ export function FormInput<T extends FieldValues>({
                     id={id}
                     className={inputClassName}
                     placeholder={placeholder}
-                    value={field}
+                    value={field || ''}
                     onAccept={(value: string) => fieldOnChange(value)}
                     onBlur={onBlur}
                     autoComplete="off"
@@ -77,7 +76,7 @@ export function FormInput<T extends FieldValues>({
                   type={type}
                   className={inputClassName}
                   placeholder={placeholder}
-                  value={fieldValue}
+                  value={fieldValue || ''}
                   onChange={e => fieldOnChange(e.target.value)}
                   onBlur={onBlur}
                   autoComplete="off"
@@ -133,7 +132,7 @@ export function FormInput<T extends FieldValues>({
             type={type}
             className={inputClassName}
             placeholder={placeholder}
-            value={value}
+            value={value || ''}
             onChange={onChange}
             {...cleanInputProps}
           />
