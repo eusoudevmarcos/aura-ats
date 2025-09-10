@@ -1,11 +1,8 @@
-import { brazilianDateSchema } from '@/utils/date/DateSchemas';
 import { isValidCPF } from '@/utils/validateCpf';
 import { z } from 'zod';
-import { contatoSchema } from './contato.schema';
-import { formacaoSchema } from './formacao.schame';
-import { localizacaoSchema } from './localizacao.schema';
 
 export const pessoaSchema = z.object({
+  id: z.string().nullable(),
   nome: z.string().min(1, 'Nome é obrigatório'),
   cpf: z
     .string()
@@ -19,21 +16,23 @@ export const pessoaSchema = z.object({
         message: 'CPF inválido',
       }
     ),
-  dataNascimento: brazilianDateSchema,
-  estadoCivil: z
-    .enum([
-      'SOLTEIRO',
-      'CASADO',
-      'DIVORCIADO',
-      'VIUVO',
-      'SEPARADO',
-      'UNIAO_ESTAVEL',
-    ])
-    .optional(),
+  // dataNascimento: z
+  //   .string()
+  //   .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
+  // estadoCivil: z
+  //   .enum([
+  //     'SOLTEIRO',
+  //     'CASADO',
+  //     'DIVORCIADO',
+  //     'VIUVO',
+  //     'SEPARADO',
+  //     'UNIAO_ESTAVEL',
+  //   ])
+  //   .optional(),
   rg: z.string().optional(),
-  contatos: z.array(contatoSchema).optional(),
-  localizacoes: z.array(localizacaoSchema).optional(),
-  formacoes: z.array(formacaoSchema).optional(),
+  // contatos: z.array(contatoSchema).optional(),
+  // localizacoes: z.array(localizacaoSchema).optional(),
+  // formacoes: z.array(formacaoSchema).optional(),
 });
 
 export type PessoaInput = z.infer<typeof pessoaSchema>;

@@ -25,7 +25,19 @@ const FuncionarioPage: React.FC = () => {
       console.log(uuid);
       try {
         const response = await api.get(`/api/external/funcionario/${uuid}`);
-        setFuncionario(response.data);
+        setFuncionario({
+          ...response.data,
+          pessoa: response.data?.pessoa
+            ? {
+                ...response.data.pessoa,
+                dataNascimento: response.data.pessoa.dataNascimento
+                  ? new Date(
+                      response.data.pessoa.dataNascimento
+                    ).toLocaleDateString('pt-BR')
+                  : '',
+              }
+            : undefined,
+        });
       } catch (_: any) {
         setErro('Funcionário não encontrado ou erro ao buscar dados.');
         setFuncionario(null);
@@ -116,20 +128,20 @@ const FuncionarioPage: React.FC = () => {
                 <span className="font-medium">CPF:</span>{' '}
                 {funcionario.pessoa.cpf}
               </div>
-              <div>
+              {/* <div>
                 <span className="font-medium">Data de Nascimento:</span>{' '}
                 {funcionario?.pessoa?.dataNascimento &&
                   new Date(
                     funcionario?.pessoa?.dataNascimento
                   ).toLocaleDateString('pt-BR')}
-              </div>
+              </div> */}
               <div>
                 <span className="font-medium">RG:</span> {funcionario.pessoa.rg}
               </div>
-              <div>
+              {/* <div>
                 <span className="font-medium">Estado Civil:</span>{' '}
                 {funcionario.pessoa.estadoCivil}
-              </div>
+              </div> */}
             </Card>
           )}
           {funcionario.empresa && (
@@ -158,7 +170,13 @@ const FuncionarioPage: React.FC = () => {
         onClose={() => setShowModalEdit(false)}
         title="Editar Funcionario"
       >
-        <FuncionarioForm onSuccess={() => {}} funcionarioData={funcionario} />
+        <FuncionarioForm
+          onSuccess={funcionario => {
+            setFuncionario(funcionario);
+            setShowModalEdit(false);
+          }}
+          funcionarioData={funcionario}
+        />
       </Modal>
     </div>
   );

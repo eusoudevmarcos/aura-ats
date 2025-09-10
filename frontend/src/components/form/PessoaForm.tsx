@@ -3,7 +3,6 @@ import { PessoaInput } from '@/schemas/pessoa.schema';
 import { makeName } from '@/utils/makeName';
 import { FormProvider } from 'react-hook-form';
 import { FormInput } from '../input/FormInput';
-import ContatoForm from './ContatoForm';
 
 type PessoaFormProps = {
   namePrefix?: string;
@@ -40,12 +39,12 @@ const PessoaForm = ({
         placeholder="000.000.000-00"
       />
 
-      <FormInput
+      {/* <FormInput
         name={dataNascimento}
         label="Data de Nascimento"
         placeholder="DD/MM/AAAA"
         maskProps={{ mask: '00/00/0000' }}
-      />
+      /> */}
 
       <FormInput
         name={rg}
@@ -55,14 +54,14 @@ const PessoaForm = ({
         errors={errors}
       />
 
-      {contatoPessoa && (
+      {/* {contatoPessoa && (
         <div className="col-span-full" title={contatoPessoa.title}>
           <h3 className="text-xl font-bold">{contatoPessoa.title}</h3>
           <section className="flex w-full gap-2">
             <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
           </section>
         </div>
-      )}
+      )} */}
     </section>
   );
 

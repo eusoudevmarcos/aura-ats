@@ -19,7 +19,7 @@ import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 
 type FuncionarioFormProps = {
-  onSuccess: (msg: boolean) => void;
+  onSuccess: (msg: any) => void;
   funcionarioData?: Partial<FuncionarioInput>;
 };
 
@@ -32,18 +32,23 @@ export const FuncionarioForm = ({
     useFormProps: {
       resolver: zodResolver(funcionarioSchema),
       mode: 'onBlur',
-      defaultValues: {
-        tipoUsuario: 'RECRUTADOR',
-        email: '',
-        password: '',
-        funcionario: {
-          setor: '',
-          cargo: '',
-        },
-        tipoPessoaOuEmpresa: 'pessoa',
-        pessoa: undefined,
-        empresa: undefined,
-      },
+      defaultValues: funcionarioData
+        ? {
+            ...funcionarioData,
+            tipoPessoaOuEmpresa: funcionarioData?.pessoa ? 'pessoa' : 'empresa',
+          }
+        : {
+            tipoUsuario: 'RECRUTADOR',
+            email: '',
+            password: '',
+            funcionario: {
+              setor: '',
+              cargo: '',
+            },
+            tipoPessoaOuEmpresa: 'pessoa',
+            pessoa: undefined,
+            empresa: undefined,
+          },
     },
   });
 
@@ -103,15 +108,15 @@ export const FuncionarioForm = ({
       }
 
       const isEdit = !!funcionarioData;
-      const url = isEdit
-        ? `/api/external/funcionario/update/${data.tipoPessoaOuEmpresa}`
-        : `/api/external/funcionario/create/${data.tipoPessoaOuEmpresa}`;
+      const url = `/api/external/funcionario/save`;
 
-      await api.post(url, cleanData);
-      onSuccess(true);
+      const response = await api.post(url, cleanData);
+      onSuccess(response.data);
     } catch (error: any) {
       onSuccess(false);
+
       console.log('Erro ao processar funcionário:', error);
+      alert(error.response.data.details.message);
     }
   }
 
@@ -172,7 +177,10 @@ export const FuncionarioForm = ({
             name="password"
             register={register}
             label="Senha"
-            inputProps={{ type: 'password', classNameContainer: 'col-span-2' }}
+            inputProps={{
+              type: 'password',
+              classNameContainer: `col-span-2`,
+            }}
           />
 
           <FormInput

@@ -6,6 +6,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
+import ClienteLayout from '@/layout/ClienteLayout';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
 
@@ -14,11 +15,17 @@ const PUBLIC_ROUTES = ['/login'];
 function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isPublic = PUBLIC_ROUTES.includes(router.pathname);
-
-  // A abordagem de importação dinâmica de CSS baseada na rota não funcionou corretamente.
-  // Portanto, ambos os arquivos CSS são importados globalmente acima.
-  // Recomenda-se que cada CSS tenha escopo suficiente para não conflitar,
-  // ou que se utilize CSS Modules para evitar vazamento de estilos.
+  console.log(router.pathname);
+  if (router.pathname == '/dashboard/cliente') {
+    return (
+      <>
+        <SpeedInsights />
+        <ClienteLayout>
+          <Component {...pageProps} />
+        </ClienteLayout>
+      </>
+    );
+  }
 
   return (
     <>
