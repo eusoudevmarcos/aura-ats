@@ -31,29 +31,20 @@ const PessoaForm = ({
 
   const formContent = (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-2">
-      <FormInput
-        name={nome}
-        register={register}
-        label="Nome Completo"
-        errors={errors}
-      />
+      <FormInput name={nome} label="Nome Completo" />
 
       <FormInput
         name={cpf}
-        control={control}
         maskProps={{ mask: '000.000.000-00' }}
         label="CPF"
         placeholder="000.000.000-00"
-        errors={errors}
       />
 
       <FormInput
         name={dataNascimento}
-        control={control}
         label="Data de Nascimento"
         placeholder="DD/MM/AAAA"
-        errors={errors}
-        type="date"
+        maskProps={{ mask: '00/00/0000' }}
       />
 
       <FormInput

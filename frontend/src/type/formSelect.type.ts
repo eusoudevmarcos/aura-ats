@@ -4,7 +4,7 @@ import {
   FieldValues,
   Path,
   UseFormRegister,
-} from "react-hook-form";
+} from 'react-hook-form';
 
 export type CommonSelectProps<T extends FieldValues> = {
   name: Path<T>;
@@ -19,6 +19,7 @@ export type CommonSelectProps<T extends FieldValues> = {
   value?: string;
   onChange?: React.ChangeEventHandler<HTMLSelectElement>;
   required?: boolean;
+  children: React.ReactNode;
 };
 
 export type ControlledSelectProps<T extends FieldValues> =
@@ -44,7 +45,6 @@ export type FormSelectProps<T extends FieldValues> =
   | ManualSelectProps<T>;
 
 export type ContainerProps = {
-  children: React.ReactNode;
   label?: React.ReactNode | string;
   id?: string;
   className?: string;

@@ -31,7 +31,7 @@ export const FuncionarioForm = ({
     mode: 'independent',
     useFormProps: {
       resolver: zodResolver(funcionarioSchema),
-      mode: 'onTouched',
+      mode: 'onBlur',
       defaultValues: {
         tipoUsuario: 'RECRUTADOR',
         email: '',
@@ -121,6 +121,7 @@ export const FuncionarioForm = ({
         onSubmit={handleSubmit(onSubmit)}
         noValidate
         className="max-w-3xl mx-auto bg-white rounded-lg space-y-6"
+        autoComplete="off"
       >
         <Card
           title="Dados de Acesso"
@@ -128,72 +129,64 @@ export const FuncionarioForm = ({
         >
           <FormSelect
             name="tipoUsuario"
-            register={register}
-            errors={errors}
             label="Tipo de funcionário"
-            selectProps={{
-              classNameContainer: 'col-span-4',
-              children: (
-                <>
-                  {TipoUsuarioEnum.options.map(tipo => (
-                    <option key={tipo} value={tipo}>
-                      {(() => {
-                        switch (tipo) {
-                          case 'ADMIN_SISTEMA':
-                            return 'Administrador do Sistema';
-                          case 'ADMINISTRATIVO':
-                            return 'Administrativo';
-                          case 'MODERADOR':
-                            return 'Moderador (Gerente)';
-                          case 'RECRUTADOR':
-                            return 'Recrutador';
-                          case 'VENDEDOR':
-                            return 'Vendedor';
-                          case 'CLIENTE_ATS':
-                            return 'Cliente ATS';
-                          case 'CLIENTE_CRM':
-                            return 'Cliente CRM';
-                          case 'CLIENTE_ATS_CRM':
-                            return 'Cliente ATS + CRM';
-                          default:
-                            return tipo;
-                        }
-                      })()}
-                    </option>
-                  ))}
-                </>
-              ),
-            }}
-          />
+            selectProps={{ classNameContainer: 'col-span-full' }}
+          >
+            <>
+              {TipoUsuarioEnum.options.map(tipo => (
+                <option key={tipo} value={tipo}>
+                  {(() => {
+                    switch (tipo) {
+                      case 'ADMIN_SISTEMA':
+                        return 'Administrador do Sistema';
+                      case 'ADMINISTRATIVO':
+                        return 'Administrativo';
+                      case 'MODERADOR':
+                        return 'Moderador (Gerente)';
+                      case 'RECRUTADOR':
+                        return 'Recrutador';
+                      case 'VENDEDOR':
+                        return 'Vendedor';
+                      case 'CLIENTE_ATS':
+                        return 'Cliente ATS';
+                      case 'CLIENTE_CRM':
+                        return 'Cliente CRM';
+                      case 'CLIENTE_ATS_CRM':
+                        return 'Cliente ATS + CRM';
+                      default:
+                        return tipo;
+                    }
+                  })()}
+                </option>
+              ))}
+            </>
+          </FormSelect>
 
           <FormInput
             name="email"
-            register={register}
             label="Email de login"
-            errors={errors}
-            inputProps={{ type: 'email' }}
+            inputProps={{ type: 'email', classNameContainer: 'col-span-2' }}
           />
 
           <FormInput
             name="password"
             register={register}
             label="Senha"
-            errors={errors}
-            inputProps={{ type: 'password' }}
+            inputProps={{ type: 'password', classNameContainer: 'col-span-2' }}
           />
 
           <FormInput
             name={setor}
             register={register}
             label="Setor"
-            errors={errors}
+            inputProps={{ classNameContainer: 'col-span-2' }}
           />
 
           <FormInput
             name={cargo}
             register={register}
             label="Cargo"
-            errors={errors}
+            inputProps={{ classNameContainer: 'col-span-2' }}
           />
         </Card>
 
@@ -202,16 +195,12 @@ export const FuncionarioForm = ({
             name="tipoPessoaOuEmpresa"
             register={register}
             label="Tipo de Funcionário (Pessoa ou Empresa)*"
-            errors={errors}
-            selectProps={{
-              children: (
-                <>
-                  <option value="pessoa">Pessoa</option>
-                  <option value="empresa">Empresa</option>
-                </>
-              ),
-            }}
-          />
+          >
+            <>
+              <option value="pessoa">Pessoa</option>
+              <option value="empresa">Empresa</option>
+            </>
+          </FormSelect>
 
           {tipoPessoaOuEmpresa === 'pessoa' && <PessoaForm />}
           {tipoPessoaOuEmpresa === 'empresa' && <EmpresaForm />}

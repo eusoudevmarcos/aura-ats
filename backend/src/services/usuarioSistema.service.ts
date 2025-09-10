@@ -77,25 +77,109 @@ export class UsuarioSistemaService {
   }
 
   async save(data: any): Promise<UsuarioSistema> {
-    // Validações básicas primeiro (fora da transação)
-    if (!data.email) {
-      throw new Error("E-mail é obrigatório.");
+    this.validateBasicFields(data);
+
+    const normalizedData = this.normalizeData(data);
+
+    await this.checkDuplicates(normalizedData);
+
+    // Operação única com Prisma nested
+    // return await prisma.$transaction(
+    //   async (tx: any) => {
+    const usuarioData = await this.buildUsuarioData(normalizedData);
+
+    if (!data.id) {
+      return await prisma.usuarioSistema.create({
+        data: usuarioData,
+        include: this.getIncludeRelations(),
+      });
+    } else {
+      return await prisma.usuarioSistema.update({
+        where: { id: data.id },
+        data: usuarioData,
+        include: this.getIncludeRelations(),
+      });
     }
-    if (!data.tipoUsuario) {
-      throw new Error("Tipo de usuário é obrigatório.");
-    }
-    if (!data.password && !data.id) {
+    //   },
+    //   {
+    //     maxWait: 5000,
+    //     timeout: 10000,
+    //     isolationLevel: "ReadCommitted",
+    //   }
+    // );
+  }
+
+  private validateBasicFields(data: any): void {
+    if (!data.email) throw new Error("E-mail é obrigatório.");
+    if (!data.tipoUsuario) throw new Error("Tipo de usuário é obrigatório.");
+    if (!data.password && !data.id)
       throw new Error("Senha é obrigatória para criação de usuário.");
+    if (!data.pessoa && !data.empresa) {
+      throw new Error("Dados de Pessoa ou Empresa são obrigatórios.");
+    }
+    if (data.pessoa && data.empresa) {
+      throw new Error(
+        "Usuário não pode ter dados de Pessoa e Empresa simultaneamente."
+      );
+    }
+  }
+
+  private normalizeDataNascimento(dataNascimento: any): Date | null {
+    if (typeof dataNascimento !== "string") return null;
+
+    const regex = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (!regex.test(dataNascimento)) return null;
+
+    const [dia, mes, ano] = dataNascimento.split("/").map(Number);
+
+    // Validação básica
+    if (
+      dia < 1 ||
+      dia > 31 ||
+      mes < 1 ||
+      mes > 12 ||
+      ano < 1900 ||
+      ano > 2100
+    ) {
+      return null;
     }
 
-    const cpfLimpo = data.pessoa?.cpf
-      ? data.pessoa.cpf.replace(/\D/g, "")
-      : undefined;
-    const cnpjLimpo = data.empresa?.cnpj
-      ? data.empresa.cnpj.replace(/\D/g, "")
-      : undefined;
+    // Cria o objeto Date (mês começa do zero)
+    const data = new Date(ano, mes - 1, dia);
 
-    // Verificações de duplicidade (fora da transação para reduzir tempo)
+    // Confirma se a data realmente existe
+    if (
+      data.getFullYear() !== ano ||
+      data.getMonth() !== mes - 1 ||
+      data.getDate() !== dia
+    ) {
+      return null;
+    }
+
+    return data;
+  }
+
+  private normalizeData(data: any) {
+    return {
+      ...data,
+      pessoa: {
+        ...data.pessoa,
+        dataNascimento: this.normalizeDataNascimento(
+          data.pessoa.dataNascimento
+        ),
+        cpf: data.pessoa.cpf?.replace(/\D/g, ""),
+      },
+      empresa: data.empresa
+        ? {
+            ...data.empresa,
+            cnpj: data.empresa.cnpj?.replace(/\D/g, ""),
+          }
+        : undefined,
+    };
+  }
+
+  private async checkDuplicates(data: any): Promise<void> {
+    // Verifica email duplicado
     const usuarioExistente = await prisma.usuarioSistema.findUnique({
       where: { email: data.email },
     });
@@ -103,168 +187,117 @@ export class UsuarioSistemaService {
       throw new Error("E-mail já cadastrado.");
     }
 
-    // Transação otimizada com timeout menor
-    return await prisma.$transaction(
-      async (tx: any) => {
-        let pessoaIdToConnect: string | undefined;
-        let empresaIdToConnect: string | undefined;
-
-        if (data.pessoa) {
-          if (cnpjLimpo) {
-            throw new Error(
-              "Usuário não pode ter dados de Pessoa e Empresa simultaneamente."
-            );
-          }
-          if (!cpfLimpo) {
-            throw new Error("CPF é obrigatório para usuário tipo Pessoa.");
-          }
-
-          const existingPessoaByCpf =
-            await this.pessoaRepository.findByCpfWithTransaction(cpfLimpo, tx);
-
-          if (
-            existingPessoaByCpf &&
-            existingPessoaByCpf.id !== (data.pessoa.id || undefined)
-          ) {
-            throw new Error(
-              `CPF '${data.pessoa.cpf}' já cadastrado para outra pessoa.`
-            );
-          }
-
-          const savedPessoa = await this.pessoaRepository.saveWithTransaction(
-            { ...data.pessoa, cpf: cpfLimpo },
-            tx
-          );
-          pessoaIdToConnect = savedPessoa.id;
-        } else if (data.empresa) {
-          if (cpfLimpo) {
-            throw new Error(
-              "Usuário não pode ter dados de Pessoa e Empresa simultaneamente."
-            );
-          }
-          if (!cnpjLimpo) {
-            throw new Error("CNPJ é obrigatório para usuário tipo Empresa.");
-          }
-
-          const existingEmpresaByCnpj =
-            await this.empresaRepository.findByCnpjWithTransaction(
-              cnpjLimpo,
-              tx
-            );
-
-          if (
-            existingEmpresaByCnpj &&
-            existingEmpresaByCnpj.id !== (data.empresa.id || undefined)
-          ) {
-            throw new Error(
-              `CNPJ '${data.empresa.cnpj}' já cadastrado para outra empresa.`
-            );
-          }
-
-          const savedEmpresa = await this.empresaRepository.saveWithTransaction(
-            data.empresa,
-            tx
-          );
-          empresaIdToConnect = savedEmpresa.id;
-        } else {
-          throw new Error(
-            "Dados de Pessoa ou Empresa são obrigatórios para o usuário do sistema."
-          );
-        }
-
-        const hashedPassword = data.password
-          ? await bcrypt.hash(data.password, 10)
-          : undefined;
-
-        const usuarioSistemaData: any = {
-          email: data.email,
-          tipoUsuario: data.tipoUsuario as TipoUsuario,
-          ...(hashedPassword ? { password: hashedPassword } : {}),
-        };
-
-        if (pessoaIdToConnect) {
-          usuarioSistemaData.pessoa = { connect: { id: pessoaIdToConnect } };
-        } else if (empresaIdToConnect) {
-          usuarioSistemaData.empresa = { connect: { id: empresaIdToConnect } };
-        }
-
-        // Include simplificado para reduzir complexidade da query
-        const includeRelations = {
-          pessoa: {
-            include: {
-              contatos: true,
-              localizacoes: true,
-            },
-          },
-          empresa: {
-            include: {
-              contatos: true,
-              localizacoes: true,
-              representantes: true,
-              socios: true,
-            },
-          },
-          funcionario: true,
-        };
-
-        if (!data.id) {
-          // Criar novo usuário
-          if (data.setor || data.cargo) {
-            usuarioSistemaData.funcionario = {
-              create: {
-                setor: data.setor,
-                cargo: data.cargo,
-              },
-            };
-          }
-
-          const newUsuario = await tx.usuarioSistema.create({
-            data: usuarioSistemaData,
-            include: includeRelations,
-          });
-          return newUsuario;
-        } else {
-          // Atualizar usuário existente
-          const existingUsuario = await tx.usuarioSistema.findUnique({
-            where: { id: data.id },
-            include: { funcionario: true },
-          });
-
-          if (!existingUsuario) {
-            throw new Error(
-              "Usuário do sistema não encontrado para atualização."
-            );
-          }
-
-          if (data.setor || data.cargo) {
-            usuarioSistemaData.funcionario = existingUsuario.funcionario
-              ? {
-                  update: {
-                    setor: data.setor,
-                    cargo: data.cargo,
-                  },
-                }
-              : {
-                  create: {
-                    setor: data.setor,
-                    cargo: data.cargo,
-                  },
-                };
-          }
-
-          const updatedUsuario = await tx.usuarioSistema.update({
-            where: { id: data.id },
-            data: usuarioSistemaData,
-            include: includeRelations,
-          });
-          return updatedUsuario;
-        }
-      },
-      {
-        maxWait: 5000, // Máximo 5 segundos aguardando
-        timeout: 10000, // Timeout de 10 segundos
-        isolationLevel: "ReadCommitted",
+    // Verifica CPF duplicado se for pessoa
+    if (data.pessoa?.cpf) {
+      if (!data.pessoa.cpf) {
+        throw new Error("CPF é obrigatório para usuário tipo Pessoa.");
       }
-    );
+
+      const pessoaExistente = await this.pessoaRepository.findByCpf(
+        data.pessoa.cpf
+      );
+      if (pessoaExistente && pessoaExistente.id !== data.pessoa.id) {
+        throw new Error(
+          `CPF '${data.pessoa.cpf}' já cadastrado para outra pessoa.`
+        );
+      }
+    }
+
+    // Verifica CNPJ duplicado se for empresa
+    if (data.empresa?.cnpj) {
+      if (!data.empresa.cnpj) {
+        throw new Error("CNPJ é obrigatório para usuário tipo Empresa.");
+      }
+
+      const empresaExistente = await this.empresaRepository.findByCnpj(
+        data.empresa.cnpj
+      );
+      if (empresaExistente && empresaExistente.id !== data.empresa.id) {
+        throw new Error(
+          `CNPJ '${data.empresa.cnpj}' já cadastrado para outra empresa.`
+        );
+      }
+    }
+  }
+
+  private async buildUsuarioData(data: any): Promise<any> {
+    const usuarioData: any = {
+      email: data.email,
+      tipoUsuario: data.tipoUsuario as TipoUsuario,
+    };
+
+    // Hash da senha apenas se fornecida
+    if (data.password) {
+      usuarioData.password = await bcrypt.hash(data.password, 10);
+    }
+
+    // Usa operações nested do Prisma para relacionamentos
+    if (data.pessoa) {
+      usuarioData.pessoa = this.buildNestedOperation(data.pessoa);
+    }
+
+    if (data.empresa) {
+      usuarioData.empresa = this.buildNestedOperation(data.empresa);
+    }
+
+    // Funcionário (sempre opcional)
+    if (data.setor || data.cargo) {
+      usuarioData.funcionario = this.buildNestedOperation({
+        id: data.funcionario?.id,
+        setor: data.setor,
+        cargo: data.cargo,
+      });
+    }
+
+    return usuarioData;
+  }
+
+  private buildNestedOperation(entityData: any) {
+    if (!entityData) return undefined;
+
+    // Se tem ID, é update ou connect
+    if (entityData.id) {
+      // Se tem outros campos além do ID, é update
+      const hasOtherFields = Object.keys(entityData).some(
+        (key) => key !== "id" && entityData[key] !== undefined
+      );
+
+      if (hasOtherFields) {
+        const { id, ...updateData } = entityData;
+        return {
+          upsert: {
+            where: { id },
+            create: entityData,
+            update: updateData,
+          },
+        };
+      } else {
+        // Apenas connect se só tem ID
+        return { connect: { id: entityData.id } };
+      }
+    } else {
+      // Sem ID = create
+      return { create: entityData };
+    }
+  }
+
+  private getIncludeRelations() {
+    return {
+      pessoa: {
+        include: {
+          contatos: true,
+          localizacoes: true,
+        },
+      },
+      empresa: {
+        include: {
+          contatos: true,
+          localizacoes: true,
+          representantes: true,
+          socios: true,
+        },
+      },
+      funcionario: true,
+    };
   }
 }

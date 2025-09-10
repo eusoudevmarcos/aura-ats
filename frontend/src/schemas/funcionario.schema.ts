@@ -19,7 +19,7 @@ export type TipoUsuario = z.infer<typeof TipoUsuarioEnum>;
 // Schema base
 export const funcionarioSchema = z.object({
   tipoUsuario: TipoUsuarioEnum,
-  email: z.string().email('Email inválido'),
+  email: z.email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   funcionario: z.object({
     setor: z.string().optional(),

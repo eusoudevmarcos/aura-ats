@@ -1,16 +1,12 @@
 // src/components/input/FormInput.tsx
 import { FormInputProps } from '@/type/formInput.type';
 import { getError } from '@/utils/getError';
-import { dateFullValidate } from '@/utils/mask/date';
-import { Controller, FieldValues } from 'react-hook-form';
+import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
 import { Container } from './Container';
 
 export function FormInput<T extends FieldValues>({
   name,
-  control,
-  register,
-  errors,
   inputProps,
   maskProps,
   label,
@@ -18,7 +14,14 @@ export function FormInput<T extends FieldValues>({
   type = 'text',
   value,
   onChange,
+  control: externalControl,
+  register: externalRegister,
+  errors: externalErrors,
 }: FormInputProps<T>) {
+  const formContext = useFormContext<T>();
+  const control = externalControl || formContext?.control;
+  const errors = externalErrors || formContext?.formState?.errors;
+
   const errorMessage = getError(errors, name);
   const id = inputProps?.id || name.toString();
 
@@ -31,135 +34,108 @@ export function FormInput<T extends FieldValues>({
     .filter(Boolean)
     .join(' ');
 
-  const isDateInput = type === 'date';
+  const hasMask = Boolean(maskProps?.mask);
 
-  // Função para converter Date para string DD/MM/YYYY
-  const formatDateToDisplay = (date: any): string => {
-    if (!date) return '';
-
-    if (date instanceof Date && !isNaN(date.getTime())) {
-      const day = date.getDate().toString().padStart(2, '0');
-      const month = (date.getMonth() + 1).toString().padStart(2, '0');
-      const year = date.getFullYear();
-      return `${day}/${month}/${year}`;
-    }
-
-    return '';
-  };
-
-  // Função para converter string DD/MM/YYYY para Date
-  const parseDisplayToDate = (dateString: string): Date | null => {
-    if (!dateString || dateString.length !== 10) return null;
-
-    const parts = dateString.split('/');
-    if (parts.length !== 3) return null;
-
-    const [day, month, year] = parts.map(Number);
-
-    // Validações básicas
-    if (
-      isNaN(day) ||
-      isNaN(month) ||
-      isNaN(year) ||
-      day < 1 ||
-      day > 31 ||
-      month < 1 ||
-      month > 12 ||
-      year < 1900 ||
-      year > 2100
-    ) {
-      return null;
-    }
-
-    const date = new Date(year, month - 1, day);
-
-    // Verifica se a data é válida
-    if (
-      date.getFullYear() === year &&
-      date.getMonth() + 1 === month &&
-      date.getDate() === day
-    ) {
-      return date;
-    }
-
-    return null;
-  };
-
-  const onAccept = (valueString: any, mask: any, onChangeFn: any) => {
-    if (isDateInput) {
-      if (mask.masked.isComplete && valueString.length === 10) {
-        const parsedDate = parseDisplayToDate(valueString);
-        onChangeFn(parsedDate);
-      } else {
-        onChangeFn(null);
-      }
-    } else {
-      onChangeFn(valueString);
-    }
-  };
-
-  return (
-    <Container id={id} label={label} className={classNameContainer}>
-      <>
-        {control ? (
+  // Se tem contexto do form, usa Controller
+  if (control) {
+    return (
+      <Container id={id} label={label} className={classNameContainer}>
+        <>
           <Controller
             name={name}
             control={control}
             render={({
               field: {
-                onChange: controllerOnChange,
+                onChange: fieldOnChange,
                 onBlur,
-                value: controllerValue,
+                value: fieldValue,
                 ref,
               },
             }) => {
-              const displayValue = isDateInput
-                ? formatDateToDisplay(controllerValue)
-                : (controllerValue as any);
+              if (hasMask) {
+                const field = fieldValue as any;
+                return (
+                  <IMaskInput
+                    inputRef={ref}
+                    id={id}
+                    className={inputClassName}
+                    placeholder={placeholder}
+                    value={field}
+                    onAccept={(value: string) => fieldOnChange(value)}
+                    onBlur={onBlur}
+                    autoComplete="off"
+                    {...(maskProps as any)}
+                    {...otherInputProps}
+                  />
+                );
+              }
 
               return (
-                <IMaskInput
-                  mask={isDateInput ? 'DD/MM/YYYY' : (maskProps?.mask as any)}
-                  blocks={isDateInput ? dateFullValidate() : undefined}
-                  inputRef={ref}
+                <input
+                  ref={ref}
                   id={id}
+                  type={type}
                   className={inputClassName}
-                  placeholder={
-                    placeholder || (isDateInput ? 'DD/MM/YYYY' : undefined)
-                  }
-                  value={displayValue || ''}
-                  onAccept={(valueString: any, mask: any) =>
-                    onAccept(valueString, mask, controllerOnChange)
-                  }
+                  placeholder={placeholder}
+                  value={fieldValue}
+                  onChange={e => fieldOnChange(e.target.value)}
                   onBlur={onBlur}
-                  type="text" // Sempre text para usar a máscara
+                  autoComplete="off"
                   {...otherInputProps}
                 />
               );
             }}
           />
-        ) : register ? (
-          <input
-            id={id}
-            {...register(name)}
-            {...otherInputProps}
-            className={inputClassName}
-            placeholder={placeholder}
-            type={isDateInput ? 'text' : type}
-            autoComplete="off"
-            onChange={onChange}
-          />
+
+          {errorMessage && (
+            <p className="text-red-500 text-xs italic mt-1">{errorMessage}</p>
+          )}
+        </>
+      </Container>
+    );
+  }
+
+  // Fallback para uso sem react-hook-form (input controlado manualmente)
+  const {
+    onChange: inputOnChange,
+    onBlur: inputOnBlur,
+    value: inputValue,
+    ...cleanInputProps
+  } = otherInputProps || {};
+
+  return (
+    <Container id={id} label={label} className={classNameContainer}>
+      <>
+        {hasMask ? (
+          (() => {
+            // Props específicas do IMaskInput para o caso sem react-hook-form
+            const maskInputProps = {
+              id,
+              className: inputClassName,
+              placeholder,
+              value: value,
+              onAccept: (maskValue: string) => {
+                if (onChange) {
+                  const syntheticEvent = {
+                    target: { value: maskValue },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onChange(syntheticEvent);
+                }
+              },
+              ...maskProps,
+            } as any; // Casting para resolver conflitos de tipagem do IMask
+
+            return <IMaskInput {...maskInputProps} />;
+          })()
         ) : (
           <input
             id={id}
-            type={isDateInput ? 'text' : type}
+            type={type}
             className={inputClassName}
             placeholder={placeholder}
             value={value}
             onChange={onChange}
-            {...(typeof otherInputProps === 'object' && otherInputProps !== null
-              ? otherInputProps
-              : {})}
+            {...cleanInputProps}
           />
         )}
 

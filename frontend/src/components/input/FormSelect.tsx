@@ -1,88 +1,106 @@
+// src/components/input/FormSelect.tsx
 import { FormSelectProps } from '@/type/formSelect.type';
 import { getError } from '@/utils/getError';
-import { Controller, FieldValues } from 'react-hook-form';
-import { Container } from './Container';
+import { Controller, FieldValues, useFormContext } from 'react-hook-form';
+import { Container } from '../input/Container';
 
 export function FormSelect<T extends FieldValues>({
   name,
-  control,
-  register,
-  errors,
   selectProps,
   label,
   placeholder,
   value,
   onChange,
   required,
+  children,
+  control: externalControl,
+  register: externalRegister,
+  errors: externalErrors,
 }: FormSelectProps<T>) {
+  const formContext = useFormContext<T>();
+  const control = externalControl || formContext?.control;
+  const errors = externalErrors || formContext?.formState?.errors;
+
   const errorMessage = getError(errors, name);
   const id = selectProps?.id || name.toString();
 
   const baseClass =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90';
   const errorClass = errorMessage ? 'border-red-500' : '';
 
-  const { classNameContainer, ...otherSelectProps } = selectProps || {};
+  const {
+    classNameContainer,
+    children: selectChildren,
+    ...otherSelectProps
+  } = selectProps || {};
 
   const selectClassName = [baseClass, errorClass, otherSelectProps?.className]
     .filter(Boolean)
     .join(' ');
 
-  return (
-    <Container id={id} label={label} className={classNameContainer}>
-      <>
-        {control ? (
+  // Se tem contexto do form, usa Controller
+  if (control) {
+    return (
+      <Container id={id} label={label} className={classNameContainer}>
+        <>
           <Controller
             name={name}
             control={control}
-            render={({ field }) => (
+            render={({
+              field: {
+                onChange: fieldOnChange,
+                onBlur,
+                value: fieldValue,
+                ref,
+              },
+            }) => (
               <select
-                {...field}
+                ref={ref}
                 id={id}
                 className={selectClassName}
+                value={fieldValue ?? ''}
+                onChange={e => fieldOnChange(e.target.value)}
+                onBlur={onBlur}
+                required={required}
                 {...otherSelectProps}
-                value={field.value ?? ''}
-                onChange={e => field.onChange(e.target.value)}
-                required={required ?? otherSelectProps?.required}
               >
                 {placeholder && (
                   <option value="" disabled>
                     {placeholder}
                   </option>
                 )}
-                {otherSelectProps?.children}
+                {children}
               </select>
             )}
           />
-        ) : register ? (
-          <select
-            id={id}
-            {...register(name)}
-            className={selectClassName}
-            {...otherSelectProps}
-            required={required ?? otherSelectProps?.required}
-            defaultValue=""
-          >
-            {placeholder && (
-              <option value="" disabled>
-                {placeholder}
-              </option>
-            )}
-            {otherSelectProps?.children}
-          </select>
-        ) : (
-          <select
-            id={id}
-            className={selectClassName}
-            {...otherSelectProps}
-            value={value}
-            onChange={onChange}
-            required={required}
-          >
-            {placeholder && <option value="">{placeholder}</option>}
-            {otherSelectProps?.children}
-          </select>
-        )}
+
+          {errorMessage && (
+            <p className="text-red-500 text-xs italic mt-1">{errorMessage}</p>
+          )}
+        </>
+      </Container>
+    );
+  }
+
+  // Fallback para uso sem react-hook-form (select controlado manualmente)
+  return (
+    <Container id={id} label={label} className={classNameContainer}>
+      <>
+        <select
+          id={id}
+          className={selectClassName}
+          value={value ?? ''}
+          onChange={onChange}
+          required={required}
+          {...otherSelectProps}
+        >
+          {placeholder && (
+            <option value="" disabled>
+              {placeholder}
+            </option>
+          )}
+          {children}
+        </select>
 
         {errorMessage && (
           <p className="text-red-500 text-xs italic mt-1">{errorMessage}</p>

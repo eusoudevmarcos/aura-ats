@@ -28,8 +28,8 @@ export default function Funcionarios() {
       >
         <FuncionarioForm
           onSuccess={() => {
-            setShowFuncionarioForm(false);
             setRefreshKey(prev => prev + 1); // força re-render do ClientList
+            setShowFuncionarioForm(false);
           }}
         />
       </Modal>

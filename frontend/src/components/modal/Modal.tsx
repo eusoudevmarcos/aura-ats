@@ -22,8 +22,8 @@ const Modal: React.FC<ModalProps> = ({
   const modalRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    setShow(isOpen);
     if (isOpen) {
-      setShow(true);
       setTimeout(() => setVisible(true), 10);
     }
   }, [isOpen]);

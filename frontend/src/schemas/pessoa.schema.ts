@@ -1,4 +1,4 @@
-import { dateSchema } from '@/utils/date/DateSchemas';
+import { brazilianDateSchema } from '@/utils/date/DateSchemas';
 import { isValidCPF } from '@/utils/validateCpf';
 import { z } from 'zod';
 import { contatoSchema } from './contato.schema';
@@ -12,7 +12,6 @@ export const pessoaSchema = z.object({
     .min(1, 'CPF é obrigatório')
     .refine(
       val => {
-        // Remove a máscara antes de validar
         const unmaskedCpf = val.replace(/\D/g, '');
         return isValidCPF(unmaskedCpf);
       },
@@ -20,7 +19,7 @@ export const pessoaSchema = z.object({
         message: 'CPF inválido',
       }
     ),
-  dataNascimento: dateSchema,
+  dataNascimento: brazilianDateSchema,
   estadoCivil: z
     .enum([
       'SOLTEIRO',

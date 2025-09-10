@@ -13,22 +13,24 @@ export type CommonProps<T extends FieldValues> = {
   inputProps?: React.InputHTMLAttributes<HTMLInputElement> & {
     classNameContainer?: string;
   };
+  // Tornar maskProps opcional e corrigir tipagem
   maskProps?: Omit<
     IMaskInputProps<any>,
-    'name' | 'value' | 'onChange' | 'onAccept' | 'ref'
+    'name' | 'value' | 'onChange' | 'onAccept' | 'ref' | 'inputRef'
   >;
   label?: React.ReactNode | string;
   placeholder?: string;
-  type?: string;
-  value?: string | number | readonly string[] | undefined;
-  onChange?: any;
+  type?: React.HTMLInputTypeAttribute;
+  // Corrigir tipagem do value para aceitar qualquer tipo de valor do form
+  value?: any;
+  onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
 };
 
 // Permite: apenas control, apenas register, ou nenhum dos dois. Nunca ambos juntos.
 export type FormInputProps<T extends FieldValues> =
   | (CommonProps<T> & { control: Control<T>; register?: never })
   | (CommonProps<T> & { register: UseFormRegister<T>; control?: never })
-  | (CommonProps<T> & { control?: undefined; register?: undefined });
+  | (CommonProps<T> & { control?: never; register?: never });
 
 export type ContainerProps = {
   children: React.ReactNode;
