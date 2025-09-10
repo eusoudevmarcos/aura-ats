@@ -163,21 +163,18 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
             register={register}
             label="Tipo de Evento"
             errors={errors}
-            selectProps={{
-              children: (
-                <>
-                  <option value="TRIAGEM_INICIAL">Triagem Inicial</option>
-                  <option value="ENTREVISTA_RH">Entrevista RH</option>
-                  <option value="ENTREVISTA_GESTOR">Entrevista Gestor</option>
-                  <option value="TESTE_TECNICO">Teste Técnico</option>
-                  <option value="TESTE_PSICOLOGICO">Teste Psicológico</option>
-                  <option value="DINAMICA_GRUPO">Dinâmica de Grupo</option>
-                  <option value="PROPOSTA">Proposta</option>
-                  <option value="OUTRO">Outro</option>
-                </>
-              ),
-            }}
-          />
+          >
+            <>
+              <option value="TRIAGEM_INICIAL">Triagem Inicial</option>
+              <option value="ENTREVISTA_RH">Entrevista RH</option>
+              <option value="ENTREVISTA_GESTOR">Entrevista Gestor</option>
+              <option value="TESTE_TECNICO">Teste Técnico</option>
+              <option value="TESTE_PSICOLOGICO">Teste Psicológico</option>
+              <option value="DINAMICA_GRUPO">Dinâmica de Grupo</option>
+              <option value="PROPOSTA">Proposta</option>
+              <option value="OUTRO">Outro</option>
+            </>
+          </FormSelect>
         </Card>
 
         <FormSelect
@@ -186,15 +183,12 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           onChange={e => {
             setSelectLocalizacao(e.target.value);
           }}
-          selectProps={{
-            children: (
-              <>
-                <option value="REMOTO">Remoto</option>
-                <option value="PRESENCIAL">Presencial</option>
-              </>
-            ),
-          }}
-        ></FormSelect>
+        >
+          <>
+            <option value="REMOTO">Remoto</option>
+            <option value="PRESENCIAL">Presencial</option>
+          </>
+        </FormSelect>
 
         {selectLocalizacao === 'PRESENCIAL' ? (
           <LocalizacaoForm namePrefix="localizacao" />
@@ -256,15 +250,12 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
               register={register}
               label="Ativa?"
               errors={errors}
-              selectProps={{
-                children: (
-                  <>
-                    <option value="true">Sim</option>
-                    <option value="false">Não</option>
-                  </>
-                ),
-              }}
-            />
+            >
+              <>
+                <option value="true">Sim</option>
+                <option value="false">Não</option>
+              </>
+            </FormSelect>
           </Card>
         )}
 

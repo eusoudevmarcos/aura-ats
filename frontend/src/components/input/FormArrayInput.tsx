@@ -92,18 +92,15 @@ export function FormArrayInput({
                   handleInputChange(config.name, e.target.value)
                 }
                 errors={errors as any}
-                selectProps={{
-                  children: (
-                    <>
-                      {config.selectOptions?.map(opt => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </>
-                  ),
-                }}
-              />
+              >
+                <>
+                  {config.selectOptions?.map(opt => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </>
+              </FormSelect>
             ) : (
               <FormInput
                 name={`_temp_${name}.${config.name}`}

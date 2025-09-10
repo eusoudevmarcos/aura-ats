@@ -225,17 +225,16 @@ const ClientList: React.FC<{
               selectProps={{
                 classNameContainer: 'max-w-[300px] w-full',
                 value: search.status || '',
-                children: (
-                  <>
-                    {StatusClienteEnum.options.map(st => (
-                      <option key={st} value={st}>
-                        {st}
-                      </option>
-                    ))}
-                  </>
-                ),
               }}
-            ></FormSelect>
+            >
+              <>
+                {StatusClienteEnum.options.map(st => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+              </>
+            </FormSelect>
           </div>
         </Modal>
       </div>

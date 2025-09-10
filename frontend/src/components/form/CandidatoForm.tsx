@@ -112,36 +112,30 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               register={register}
               errors={errors}
               placeholder="Área de atuação"
-              selectProps={{
-                children: (
-                  <>
-                    {AreaCandidatoEnum.options.map(area => (
-                      <option key={area} value={area}>
-                        {area.replaceAll('_', ' ')}
-                      </option>
-                    ))}
-                  </>
-                ),
-              }}
-            ></FormSelect>
+            >
+              <>
+                {AreaCandidatoEnum.options.map(area => (
+                  <option key={area} value={area}>
+                    {area.replaceAll('_', ' ')}
+                  </option>
+                ))}
+              </>
+            </FormSelect>
 
             <FormSelect
               name="especialidadeId"
               errors={errors}
               register={register}
               placeholder="Especialidade"
-              selectProps={{
-                children: (
-                  <>
-                    {especialidades.map(esp => (
-                      <option key={esp.id} value={esp.id}>
-                        {esp.nome}
-                      </option>
-                    ))}
-                  </>
-                ),
-              }}
-            ></FormSelect>
+            >
+              <>
+                {especialidades.map(esp => (
+                  <option key={esp.id} value={esp.id}>
+                    {esp.nome}
+                  </option>
+                ))}
+              </>
+            </FormSelect>
 
             <FormInput name="crm" placeholder="CRM" register={register} />
             <FormInput name="corem" placeholder="COREM" register={register} />

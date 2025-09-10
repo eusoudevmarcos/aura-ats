@@ -58,21 +58,6 @@ const ClienteSearch = () => {
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-2 mb-4">
-        {/* <FormSelect
-          name="SelectSearchCliente"
-          value={searchField}
-          onChange={handleSearch}
-          selectProps={{
-            children: (
-              <>
-                <option value="cnpj">CNPJ</option>
-                <option value="razaoSocial">Razão Social</option>
-                <option value="nomeFantasia">Nome Fantasia</option>
-              </>
-            ),
-          }}
-        ></FormSelect> */}
-
         <FormInput
           name="searchCliente"
           type="text"

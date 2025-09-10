@@ -224,21 +224,17 @@ const LocalizacaoFormInner: React.FC<{
           register={register}
           errors={errors}
           label="UF"
-          selectProps={{
-            classNameContainer: 'col-span-1',
-            disabled: isLoadingCep,
-            children: (
-              <>
-                <option value="">Selecione</option>
-                {UF_MODEL.map(({ label }) => (
-                  <option key={label} value={label}>
-                    {label}
-                  </option>
-                ))}
-              </>
-            ),
-          }}
-        />
+        >
+          {' '}
+          <>
+            <option value="">Selecione</option>
+            {UF_MODEL.map(({ label }) => (
+              <option key={label} value={label}>
+                {label}
+              </option>
+            ))}
+          </>
+        </FormSelect>
 
         <FormInput
           name={cidadeFieldName}

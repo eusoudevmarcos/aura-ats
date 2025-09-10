@@ -91,19 +91,15 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         name="status"
         register={register}
         placeholder="Selecione o status do Cliente"
-        selectProps={{
-          disabled: !!initialValues?.status,
-          children: (
-            <>
-              {StatusClienteEnum.options.map(st => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </>
-          ),
-        }}
-      ></FormSelect>
+      >
+        <>
+          {StatusClienteEnum.options.map(st => (
+            <option key={st} value={st}>
+              {st}
+            </option>
+          ))}
+        </>
+      </FormSelect>
 
       <Card title="Dados da empresa">
         <EmpresaForm namePrefix="empresa" />

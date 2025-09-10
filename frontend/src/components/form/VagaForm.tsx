@@ -125,16 +125,13 @@ const VagaForm: React.FC<VagaFormProps> = ({
           register={register}
           label="Tipo de salário"
           placeholder="Selecione o tipo de salário"
-          selectProps={{
-            children: (
-              <>
-                <option value="A COMBINAR">A COMBINAR</option>
-                <option value="DIARIA">DIARIA</option>
-                <option value="MENSAL">MENSAL</option>
-              </>
-            ),
-          }}
-        />
+        >
+          <>
+            <option value="A COMBINAR">A COMBINAR</option>
+            <option value="DIARIA">DIARIA</option>
+            <option value="MENSAL">MENSAL</option>
+          </>
+        </FormSelect>
 
         {tipoSalario !== 'A COMBINAR' && (
           <FormInput
@@ -151,54 +148,45 @@ const VagaForm: React.FC<VagaFormProps> = ({
           errors={errors}
           label="Categoria da Vaga"
           placeholder="Selecione o categoria"
-          selectProps={{
-            children: (
-              <>
-                {CategoriaVagaEnum.options.map(cat => (
-                  <option key={cat} value={cat}>
-                    {cat.replaceAll('_', ' ')}
-                  </option>
-                ))}
-              </>
-            ),
-          }}
-        />
+        >
+          <>
+            {CategoriaVagaEnum.options.map(cat => (
+              <option key={cat} value={cat}>
+                {cat.replaceAll('_', ' ')}
+              </option>
+            ))}
+          </>
+        </FormSelect>
 
         <FormSelect
           name="status"
           register={register}
           errors={errors}
           label="Status da Vaga"
-          selectProps={{
-            children: (
-              <>
-                {StatusVagaEnum.options.map(stat => (
-                  <option key={stat} value={stat}>
-                    {stat.replaceAll('_', ' ')}
-                  </option>
-                ))}
-              </>
-            ),
-          }}
-        />
+        >
+          <>
+            {StatusVagaEnum.options.map(stat => (
+              <option key={stat} value={stat}>
+                {stat.replaceAll('_', ' ')}
+              </option>
+            ))}
+          </>
+        </FormSelect>
 
         <FormSelect
           name="tipoContrato"
           register={register}
           label="Tipo de Contrato"
           placeholder="Selecione o tipo de contratação"
-          selectProps={{
-            children: (
-              <>
-                {TipoContratoEnum.options.map(tipo => (
-                  <option key={tipo} value={tipo}>
-                    {tipo.replaceAll('_', ' ')}
-                  </option>
-                ))}
-              </>
-            ),
-          }}
-        />
+        >
+          <>
+            {TipoContratoEnum.options.map(tipo => (
+              <option key={tipo} value={tipo}>
+                {tipo.replaceAll('_', ' ')}
+              </option>
+            ))}
+          </>
+        </FormSelect>
 
         {categoria !== 'SAUDE' && (
           <FormSelect
@@ -207,38 +195,16 @@ const VagaForm: React.FC<VagaFormProps> = ({
             errors={errors}
             label="Nível de Experiência"
             placeholder="Selecione o nível de experiência"
-            selectProps={{
-              children: (
-                <>
-                  {NivelExperienciaEnum.options.map(nivel => (
-                    <option key={nivel} value={nivel}>
-                      {nivel.replaceAll('_', ' ')}
-                    </option>
-                  ))}
-                </>
-              ),
-            }}
-          />
+          >
+            <>
+              {NivelExperienciaEnum.options.map(nivel => (
+                <option key={nivel} value={nivel}>
+                  {nivel.replaceAll('_', ' ')}
+                </option>
+              ))}
+            </>
+          </FormSelect>
         )}
-
-        {/*<FormSelect
-          name="clienteId"
-          register={register}
-          errors={errors}
-          placeholder="Cliente Contratante"
-          selectProps={{
-            children: (
-              <>
-                <option value="">Selecione o Cliente</option>
-                {clientes.map((cli) => (
-                  <option key={cli.id} value={cli.id}>
-                    {cli.nome}
-                  </option>
-                ))}
-              </>
-            ),
-          }}
-        />*/}
 
         <FormTextarea
           name="descricao"
