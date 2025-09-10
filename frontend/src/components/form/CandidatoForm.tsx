@@ -91,10 +91,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-6">
         <Card title="Dados Pessoais">
-          <PessoaForm
-            namePrefix="pessoa"
-            contatoPessoa={{ title: 'Contato' }}
-          />
+          <PessoaForm namePrefix="pessoa" />
         </Card>
 
         <Card title="Endereço">
