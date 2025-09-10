@@ -219,11 +219,11 @@ export class UsuarioSistemaService extends buildNestedOperation {
     }
 
     // Funcionário (sempre opcional)
-    if (data.setor || data.cargo) {
+    if (data.funcionario) {
       usuarioData.funcionario = this.buildNestedOperation({
         id: data.funcionario?.id,
-        setor: data.setor,
-        cargo: data.cargo,
+        setor: data.funcionario.setor,
+        cargo: data.funcionario.cargo,
       });
     }
 

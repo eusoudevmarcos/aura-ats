@@ -29,6 +29,7 @@ export class FuncionarioController {
   async getById(req: Request, res: Response) {
     try {
       const funcionario = await this.service.getById(req.params.uid as string);
+      console.log(funcionario);
       return res.status(200).json(usuarioSistemaDTO(funcionario));
     } catch (error: any) {
       return res.status(400).json({

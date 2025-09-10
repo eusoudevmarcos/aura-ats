@@ -23,6 +23,7 @@ export const funcionarioSchema = z.object({
   email: z.email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
   funcionario: z.object({
+    id: z.string().nullable(),
     setor: z.string().optional(),
     cargo: z.string().optional(),
   }),
@@ -30,22 +31,5 @@ export const funcionarioSchema = z.object({
   pessoa: pessoaSchema.optional(),
   empresa: empresaSchema.optional(),
 });
-
-// Schema com validação condicional
-// export const funcionarioSchema = funcionarioBaseSchema.refine(
-//   data => {
-//     if (data.tipoPessoaOuEmpresa === 'pessoa') {
-//       return data.pessoa !== undefined && data.pessoa !== null;
-//     }
-//     if (data.tipoPessoaOuEmpresa === 'empresa') {
-//       return data.empresa !== undefined && data.empresa !== null;
-//     }
-//     return false;
-//   },
-//   {
-//     message: 'Dados de pessoa ou empresa são obrigatórios',
-//     path: ['tipoPessoaOuEmpresa'],
-//   }
-// );
 
 export type FuncionarioInput = z.infer<typeof funcionarioSchema>;
