@@ -25,15 +25,21 @@ const BurgerIcon: React.FC<{ className?: string }> = ({ className }) => (
   </svg>
 );
 
-const HeaderLayout: React.FC = () => {
-  const [uid, setUid] = React.useState<string | null>(null);
+interface HeaderLayoutProps {
+  showBtnTakeIt?: boolean;
+}
+
+const HeaderLayout: React.FC<HeaderLayoutProps> = ({
+  showBtnTakeIt = true,
+}) => {
+  // const [uid, setUid] = React.useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
-  React.useEffect(() => {
-    if (typeof window !== 'undefined') {
-      setUid(localStorage.getItem('uid'));
-    }
-  }, []);
+  // React.useEffect(() => {
+  //   if (typeof window !== 'undefined') {
+  //     setUid(localStorage.getItem('uid'));
+  //   }
+  // }, []);
 
   // Fecha o menu ao redimensionar para desktop
   React.useEffect(() => {
@@ -64,10 +70,12 @@ const HeaderLayout: React.FC = () => {
             />
           </div>
           <div className={styles.headerActions}>
-            <Link href="/take-it" className="buttonPrimary">
-              <SearchIcon />
-              TAKE IT
-            </Link>
+            {showBtnTakeIt && (
+              <Link href="/take-it" className="buttonPrimary">
+                <SearchIcon />
+                TAKE IT
+              </Link>
+            )}
             <button className={styles.iconButton}>
               <BellIcon />
             </button>
@@ -128,14 +136,12 @@ const HeaderLayout: React.FC = () => {
                     className={styles.searchInput}
                   />
                 </div>
-                <Link
-                  href="/take-it"
-                  className="buttonPrimary flex items-center gap-2 justify-center"
-                  onClick={() => setIsMenuOpen(false)}
-                >
-                  <SearchIcon />
-                  TAKE IT
-                </Link>
+                {showBtnTakeIt && (
+                  <Link href="/take-it" className="buttonPrimary">
+                    <SearchIcon />
+                    TAKE IT
+                  </Link>
+                )}
 
                 <Link
                   href={`/profile`}
