@@ -1,6 +1,6 @@
 // src/components/form/FuncionarioForm.tsx
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import api from '@/axios';
@@ -27,6 +27,7 @@ export const FuncionarioForm = ({
   onSuccess,
   funcionarioData,
 }: FuncionarioFormProps) => {
+  const [loading, setLoading] = useState(false);
   const defaultValues = useMemo(() => {
     if (funcionarioData) {
       return {
@@ -109,6 +110,7 @@ export const FuncionarioForm = ({
         });
         delete (cleanData as any).pessoa;
       }
+      setLoading(true);
 
       const url = `/api/external/funcionario/save`;
       const response = await api.post(url, cleanData);
@@ -116,6 +118,8 @@ export const FuncionarioForm = ({
     } catch (error: any) {
       console.log('Erro ao processar funcionário:', error);
       alert(error.response.data.details.message);
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -228,9 +232,13 @@ export const FuncionarioForm = ({
         <PrimaryButton
           type="submit"
           className="w-full text-white font-semibold py-3 rounded-md transition-colors"
-          disabled={!isValid}
+          disabled={!isValid || loading}
         >
-          {funcionarioData ? 'Salvar Alterações' : 'Cadastrar Funcionário'}
+          {loading
+            ? 'Carregando...'
+            : funcionarioData
+            ? 'Salvar Alterações'
+            : 'Cadastrar Funcionário'}
         </PrimaryButton>
       </form>
     </FormProvider>

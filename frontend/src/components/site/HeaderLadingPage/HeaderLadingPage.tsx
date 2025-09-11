@@ -96,14 +96,7 @@ const HeaderLadingPage: React.FC = () => {
         }
         h-[70px] flex items-center
         transition-transform duration-500
-        ${
-          // Só aplica a animação de esconder no mobile
-          typeof window !== 'undefined' && window.innerWidth < 768
-            ? showMobileHeader
-              ? 'translate-y-0'
-              : '-translate-y-full'
-            : 'translate-y-0'
-        }
+        
       `}
       style={{
         // Garante que a animação funcione no mobile
