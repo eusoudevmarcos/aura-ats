@@ -32,10 +32,11 @@ const ClientePage: React.FC<{
       setErro(null);
       try {
         const res = await api.get(`/api/external/cliente/${uuid}`);
+        console.log(res.data);
         setCliente({
           ...res.data,
           empresa: {
-            ...res.data,
+            ...res.data.empresa,
             dataAbertura: new Date(
               res.data.empresa.dataAbertura
             ).toLocaleDateString('pt-BR'),
