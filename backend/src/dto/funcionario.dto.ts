@@ -4,6 +4,10 @@ function filtrarValores(obj: any): any {
       .map((item) => filtrarValores(item))
       .filter((item) => item !== undefined);
     return filtrado.length > 0 ? filtrado : undefined;
+  }
+  // CORREÇÃO: Verificar se é Date antes de verificar se é object
+  else if (obj instanceof Date) {
+    return obj; // Retorna a Date sem processar
   } else if (obj !== null && typeof obj === "object") {
     const novoObj: any = {};
     Object.keys(obj).forEach((key) => {
