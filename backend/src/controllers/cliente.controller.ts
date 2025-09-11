@@ -8,7 +8,7 @@ export class ClienteController {
 
   async save(req: Request, res: Response) {
     try {
-      const response = await this.service.saveWithTransaction(req.body);
+      const response = await this.service.save(req.body);
       return res.status(201).json(response);
     } catch (error: any) {
       return res

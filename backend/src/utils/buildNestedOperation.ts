@@ -1,12 +1,47 @@
 type NestedData = Record<string, any>;
 
 export class buildNestedOperation {
-  protected buildNestedOperation(entityData: any) {
+  protected buildNestedOperation(entityData: NestedData | NestedData[]): any {
     if (!entityData) return undefined;
 
-    // Se tem ID, é update ou connect
+    // Se for array, processa cada item individualmente
+    if (Array.isArray(entityData)) {
+      const create: any[] = [];
+      const update: any[] = [];
+      const connect: any[] = [];
+
+      for (const item of entityData) {
+        if (item.id) {
+          // Se existe ID, decide entre update ou connect
+          const hasOtherFields = Object.keys(item).some(
+            (key) => key !== "id" && item[key] !== undefined
+          );
+
+          if (hasOtherFields) {
+            const { id, ...updateData } = item;
+            update.push({
+              where: { id },
+              data: updateData,
+            });
+          } else {
+            connect.push({ id: item.id });
+          }
+        } else {
+          // Sem ID = criar novo
+          create.push(item);
+        }
+      }
+
+      const result: any = {};
+      if (create.length) result.create = create;
+      if (update.length) result.update = update;
+      if (connect.length) result.connect = connect;
+
+      return Object.keys(result).length ? result : undefined;
+    }
+
+    // Se for objeto simples
     if (entityData.id) {
-      // Se tem outros campos além do ID, é update
       const hasOtherFields = Object.keys(entityData).some(
         (key) => key !== "id" && entityData[key] !== undefined
       );
@@ -20,11 +55,9 @@ export class buildNestedOperation {
           },
         };
       } else {
-        // Apenas connect se só tem ID
         return { connect: { id: entityData.id } };
       }
     } else {
-      // Sem ID = create
       return { create: entityData };
     }
   }

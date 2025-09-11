@@ -32,7 +32,23 @@ const ClientePage: React.FC<{
       setErro(null);
       try {
         const res = await api.get(`/api/external/cliente/${uuid}`);
-        setCliente(res.data);
+        setCliente({
+          ...res.data,
+          empresa: {
+            ...res.data,
+            dataAbertura: new Date(
+              res.data.empresa.dataAbertura
+            ).toLocaleDateString('pt-BR'),
+            representantes: res.data.empresa.representantes.map(
+              (representante: any) => ({
+                ...representante,
+                dataNascimento: new Date(
+                  representante.dataNascimento
+                ).toLocaleDateString('pt-BR'),
+              })
+            ),
+          },
+        });
       } catch (_) {
         setErro('Cliente não encontrado ou erro ao buscar dados.');
         setCliente(null);
@@ -136,17 +152,39 @@ const ClientePage: React.FC<{
                 {cliente.empresa.razaoSocial}
               </div>
               <div>
+                <span className="font-medium">Nome Fantasia:</span>
+                {cliente.empresa.nomeFantasia}
+              </div>
+              <div>
                 <span className="font-medium">CNPJ:</span>
                 {cliente.empresa.cnpj}
               </div>
               {cliente.empresa.dataAbertura && (
                 <div>
                   <span className="font-medium">Data de Abertura:</span>
-                  {new Date(cliente.empresa.dataAbertura).toLocaleDateString(
-                    'pt-BR'
-                  )}
+                  {cliente.empresa.dataAbertura.toString()}
                 </div>
               )}
+            </Card>
+          )}
+
+          {cliente.empresa.representantes && (
+            <Card title="Dados do representante">
+              <div>
+                <span className="font-medium">Representantes</span>
+                {cliente.empresa.razaoSocial}
+              </div>
+              <div>
+                {cliente.empresa.representantes.map(representante => {
+                  return (
+                    <div key={representante.nome}>
+                      <p>{representante.cpf}</p>
+                      <p>{representante.dataNascimento.toString()}</p>
+                      <p>{representante.nome}</p>
+                    </div>
+                  );
+                })}
+              </div>
             </Card>
           )}
           {/* Profissional
@@ -175,7 +213,7 @@ const ClientePage: React.FC<{
             </Card>
           )} */}
           {/* Contatos */}
-          {cliente.empresa?.contatos?.length > 0 && (
+          {/* {cliente.empresa?.contatos?.length > 0 && (
             <Card title="Contatos da Empresa">
               {cliente.empresa.contatos.map((contato: any) => (
                 <div key={contato.id} className="mb-2">
@@ -185,9 +223,9 @@ const ClientePage: React.FC<{
                 </div>
               ))}
             </Card>
-          )}
+          )} */}
           {/* Localizações */}
-          {cliente.empresa?.localizacoes?.length > 0 && (
+          {/* {cliente.empresa?.localizacoes?.length > 0 && (
             <Card title="Localizações">
               {cliente.empresa.localizacoes.map((loc: any) => (
                 <ul key={loc.id} className="mb-2 list-inside">
@@ -236,7 +274,7 @@ const ClientePage: React.FC<{
                 </ul>
               ))}
             </Card>
-          )}
+          )} */}
         </div>
       </section>
 
@@ -245,7 +283,13 @@ const ClientePage: React.FC<{
         onClose={() => setShowModalEdit(false)}
         title="Editar Cliente"
       >
-        <ClienteForm onSuccess={() => {}} initialValues={cliente} />
+        <ClienteForm
+          onSuccess={cliente => {
+            setShowModalEdit(false);
+            setCliente(cliente);
+          }}
+          initialValues={cliente}
+        />
       </Modal>
     </div>
   );

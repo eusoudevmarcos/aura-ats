@@ -52,7 +52,7 @@ const EmpresaForm = ({
 
       <FormInput
         name={nomeFantasia}
-        label="Razão Social"
+        label="Nome Fantasia"
         placeholder="Ex: Aura ATS .LTDA"
         inputProps={{ classNameContainer: 'col-span-2' }}
       />

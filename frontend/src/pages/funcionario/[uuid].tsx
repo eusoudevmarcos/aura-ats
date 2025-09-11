@@ -128,13 +128,11 @@ const FuncionarioPage: React.FC = () => {
                 <span className="font-medium">CPF:</span>{' '}
                 {funcionario.pessoa.cpf}
               </div>
-              {/* <div>
-                <span className="font-medium">Data de Nascimento:</span>{' '}
+              <div>
+                <span className="font-medium">Data de Nascimento:</span>
                 {funcionario?.pessoa?.dataNascimento &&
-                  new Date(
-                    funcionario?.pessoa?.dataNascimento
-                  ).toLocaleDateString('pt-BR')}
-              </div> */}
+                  funcionario?.pessoa?.dataNascimento.toString()}
+              </div>
               <div>
                 <span className="font-medium">RG:</span> {funcionario.pessoa.rg}
               </div>

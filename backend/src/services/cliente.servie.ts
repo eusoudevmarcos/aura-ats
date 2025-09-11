@@ -1,139 +1,16 @@
-import { Cliente, Empresa, StatusCliente, TipoServico } from "@prisma/client";
+import { Cliente, StatusCliente, TipoServico } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { Pagination } from "../types/pagination";
+import { buildNestedOperation } from "../utils/buildNestedOperation";
 
 @injectable()
-export class ClienteService {
+export class ClienteService extends buildNestedOperation {
   constructor(
     @inject(EmpresaRepository) private empresaRepository: EmpresaRepository
-  ) {}
-
-  async saveWithTransaction(clienteData: any): Promise<Cliente> {
-    const { id, empresa, empresaId, status, tipoServico } = clienteData;
-    empresa.cnpj = empresa.cnpj.replace(/\D/g, "");
-
-    if (!empresa && !empresaId) {
-      throw new Error(
-        "Dados da empresa (ID ou objeto de criação) são obrigatórios para um cliente."
-      );
-    }
-
-    return await prisma.$transaction(
-      async (prismaTransaction) => {
-        let empresaFinal: Empresa;
-
-        if (empresaId) {
-          const existingEmpresa =
-            await this.empresaRepository.findByIdWithTransaction(
-              empresaId as string,
-              prismaTransaction
-            );
-
-          if (!existingEmpresa) {
-            throw new Error(`Empresa com ID ${empresaId} não encontrada.`);
-          }
-
-          if (empresa && empresa.id === empresaId) {
-            empresaFinal = await this.empresaRepository.saveWithTransaction(
-              { ...empresa, id: empresaId },
-              prismaTransaction
-            );
-          } else {
-            empresaFinal = existingEmpresa;
-          }
-        } else if (empresa) {
-          if (
-            !id &&
-            (!empresa.representantes || empresa.representantes.length === 0)
-          ) {
-            throw new Error(
-              "Ao criar uma nova empresa para o cliente, é obrigatório informar pelo menos um representante."
-            );
-          }
-
-          const CNPJExiste =
-            await this.empresaRepository.findByCnpjWithTransaction(
-              empresa.cnpj,
-              prismaTransaction
-            );
-
-          if (CNPJExiste) {
-            empresaFinal = await this.empresaRepository.saveWithTransaction(
-              { ...empresa, id: CNPJExiste.id },
-              prismaTransaction
-            );
-          } else {
-            empresaFinal = await this.empresaRepository.saveWithTransaction(
-              empresa,
-              prismaTransaction
-            );
-          }
-        } else {
-          throw new Error("Informações da empresa inválidas ou ausentes.");
-        }
-
-        const clientePayload: any = {
-          status: status as StatusCliente,
-          tipoServico: tipoServico as TipoServico[],
-          empresa: {
-            connect: { id: empresaFinal.id },
-          },
-        };
-
-        const includeRelations = {
-          empresa: {
-            include: {
-              contatos: true,
-              localizacoes: true,
-              representantes: true,
-              socios: true,
-            },
-          },
-        } as const;
-
-        if (id) {
-          const existingCliente = await prismaTransaction.cliente.findUnique({
-            where: { id },
-          });
-
-          if (!existingCliente) {
-            throw new Error(`Cliente com ID ${id} não encontrado.`);
-          }
-
-          return await prismaTransaction.cliente.update({
-            where: { id },
-            data: clientePayload,
-            include: includeRelations,
-          });
-        } else {
-          // Lógica para CRIAR Cliente dentro da transação
-          const existingClienteForEmpresa =
-            await prismaTransaction.cliente.findUnique({
-              where: { empresaId: empresaFinal.id },
-            });
-
-          if (existingClienteForEmpresa) {
-            throw new Error(
-              `Já existe um cliente associado à empresa com ID: ${empresaFinal.id}`
-            );
-          }
-          return await prismaTransaction.cliente.create({
-            data: clientePayload,
-            include: includeRelations,
-          });
-        }
-      },
-      {
-        maxWait: 5000,
-        timeout: 10000,
-      }
-    );
-  }
-
-  async update(clienteData: any, clienteId: string): Promise<Cliente> {
-    return this.saveWithTransaction({ ...clienteData, id: clienteId });
+  ) {
+    super();
   }
 
   async getClienteById(id: string): Promise<Cliente | null> {
@@ -191,6 +68,184 @@ export class ClienteService {
       page,
       pageSize,
       totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  async save(clienteData: any): Promise<Cliente> {
+    // Validações básicas antes de processar
+    this.validateBasicFields(clienteData);
+
+    // Normalizar dados
+    const normalizedData = this.normalizeData(clienteData);
+
+    // Validações de duplicatas se for criação
+    if (!clienteData.id) {
+      await this.checkDuplicates(normalizedData);
+    }
+
+    // Construir dados para salvamento
+    const clientePayload = await this.buildClienteData(normalizedData);
+    console.log(clientePayload);
+    // Executar operação de criação ou atualização
+    if (clienteData.id) {
+      return await prisma.cliente.update({
+        where: { id: clienteData.id },
+        data: clientePayload,
+        include: this.getIncludeRelations(),
+      });
+    } else {
+      return await prisma.cliente.create({
+        data: clientePayload,
+        include: this.getIncludeRelations(),
+      });
+    }
+  }
+
+  private validateBasicFields(data: any): void {
+    if (!data.empresa && !data.empresaId) {
+      throw new Error(
+        "Dados da empresa (ID ou objeto) são obrigatórios para um cliente."
+      );
+    }
+
+    if (!data.status) {
+      throw new Error("Status é obrigatório.");
+    }
+
+    if (
+      !data.tipoServico ||
+      !Array.isArray(data.tipoServico) ||
+      data.tipoServico.length === 0
+    ) {
+      throw new Error(
+        "Tipo de serviço é obrigatório e deve ser um array não vazio."
+      );
+    }
+
+    // Validação específica para criação de nova empresa
+    if (!data.id && data.empresa && !data.empresaId) {
+      if (
+        !data.empresa.representantes ||
+        data.empresa.representantes.length === 0
+      ) {
+        throw new Error(
+          "Ao criar uma nova empresa, é obrigatório informar pelo menos um representante."
+        );
+      }
+    }
+  }
+
+  private normalizeData(data: any) {
+    return {
+      ...data,
+      empresa: data.empresa
+        ? {
+            ...data.empresa,
+            cnpj: data.empresa.cnpj?.replace(/\D/g, ""),
+            representantes: data.empresa.representantes?.map((rep: any) => ({
+              ...rep,
+              cpf: rep.cpf?.replace(/\D/g, ""),
+            })),
+          }
+        : undefined,
+    };
+  }
+
+  private async checkDuplicates(data: any): Promise<void> {
+    // Se tem empresaId, verificar se a empresa existe
+    if (data.empresaId) {
+      const empresaExistente = await prisma.empresa.findUnique({
+        where: { id: data.empresaId },
+      });
+
+      if (!empresaExistente) {
+        throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
+      }
+
+      // Verificar se já existe cliente para essa empresa
+      const clienteExistente = await prisma.cliente.findUnique({
+        where: { empresaId: data.empresaId },
+      });
+
+      if (clienteExistente) {
+        throw new Error(
+          `Já existe um cliente associado à empresa com ID: ${data.empresaId}`
+        );
+      }
+    }
+
+    // Se tem dados da empresa para criar/atualizar
+    if (data.empresa?.cnpj) {
+      const empresaExistentePorCnpj = await prisma.empresa.findUnique({
+        where: { cnpj: data.empresa.cnpj },
+      });
+
+      if (empresaExistentePorCnpj) {
+        // Se a empresa existe, verificar se já tem cliente
+        const clienteExistente = await prisma.cliente.findUnique({
+          where: { empresaId: empresaExistentePorCnpj.id },
+        });
+
+        if (clienteExistente) {
+          throw new Error(
+            `Já existe um cliente para a empresa com CNPJ: ${data.empresa.cnpj}`
+          );
+        }
+      }
+    }
+  }
+
+  private async buildClienteData(data: any): Promise<any> {
+    const clienteData: any = {
+      status: data.status as StatusCliente,
+      tipoServico: data.tipoServico as TipoServico[],
+    };
+
+    if (data.empresaId) {
+      // Se já tem o ID da empresa explícito, só conecta
+      clienteData.empresa = { connect: { id: data.empresaId } };
+    }
+
+    if (data.empresa) {
+      // Usa o helper genérico
+      delete data.empresa.representantes;
+      clienteData.empresa = this.buildNestedOperation(data.empresa);
+
+      // Nested de contatos
+      // if (data.empresa.contatos) {
+      //   clienteData.empresa.contatos = this.buildNestedOperation(
+      //     data.empresa.contatos
+      //   );
+      // }
+
+      // Nested de representantes
+      if (data.empresa.representantes) {
+        clienteData.empresa.representantes = this.buildNestedOperation(
+          data.empresa.representantes
+        );
+      }
+
+      // Nested de localizações
+      // if (data.empresa.localizacoes) {
+      //   clienteData.empresa.localizacoes = this.buildNestedOperation(
+      //     data.empresa.localizacoes
+      //   );
+      // }
+    }
+
+    return clienteData;
+  }
+
+  private getIncludeRelations() {
+    return {
+      empresa: {
+        include: {
+          contatos: true,
+          localizacoes: true,
+          representantes: true,
+          socios: true,
+        },
+      },
     };
   }
 }

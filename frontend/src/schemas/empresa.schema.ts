@@ -1,11 +1,10 @@
 import { z } from 'zod';
-import { contatoSchema } from './contato.schema';
-import { localizacaoSchema } from './localizacao.schema';
 import { pessoaSchema } from './pessoa.schema';
 
 export const empresaSchema = z.object({
   id: z.string().nullable().optional(),
   razaoSocial: z.string().min(1, 'Razão Social é obrigatória'),
+  nomeFantasia: z.string().min(1, 'Nome Fantasia é obrigatória'),
   cnpj: z
     .string()
     .min(18, 'CNPJ inválido') // inclui pontos, barra e traço
@@ -17,8 +16,8 @@ export const empresaSchema = z.object({
       .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
     z.date(),
   ]),
-  contatos: z.array(contatoSchema),
-  localizacoes: z.array(localizacaoSchema),
+  // contatos: z.array(contatoSchema),
+  // localizacoes: z.array(localizacaoSchema),
   representantes: z.array(pessoaSchema),
 });
 
