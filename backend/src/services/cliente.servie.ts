@@ -1,9 +1,12 @@
-import { Cliente, StatusCliente, TipoServico } from "@prisma/client";
+import { Cliente, StatusCliente } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
+import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
+import { buildClienteData } from "../helper/buildNested/cliente.build";
+import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
+import { validateBasicFieldsCliente } from "../helper/validate/cliente.validate";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { Pagination } from "../types/pagination";
-import { BuildNestedOperation } from "../utils/buildNestedOperation";
 
 @injectable()
 export class ClienteService extends BuildNestedOperation {
@@ -72,87 +75,39 @@ export class ClienteService extends BuildNestedOperation {
   }
 
   async save(clienteData: any): Promise<Cliente> {
-    this.validateBasicFields(clienteData);
+    validateBasicFieldsCliente(clienteData);
 
-    const normalizedData = this.normalizeData(clienteData);
+    const normalizedData = normalizeClienteData(clienteData);
 
     if (!clienteData.id) {
       await this.checkDuplicates(normalizedData);
     }
 
-    const clientePayload = await this.buildClienteData(normalizedData);
+    const clientePayload = await buildClienteData(normalizedData);
 
-    const clienteDataBuild: any = {
-      status: clienteData.status as StatusCliente,
-      tipoServico: clienteData.tipoServico as TipoServico[],
+    const relations = {
+      empresa: {
+        include: {
+          contatos: true,
+          localizacoes: true,
+          representantes: true,
+          socios: true,
+        },
+      },
     };
-
-    if (clienteData.empresa) {
-      clienteDataBuild.empresa = this.buildNestedOperation(clienteData.empresa);
-    }
 
     if (clienteData.id) {
       return await prisma.cliente.update({
         where: { id: clienteData.id },
         data: clientePayload,
-        include: this.getIncludeRelations(),
+        include: relations,
       });
     } else {
       return await prisma.cliente.create({
         data: clientePayload,
-        include: this.getIncludeRelations(),
+        include: relations,
       });
     }
-  }
-
-  private validateBasicFields(data: any): void {
-    if (!data.empresa && !data.empresaId) {
-      throw new Error(
-        "Dados da empresa (ID ou objeto) são obrigatórios para um cliente."
-      );
-    }
-
-    if (!data.status) {
-      throw new Error("Status é obrigatório.");
-    }
-
-    if (
-      !data.tipoServico ||
-      !Array.isArray(data.tipoServico) ||
-      data.tipoServico.length === 0
-    ) {
-      throw new Error(
-        "Tipo de serviço é obrigatório e deve ser um array não vazio."
-      );
-    }
-
-    // Validação específica para criação de nova empresa
-    if (!data.id && data.empresa && !data.empresaId) {
-      if (
-        !data.empresa.representantes ||
-        data.empresa.representantes.length === 0
-      ) {
-        throw new Error(
-          "Ao criar uma nova empresa, é obrigatório informar pelo menos um representante."
-        );
-      }
-    }
-  }
-
-  private normalizeData(data: any) {
-    return {
-      ...data,
-      empresa: data.empresa
-        ? {
-            ...data.empresa,
-            cnpj: data.empresa.cnpj?.replace(/\D/g, ""),
-            representantes: data.empresa.representantes?.map((rep: any) => ({
-              ...rep,
-              cpf: rep.cpf?.replace(/\D/g, ""),
-            })),
-          }
-        : undefined,
-    };
   }
 
   private async checkDuplicates(data: any): Promise<void> {
@@ -197,46 +152,5 @@ export class ClienteService extends BuildNestedOperation {
         }
       }
     }
-  }
-
-  private async buildClienteData(data: any): Promise<any> {
-    const clienteData: any = {
-      status: data.status as StatusCliente,
-      tipoServico: data.tipoServico as TipoServico[],
-    };
-
-    if (data.empresa) {
-      // Usa o helper genérico
-      clienteData.empresa = this.buildNestedOperation(data.empresa);
-
-      // Nested de contatos
-      // if (data.empresa.contatos) {
-      //   clienteData.empresa.contatos = this.buildNestedOperation(
-      //     data.empresa.contatos
-      //   );
-      // }
-
-      // Nested de localizações
-      // if (data.empresa.localizacoes) {
-      //   clienteData.empresa.localizacoes = this.buildNestedOperation(
-      //     data.empresa.localizacoes
-      //   );
-      // }
-    }
-
-    return clienteData;
-  }
-
-  private getIncludeRelations() {
-    return {
-      empresa: {
-        include: {
-          contatos: true,
-          localizacoes: true,
-          representantes: true,
-          socios: true,
-        },
-      },
-    };
   }
 }

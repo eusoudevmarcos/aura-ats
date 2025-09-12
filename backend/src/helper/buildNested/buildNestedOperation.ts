@@ -10,10 +10,9 @@ type NestedData = Record<string, any>;
  * Trata recursivamente campos aninhados (arrays/objetos) até maxDepth.
  */
 export class BuildNestedOperation {
-  // Você pode ajustar maxDepth conforme necessidade (proteção contra recursão infinita)
   constructor(private maxDepth = 20) {}
 
-  protected buildNestedOperation(
+  public build(
     entityData: NestedData | NestedData[] | undefined,
     _opts?: { _depth?: number; _seen?: WeakSet<object> }
   ): any {
@@ -121,11 +120,6 @@ export class BuildNestedOperation {
     return undefined;
   }
 
-  /**
-   * Monta o objeto "data" que será usado em update/create:
-   * - campos primitivos são mantidos
-   * - campos objeto/array são processados recursivamente com buildNestedOperation
-   */
   private processEntityData(
     obj: NestedData,
     depth: number,
@@ -152,7 +146,7 @@ export class BuildNestedOperation {
 
       // objetos/arrays -> processa recursivamente
       if (Array.isArray(value) || typeof value === "object") {
-        const nested = this.buildNestedOperation(value, {
+        const nested = this.build(value, {
           _depth: depth,
           _seen: seen,
         });

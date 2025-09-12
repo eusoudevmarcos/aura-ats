@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { ClienteService } from "../services/cliente.servie";
 
 @injectable()
@@ -26,7 +27,7 @@ export class ClienteController {
         return res.status(404).json({ message: "Cliente não encontrado" });
       }
 
-      return res.status(200).json(cliente);
+      return res.status(200).json(nonEmptyAndConvertDataDTO(cliente));
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao buscar cliente", error });
