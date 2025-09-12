@@ -188,13 +188,13 @@ function TR<T>({
               onRowClick ? 'cursor-pointer' : 'cursor-default'
             }`}
           >
-            <span className="cell-ellipsis block whitespace-nowrap overflow-hidden text-ellipsis w-full transition-colors duration-200">
+            <span className="cell-ellipsis block whitespace-nowrap overflow-hidden text-ellipsis w-full transition-colors duration-200 text-secondary">
               {valorCelula}
             </span>
 
             <span
               title={valorCompleto}
-              className="cell-full absolute left-0 top-0 z-20 bg-white shadow-lg px-2 py-2 min-w-full max-w-[400px] whitespace-pre-line overflow-x-auto text-primary font-medium rounded-lg border border-gray-200 word-break-normal group-hover:block"
+              className="cell-full absolute left-0 top-0 z-20 bg-white shadow-lg px-2 py-2 min-w-full max-w-[400px] whitespace-pre-line overflow-x-auto text-secondary font-medium rounded-lg border border-gray-200 word-break-normal group-hover:block"
             >
               <div className="flex flex-row items-center justify-between gap-2">
                 <p className="fit m-0">{valorCompleto}</p>
@@ -251,7 +251,7 @@ const Pagination: React.FC<PaginationProps> = ({
     <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4">
       <div className="flex items-center gap-2">
         <button
-          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm"
+          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm cursor-pointer"
           onClick={() => onPageChange && onPageChange(page - 1)}
           disabled={page === 1}
         >
@@ -262,8 +262,8 @@ const Pagination: React.FC<PaginationProps> = ({
             key={p}
             className={`px-3 py-1 rounded border text-sm ${
               p === page
-                ? 'bg-primary text-white border-primary'
-                : 'text-primary border-primary bg-white'
+                ? 'bg-primary text-white border-primary cursor-pointer'
+                : 'text-primary border-primary bg-white cursor-pointer'
             }`}
             onClick={() => onPageChange && onPageChange(p)}
             disabled={p === page}
@@ -272,7 +272,7 @@ const Pagination: React.FC<PaginationProps> = ({
           </button>
         ))}
         <button
-          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm"
+          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm cursor-pointer"
           onClick={() => onPageChange && onPageChange(page + 1)}
           disabled={page === totalPages}
         >
@@ -388,7 +388,7 @@ function Table<T>({
               {columns.map(col => (
                 <th
                   key={String(col.key)}
-                  className="px-4 py-3 text-left font-semibold bg-neutral text-secondary"
+                  className="px-4 py-3 text-left font-semibold bg-neutral text-primary"
                   style={{
                     position: 'sticky',
                     top: 0,

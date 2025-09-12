@@ -4,6 +4,7 @@ import { Pagination } from '@/type/pagination.type'; // Se este é o seu tipo de
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 import Table, { TableColumn } from '../Table'; // Certifique-se que o caminho está correto
+import { FormInput } from '../input/FormInput';
 
 // ===================== ENUMS (Adaptadas para o Frontend) =====================
 export enum CategoriaVaga {
@@ -213,12 +214,16 @@ const VagaList: React.FC = () => {
     <Card classNameContainer="mt-6 px-6 py-2">
       <div className="flex justify-between items-center flex-wrap p-2">
         <h2 className="text-xl font-bold mb-4">Lista de Vagas</h2>
-        <input
-          type="text"
+        <FormInput
+          name="search"
           placeholder="Buscar por título, descrição, área ou cliente..."
           value={searchQuery}
           onChange={e => setSearchQuery(e.target.value)}
-          className="flex-grow w-full max-w-[400px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
+          clear
+          inputProps={{
+            className:
+              'flex-grow w-full max-w-[400px] px-3 py-2 rounded-lg border border-gray-200 outline-none',
+          }}
         />
       </div>
       <Table

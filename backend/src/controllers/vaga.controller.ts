@@ -1,6 +1,7 @@
 // src/controllers/VagaController.ts
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { VagaService } from "../services/vaga.service";
 
 @injectable()
@@ -10,7 +11,9 @@ export class VagaController {
   async save(req: Request, res: Response): Promise<Response> {
     try {
       const vagaData = req.body;
-      const newVaga = await this.service.saveWithTransaction(vagaData);
+      const newVaga = await this.service.save(
+        nonEmptyAndConvertDataDTO(vagaData)
+      );
       return res.status(201).json(newVaga);
     } catch (error: any) {
       console.error("Error creating vaga:", error);
@@ -41,7 +44,7 @@ export class VagaController {
     const { id } = req.params;
     try {
       const vaga = await this.service.getById(id);
-      return res.status(200).json(vaga);
+      return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
     } catch (error: any) {
       console.error("Error fetching vaga by ID:", error);
       return res

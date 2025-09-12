@@ -1,104 +1,17 @@
 import { injectable } from "tsyringe";
-import { save } from "../helper/buildSave";
 import prisma from "../lib/prisma";
 import { VagaSaveInput } from "../types/vaga.type";
 
-import { Prisma } from "@prisma/client";
+import { Prisma, Vaga } from "@prisma/client";
+import { buildVagaData } from "../helper/buildNested/vaga.build";
 import { buildWhere } from "../helper/buildWhere";
+import { normalizeData } from "../helper/normalize/vaga.normalize";
+import { validateBasicFields } from "../helper/validate/vaga.validate";
 import { Pagination } from "../types/pagination";
 
 @injectable()
 export class VagaService {
   constructor() {}
-
-  async saveWithTransaction(vagaData: VagaSaveInput) {
-    const {
-      id,
-      titulo,
-      beneficios,
-      habilidades,
-      anexos,
-      localizacao,
-      localizacaoId,
-      clienteId,
-      responsabilidades,
-      ...rest
-    } = vagaData;
-
-    return await prisma.$transaction(async (tx) => {
-      const dataToSave: any = {
-        id,
-        titulo,
-        responsabilidades,
-        clienteId: clienteId || undefined,
-        localizacao:
-          localizacao || (localizacaoId ? { id: localizacaoId } : undefined),
-        ...rest,
-      };
-
-      // Adiciona benefícios apenas se for um array válido
-      if (beneficios && Array.isArray(beneficios) && beneficios.length > 0) {
-        dataToSave.beneficios = beneficios;
-      }
-
-      // Adiciona habilidades apenas se for um array válido
-      if (habilidades && Array.isArray(habilidades) && habilidades.length > 0) {
-        dataToSave.habilidades = habilidades;
-      }
-
-      // Adiciona anexos apenas se for um array válido
-      if (anexos && Array.isArray(anexos) && anexos.length > 0) {
-        dataToSave.anexos = anexos;
-      }
-
-      const vaga = await save({
-        prisma,
-        tx,
-        model: "vaga",
-        idField: "id",
-        data: dataToSave,
-        relations: {
-          // Relação one-to-one com localização
-          localizacao: {
-            type: "one-to-one",
-            validation: {
-              uniqueKeys: ["cidade", "uf"],
-            },
-          },
-          // Relação one-to-many com benefícios (Beneficio tem vagaId)
-          beneficios: {
-            type: "one-to-many",
-            validation: {
-              uniqueKeys: ["nome"],
-            },
-          },
-          // Relação many-to-many com habilidades (via VagaHabilidade)
-          habilidades: {
-            type: "many-to-many",
-            validation: {
-              uniqueKeys: ["nome"],
-            },
-          },
-          // Relação many-to-many com anexos (via VagaAnexo)
-          anexos: {
-            type: "many-to-many",
-            validation: {
-              uniqueKeys: ["anexoId"],
-            },
-          },
-        },
-        include: {
-          localizacao: true,
-          beneficios: true,
-          habilidades: true,
-          anexos: true,
-          cliente: true,
-        },
-      });
-
-      return vaga;
-    });
-  }
 
   async getAllByCliente(
     clienteId: string,
@@ -135,14 +48,23 @@ export class VagaService {
 
   async getAll({ page = 1, pageSize = 10, search = "" }: Pagination) {
     const skip = (page - 1) * pageSize;
+    const fields = [
+      "titulo",
+      "descricao",
+      "localizacao.cidade",
+      "localizacao.uf",
+      "create_at",
+    ];
 
     const where = buildWhere<Prisma.VagaWhereInput>(search, [
       "titulo",
       "descricao",
       "localizacao.cidade",
       "localizacao.uf",
-      "beneficios.nome",
-      "habilidades.nome",
+      "localizacao.cidade",
+      "create_at",
+      // "beneficios.nome",
+      // "habilidades.nome",
     ]);
 
     const [vagas, total] = await prisma.$transaction([
@@ -158,6 +80,7 @@ export class VagaService {
           habilidades: true,
           anexos: true,
           localizacao: true,
+          cliente: true,
         },
       }),
       prisma.vaga.count(),
@@ -189,5 +112,78 @@ export class VagaService {
     }
 
     return vaga;
+  }
+
+  async save(vagaData: VagaSaveInput): Promise<Vaga> {
+    validateBasicFields(vagaData);
+
+    const normalizedData = normalizeData(vagaData);
+    if (!vagaData.id) {
+      await this.checkDuplicates(normalizedData);
+    }
+
+    const vagaPayload = await buildVagaData(normalizedData);
+
+    const relationsShip = {
+      localizacao: true,
+      beneficios: true,
+      habilidades: true,
+      anexos: true,
+      cliente: true,
+    };
+
+    if (!vagaData.id) {
+      return await prisma.vaga.create({
+        data: vagaPayload,
+        include: relationsShip,
+      });
+    } else {
+      return await prisma.vaga.update({
+        where: { id: vagaData.id },
+        data: vagaPayload,
+        include: relationsShip,
+      });
+    }
+  }
+
+  private async checkDuplicates(data: any): Promise<void> {
+    if (data.clienteId) {
+      const clienteExistente = await prisma.cliente.findUnique({
+        where: { id: data.clienteId },
+      });
+
+      if (!clienteExistente) {
+        throw new Error(`Cliente com ID ${data.clienteId} não encontrado.`);
+      }
+    }
+
+    if (data.localizacaoId) {
+      const localizacaoExistente = await prisma.localizacao.findUnique({
+        where: { id: data.localizacaoId },
+      });
+
+      if (!localizacaoExistente) {
+        throw new Error(
+          `Localização com ID ${data.localizacaoId} não encontrada.`
+        );
+      }
+    }
+
+    // Verificar duplicata de título para o mesmo cliente (opcional)
+    if (data.titulo && data.clienteId) {
+      const vagaExistente = await prisma.vaga.findFirst({
+        where: {
+          titulo: data.titulo,
+          clienteId: data.clienteId,
+          NOT: data.id ? { id: data.id } : undefined,
+        },
+      });
+
+      if (vagaExistente) {
+        throw new Error(
+          `Já existe uma vaga com o título "${data.titulo}" para este cliente.`
+        );
+      }
+    }
   }
 }

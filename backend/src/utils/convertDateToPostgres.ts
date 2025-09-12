@@ -1,70 +1,57 @@
-// Função que valida e converte string "dd/MM/yyyy" para Date
-export const convertDateToPostgres = (
-  dateString: string | undefined
-): Date | undefined => {
-  if (!dateString || dateString.length !== 10) {
-    return undefined;
+/**
+ * Converte qualquer valor em Date válido para Postgres, recursivamente.
+ * Aceita strings "dd/MM/yyyy", "yyyy-MM-dd" ou objetos Date.
+ * Funciona para objetos aninhados, arrays e arrays de objetos.
+ */
+export function convertAnyDateToPostgres(value: any): any {
+  if (Array.isArray(value)) {
+    return value.map(convertAnyDateToPostgres);
   }
 
-  const parts = dateString.split("/");
-  if (parts.length !== 3) return undefined;
-
-  const [day, month, year] = parts.map(Number);
-
-  if (
-    isNaN(day) ||
-    isNaN(month) ||
-    isNaN(year) ||
-    day < 1 ||
-    day > 31 ||
-    month < 1 ||
-    month > 12 ||
-    year < 1900 ||
-    year > 2100
-  ) {
-    return undefined;
+  if (value instanceof Date) {
+    return value;
   }
 
-  const inputDate = new Date(year, month - 1, day);
+  if (typeof value === "string") {
+    // Tenta "dd/MM/yyyy"
+    const parts = value.split("/");
+    if (parts.length === 3) {
+      const [day, month, year] = parts.map(Number);
+      if (
+        !isNaN(day) &&
+        !isNaN(month) &&
+        !isNaN(year) &&
+        day >= 1 &&
+        day <= 31 &&
+        month >= 1 &&
+        month <= 12 &&
+        year >= 1900 &&
+        year <= 2100
+      ) {
+        const date = new Date(year, month - 1, day);
+        if (
+          date.getFullYear() === year &&
+          date.getMonth() === month - 1 &&
+          date.getDate() === day
+        )
+          return date;
+      }
+    }
 
-  if (
-    inputDate.getFullYear() !== year ||
-    inputDate.getMonth() !== month - 1 ||
-    inputDate.getDate() !== day
-  ) {
-    return undefined;
+    // Tenta ISO / "yyyy-MM-dd"
+    const isoDate = new Date(value);
+    if (!isNaN(isoDate.getTime())) return isoDate;
+
+    return value; // Não é data, mantém string
   }
 
-  return inputDate; // Prisma e Postgres entendem Date diretamente
-};
-
-// Função recursiva para processar qualquer objeto/array
-function deepConvertDatesToPostgres(obj: any): any {
-  if (Array.isArray(obj)) {
-    return obj.map((item) => deepConvertDatesToPostgres(item));
-  }
-
-  if (obj instanceof Date) {
-    return obj; // já é Date
-  }
-
-  if (typeof obj === "string") {
-    const converted = convertDateToPostgres(obj);
-    return converted ?? obj; // se não for data válida, mantém a string
-  }
-
-  if (obj !== null && typeof obj === "object") {
+  if (value !== null && typeof value === "object") {
     const newObj: any = {};
-    for (const key of Object.keys(obj)) {
-      newObj[key] = deepConvertDatesToPostgres(obj[key]);
+    for (const key of Object.keys(value)) {
+      newObj[key] = convertAnyDateToPostgres(value[key]);
     }
     return newObj;
   }
 
-  return obj;
-}
-
-export function convertAnyDateToPostgres(prop: any) {
-  const resultado = deepConvertDatesToPostgres(prop);
-  return resultado || {};
+  return value;
 }
