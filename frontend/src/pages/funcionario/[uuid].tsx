@@ -15,6 +15,7 @@ const FuncionarioPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [showModalEdit, setShowModalEdit] = useState<boolean>(false);
   const [erro, setErro] = useState<string | null>(null);
+  const [openCount, setOpenCount] = useState<number>(1);
 
   useEffect(() => {
     if (!uuid) return;
@@ -22,22 +23,9 @@ const FuncionarioPage: React.FC = () => {
     const fetchFuncionario = async () => {
       setLoading(true);
       setErro(null);
-      console.log(uuid);
       try {
         const response = await api.get(`/api/external/funcionario/${uuid}`);
-        setFuncionario({
-          ...response.data,
-          pessoa: response.data?.pessoa
-            ? {
-                ...response.data.pessoa,
-                dataNascimento: response.data.pessoa.dataNascimento
-                  ? new Date(
-                      response.data.pessoa.dataNascimento
-                    ).toLocaleDateString('pt-BR')
-                  : '',
-              }
-            : undefined,
-        });
+        setFuncionario(response.data);
       } catch (_: any) {
         setErro('Funcionário não encontrado ou erro ao buscar dados.');
         setFuncionario(null);
@@ -101,66 +89,80 @@ const FuncionarioPage: React.FC = () => {
         </div>
         <div className="flex gap-4">
           <Card title="Informações Gerais">
-            <div>
-              <span className="font-medium">Email:</span> {funcionario.email}
-            </div>
-            <div>
+            <p>
+              <span className="font-medium">Email:</span>{' '}
+              <span className="text-secondary">{funcionario.email}</span>
+            </p>
+            <p>
               <span className="font-medium">Tipo de Usuário:</span>{' '}
-              {funcionario.tipoUsuario}
-            </div>
-
-            <div>
-              <span className="font-medium">Setor:</span>
-              {funcionario?.funcionario?.setor ?? 'N/A'}
-            </div>
-            <div>
-              <span className="font-medium">Cargo:</span>
-              {funcionario?.funcionario?.cargo ?? 'N/A'}
-            </div>
+              <span className="text-secondary">{funcionario.tipoUsuario}</span>
+            </p>
+            <p>
+              <span className="font-medium">Setor:</span>{' '}
+              <span className="text-secondary">
+                {funcionario?.funcionario?.setor ?? 'N/A'}
+              </span>
+            </p>
+            <p>
+              <span className="font-medium">Cargo:</span>{' '}
+              <span className="text-secondary">
+                {funcionario?.funcionario?.cargo ?? 'N/A'}
+              </span>
+            </p>
           </Card>
           {funcionario.pessoa && (
             <Card title="Dados da Pessoa">
-              <div>
+              <p>
                 <span className="font-medium">Nome:</span>{' '}
-                {funcionario.pessoa.nome}
-              </div>
-              <div>
+                <span className="text-secondary">
+                  {funcionario.pessoa.nome}
+                </span>
+              </p>
+              <p>
                 <span className="font-medium">CPF:</span>{' '}
-                {funcionario.pessoa.cpf}
-              </div>
-              <div>
-                <span className="font-medium">Data de Nascimento:</span>
-                {funcionario?.pessoa?.dataNascimento &&
-                  funcionario?.pessoa?.dataNascimento.toString()}
-              </div>
-              <div>
-                <span className="font-medium">RG:</span> {funcionario.pessoa.rg}
-              </div>
-              {/* <div>
-                <span className="font-medium">Estado Civil:</span>{' '}
-                {funcionario.pessoa.estadoCivil}
-              </div> */}
+                <span className="text-secondary">{funcionario.pessoa.cpf}</span>
+              </p>
+              <p>
+                <span className="font-medium">Data de Nascimento:</span>{' '}
+                <span className="text-secondary">
+                  {funcionario?.pessoa?.dataNascimento &&
+                    funcionario?.pessoa?.dataNascimento.toString()}
+                </span>
+              </p>
+              <p>
+                <span className="font-medium">RG:</span>{' '}
+                <span className="text-secondary">{funcionario.pessoa.rg}</span>
+              </p>
+              {/* <p>
+                <span className="font-medium">Estado Civil:</span> <span className="text-secondary">{funcionario.pessoa.estadoCivil}</span>
+              </p> */}
             </Card>
           )}
           {funcionario.empresa && (
             <Card title="Dados da Empresa">
-              <div>
+              <p>
                 <span className="font-medium">Razão Social:</span>{' '}
-                {funcionario.empresa.razaoSocial}
-              </div>
-              <div>
+                <span className="text-secondary">
+                  {funcionario.empresa.razaoSocial}
+                </span>
+              </p>
+              <p>
                 <span className="font-medium">CNPJ:</span>{' '}
-                {funcionario.empresa.cnpj}
-              </div>
+                <span className="text-secondary">
+                  {funcionario.empresa.cnpj}
+                </span>
+              </p>
               {funcionario?.empresa?.dataAbertura && (
-                <div>
-                  <span className="font-medium">Data de Abertura:</span>
-                  {funcionario.empresa.dataAbertura
-                    ? new Date(
-                        funcionario.empresa.dataAbertura
-                      ).toLocaleDateString('pt-BR')
-                    : ''}
-                </div>
+                <p>
+                  <span className="font-medium">Data de Abertura:</span>{' '}
+                  <span className="text-secondary">
+                    {funcionario.empresa.dataAbertura
+                      ? new Date(
+                          funcionario.empresa.dataAbertura
+                        ).toLocaleDateString('pt-BR')
+                      : ''}
+                  </span>
+                </p>
               )}
             </Card>
           )}
@@ -169,16 +171,22 @@ const FuncionarioPage: React.FC = () => {
 
       <Modal
         isOpen={showModalEdit}
-        onClose={() => setShowModalEdit(false)}
+        onClose={() => {
+          setShowModalEdit(false);
+          setOpenCount(openCount + 1);
+        }}
         title="Editar Funcionario"
       >
-        <FuncionarioForm
-          onSuccess={funcionario => {
-            setFuncionario(funcionario);
-            setShowModalEdit(false);
-          }}
-          funcionarioData={funcionario}
-        />
+        {showModalEdit && (
+          <FuncionarioForm
+            key={openCount}
+            onSuccess={funcionario => {
+              setFuncionario(funcionario);
+              setShowModalEdit(false);
+            }}
+            funcionarioData={funcionario}
+          />
+        )}
       </Modal>
     </div>
   );

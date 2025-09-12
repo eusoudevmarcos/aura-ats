@@ -56,7 +56,7 @@ export const FuncionarioForm = ({
     watch,
     trigger,
     reset,
-    formState: { isValid, errors },
+    formState: { isValid, isDirty, errors },
   } = methods;
 
   const tipoPessoaOuEmpresa = watch('tipoPessoaOuEmpresa');
@@ -71,15 +71,21 @@ export const FuncionarioForm = ({
   }, [funcionarioData, reset, defaultValues]);
 
   useEffect(() => {
-    setValue(setor, tipoUsuario, { shouldValidate: true });
-    setValue(cargo, tipoUsuario, { shouldValidate: true });
+    setValue(setor, tipoUsuario, { shouldValidate: true, shouldDirty: true });
+    setValue(cargo, tipoUsuario, { shouldValidate: true, shouldDirty: true });
   }, [tipoUsuario, setValue, setor, cargo]);
 
   useEffect(() => {
     if (tipoPessoaOuEmpresa === 'pessoa') {
-      setValue('empresa', undefined, { shouldValidate: true });
+      setValue('empresa', undefined, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     } else {
-      setValue('pessoa', undefined, { shouldValidate: true });
+      setValue('pessoa', undefined, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
     trigger('tipoPessoaOuEmpresa');
   }, [tipoPessoaOuEmpresa, setValue, trigger]);
@@ -115,6 +121,7 @@ export const FuncionarioForm = ({
       const url = `/api/external/funcionario/save`;
       const response = await api.post(url, cleanData);
       onSuccess(response.data);
+      reset(response.data);
     } catch (error: any) {
       console.log('Erro ao processar funcionário:', error);
       alert(error.response.data.details.message);
@@ -232,7 +239,7 @@ export const FuncionarioForm = ({
         <PrimaryButton
           type="submit"
           className="w-full text-white font-semibold py-3 rounded-md transition-colors"
-          disabled={!isValid || loading}
+          disabled={loading || !isDirty}
         >
           {loading
             ? 'Carregando...'

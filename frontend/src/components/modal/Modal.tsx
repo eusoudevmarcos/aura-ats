@@ -29,11 +29,9 @@ const Modal: React.FC<ModalProps> = ({
   }, [isOpen]);
 
   const handleClose = () => {
+    if (onClose) onClose(false);
     setVisible(false);
-    timeoutRef.current = setTimeout(() => {
-      setShow(false);
-      if (onClose) onClose(false);
-    }, 200);
+    timeoutRef.current = setTimeout(() => setShow(false), 200);
   };
 
   const handleBackdropClick = (

@@ -32,24 +32,7 @@ const ClientePage: React.FC<{
       setErro(null);
       try {
         const res = await api.get(`/api/external/cliente/${uuid}`);
-        console.log(res.data);
-        setCliente({
-          ...res.data,
-          empresa: {
-            ...res.data.empresa,
-            dataAbertura: new Date(
-              res.data.empresa.dataAbertura
-            ).toLocaleDateString('pt-BR'),
-            representantes: res.data.empresa.representantes.map(
-              (representante: any) => ({
-                ...representante,
-                dataNascimento: new Date(
-                  representante.dataNascimento
-                ).toLocaleDateString('pt-BR'),
-              })
-            ),
-          },
-        });
+        setCliente(res.data);
       } catch (_) {
         setErro('Cliente não encontrado ou erro ao buscar dados.');
         setCliente(null);

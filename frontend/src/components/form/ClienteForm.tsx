@@ -4,7 +4,6 @@ import EmpresaForm from '@/components/form/EmpresaForm';
 import { ClienteInput, clienteSchema } from '@/schemas/cliente.schema';
 import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { TipoServicoEnum } from '@/schemas/tipoServicoEnum.schema';
-import { convertDateToPostgres } from '@/utils/date/convertDateToPostgres';
 import { getError } from '@/utils/getError';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
@@ -43,16 +42,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     if (onSubmit) onSubmit(data);
 
     const payload: ClienteInput = { ...data } as ClienteInput;
-    if (payload.empresa) {
-      const e: any = { ...payload.empresa };
-      if (e.dataAbertura) {
-        e.dataAbertura = convertDateToPostgres(e.dataAbertura as string);
-        e.representantes[0].dataNascimento = convertDateToPostgres(
-          e.representantes[0].dataNascimento as string
-        );
-        payload.empresa = e;
-      }
-    }
+
     setLoading(true);
 
     try {

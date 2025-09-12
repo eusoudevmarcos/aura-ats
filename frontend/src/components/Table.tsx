@@ -81,10 +81,10 @@ function ButtonCopy({ valorCompleto }: any) {
   return (
     <PrimaryButton
       title={copiado ? 'Copiado!' : 'Copiar'}
-      className="!p-1 !min-w-0 flex-shrink-0"
+      className="!p-2 !min-w-0 flex-shrink-0 !rounded-sm hover:scale-[1.1]"
       onClick={handleCopy}
     >
-      <span className="material-icons text-sm">
+      <span className="material-icons !text-sm">
         {copiado ? 'done' : 'content_copy'}
       </span>
     </PrimaryButton>
