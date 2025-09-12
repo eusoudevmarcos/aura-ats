@@ -129,7 +129,7 @@ const ClientePage: React.FC<{
             <div>
               <span className="font-medium">Status:</span>
 
-              <span className="ml-2 bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+              <span className="ml-2 bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
                 {cliente.status}
               </span>
             </div>
@@ -138,7 +138,7 @@ const ClientePage: React.FC<{
               {cliente.tipoServico.map((tipo, idx) => (
                 <span
                   key={idx}
-                  className="ml-2 bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary"
+                  className="ml-2 bg-[#ede9fe] text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary"
                 >
                   {tipo.replace(/_/g, ' ')}
                 </span>
@@ -150,44 +150,64 @@ const ClientePage: React.FC<{
             <Card title="Dados da Empresa">
               <div>
                 <span className="font-medium">Razão Social:</span>
-                {cliente.empresa.razaoSocial}
+                <span className="text-secondary ml-2">
+                  {cliente.empresa.razaoSocial}
+                </span>
               </div>
               <div>
                 <span className="font-medium">Nome Fantasia:</span>
-                {cliente.empresa.nomeFantasia}
+                <span className="text-secondary ml-2">
+                  {cliente.empresa.nomeFantasia}
+                </span>
               </div>
               <div>
                 <span className="font-medium">CNPJ:</span>
-                {cliente.empresa.cnpj}
+                <span className="text-secondary ml-2">
+                  {cliente.empresa.cnpj}
+                </span>
               </div>
               {cliente.empresa.dataAbertura && (
                 <div>
                   <span className="font-medium">Data de Abertura:</span>
-                  {cliente.empresa.dataAbertura.toString()}
+                  <span className="text-secondary ml-2">
+                    {cliente.empresa.dataAbertura.toString()}
+                  </span>
                 </div>
               )}
             </Card>
           )}
 
-          {cliente.empresa.representantes && (
-            <Card title="Dados do representante">
-              <div>
-                <span className="font-medium">Representantes</span>
-                {cliente.empresa.razaoSocial}
-              </div>
-              <div>
-                {cliente.empresa.representantes.map(representante => {
-                  return (
-                    <div key={representante.nome}>
-                      <p>{representante.cpf}</p>
-                      <p>{representante.dataNascimento.toString()}</p>
-                      <p>{representante.nome}</p>
-                    </div>
-                  );
-                })}
-              </div>
-            </Card>
-          )}
+          {cliente.empresa.representantes &&
+            cliente.empresa.representantes.length > 0 && (
+              <Card title="Dados do representante">
+                <div>
+                  {cliente.empresa.representantes.map(representante => {
+                    return (
+                      <div key={representante.nome}>
+                        <p>
+                          CPF:{' '}
+                          <span className="text-secondary">
+                            {representante.cpf}
+                          </span>
+                        </p>
+                        <p>
+                          Data Nascimento:{' '}
+                          <span className="text-secondary">
+                            {representante.dataNascimento.toString()}
+                          </span>
+                        </p>
+                        <p>
+                          Nome:{' '}
+                          <span className="text-secondary">
+                            {representante.nome}
+                          </span>
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            )}
           {/* Profissional
           {cliente.profissional && cliente.profissional.pessoa && (
             <Card title="Profissional Associado">

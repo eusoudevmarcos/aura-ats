@@ -3,10 +3,10 @@ import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { Pagination } from "../types/pagination";
-import { buildNestedOperation } from "../utils/buildNestedOperation";
+import { BuildNestedOperation } from "../utils/buildNestedOperation";
 
 @injectable()
-export class ClienteService extends buildNestedOperation {
+export class ClienteService extends BuildNestedOperation {
   constructor(
     @inject(EmpresaRepository) private empresaRepository: EmpresaRepository
   ) {
@@ -72,21 +72,25 @@ export class ClienteService extends buildNestedOperation {
   }
 
   async save(clienteData: any): Promise<Cliente> {
-    // Validações básicas antes de processar
     this.validateBasicFields(clienteData);
 
-    // Normalizar dados
     const normalizedData = this.normalizeData(clienteData);
 
-    // Validações de duplicatas se for criação
     if (!clienteData.id) {
       await this.checkDuplicates(normalizedData);
     }
 
-    // Construir dados para salvamento
     const clientePayload = await this.buildClienteData(normalizedData);
-    console.log(clientePayload);
-    // Executar operação de criação ou atualização
+
+    const clienteDataBuild: any = {
+      status: clienteData.status as StatusCliente,
+      tipoServico: clienteData.tipoServico as TipoServico[],
+    };
+
+    if (clienteData.empresa) {
+      clienteDataBuild.empresa = this.buildNestedOperation(clienteData.empresa);
+    }
+
     if (clienteData.id) {
       return await prisma.cliente.update({
         where: { id: clienteData.id },
@@ -201,14 +205,8 @@ export class ClienteService extends buildNestedOperation {
       tipoServico: data.tipoServico as TipoServico[],
     };
 
-    if (data.empresaId) {
-      // Se já tem o ID da empresa explícito, só conecta
-      clienteData.empresa = { connect: { id: data.empresaId } };
-    }
-
     if (data.empresa) {
       // Usa o helper genérico
-      delete data.empresa.representantes;
       clienteData.empresa = this.buildNestedOperation(data.empresa);
 
       // Nested de contatos
@@ -217,13 +215,6 @@ export class ClienteService extends buildNestedOperation {
       //     data.empresa.contatos
       //   );
       // }
-
-      // Nested de representantes
-      if (data.empresa.representantes) {
-        clienteData.empresa.representantes = this.buildNestedOperation(
-          data.empresa.representantes
-        );
-      }
 
       // Nested de localizações
       // if (data.empresa.localizacoes) {

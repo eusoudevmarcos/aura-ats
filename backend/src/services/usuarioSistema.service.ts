@@ -5,10 +5,10 @@ import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
-import { buildNestedOperation } from "../utils/buildNestedOperation";
+import { BuildNestedOperation } from "../utils/buildNestedOperation";
 
 @injectable()
-export class UsuarioSistemaService extends buildNestedOperation {
+export class UsuarioSistemaService extends BuildNestedOperation {
   constructor(
     @inject(PessoaRepository) private pessoaRepository: PessoaRepository,
     @inject(EmpresaRepository) private empresaRepository: EmpresaRepository
@@ -191,41 +191,41 @@ export class UsuarioSistemaService extends buildNestedOperation {
     if (data.pessoa) {
       usuarioData.pessoa = this.buildNestedOperation(data.pessoa);
 
-      if (data.pessoa.contatos) {
-        usuarioData.pessoa.contatos = this.buildNestedOperation(
-          data.pessoa.contatos
-        );
-      }
-      if (data.pessoa.localizacoes) {
-        usuarioData.pessoa.localizacoes = this.buildNestedOperation(
-          data.pessoa.localizacoes
-        );
-      }
+      // if (data.pessoa.contatos) {
+      //   usuarioData.pessoa.contatos = this.buildNestedOperation(
+      //     data.pessoa.contatos
+      //   );
+      // }
+      // if (data.pessoa.localizacoes) {
+      //   usuarioData.pessoa.localizacoes = this.buildNestedOperation(
+      //     data.pessoa.localizacoes
+      //   );
+      // }
     }
 
     if (data.empresa) {
       usuarioData.empresa = this.buildNestedOperation(data.empresa);
 
-      if (data.empresa.contatos) {
-        usuarioData.empresa.contatos = this.buildNestedOperation(
-          data.empresa.contatos
-        );
-      }
-      if (data.empresa.localizacoes) {
-        usuarioData.empresa.localizacoes = this.buildNestedOperation(
-          data.empresa.localizacoes
-        );
-      }
+      // if (data.empresa.contatos) {
+      //   usuarioData.empresa.contatos = this.buildNestedOperation(
+      //     data.empresa.contatos
+      //   );
+      // }
+      // if (data.empresa.localizacoes) {
+      //   usuarioData.empresa.localizacoes = this.buildNestedOperation(
+      //     data.empresa.localizacoes
+      //   );
+      // }
     }
 
     // Funcionário (sempre opcional)
-    if (data.funcionario) {
-      usuarioData.funcionario = this.buildNestedOperation({
-        id: data.funcionario?.id,
-        setor: data.funcionario.setor,
-        cargo: data.funcionario.cargo,
-      });
-    }
+    // if (data.funcionario) {
+    //   usuarioData.funcionario = this.buildNestedOperation({
+    //     id: data.funcionario?.id,
+    //     setor: data.funcionario.setor,
+    //     cargo: data.funcionario.cargo,
+    //   });
+    // }
 
     return usuarioData;
   }
