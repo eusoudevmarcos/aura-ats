@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { empresaSchema } from './empresa.schema';
+import { StatusClienteEnum } from './statusClienteEnum.schema';
 import { TipoServicoEnum } from './tipoServicoEnum.schema';
 
 export const clienteSchema = z.object({
@@ -9,7 +10,7 @@ export const clienteSchema = z.object({
   tipoServico: z.array(TipoServicoEnum).min(1, 'Selecione ao menos um serviço'),
 
   // profissionalId: z.string().uuid().optional(),
-  // status: StatusClienteEnum,
+  status: StatusClienteEnum,
 });
 
 export type ClienteInput = z.infer<typeof clienteSchema>;

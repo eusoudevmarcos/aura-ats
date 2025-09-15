@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { pessoaSchema } from './pessoa.schema';
 
 export const empresaSchema = z.object({
   id: z.string().nullable().optional(),
@@ -20,7 +21,7 @@ export const empresaSchema = z.object({
   ]),
   // contatos: z.array(contatoSchema),
   // localizacoes: z.array(localizacaoSchema),
-  // representantes: z.array(pessoaSchema),
+  representantes: z.array(pessoaSchema),
 });
 
 export type EmpresaInput = z.infer<typeof empresaSchema>;
