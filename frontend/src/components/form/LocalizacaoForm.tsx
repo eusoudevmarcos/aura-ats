@@ -198,8 +198,8 @@ const LocalizacaoFormInner: React.FC<{
 
   return (
     <>
-      <div className="grid grid-cols-1 md:grid-cols-8 gap-x-2">
-        <FormInput
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2">
+        {/* <FormInput
           name={cepFieldName}
           label="CEP"
           placeholder="00000-000"
@@ -209,7 +209,7 @@ const LocalizacaoFormInner: React.FC<{
             disabled: isLoadingCep,
           }}
           onChange={getLocalization}
-        />
+        /> */}
 
         <FormSelect name={ufFieldName} errors={errors} label="UF">
           {' '}
@@ -228,11 +228,10 @@ const LocalizacaoFormInner: React.FC<{
           label="Cidade"
           placeholder="Ex: Taguatinga"
           inputProps={{
-            classNameContainer: 'col-span-2',
             disabled: isLoadingCep,
           }}
         />
-
+        {/* 
         <FormInput
           name={bairroFieldName}
           label="Bairro"
@@ -263,7 +262,7 @@ const LocalizacaoFormInner: React.FC<{
             classNameContainer: 'col-span-2',
             disabled: isLoadingCep,
           }}
-        />
+        /> */}
       </div>
     </>
   );

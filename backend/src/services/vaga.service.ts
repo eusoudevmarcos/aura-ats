@@ -107,11 +107,12 @@ export class VagaService {
 
   async save(vagaData: VagaSaveInput): Promise<Vaga> {
     const normalizedData = normalizeData(vagaData);
-    if (!vagaData.id) {
+    if (!vagaData?.id) {
       await this.checkDuplicates(normalizedData);
     }
 
     const vagaPayload = await buildVagaData(normalizedData);
+    console.log(vagaPayload);
     const relationsShip = {
       localizacao: true,
       beneficios: true,
@@ -120,14 +121,14 @@ export class VagaService {
       cliente: true,
     };
 
-    if (!vagaData.id) {
-      return await prisma.vaga.create({
+    if (vagaData?.id) {
+      return await prisma.vaga.update({
+        where: { id: vagaData.id },
         data: vagaPayload,
         include: relationsShip,
       });
     } else {
-      return await prisma.vaga.update({
-        where: { id: vagaData.id },
+      return await prisma.vaga.create({
         data: vagaPayload,
         include: relationsShip,
       });

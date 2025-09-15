@@ -11,8 +11,8 @@ export const buildVagaData = async (data: any): Promise<any> => {
   };
 
   // Adicionar outros campos simples do rest
+  // Removido "id = undefined" pois pode não existir a variável
   const {
-    id,
     titulo,
     beneficios,
     habilidades,
@@ -25,12 +25,18 @@ export const buildVagaData = async (data: any): Promise<any> => {
     ...rest
   } = data;
 
+  if (rest.id) {
+    delete rest.id;
+  }
+
   Object.assign(vagaData, rest);
 
   const buildNestedOperation = new BuildNestedOperation();
 
   if (data.clienteId) {
-    vagaData.cliente = buildNestedOperation.build(data.cliente.id);
+    vagaData.cliente = buildNestedOperation.build(
+      data.cliente?.id ?? data.clienteId
+    );
   }
 
   if (data.localizacao) {
