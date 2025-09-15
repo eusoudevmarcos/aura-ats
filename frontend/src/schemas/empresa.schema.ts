@@ -12,12 +12,12 @@ export const empresaSchema = z.object({
       'Formato de CNPJ inválido'
     ),
 
-  // dataAbertura: z.union([
-  //   z
-  //     .string()
-  //     .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
-  //   z.date(),
-  // ]),
+  dataAbertura: z.union([
+    z
+      .string()
+      .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
+    z.date(),
+  ]),
   // contatos: z.array(contatoSchema),
   // localizacoes: z.array(localizacaoSchema),
   // representantes: z.array(pessoaSchema),
