@@ -119,12 +119,14 @@ const ClientePage: React.FC<{
             <div>
               <span className="font-medium">Tipo de Serviço:</span>
               {cliente.tipoServico.map((tipo, idx) => (
-                <span
+                <div
                   key={idx}
-                  className="ml-2 bg-[#ede9fe] text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary"
+                  className="ml-1 bg-[#ede9fe] text-xs font-semibold px-3 py-1 rounded-full border border-secondary w-fit"
                 >
-                  {tipo.replace(/_/g, ' ')}
-                </span>
+                  <span className="text-nowrap text-secondary">
+                    {tipo.replace(/_/g, ' ')}
+                  </span>
+                </div>
               ))}
             </div>
           </Card>

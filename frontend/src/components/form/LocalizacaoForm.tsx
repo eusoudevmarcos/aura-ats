@@ -71,16 +71,9 @@ const LocalizacaoFormInner: React.FC<{
   // );
   const getLocalization = useCallback(
     async (event: any) => {
-      const cep = event.target.value;
-      const normalizedCep = cep.replace(/\D/g, '');
-      console.log(cep);
-      console.log('aqui');
-
-      if (!normalizedCep || normalizedCep.length !== 8) return;
-      console.log('aqui');
-      // if (lastProcessedCep.current === normalizedCep) {
-      //   return;
-      // }
+      if (!event) return;
+      if (event.length < 9) return;
+      const normalizedCep = event.replace(/\D/g, '');
 
       setIsLoadingCep(true);
 
@@ -208,7 +201,6 @@ const LocalizacaoFormInner: React.FC<{
       <div className="grid grid-cols-1 md:grid-cols-8 gap-x-2">
         <FormInput
           name={cepFieldName}
-          register={register}
           label="CEP"
           placeholder="00000-000"
           maskProps={{ mask: '00000-000' }}
@@ -219,12 +211,7 @@ const LocalizacaoFormInner: React.FC<{
           onChange={getLocalization}
         />
 
-        <FormSelect
-          name={ufFieldName}
-          register={register}
-          errors={errors}
-          label="UF"
-        >
+        <FormSelect name={ufFieldName} errors={errors} label="UF">
           {' '}
           <>
             <option value="">Selecione</option>
@@ -238,7 +225,6 @@ const LocalizacaoFormInner: React.FC<{
 
         <FormInput
           name={cidadeFieldName}
-          register={register}
           label="Cidade"
           placeholder="Ex: Taguatinga"
           inputProps={{
@@ -249,7 +235,6 @@ const LocalizacaoFormInner: React.FC<{
 
         <FormInput
           name={bairroFieldName}
-          register={register}
           label="Bairro"
           placeholder="Ex: Setor Leste"
           errors={errors}
@@ -260,7 +245,6 @@ const LocalizacaoFormInner: React.FC<{
         />
         <FormInput
           name={complementoFieldName}
-          register={register}
           label="Complemento"
           placeholder="EX: Hospital Santa Lúcia"
           errors={errors}
@@ -272,7 +256,6 @@ const LocalizacaoFormInner: React.FC<{
 
         <FormInput
           name={logradouroFieldName}
-          register={register}
           label="Logradouro"
           placeholder="Ex: 15"
           errors={errors}

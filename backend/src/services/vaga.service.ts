@@ -48,23 +48,15 @@ export class VagaService {
 
   async getAll({ page = 1, pageSize = 10, search = "" }: Pagination) {
     const skip = (page - 1) * pageSize;
-    const fields = [
-      "titulo",
-      "descricao",
-      "localizacao.cidade",
-      "localizacao.uf",
-      "create_at",
-    ];
 
     const where = buildWhere<Prisma.VagaWhereInput>(search, [
       "titulo",
       "descricao",
+      "empresa.cpnj",
       "localizacao.cidade",
       "localizacao.uf",
       "localizacao.cidade",
       "create_at",
-      // "beneficios.nome",
-      // "habilidades.nome",
     ]);
 
     const [vagas, total] = await prisma.$transaction([

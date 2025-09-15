@@ -61,6 +61,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
     register,
     control,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = methods;
 
@@ -101,6 +102,10 @@ const VagaForm: React.FC<VagaFormProps> = ({
     }
   };
 
+  const onSuccessClienteSearch = (cliente: any) => {
+    setValue('clienteId', cliente.id);
+  };
+
   return (
     <FormProvider {...methods}>
       <form
@@ -108,14 +113,14 @@ const VagaForm: React.FC<VagaFormProps> = ({
         className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-1 space-y-2"
       >
         <div className="col-span-full">
-          <ClienteSearch />
+          <ClienteSearch onSuccess={onSuccessClienteSearch} />
         </div>
 
         <FormInput
           name="titulo"
           register={register}
           label="Título da Vaga"
-          placeholder="Medico residente"
+          placeholder="Ex: Medico residente"
           errors={errors}
           inputProps={{ classNameContainer: 'col-span-full' }}
         />

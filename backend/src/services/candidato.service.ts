@@ -1,6 +1,8 @@
 // src/services/candidato.service.ts
-import { AreaCandidato, Candidato, Especialidade } from "@prisma/client";
+import { Candidato, Especialidade } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
+import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
+import { validateBasicFieldsCandidato } from "../helper/validate/candidato.validate";
 import prisma from "../lib/prisma";
 import { CandidatoRepository } from "../repository/candidato.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
@@ -60,37 +62,15 @@ export class CandidatoService {
   }
 
   async save(candidatoData: any): Promise<Candidato> {
-    if (!candidatoData.pessoa || !candidatoData.pessoa.cpf) {
-      throw new Error(
-        "Dados da pessoa e CPF são obrigatórios para um candidato."
-      );
-    }
-
-    const cpfLimpo = candidatoData.pessoa.cpf.replace(/\D/g, "");
-    const existingPessoaByCpf = await this.pessoaRepository.findByCpf(cpfLimpo);
-
-    if (existingPessoaByCpf) {
-      throw new Error("Candidato já existe");
-    }
-
-    if (!candidatoData.areaCandidato) {
-      throw new Error("A área do candidato é obrigatória.");
-    }
-
-    if (!Object.values(AreaCandidato).includes(candidatoData.areaCandidato)) {
-      throw new Error(
-        `Área do candidato inválida: ${candidatoData.areaCandidato}`
-      );
-    }
-
-    if (
-      !!candidatoData.especialidadeId &&
-      candidatoData.especialidadeId !== ""
-    ) {
-      candidatoData.especialidadeId = Number(candidatoData.especialidadeId);
-    }
-
     candidatoData.pessoa.cpf = candidatoData.pessoa.cpf.replace(/\D/g, "");
+    validateBasicFieldsCandidato(candidatoData);
+
+    const buildNestedOperation = new BuildNestedOperation();
+    const { id, ...rest } = candidatoData;
+    let data = {};
+    if (rest) {
+      data = buildNestedOperation.build(rest);
+    }
 
     const includeRelations = {
       pessoa: {
@@ -103,16 +83,16 @@ export class CandidatoService {
       formacoes: true,
     };
 
-    if (candidatoData.id) {
+    if (id) {
       const { id, ...updateData } = candidatoData as CandidatoUpdateInput;
       return await prisma.candidato.update({
         where: { id: id },
-        data: updateData as any,
+        data: data as any,
         include: includeRelations,
       });
     } else {
       return await prisma.candidato.create({
-        data: candidatoData as any,
+        data: data as any,
         include: includeRelations,
       });
     }

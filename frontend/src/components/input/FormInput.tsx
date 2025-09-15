@@ -15,6 +15,7 @@ export function FormInput<T extends FieldValues>({
   type = 'text',
   value,
   onChange,
+  onKeyDown,
   control: externalControl,
   register: externalRegister,
   errors: externalErrors,
@@ -23,106 +24,93 @@ export function FormInput<T extends FieldValues>({
   const formContext = useFormContext<T>();
   const control = externalControl || formContext?.control;
   const errors = externalErrors || formContext?.formState?.errors;
-
   const errorMessage = getError(errors, name);
   const id = inputProps?.id || name.toString();
 
-  const setValue = formContext?.setValue; // ✅ pegar setValue
-  const watch = formContext?.watch; // ✅ pegar watch
-
+  const setValue = formContext?.setValue;
+  const watch = formContext?.watch;
   const watchValue = watch ? watch(name) : value;
 
-  // Separar props do input das props do container
   const { classNameContainer, ...otherInputProps } = inputProps || {};
-
-  // Classes do input
   const inputClassName = buildInputClasses(
     errorMessage ?? null,
     otherInputProps?.className
   );
 
-  // Se usa react-hook-form
-  if (control) {
+  const renderInput = (field?: {
+    value: any;
+    onChange: (val: any) => void;
+    onBlur: () => void;
+    ref: any;
+  }) => {
+    const handleChange = (newValue: any) => {
+      // Atualiza react-hook-form (se existir)
+      field?.onChange?.(newValue);
+
+      // Chama o onChange customizado
+      if (onChange) {
+        if (maskProps?.mask) {
+          onChange(newValue);
+        } else {
+          const syntheticEvent = {
+            target: { value: newValue, name: name.toString() },
+            currentTarget: { value: newValue, name: name.toString() },
+          } as React.ChangeEvent<HTMLInputElement>;
+          onChange(syntheticEvent);
+        }
+      }
+    };
+
     return (
-      <Container id={id} label={label} className={classNameContainer}>
-        <div className="relative">
-          <Controller
-            name={name}
-            control={control}
-            render={({
-              field: {
-                onChange: fieldOnChange,
-                onBlur,
-                value: fieldValue,
-                ref,
-              },
-            }) => (
-              <InputElement
-                ref={ref}
-                id={id}
-                type={type}
-                className={inputClassName}
-                placeholder={placeholder}
-                value={fieldValue || ''}
-                onChange={(newValue: any) => fieldOnChange(newValue)}
-                onBlur={onBlur}
-                maskProps={maskProps}
-                {...otherInputProps}
-              />
-            )}
-          />
-
-          {clear && (
-            <ClearButton
-              value={watchValue}
-              onClear={() => {
-                if (setValue) {
-                  setValue(name, '' as any, {
-                    shouldDirty: true,
-                    shouldValidate: true,
-                  });
-                }
-              }}
-            />
-          )}
-        </div>
-
-        <ErrorMessage message={errorMessage ?? null} />
-      </Container>
+      <InputElement
+        ref={field?.ref}
+        id={id}
+        type={type}
+        className={inputClassName}
+        placeholder={placeholder}
+        value={field ? field.value || '' : value || ''}
+        onChange={handleChange}
+        onBlur={field?.onBlur}
+        onKeyDown={onKeyDown}
+        maskProps={maskProps}
+        {...otherInputProps}
+      />
     );
-  }
+  };
 
-  // Fallback para uso sem react-hook-form
   return (
     <Container id={id} label={label} className={classNameContainer}>
       <div className="relative">
-        <InputElement
-          id={id}
-          type={type}
-          className={inputClassName}
-          placeholder={placeholder}
-          value={value || ''}
-          onChange={(newValue: any) => {
-            if (onChange) {
-              const syntheticEvent = {
-                target: { value: newValue },
-              } as React.ChangeEvent<HTMLInputElement>;
-              onChange(syntheticEvent);
-            }
-          }}
-          maskProps={maskProps}
-          {...otherInputProps}
-        />
+        {control ? (
+          <Controller
+            name={name}
+            control={control}
+            render={({ field }) => renderInput(field)}
+          />
+        ) : (
+          renderInput()
+        )}
 
         {clear && (
           <ClearButton
-            value={value}
+            value={watchValue ?? value}
             onClear={() => {
+              if (setValue) {
+                setValue(name, '' as any, {
+                  shouldDirty: true,
+                  shouldValidate: true,
+                });
+              }
               if (onChange) {
-                const syntheticEvent = {
-                  target: { value: '' },
-                } as React.ChangeEvent<HTMLInputElement>;
-                onChange(syntheticEvent);
+                if (maskProps?.mask) {
+                  onChange('' as any);
+                } else {
+                  const syntheticEvent = {
+                    target: { value: '', name: name.toString() },
+                    currentTarget: { value: '', name: name.toString() },
+                  } as React.ChangeEvent<HTMLInputElement>;
+                  onChange(syntheticEvent);
+                }
               }
             }}
           />
@@ -134,40 +122,26 @@ export function FormInput<T extends FieldValues>({
   );
 }
 
-// Componente do input (com ou sem máscara)
-interface InputElementProps {
-  id: string;
-  type: string;
-  className: string;
-  placeholder?: string;
-  value: string;
-  onChange: (value: string) => void;
-  onBlur?: () => void;
-  maskProps?: any;
-  ref?: any;
-  [key: string]: any;
-}
-
-const InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
-  ({ maskProps, onChange, ...props }, ref) => {
-    const hasMask = Boolean(maskProps?.mask);
-
-    if (hasMask) {
+// Input com/sem máscara
+const InputElement = React.forwardRef<HTMLInputElement, any>(
+  ({ maskProps, onChange, onKeyDown, ...props }, ref) => {
+    if (maskProps?.mask) {
       return (
         <IMaskInput
           inputRef={ref}
-          onAccept={(value: string) => onChange(value)}
+          onAccept={(val: string) => onChange(val)}
+          onKeyDown={onKeyDown}
           autoComplete="off"
           {...maskProps}
           {...props}
         />
       );
     }
-
     return (
       <input
         ref={ref}
         onChange={e => onChange(e.target.value)}
+        onKeyDown={onKeyDown}
         autoComplete="off"
         {...props}
       />
@@ -175,18 +149,8 @@ const InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
   }
 );
 
-// Botão de limpar
-interface ClearButtonProps {
-  value: any;
-  onClear: () => void;
-}
-
-const ClearButton = ({ value, onClear }: ClearButtonProps) => {
-  const hasValue = value && String(value).trim() !== '';
-
-  if (!hasValue) return null;
-
-  return (
+const ClearButton = ({ value, onClear }: { value: any; onClear: () => void }) =>
+  value && String(value).trim() !== '' ? (
     <button
       type="button"
       onClick={onClear}
@@ -195,24 +159,19 @@ const ClearButton = ({ value, onClear }: ClearButtonProps) => {
     >
       <span className="material-icons-outlined">close</span>
     </button>
-  );
-};
+  ) : null;
 
-// Mensagem de erro
-const ErrorMessage = ({ message }: { message: string | null }) => {
-  if (!message) return null;
+const ErrorMessage = ({ message }: { message: string | null }) =>
+  message ? (
+    <p className="text-red-500 text-xs italic mt-1">{message}</p>
+  ) : null;
 
-  return <p className="text-red-500 text-xs italic mt-1">{message}</p>;
-};
-
-// Função para construir classes do input
 function buildInputClasses(
   errorMessage: string | null,
   customClassName?: string
-): string {
-  const baseClass =
+) {
+  const base =
     'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90';
   const errorClass = errorMessage ? 'border-red-500' : '';
-
-  return [baseClass, errorClass, customClassName].filter(Boolean).join(' ');
+  return [base, errorClass, customClassName].filter(Boolean).join(' ');
 }

@@ -24,6 +24,8 @@ export type CommonProps<T extends FieldValues> = {
   // Corrigir tipagem do value para aceitar qualquer tipo de valor do form
   value?: any;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
+  clear?: boolean;
 };
 
 // Permite: apenas control, apenas register, ou nenhum dos dois. Nunca ambos juntos.
