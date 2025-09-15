@@ -21,34 +21,16 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
     key: 'pessoa.nome',
     render: (value, row) => row.pessoa?.nome || 'N/A',
   },
-  {
-    label: 'Email',
-    key: 'pessoa.contatos[0].email',
-    render: (value, row) => row.pessoa?.contatos?.[0]?.email || 'N/A',
-  },
+
   { label: 'Área Candidato', key: 'areaCandidato' },
-  {
-    label: 'Data de Nascimento',
-    key: 'pessoa.dataNascimento',
-    render: (value, row) => {
-      return row.pessoa?.dataNascimento
-        ? new Date(row.pessoa.dataNascimento).toLocaleDateString('pt-BR')
-        : 'N/A';
-    },
-  },
-  {
-    label: 'CPF',
-    key: 'pessoa.cpf',
-    render: (value, row) => row.pessoa?.cpf || 'N/A',
-  },
-  { label: 'CRM', key: 'crm' },
-  { label: 'COREN', key: 'corem' },
-  { label: 'RQE', key: 'rqe' },
   {
     label: 'Especialidade',
     key: 'especialidade.nome',
     render: (_, row) => row.especialidade?.nome || 'N/A',
   },
+  { label: 'RQE', key: 'rqe' },
+
+  { label: 'UF/Cidade', key: 'uf' },
 ];
 
 const CandidatoList: React.FC = () => {
