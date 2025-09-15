@@ -149,6 +149,8 @@ const InputElement = React.forwardRef<HTMLInputElement, any>(
   }
 );
 
+InputElement.displayName = 'InputElement';
+
 const ClearButton = ({ value, onClear }: { value: any; onClear: () => void }) =>
   value && String(value).trim() !== '' ? (
     <button
