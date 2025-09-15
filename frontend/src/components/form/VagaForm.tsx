@@ -1,9 +1,13 @@
 // src/components/form/VagaForm.tsx
 import api from '@/axios';
-import { useSafeForm } from '@/hook/useSafeForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
-import { FormProvider, UseFormReturn, useWatch } from 'react-hook-form';
+import {
+  FormProvider,
+  useForm,
+  UseFormReturn,
+  useWatch,
+} from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 // import Card from "@/components/Card"; // Comentado no seu código, mantendo
 import { FormInput } from '../input/FormInput';
@@ -43,17 +47,14 @@ const VagaForm: React.FC<VagaFormProps> = ({
   const [beneficiosAllow, setBeneficiosAllow] = useState(false);
   // const [clientes, setClientes] = useState<{ id: string; nome: string }[]>([]);
 
-  const methods = useSafeForm<VagaInput>({
-    mode: 'independent',
-    useFormProps: {
-      resolver: zodResolver(vagaSchema) as any,
-      mode: 'onTouched',
-      defaultValues: {
-        ...initialValues,
-        tipoSalario: 'A COMBINAR',
-        categoria: 'SAUDE',
-        status: 'ATIVA',
-      },
+  const methods = useForm<VagaInput>({
+    resolver: zodResolver(vagaSchema) as any,
+    mode: 'onChange',
+    defaultValues: {
+      ...initialValues,
+      tipoSalario: 'A COMBINAR',
+      categoria: 'SAUDE',
+      status: 'ATIVA',
     },
   });
 

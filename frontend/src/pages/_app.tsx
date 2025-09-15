@@ -6,6 +6,7 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
+import { AuthProvider } from '@/context/AuthContext';
 import ClienteLayout from '@/layout/ClienteLayout';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
@@ -18,12 +19,12 @@ function App({ Component, pageProps }: AppProps) {
   console.log(router.pathname);
   if (router.pathname == '/dashboard/cliente') {
     return (
-      <>
+      <AuthProvider>
         <SpeedInsights />
         <ClienteLayout>
           <Component {...pageProps} />
         </ClienteLayout>
-      </>
+      </AuthProvider>
     );
   }
 
@@ -51,12 +52,12 @@ function App({ Component, pageProps }: AppProps) {
           <Component {...pageProps} />
         </>
       ) : (
-        <>
+        <AuthProvider>
           <SpeedInsights />
           <DashboardLayout>
             {dashboardProps => <Component {...pageProps} {...dashboardProps} />}
           </DashboardLayout>
-        </>
+        </AuthProvider>
       )}
     </>
   );

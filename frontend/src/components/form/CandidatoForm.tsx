@@ -2,11 +2,10 @@ import api from '@/axios';
 import Card from '@/components/Card';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import PessoaForm from '@/components/form/PessoaForm';
-import { useSafeForm } from '@/hook/useSafeForm';
 import { CandidatoInput, candidatoSchema } from '@/schemas/candidato.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
-import { FormProvider, UseFormReturn } from 'react-hook-form';
+import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 
 import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
@@ -30,13 +29,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     { id: number; nome: string }[]
   >([]);
 
-  const methods = useSafeForm<CandidatoInput>({
-    mode: 'independent',
-    useFormProps: {
-      resolver: zodResolver(candidatoSchema),
-      mode: 'onTouched',
-      defaultValues: initialValues,
-    },
+  const methods = useForm<CandidatoInput>({
+    resolver: zodResolver(candidatoSchema),
+    mode: 'onTouched',
+    defaultValues: initialValues,
   });
 
   const {

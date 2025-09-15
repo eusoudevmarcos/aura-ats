@@ -1,8 +1,7 @@
 import api from '@/axios';
-import { useSafeForm } from '@/hook/useSafeForm';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useEffect, useState } from 'react';
-import { FormProvider } from 'react-hook-form';
+import { FormProvider, useForm } from 'react-hook-form';
 
 import Card from '@/components/Card';
 import { FormInput } from '@/components/input/FormInput';
@@ -27,12 +26,9 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
   const [isEtapa, setIsEtapa] = useState<boolean>(false);
   const { data: session } = useSession();
 
-  const methods = useSafeForm<AgendaInput>({
-    mode: 'independent',
-    useFormProps: {
-      resolver: zodResolver(agendaSchema),
-      mode: 'onTouched',
-    },
+  const methods = useForm<AgendaInput>({
+    resolver: zodResolver(agendaSchema),
+    mode: 'onTouched',
   });
 
   const {

@@ -1,5 +1,5 @@
 import api from '@/axios';
-import { useUser } from '@/hook/useUser';
+import { useUser } from '@/context/AuthContext';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
