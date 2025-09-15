@@ -1,4 +1,9 @@
+// middleware.ts
+import { jwtVerify } from 'jose';
 import { NextRequest, NextResponse } from 'next/server';
+
+// Tipos de usuário que devem ir para /dashboard/cliente
+const CLIENTE_TYPES = ['CLIENTE_ATS', 'CLIENTE_ATS_CRM', 'CLIENTE_CRM'];
 
 // A rota "/" deve ser sempre pública (landing page), independente do login
 const ALWAYS_PUBLIC_PATHS = ['/'];
@@ -6,7 +11,15 @@ const ALWAYS_PUBLIC_PATHS = ['/'];
 // Apenas rotas de login podem ser acessadas sem autenticação
 const LOGIN_PATHS = ['/login', '/api/login'];
 
-const DASHBOARD_PATH = '/atividades/agendas';
+// Rotas específicas para cada tipo de usuário
+const CLIENT_DASHBOARD_PATH = '/dashboard/cliente';
+const DEFAULT_DASHBOARD_PATH = '/atividades/agendas';
+
+// Rotas que são exclusivas para clientes
+const CLIENT_ONLY_PATHS = ['/dashboard/cliente'];
+
+// Rotas que clientes NÃO podem acessar
+const NON_CLIENT_PATHS = ['/atividades', '/admin', '/configuracoes/sistema'];
 
 function isAlwaysPublicPath(pathname: string) {
   return ALWAYS_PUBLIC_PATHS.some(publicPath => pathname === publicPath);
@@ -16,7 +29,41 @@ function isLoginPath(pathname: string) {
   return LOGIN_PATHS.some(loginPath => pathname.startsWith(loginPath));
 }
 
-export default function middleware(req: NextRequest) {
+function isClientOnlyPath(pathname: string) {
+  return CLIENT_ONLY_PATHS.some(clientPath => pathname.startsWith(clientPath));
+}
+
+function isNonClientPath(pathname: string) {
+  return NON_CLIENT_PATHS.some(nonClientPath =>
+    pathname.startsWith(nonClientPath)
+  );
+}
+
+function isClientType(userType: string) {
+  return CLIENTE_TYPES.includes(userType);
+}
+
+async function getUserFromToken(token: string) {
+  try {
+    // Substitua 'your-secret-key' pela sua chave secreta
+    const secret = new TextEncoder().encode(
+      process.env.NUXT_PUBLIC_JWT_SECRET || 'your-secret-key'
+    );
+    const { payload } = await jwtVerify(token, secret);
+
+    return {
+      id: payload.id as string,
+      tipo: payload.tipo as string,
+      nome: payload.nome as string,
+      // Adicione outros campos que você tem no JWT
+    };
+  } catch (error) {
+    console.error('Erro ao verificar token:', error);
+    return null;
+  }
+}
+
+export default async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get('token')?.value;
 
@@ -41,21 +88,61 @@ export default function middleware(req: NextRequest) {
     return NextResponse.json({ message: 'Não autenticado.' }, { status: 401 });
   }
 
-  // Se estiver autenticado
-  // Não redireciona se já estiver no dashboard para evitar loop
+  // Tenta obter dados do usuário do token
+  const user = await getUserFromToken(token);
+
+  // Se o token é inválido
+  if (!user) {
+    // Remove o cookie inválido e redireciona para login
+    const response = NextResponse.redirect(
+      new URL('/login?error=invalid_token', req.url)
+    );
+    response.cookies.delete('token');
+    return response;
+  }
+
+  // Se estiver nas rotas de login já autenticado
   if (isLoginPath(pathname)) {
     if (!pathname.startsWith('/api')) {
-      return NextResponse.redirect(new URL(DASHBOARD_PATH, req.url));
+      // Redireciona baseado no tipo de usuário
+      const dashboardPath = isClientType(user.tipo)
+        ? CLIENT_DASHBOARD_PATH
+        : DEFAULT_DASHBOARD_PATH;
+      return NextResponse.redirect(new URL(dashboardPath, req.url));
     }
     return NextResponse.next();
   }
 
-  // Se tentar acessar o dashboard já autenticado, não faz nada (evita loop)
-  if (pathname === DASHBOARD_PATH) {
-    return NextResponse.next();
+  // VALIDAÇÕES BASEADAS NO TIPO DE USUÁRIO
+
+  // Se for cliente (ATS, CRM, ATS_CRM)
+  if (isClientType(user.tipo)) {
+    // Clientes tentando acessar rotas proibidas
+    if (isNonClientPath(pathname)) {
+      return NextResponse.redirect(
+        new URL(`${CLIENT_DASHBOARD_PATH}`, req.url)
+      );
+    }
+
+    // Redireciona clientes para seu dashboard se acessarem o dashboard padrão
+    if (
+      pathname === DEFAULT_DASHBOARD_PATH ||
+      pathname.startsWith('/atividades')
+    ) {
+      return NextResponse.redirect(new URL(CLIENT_DASHBOARD_PATH, req.url));
+    }
+  }
+  // Se NÃO for cliente
+  else {
+    // Usuários não-clientes tentando acessar rotas de cliente
+    if (isClientOnlyPath(pathname)) {
+      return NextResponse.redirect(
+        new URL(`${DEFAULT_DASHBOARD_PATH}?error=client_only`, req.url)
+      );
+    }
   }
 
-  // Usuário autenticado pode acessar qualquer rota (exceto login)
+  // Permite acesso normal para usuários autenticados e autorizados
   return NextResponse.next();
 }
 
