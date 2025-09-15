@@ -125,14 +125,6 @@ export interface VagaWithRelations {
 const columns: TableColumn<VagaWithRelations>[] = [
   { label: 'Título', key: 'titulo' },
   {
-    label: 'Salário',
-    key: 'salario',
-    render: (value, row) =>
-      row.salario
-        ? `R$ ${row.salario.toFixed(2)} (${row.tipoSalario || 'N/A'})`
-        : 'N/A',
-  },
-  {
     label: 'Data Publicação',
     key: 'dataPublicacao',
     render: (value, row) =>
@@ -141,10 +133,10 @@ const columns: TableColumn<VagaWithRelations>[] = [
         : 'N/A',
   },
   { label: 'Status', key: 'status' },
-  { label: 'Área Candidato', key: 'areaCandidato' },
+  { label: 'Categoria', key: 'categoria' },
   {
     label: 'Localização',
-    key: 'localizacao.cidade',
+    key: 'localizacao.uf',
     render: (_, row) =>
       row.localizacao
         ? `${row.localizacao.cidade} - ${row.localizacao.uf}`

@@ -6,14 +6,16 @@ import Card from '../Card';
 import { FormInput } from '../input/FormInput';
 import Modal from '../modal/Modal';
 
-const ClienteSearch = ({ onSuccess }: any) => {
+const ClienteSearch = ({ onSuccess, initialValuesProps = null }: any) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchQueryList, setSearchQueryList] = useState<any[]>([]);
   const [page] = useState<number>(1);
   const [pageSize] = useState<number>(5);
-
+  console.log(initialValuesProps);
   const [searchField, setSearchField] = useState('cnpj');
-  const [initialValues, setInitialValues] = useState<any>(null);
+  const [initialValues, setInitialValues] = useState<any>(
+    initialValuesProps ?? null
+  );
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showAutocomplete, setShowAutocomplete] = useState(false);

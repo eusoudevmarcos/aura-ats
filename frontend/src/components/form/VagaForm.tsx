@@ -87,10 +87,9 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
     try {
       const url = '/api/external/vaga';
-      const endpoint = payload.id ? `${url}/${payload.id}` : url;
-      const method = payload.id ? api.put : api.post;
+      // const endpoint = payload.id ? `${url}` : url;
 
-      const response = await method(endpoint, payload);
+      const response = await api.post(url, payload);
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
         alert('Vaga salva com sucesso!');
@@ -113,7 +112,13 @@ const VagaForm: React.FC<VagaFormProps> = ({
         className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-1 space-y-2"
       >
         <div className="col-span-full">
-          <ClienteSearch onSuccess={onSuccessClienteSearch} />
+          <ClienteSearch
+            onSuccess={onSuccessClienteSearch}
+            initialValuesProps={{
+              empresa: { ...initialValues?.cliente?.empresa },
+              clienteId: initialValues?.clienteId,
+            }}
+          />
         </div>
 
         <FormInput
@@ -220,7 +225,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           textareaProps={{ classNameContainer: 'col-span-full' }}
         />
 
-        <FormTextarea
+        {/* <FormTextarea
           name="requisitos"
           register={register}
           label="Requisitos (Opcional)"
@@ -236,7 +241,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           placeholder="Ex: Atuar como médico em clinicas locais."
           errors={errors}
           textareaProps={{ classNameContainer: 'col-span-full', rows: 2 }}
-        />
+        /> */}
 
         <div className="col-span-full">
           <LocalizacaoForm namePrefix="localizacao" />

@@ -6,7 +6,6 @@ import { Prisma, Vaga } from "@prisma/client";
 import { buildVagaData } from "../helper/buildNested/vaga.build";
 import { buildWhere } from "../helper/buildWhere";
 import { normalizeData } from "../helper/normalize/vaga.normalize";
-import { validateBasicFields } from "../helper/validate/vaga.validate";
 import { Pagination } from "../types/pagination";
 
 @injectable()
@@ -95,7 +94,7 @@ export class VagaService {
         habilidades: { include: { habilidade: true } },
         anexos: true,
         localizacao: true,
-        cliente: true,
+        cliente: { include: { empresa: true } },
       },
     });
 
@@ -107,15 +106,12 @@ export class VagaService {
   }
 
   async save(vagaData: VagaSaveInput): Promise<Vaga> {
-    validateBasicFields(vagaData);
-
     const normalizedData = normalizeData(vagaData);
     if (!vagaData.id) {
       await this.checkDuplicates(normalizedData);
     }
 
     const vagaPayload = await buildVagaData(normalizedData);
-
     const relationsShip = {
       localizacao: true,
       beneficios: true,

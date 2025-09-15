@@ -1,5 +1,6 @@
 // src/schemas/vaga.schema.ts
 import { z } from 'zod';
+import { clienteSchema } from './cliente.schema';
 import { localizacaoSchema } from './localizacao.schema';
 
 export const CategoriaVagaEnum = z.enum(
@@ -70,13 +71,14 @@ export type BeneficioInput = z.infer<typeof beneficioSchema>;
 
 export const vagaSchema = z.object({
   id: z.string().optional(),
+  cliente: clienteSchema.optional(),
   clienteId: z.string('Um cliente é obrigatória'),
   titulo: z.string().min(3, 'O título da vaga é obrigatório.'),
   descricao: z
     .string()
     .min(20, 'A descrição da vaga deve ter no mínimo 20 caracteres.'),
-  requisitos: z.string().optional(),
-  responsabilidades: z.string().optional(),
+  // requisitos: z.string().optional(),
+  // responsabilidades: z.string().optional(),
   categoria: CategoriaVagaEnum.optional(),
   status: StatusVagaEnum.default('ATIVA').optional(),
   tipoContrato: TipoContratoEnum.optional(),

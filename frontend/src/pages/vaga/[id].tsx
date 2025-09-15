@@ -124,7 +124,7 @@ const VagaPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Informações Principais da Vaga */}
           <Card
             classNameContainer="col-span-full"
@@ -200,23 +200,27 @@ const VagaPage: React.FC = () => {
             </section>
           </Card>
 
-          {/* Dados do Cliente */}
-          {vaga.cliente && (
+          {vaga.cliente.empresa && (
             <Card title="Dados do Cliente">
               <div>
-                <span className="font-medium">Titulo:</span>
-                <span className="ml-2">{vaga.cliente.titulo}</span>
+                <span className="font-medium">CNPJ:</span>
+                <span className="ml-2">{vaga.cliente.empresa.cnpj}</span>
               </div>
-              {/* Adicione outros campos do cliente aqui se houver */}
+              <div>
+                <span className="font-medium">Razão Social:</span>
+                <span className="ml-2">{vaga.cliente.empresa.razaoSocial}</span>
+              </div>
+              <div>
+                <span className="font-medium">Nome Fantasia:</span>
+                <span className="ml-2">
+                  {vaga.cliente.empresa.nomeFantasia}
+                </span>
+              </div>
             </Card>
           )}
 
-          {/* Dados da Localização */}
           {vaga.localizacao && (
-            <Card
-              title="Localização da Vaga"
-              classNameContainer="col-span-full"
-            >
+            <Card title="Localização da Vaga">
               <div>
                 <span className="font-medium">Endereço:</span>
                 <span className="ml-2">
