@@ -7,19 +7,6 @@ import Modal from '@/components/modal/Modal'; // Certifique-se que o caminho est
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
-// Importe as novas tipagens de vaga
-// import {
-//   VagaWithAllRelations,
-//   CategoriaVaga,
-//   StatusVaga,
-//   TipoContrato,
-//   NivelExperiencia,
-//   AreaCandidato,
-// } from "@/types/vaga.type"; // Ajuste o caminho para onde você salvou vaga.type.ts
-
-// Importe o formulário de Vaga se existir, caso contrário, use um placeholder.
-// import VagaForm from "@/components/form/VagaForm"; // Descomente e ajuste o caminho se você tiver um VagaForm
-
 const VagaPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query; // 'uuid' será o ID da vaga
@@ -36,7 +23,6 @@ const VagaPage: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        // Altere o endpoint para buscar detalhes da vaga
         const res = await api.get(`/api/external/vaga/${id}`);
         setVaga(res.data);
       } catch (_) {
@@ -54,9 +40,8 @@ const VagaPage: React.FC = () => {
     if (!vaga) return;
     if (confirm('Tem certeza que deseja excluir esta vaga?')) {
       try {
-        // Altere o endpoint para deletar vaga
         await api.delete(`/api/vaga/${vaga.id}`);
-        router.push('/vagas'); // Redireciona para a lista de vagas
+        router.push('/vagas');
       } catch {
         alert('Erro ao excluir vaga.');
       }
@@ -131,70 +116,80 @@ const VagaPage: React.FC = () => {
             classNameContent="gap-2 flex flex-col"
           >
             <h1 className="font-black text-xl">{vaga.titulo}</h1>
-            <div>
+            <div className="flex items-center">
               <span className="font-medium">Descrição:</span>
-              <span className="ml-2">{vaga.descricao}</span>
+              <p className="ml-2 text-secondary inline-block">
+                {vaga.descricao}
+              </p>
             </div>
             {vaga.requisitos && (
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">Requisitos:</span>
-                <span className="ml-2">{vaga.requisitos}</span>
+                <p className="ml-2 text-secondary inline-block">
+                  {vaga.requisitos}
+                </p>
               </div>
             )}
             {vaga.responsabilidades && (
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">Responsabilidades:</span>
-                <span className="ml-2">{vaga.responsabilidades}</span>
+                <p className="ml-2 text-secondary inline-block">
+                  {vaga.responsabilidades}
+                </p>
               </div>
             )}
-            <div>
+            <div className="flex items-center">
               <span className="font-medium">Salário:</span>
-              <span className="ml-2">
+              <p className="ml-2 text-secondary inline-block">
                 {formatCurrency(vaga.salario)}
                 {vaga.tipoSalario && `(${vaga.tipoSalario})`}
-              </span>
+              </p>
             </div>
-            <div>
+            <div className="flex items-center">
               <span className="font-medium">Data Publicação:</span>
-              <span className="ml-2">{formatDate(vaga.dataPublicacao)}</span>
+              <p className="ml-2 text-secondary inline-block">
+                {formatDate(vaga.dataPublicacao)}
+              </p>
             </div>
             {vaga.dataFechamento && (
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">Data Fechamento:</span>
-                <span className="ml-2">{formatDate(vaga.dataFechamento)}</span>
+                <p className="ml-2 text-secondary inline-block">
+                  {formatDate(vaga.dataFechamento)}
+                </p>
               </div>
             )}
             <section className="flex justify-between">
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium mr-2">Categoria:</span>
-                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+                <p className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary inline-block m-0">
                   {vaga.categoria}
-                </span>
+                </p>
               </div>
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium mr-2">Status:</span>
-                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+                <p className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary inline-block m-0">
                   {vaga.status}
-                </span>
+                </p>
               </div>
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium mr-2">Tipo Contrato:</span>
-                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+                <p className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary inline-block m-0">
                   {vaga.tipoContrato}
-                </span>
+                </p>
               </div>
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium mr-2">Nível Experiência:</span>
-                <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+                <p className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary inline-block m-0">
                   {vaga.nivelExperiencia}
-                </span>
+                </p>
               </div>
               {vaga.areaCandidato && (
-                <div>
+                <div className="flex items-center">
                   <span className="font-medium mr-2">Área Candidato:</span>
-                  <span className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+                  <p className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary inline-block m-0">
                     {vaga.areaCandidato}
-                  </span>
+                  </p>
                 </div>
               )}
             </section>
@@ -202,28 +197,32 @@ const VagaPage: React.FC = () => {
 
           {vaga.cliente.empresa && (
             <Card title="Dados do Cliente">
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">CNPJ:</span>
-                <span className="ml-2">{vaga.cliente.empresa.cnpj}</span>
+                <p className="ml-2 text-secondary inline-block">
+                  {vaga.cliente.empresa.cnpj}
+                </p>
               </div>
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">Razão Social:</span>
-                <span className="ml-2">{vaga.cliente.empresa.razaoSocial}</span>
+                <p className="ml-2 text-secondary inline-block">
+                  {vaga.cliente.empresa.razaoSocial}
+                </p>
               </div>
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">Nome Fantasia:</span>
-                <span className="ml-2">
+                <p className="ml-2 text-secondary inline-block">
                   {vaga.cliente.empresa.nomeFantasia}
-                </span>
+                </p>
               </div>
             </Card>
           )}
 
           {vaga.localizacao && (
             <Card title="Localização da Vaga">
-              <div>
+              <div className="flex items-center">
                 <span className="font-medium">Endereço:</span>
-                <span className="ml-2">
+                <p className="ml-2 text-secondary inline-block">
                   {vaga.localizacao.logradouro
                     ? `${vaga.localizacao.logradouro}, `
                     : ''}
@@ -231,24 +230,30 @@ const VagaPage: React.FC = () => {
                     ? `${vaga.localizacao.bairro}, `
                     : ''}
                   {vaga.localizacao.cidade} - {vaga.localizacao.uf}
-                </span>
+                </p>
               </div>
               {vaga.localizacao.cep && (
-                <div>
+                <div className="flex items-center">
                   <span className="font-medium">CEP:</span>
-                  <span className="ml-2">{vaga.localizacao.cep}</span>
+                  <p className="ml-2 text-secondary inline-block">
+                    {vaga.localizacao.cep}
+                  </p>
                 </div>
               )}
               {vaga.localizacao.complemento && (
-                <div>
+                <div className="flex items-center">
                   <span className="font-medium">Complemento:</span>
-                  <span className="ml-2">{vaga.localizacao.complemento}</span>
+                  <p className="ml-2 text-secondary inline-block">
+                    {vaga.localizacao.complemento}
+                  </p>
                 </div>
               )}
               {vaga.localizacao.regiao && (
-                <div>
+                <div className="flex items-center">
                   <span className="font-medium">Região:</span>
-                  <span className="ml-2">{vaga.localizacao.regiao}</span>
+                  <p className="ml-2 text-secondary inline-block">
+                    {vaga.localizacao.regiao}
+                  </p>
                 </div>
               )}
             </Card>
@@ -258,11 +263,13 @@ const VagaPage: React.FC = () => {
           {vaga.beneficios && vaga.beneficios.length > 0 && (
             <Card title="Benefícios Oferecidos">
               {vaga.beneficios.map((beneficio: any) => (
-                <div key={beneficio.id} className="mb-2">
+                <div key={beneficio.id} className="mb-2 flex items-center">
                   <span className="font-medium">
                     {beneficio.nome || 'N/A'}:
                   </span>
-                  <span className="ml-2">{beneficio.descricao || 'N/A'}</span>
+                  <p className="ml-2 text-secondary inline-block">
+                    {beneficio.descricao || 'N/A'}
+                  </p>
                 </div>
               ))}
             </Card>
@@ -272,12 +279,18 @@ const VagaPage: React.FC = () => {
           {vaga.habilidades && vaga.habilidades.length > 0 && (
             <Card title="Habilidades Exigidas">
               {vaga.habilidades.map((vh: any) => (
-                <div key={vh.habilidadeId} className="mb-2">
-                  <span>{vh.nivelExigido || 'Não especificado'}</span>-
-                  <span>{vh.habilidade.nome || 'Não especificado'}</span>-
-                  <span>
+                <div key={vh.habilidadeId} className="mb-2 flex items-center">
+                  <p className="text-secondary inline-block">
+                    {vh.nivelExigido || 'Não especificado'}
+                  </p>
+                  <span className="mx-1">-</span>
+                  <p className="text-secondary inline-block">
+                    {vh.habilidade.nome || 'Não especificado'}
+                  </p>
+                  <span className="mx-1">-</span>
+                  <p className="text-secondary inline-block">
                     {vh.habilidade.tipoHabilidade || 'Não especificado'}
-                  </span>
+                  </p>
                 </div>
               ))}
             </Card>
@@ -287,14 +300,16 @@ const VagaPage: React.FC = () => {
           {vaga.anexos && vaga.anexos.length > 0 && (
             <Card title="Anexos da Vaga">
               {vaga.anexos.map((va: any) => (
-                <div key={va.anexoId} className="mb-2">
+                <div key={va.anexoId} className="mb-2 flex items-center">
                   <a
                     href={va.anexo.url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline"
                   >
-                    {va.anexo.nomeArquivo}
+                    <p className="text-secondary inline-block m-0">
+                      {va.anexo.nomeArquivo}
+                    </p>
                   </a>
                   {va.anexo.tipo && (
                     <span className="text-sm text-gray-500">
