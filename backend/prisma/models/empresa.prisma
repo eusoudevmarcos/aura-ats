@@ -1,7 +1,7 @@
 model Empresa {
   id             String          @id @default(uuid())
   razaoSocial    String
-  cnpj           String          @unique
+  cnpj           String
   dataAbertura   DateTime?
   createdAt      DateTime        @default(now())
   updatedAt      DateTime        @updatedAt
@@ -12,6 +12,8 @@ model Empresa {
   representantes Pessoa[]        @relation("EmpresaRepresentantes")
   socios         Socio[]
   usuarioSistema UsuarioSistema?
+
+  @@unique([cnpj])
 }
 
 model Socio {

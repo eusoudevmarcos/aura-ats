@@ -1,6 +1,6 @@
 model UsuarioSistema {
   id          String       @id @default(uuid())
-  email       String       @unique
+  email       String
   password    String
   tipoUsuario TipoUsuario
   pessoaId    String?      @unique
@@ -8,6 +8,8 @@ model UsuarioSistema {
   funcionario Funcionario?
   empresa     Empresa?     @relation(fields: [empresaId], references: [id])
   pessoa      Pessoa?      @relation(fields: [pessoaId], references: [id])
+
+  @@unique([email])
 }
 
 model Funcionario {

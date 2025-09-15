@@ -1,7 +1,7 @@
 model Pessoa {
   id                    String          @id @default(uuid())
   nome                  String
-  cpf                   String?         @unique
+  cpf                   String?
   dataNascimento        DateTime?
   rg                    String?
   estadoCivil           EstadoCivil?
@@ -14,6 +14,8 @@ model Pessoa {
   empresaRepresentada   Empresa?        @relation("EmpresaRepresentantes", fields: [empresaRepresentadaId], references: [id])
   socios                Socio[]
   usuarioSistema        UsuarioSistema?
+
+  @@unique([cpf])
 }
 
 enum EstadoCivil {
