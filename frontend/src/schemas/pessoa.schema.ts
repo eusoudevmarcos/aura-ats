@@ -1,5 +1,6 @@
 import { isValidCPF } from '@/utils/validateCpf';
 import { z } from 'zod';
+import { localizacaoSchema } from './localizacao.schema';
 
 export const pessoaSchema = z.object({
   id: z.string().nullable().optional(),
@@ -47,7 +48,7 @@ export const pessoaSchema = z.object({
   //   ])
   //   .optional(),
   // contatos: z.array(contatoSchema).optional(),
-  // localizacoes: z.array(localizacaoSchema).optional(),
+  localizacoes: z.array(localizacaoSchema).optional(),
   // formacoes: z.array(formacaoSchema).optional(),
 });
 

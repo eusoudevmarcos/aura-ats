@@ -1,6 +1,7 @@
 import api from '@/axios';
 import Card from '@/components/Card';
 import { ContatoInput } from '@/schemas/contato.schema';
+import { LocalizacaoInput } from '@/schemas/localizacao.schema';
 import { Candidato } from '@/type/candidato.type';
 import { Especialidade } from '@/type/especialidade.type';
 import { Pessoa } from '@/type/pessoa.type';
@@ -11,6 +12,7 @@ import Table, { TableColumn } from '../Table'; // Certifique-se que o caminho es
 export type CandidatoWithRelations = Candidato & {
   pessoa: Pessoa & {
     contatos?: ContatoInput[];
+    localizacoes?: LocalizacaoInput[];
   };
   especialidade?: Especialidade | null;
 };
@@ -30,7 +32,23 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
   },
   { label: 'RQE', key: 'rqe' },
 
-  { label: 'UF/Cidade', key: 'uf' },
+  {
+    label: 'UF/Cidade',
+    key: 'pessoa.localizacoes',
+    render: (_, row) => {
+      if (
+        row.pessoa?.localizacoes?.[0]?.cidade ||
+        row.pessoa?.localizacoes?.[0]?.uf
+      ) {
+        return (
+          row.pessoa?.localizacoes?.[0]?.cidade +
+          '-' +
+          row.pessoa?.localizacoes?.[0]?.uf
+        );
+      }
+      return '-';
+    },
+  },
 ];
 
 const CandidatoList: React.FC = () => {
@@ -77,11 +95,15 @@ const CandidatoList: React.FC = () => {
   const dadosFiltrados = dadosTabela.filter(
     c =>
       c.pessoa?.nome?.toLowerCase().includes(search.toLowerCase()) ||
-      c.pessoa?.contatos?.[0]?.email
+      c.areaCandidato?.toLowerCase().includes(search.toLowerCase()) ||
+      c.pessoa?.cpf?.toLowerCase().includes(search.toLowerCase()) ||
+      c.especialidade?.nome.toLowerCase().includes(search.toLowerCase()) ||
+      c.pessoa?.localizacoes?.[0]?.uf
         ?.toLowerCase()
         .includes(search.toLowerCase()) ||
-      c.areaCandidato?.toLowerCase().includes(search.toLowerCase()) ||
-      c.pessoa?.cpf?.toLowerCase().includes(search.toLowerCase())
+      c.pessoa?.localizacoes?.[0]?.cidade
+        ?.toLowerCase()
+        .includes(search.toLowerCase())
   );
 
   const onRowClick = (row: CandidatoWithRelations) => {
