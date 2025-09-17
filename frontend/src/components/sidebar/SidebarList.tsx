@@ -17,13 +17,11 @@ export const getNavItems = (user: any) => {
     user?.tipo === TipoUsuarioEnum.enum.VENDEDOR ||
     user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
   ) {
-    const navItems = [
-      {
-        icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
-        label: 'Atividades',
-        href: '/atividades/agendas',
-      },
-    ];
+    navItems.push({
+      icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+      label: 'Atividades',
+      href: '/atividades/agendas',
+    });
   }
 
   if (
