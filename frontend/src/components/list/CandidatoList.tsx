@@ -107,7 +107,7 @@ const CandidatoList: React.FC = () => {
   );
 
   const onRowClick = (row: CandidatoWithRelations) => {
-    router.push(`/vaga/${row.id}`);
+    router.push(`/candidato/${row.id}`);
   };
 
   return (
