@@ -10,7 +10,7 @@ import {
 
 // Recebe o usuário como parâmetro para montar o menu dinamicamente
 export const getNavItems = (user: any) => {
-  let navItems = [];
+  const navItems = [];
 
   if (
     user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
