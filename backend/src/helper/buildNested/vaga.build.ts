@@ -34,9 +34,8 @@ export const buildVagaData = async (data: any): Promise<any> => {
   const buildNestedOperation = new BuildNestedOperation();
 
   if (data.clienteId) {
-    vagaData.cliente = buildNestedOperation.build(
-      data.cliente?.id ?? data.clienteId
-    );
+    const cliente = { id: data.clienteId };
+    vagaData.cliente = buildNestedOperation.build(cliente);
   }
 
   if (data.localizacao) {

@@ -112,13 +112,13 @@ export class VagaService {
     }
 
     const vagaPayload = await buildVagaData(normalizedData);
-    console.log(vagaPayload);
+
     const relationsShip = {
       localizacao: true,
       beneficios: true,
       habilidades: true,
       anexos: true,
-      cliente: true,
+      cliente: { include: { empresa: true } },
     };
 
     if (vagaData?.id) {

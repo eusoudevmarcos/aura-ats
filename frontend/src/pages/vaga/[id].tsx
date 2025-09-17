@@ -195,7 +195,7 @@ const VagaPage: React.FC = () => {
             </section>
           </Card>
 
-          {vaga.cliente.empresa && (
+          {vaga?.cliente?.empresa && (
             <Card title="Dados do Cliente">
               <div className="flex items-center">
                 <span className="font-medium">CNPJ:</span>
@@ -330,8 +330,9 @@ const VagaPage: React.FC = () => {
         title="Editar Vaga"
       >
         <VagaForm
-          onSuccess={() => {
+          onSuccess={vaga => {
             setShowModalEdit(false);
+            setVaga(vaga);
           }}
           initialValues={vaga}
         />
