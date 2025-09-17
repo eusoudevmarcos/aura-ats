@@ -2,7 +2,7 @@
 import { z } from 'zod';
 import { pessoaSchema } from './pessoa.schema';
 
-const areaCandidato = ['MEDICINA', 'ENFERMAGEM', 'OUTROS'];
+const areaCandidato = ['MEDICINA', 'ENFERMAGEM', 'OUTRO'];
 
 export const AreaCandidatoEnum = z.enum(areaCandidato, {
   error: 'Area de atuação é obrigatório',
