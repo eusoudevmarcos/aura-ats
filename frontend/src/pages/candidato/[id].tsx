@@ -96,39 +96,14 @@ const CandidatoPage: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-4">
-          {/* Sessão Dados do Candidato */}
-          <Card title="Dados do Candidato">
-            <div>
-              <span className="font-medium">ID:</span> {candidato.id}
-            </div>
-            <div>
-              <span className="font-medium">Área de Atuação:</span>{' '}
-              {candidato.areaCandidato?.replace(/_/g, ' ')}
-            </div>
-            <div>
-              <span className="font-medium">CRM:</span> {candidato.crm || 'N/A'}
-            </div>
-            <div>
-              <span className="font-medium">COREM:</span>{' '}
-              {candidato.corem || 'N/A'}
-            </div>
-            <div>
-              <span className="font-medium">RQE:</span> {candidato.rqe || 'N/A'}
-            </div>
-            <div>
-              <span className="font-medium">Especialidade:</span>{' '}
-              {candidato.especialidade?.nome || 'N/A'}
-            </div>
-          </Card>
+        <h1 className="font-bold text-primary text-xl">
+          {candidato.pessoa.nome}
+        </h1>
 
+        <div className="flex flex-wrap gap-4">
           {/* Sessão Pessoa */}
           {candidato.pessoa && (
             <Card title="Dados Pessoais">
-              <div>
-                <span className="font-medium">Nome:</span>{' '}
-                {candidato.pessoa.nome}
-              </div>
               <div>
                 <span className="font-medium">CPF:</span> {candidato.pessoa.cpf}
               </div>
@@ -146,6 +121,42 @@ const CandidatoPage: React.FC = () => {
               </div>
             </Card>
           )}
+
+          {/* Sessão Dados do Candidato */}
+          <Card title="Dados do Candidato">
+            {/* <div>
+              <span className="font-medium">ID:</span> {candidato.id}
+            </div> */}
+            <div>
+              <span className="font-medium">Área de Atuação:</span>{' '}
+              {candidato.areaCandidato?.replace(/_/g, ' ')}
+            </div>
+
+            {candidato.corem && (
+              <div>
+                <span className="font-medium">CRM:</span>{' '}
+                {candidato.crm || 'N/A'}
+              </div>
+            )}
+
+            {candidato.corem && (
+              <div>
+                <span className="font-medium">COREM:</span>
+                {candidato.corem || 'N/A'}
+              </div>
+            )}
+
+            {candidato.rqe && (
+              <div>
+                <span className="font-medium">RQE:</span>{' '}
+                {candidato.rqe || 'N/A'}
+              </div>
+            )}
+            <div>
+              <span className="font-medium">Especialidade:</span>{' '}
+              {candidato.especialidade?.nome || 'N/A'}
+            </div>
+          </Card>
 
           {/* Sessão Contatos */}
           {candidato.pessoa?.contatos?.length > 0 && (
@@ -323,7 +334,13 @@ const CandidatoPage: React.FC = () => {
         onClose={() => setShowModalEdit(false)}
         title="Editar Candidato"
       >
-        <CandidatoForm onSuccess={() => {}} initialValues={candidato} />
+        <CandidatoForm
+          onSuccess={candidato => {
+            setShowModalEdit(false);
+            setCandidato(candidato);
+          }}
+          initialValues={candidato}
+        />
       </Modal>
     </div>
   );

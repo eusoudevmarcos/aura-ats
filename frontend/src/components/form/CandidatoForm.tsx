@@ -32,7 +32,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const methods = useForm<CandidatoInput>({
     resolver: zodResolver(candidatoSchema),
     mode: 'onChange',
-    defaultValues: initialValues,
+    defaultValues: {
+      ...initialValues,
+      especialidadeId: String(initialValues?.especialidadeId),
+    },
   });
 
   const { handleSubmit, watch } = methods;
@@ -70,12 +73,12 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       const endpoint = payload.id
         ? `/api/external/candidato/${payload.id}`
         : '/api/external/candidato';
-      const method = payload.id ? api.put : api.post;
+      // const method = payload.id ? api.put : api.post;
 
-      const response = await method(endpoint, payload);
+      const response = await api.post('/api/external/candidato', payload);
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
-        alert('Profissional salvo com sucesso!');
+        // alert('Profissional salvo com sucesso!');
       }
     } catch (erro: any) {
       alert(
