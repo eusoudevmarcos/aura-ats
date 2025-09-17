@@ -157,6 +157,7 @@ export class CandidatoRepository {
           pessoa: {
             include: {
               contatos: true, // <<< ISSO PRECISA ESTAR AQUI!
+              localizacoes: true, // <<< ISSO PRECISA ESTAR AQUI!
             },
           },
           especialidade: true,

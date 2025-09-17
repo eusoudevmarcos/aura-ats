@@ -100,7 +100,10 @@ export class CandidatoService {
       CandidatoData.formacoes = buildNestedOperation.build(rest.formacoes);
     }
 
-    console.log(CandidatoData);
+    // if (rest.localizacoes || rest.localizacoes) {
+    //   CandidatoData.localizacao = buildNestedOperation.build(rest.localizacoes);
+    // }
+
     const includeRelations = {
       pessoa: {
         include: {
