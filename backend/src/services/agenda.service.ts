@@ -1,7 +1,7 @@
 import { AgendaVaga } from "@prisma/client";
 import { injectable } from "tsyringe";
+import { normalizeDataAgenda } from "../helper/normalize/agenda.normalize";
 import prisma from "../lib/prisma";
-import { parseDateTime } from "../utils/parseDateTime";
 
 // Tipos para entrada de dados da agenda
 
@@ -27,7 +27,7 @@ export class AgendaService {
   constructor() {}
 
   async create(agendaData: AgendaInput): Promise<AgendaVaga> {
-    const dataHora = parseDateTime(agendaData.dataHora);
+    agendaData = normalizeDataAgenda(agendaData);
 
     return await prisma.agendaVaga.create({
       data: {

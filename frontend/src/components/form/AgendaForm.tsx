@@ -96,6 +96,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
   async function onSubmit(data: AgendaInput) {
     const validationData: any = { ...data };
+    console.log('aqui');
     const result = agendaSchema.safeParse(validationData);
 
     if (!result.success) return;
@@ -120,7 +121,6 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        noValidate
         className="max-w-3xl mx-auto bg-white rounded-lg space-y-6"
       >
         <Card
@@ -131,33 +131,20 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
           <FormInput
             name={'data' as any}
-            register={register}
             label="Data"
-            type="date"
             placeholder="DD-MM-YYYY"
-            errors={errors}
-            inputProps={{ pattern: '^\\d{2}-\\d{2}-\\d{4}$' }}
+            maskProps={{ mask: '00/00/0000' }}
           />
 
           <FormInput
             name={'hora' as any}
-            control={control}
             label="Hora"
             type="text"
             placeholder="HH:mm"
-            errors={errors}
             maskProps={{ mask: '00:00' }}
-            inputProps={{
-              pattern: '^([01]\\d|2[0-3]):[0-5]\\d$',
-            }}
           />
 
-          <FormSelect
-            name="tipoEvento"
-            register={register}
-            label="Tipo de Evento"
-            errors={errors}
-          >
+          <FormSelect name="tipoEvento" label="Tipo de Evento">
             <>
               <option value="TRIAGEM_INICIAL">Triagem Inicial</option>
               <option value="ENTREVISTA_RH">Entrevista RH</option>
@@ -214,37 +201,11 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
             classNameContent="grid grid-cols-1 md:grid-cols-2 gap-4"
             classNameContainer="animate-[slideInDown_0.3s_cubic-bezier(0.4,0,0.2,1)_forwards,fadeIn_0.6s_linear_forwards]"
           >
-            <FormInput
-              name="etapaAtual.nome"
-              register={register}
-              label="Nome da Etapa"
-              errors={errors}
-            />
-            <FormInput
-              name="etapaAtual.tipo"
-              register={register}
-              label="Tipo de Etapa"
-              errors={errors}
-            />
-            <FormInput
-              name="etapaAtual.ordem"
-              register={register}
-              label="Ordem"
-              type="number"
-              errors={errors}
-            />
-            <FormInput
-              name="etapaAtual.descricao"
-              register={register}
-              label="Descrição"
-              errors={errors}
-            />
-            <FormSelect
-              name="etapaAtual.ativa"
-              register={register}
-              label="Ativa?"
-              errors={errors}
-            >
+            <FormInput name="etapaAtual.nome" label="Nome da Etapa" />
+            <FormInput name="etapaAtual.tipo" label="Tipo de Etapa" />
+            <FormInput name="etapaAtual.ordem" label="Ordem" type="number" />
+            <FormInput name="etapaAtual.descricao" label="Descrição" />
+            <FormSelect name="etapaAtual.ativa" label="Ativa?">
               <>
                 <option value="true">Sim</option>
                 <option value="false">Não</option>

@@ -26,28 +26,30 @@ const etapaAtualSchema = z.object({
 });
 
 // Schema principal da Agenda
-export const agendaSchema = z
-  .object({
-    data: z.iso
-      .date('Data invalida')
-      .max(new Date().getDate())
-      .regex(/^\d{2}-\d{2}-\d{4}$/i, 'Data deve ser DD-MM-AAAA'),
-    hora: z
+export const agendaSchema = z.object({
+  vagaId: z.uuid().optional(),
+  data: z.union([
+    z
       .string()
-      .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Hora deve ser HH:mm (24h)'),
-    tipoEvento: tipoEventoEnum,
-    link: z.url('Link inválido').optional(),
-    localizacao: localizacaoSchema.optional(),
-    vagaId: z.uuid().optional(),
-    etapaAtual: etapaAtualSchema.optional(),
-  })
-  .refine(
-    data => data.link || data.localizacao,
-    'Você deve fornecer link ou localização'
-  )
-  .refine(
-    data => !(data.link && data.localizacao),
-    'Você não deve fornecer link e localização ao mesmo tempo'
-  );
+      .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
+    z.date(),
+  ]),
+  hora: z
+    .string()
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Hora deve ser HH:mm (24h)'),
+  tipoEvento: tipoEventoEnum,
+  link: z.url('Link inválido').optional(),
+  localizacao: localizacaoSchema.optional(),
+  etapaAtual: etapaAtualSchema.optional(),
+});
+// .refine(
+//   data => data.link || data.localizacao,
+//   'Você deve fornecer link ou localização'
+// )
+// .refine(
+//   data => !(data.link && data.localizacao),
+//   'Você não deve fornecer link e localização ao mesmo tempo'
+// );
+
 // Tipo TypeScript baseado no schema
 export type AgendaInput = z.infer<typeof agendaSchema>;
