@@ -64,7 +64,7 @@ export class CandidatoService {
 
   async save(candidatoData: any): Promise<Candidato> {
     candidatoData.pessoa.cpf = candidatoData.pessoa.cpf.replace(/\D/g, "");
-    validateBasicFieldsCandidato(candidatoData);
+    if (!candidatoData.id) validateBasicFieldsCandidato(candidatoData);
 
     candidatoData = normalizeCandidatoData(candidatoData);
 

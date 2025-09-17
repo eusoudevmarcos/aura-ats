@@ -1,6 +1,7 @@
 // src/controllers/candidato.controller.ts
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { CandidatoService } from "../services/candidato.service";
 
 @injectable()
@@ -9,7 +10,7 @@ export class CandidatoController {
     @inject(CandidatoService) private candidatoService: CandidatoService
   ) {}
 
-  async createCandidato(req: Request, res: Response): Promise<Response> {
+  async saveCandidato(req: Request, res: Response): Promise<Response> {
     try {
       const candidatoData = req.body;
       const newCandidato = await this.candidatoService.save(candidatoData);
@@ -20,17 +21,17 @@ export class CandidatoController {
     }
   }
 
-  async updateCandidato(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      const candidatoData = { ...req.body, id };
-      const updatedCandidato = await this.candidatoService.save(candidatoData);
-      return res.status(200).json(updatedCandidato);
-    } catch (error: any) {
-      console.error("Erro ao atualizar candidato:", error.message);
-      return res.status(400).json({ message: error.message });
-    }
-  }
+  // async updateCandidato(req: Request, res: Response): Promise<Response> {
+  //   try {
+  //     const { id } = req.params;
+  //     const candidatoData = { ...req.body, id };
+  //     const updatedCandidato = await this.candidatoService.save(candidatoData);
+  //     return res.status(200).json(updatedCandidato);
+  //   } catch (error: any) {
+  //     console.error("Erro ao atualizar candidato:", error.message);
+  //     return res.status(400).json({ message: error.message });
+  //   }
+  // }
 
   async getCandidatoById(req: Request, res: Response): Promise<Response> {
     try {
@@ -39,7 +40,7 @@ export class CandidatoController {
       if (!candidato) {
         return res.status(404).json({ message: "Candidato não encontrado." });
       }
-      return res.status(200).json(candidato);
+      return res.status(200).json(nonEmptyAndConvertDataDTO(candidato));
     } catch (error: any) {
       console.error("Erro ao buscar candidato por ID:", error.message);
       return res.status(500).json({ message: "Erro interno do servidor." });

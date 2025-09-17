@@ -22,9 +22,12 @@ function filtrarValores(
 
   // Se for string parseável como data → converte
   if (typeof obj === "string") {
-    const parsed = new Date(obj);
-    if (!isNaN(parsed.getTime())) {
-      return parsed.toLocaleDateString(locale, dateOptions);
+    const regexDataBR = /^\d{2}\/\d{2}\/\d{4}$/;
+    if (regexDataBR.test(obj)) {
+      const parsed = new Date(obj);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString(locale, dateOptions);
+      }
     }
     return obj; // string comum, mantém
   }
