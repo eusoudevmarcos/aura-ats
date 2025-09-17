@@ -1,11 +1,12 @@
-import { TipoUsuario } from "@prisma/client";
 import bcrypt from "bcryptjs";
 import { BuildNestedOperation } from "./buildNestedOperation";
 
 export const buildUsuarioData = async (data: any): Promise<any> => {
+  console.log("aqui");
   const usuarioData: any = {
     email: data.email,
-    tipoUsuario: data.tipoUsuario as TipoUsuario,
+    tipoUsuario: data.tipoUsuario,
+    password: await bcrypt.hash(data.password, 10),
   };
 
   if (data.password) {
@@ -13,6 +14,7 @@ export const buildUsuarioData = async (data: any): Promise<any> => {
   }
 
   const buildNestedOperation = new BuildNestedOperation();
+
   if (data.pessoa) {
     usuarioData.pessoa = buildNestedOperation.build(data.pessoa);
 
@@ -27,7 +29,6 @@ export const buildUsuarioData = async (data: any): Promise<any> => {
     //   );
     // }
   }
-
   if (data.empresa) {
     usuarioData.empresa = buildNestedOperation.build(data.empresa);
 
@@ -44,13 +45,9 @@ export const buildUsuarioData = async (data: any): Promise<any> => {
   }
 
   // Funcionário (sempre opcional)
-  // if (data.funcionario) {
-  //   usuarioData.funcionario = this.buildNestedOperation({
-  //     id: data.funcionario?.id,
-  //     setor: data.funcionario.setor,
-  //     cargo: data.funcionario.cargo,
-  //   });
-  // }
+  if (data.funcionario) {
+    usuarioData.funcionario = buildNestedOperation.build(data.funcionario);
+  }
 
   return usuarioData;
 };

@@ -90,7 +90,7 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     }
 
     const usuarioData = await buildUsuarioData(normalizedData);
-
+    console.log(usuarioData);
     const relationsShip = {
       pessoa: {
         include: {

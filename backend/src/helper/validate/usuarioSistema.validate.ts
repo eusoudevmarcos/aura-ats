@@ -1,7 +1,7 @@
 export const validateBasicFields = (data: any): void => {
   if (!data.email) throw new Error("E-mail é obrigatório.");
   if (!data.tipoUsuario) throw new Error("Tipo de usuário é obrigatório.");
-  if (!data.password && !data.id)
+  if (!data.password)
     throw new Error("Senha é obrigatória para criação de usuário.");
   if (!data.pessoa && !data.empresa) {
     throw new Error("Dados de Pessoa ou Empresa são obrigatórios.");

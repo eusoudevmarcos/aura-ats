@@ -15,7 +15,8 @@ export const normalizeData = (data: any) => {
       : undefined,
   };
 
-  newData = convertAnyDateToPostgres(newData);
+  newData.pessoa = convertAnyDateToPostgres(newData.pessoa);
+  newData.empresa = convertAnyDateToPostgres(newData.empresa);
 
   return newData;
 };

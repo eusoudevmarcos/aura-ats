@@ -95,7 +95,12 @@ export const FuncionarioForm = ({
       const cleanData = {
         ...data,
       };
-      if (data.tipoPessoaOuEmpresa === 'pessoa') {
+      const tipoPessoaOuEmpresa = data.tipoPessoaOuEmpresa;
+      if ('tipoPessoaOuEmpresa' in cleanData) {
+        delete (cleanData as any).tipoPessoaOuEmpresa;
+      }
+
+      if (tipoPessoaOuEmpresa === 'pessoa') {
         Object.assign(cleanData, {
           pessoa: {
             ...data.pessoa,
