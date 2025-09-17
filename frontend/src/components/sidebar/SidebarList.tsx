@@ -10,13 +10,40 @@ import {
 
 // Recebe o usuário como parâmetro para montar o menu dinamicamente
 export const getNavItems = (user: any) => {
-  const navItems = [
-    {
-      icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
-      label: 'Atividades',
-      href: '/atividades/agendas',
-    },
-  ];
+  let navItems = [];
+
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
+    user?.tipo === TipoUsuarioEnum.enum.VENDEDOR ||
+    user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
+  ) {
+    const navItems = [
+      {
+        icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+        label: 'Atividades',
+        href: '/atividades/agendas',
+      },
+    ];
+  }
+
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM
+  ) {
+    navItems.push(
+      {
+        icon: <UsersIcon className="w-5 h-5 text-inherit" />,
+        label: 'perfil',
+        href: '/perfil',
+      },
+      {
+        icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+        label: 'agenda',
+        href: '/agenda',
+      }
+    );
+  }
 
   if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
     navItems.push({

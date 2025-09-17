@@ -7,7 +7,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import { AuthProvider } from '@/context/AuthContext';
-import ClienteLayout from '@/layout/ClienteLayout';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
 
@@ -21,9 +20,9 @@ function App({ Component, pageProps }: AppProps) {
     return (
       <AuthProvider>
         <SpeedInsights />
-        <ClienteLayout>
+        <DashboardLayout>
           <Component {...pageProps} />
-        </ClienteLayout>
+        </DashboardLayout>
       </AuthProvider>
     );
   }
