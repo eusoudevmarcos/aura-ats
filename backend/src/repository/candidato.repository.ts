@@ -163,7 +163,11 @@ export class CandidatoRepository {
           especialidade: true,
           formacoes: true,
         },
-        orderBy: { id: "asc" },
+        orderBy: {
+          pessoa: {
+            createdAt: "desc",
+          },
+        },
       }),
       tx.candidato.count(),
     ]);
