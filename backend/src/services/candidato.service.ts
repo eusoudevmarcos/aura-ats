@@ -86,7 +86,10 @@ export class CandidatoService {
 
     if (rest.especialidade || rest.especialidadeId) {
       if (rest.especialidadeId) {
-        rest.especialidade.id = rest.especialidadeId;
+        rest.especialidade = {
+          ...(rest.especialidade ?? {}),
+          id: rest.especialidadeId,
+        };
       }
       CandidatoData.especialidade = buildNestedOperation.build(
         rest.especialidade

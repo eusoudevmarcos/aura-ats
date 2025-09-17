@@ -31,7 +31,14 @@ const PessoaForm = ({ namePrefix = 'pessoa' }: PessoaFormProps) => {
         maskProps={{ mask: '00/00/0000' }}
       />
 
-      <FormInput name={rg} label="RG" placeholder="00000-000" />
+      {/* <FormInput name={rg} label="RG" placeholder="00000-000" /> */}
+
+      <FormInput
+        name={rg}
+        maskProps={{ mask: '0000000000' }}
+        label="RG"
+        placeholder="000000000"
+      />
 
       {/* {contatoPessoa && (
         <div className="col-span-full" title={contatoPessoa.title}>

@@ -31,15 +31,14 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
   const methods = useForm<CandidatoInput>({
     resolver: zodResolver(candidatoSchema),
-    mode: 'onTouched',
+    mode: 'onChange',
     defaultValues: initialValues,
   });
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = methods;
+  const { handleSubmit, watch } = methods;
+
+  const areaCandidato = watch('areaCandidato');
+  const especialidadeId = watch('especialidadeId');
 
   const fetchEspecialidades = async () => {
     try {
@@ -60,7 +59,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
 
-    const payload: CandidatoInput = { ...data };
+    const payload = {
+      ...data,
+      especialidadeId: Number(data.especialidadeId),
+    };
 
     setLoading(true);
 
@@ -100,14 +102,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           <FormacaoForm namePrefix="" />
         </Card> */}
 
-        <Card title="Dados Profissionais">
+        <Card title="Dados Cadidato">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormSelect
-              name="areaCandidato"
-              register={register}
-              errors={errors}
-              placeholder="Área de atuação"
-            >
+            <FormSelect name="areaCandidato" placeholder="Área de atuação">
               <>
                 {AreaCandidatoEnum.options.map(area => (
                   <option key={area} value={area}>
@@ -117,24 +114,47 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               </>
             </FormSelect>
 
-            <FormSelect
-              name="especialidadeId"
-              errors={errors}
-              register={register}
-              placeholder="Especialidade"
-            >
+            {areaCandidato !== AreaCandidatoEnum.enum.OUTROS && (
               <>
-                {especialidades.map(esp => (
-                  <option key={esp.id} value={esp.id}>
-                    {esp.nome}
-                  </option>
-                ))}
-              </>
-            </FormSelect>
+                <FormSelect
+                  selectProps={{ disabled: !areaCandidato }}
+                  name="especialidadeId"
+                  placeholder="Especialidade"
+                >
+                  <>
+                    {especialidades.map(esp => (
+                      <option key={esp.id} value={esp.id}>
+                        {esp.nome}
+                      </option>
+                    ))}
+                  </>
+                </FormSelect>
 
-            <FormInput name="crm" placeholder="CRM" register={register} />
-            <FormInput name="corem" placeholder="COREM" register={register} />
-            <FormInput name="rqe" placeholder="RQE" register={register} />
+                {areaCandidato !== AreaCandidatoEnum.enum.MEDICINA && (
+                  <FormInput
+                    name="crm"
+                    placeholder="CRM"
+                    inputProps={{ disabled: !areaCandidato }}
+                  />
+                )}
+
+                {areaCandidato !== AreaCandidatoEnum.enum.ENFERMAGEM && (
+                  <FormInput
+                    name="corem"
+                    placeholder="COREM"
+                    inputProps={{ disabled: !areaCandidato }}
+                  />
+                )}
+
+                {especialidadeId && (
+                  <FormInput
+                    name="rqe"
+                    placeholder="RQE"
+                    inputProps={{ disabled: !areaCandidato }}
+                  />
+                )}
+              </>
+            )}
           </div>
         </Card>
 

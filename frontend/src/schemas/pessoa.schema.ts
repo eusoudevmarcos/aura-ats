@@ -16,7 +16,20 @@ export const pessoaSchema = z.object({
         message: 'CPF inválido',
       }
     ),
-  rg: z.string().optional(),
+  rg: z
+    .string()
+    .optional()
+    .refine(
+      val => {
+        if (val) {
+          const unmaskedCpf = val.replace(/\D/g, '');
+          return unmaskedCpf;
+        }
+      },
+      {
+        message: 'RG inválido',
+      }
+    ),
   dataNascimento: z.union([
     z
       .string()
