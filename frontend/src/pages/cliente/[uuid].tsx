@@ -116,19 +116,21 @@ const ClientePage: React.FC<{
                 {cliente.status}
               </span>
             </div>
-            <div>
-              <span className="font-medium">Tipo de Serviço:</span>
-              {cliente.tipoServico.map((tipo, idx) => (
-                <div
-                  key={idx}
-                  className="ml-1 bg-[#ede9fe] text-xs font-semibold px-3 py-1 rounded-full border border-secondary w-fit"
-                >
-                  <span className="text-nowrap text-secondary">
-                    {tipo.replace(/_/g, ' ')}
-                  </span>
-                </div>
-              ))}
-            </div>
+            {cliente?.tipoServico && (
+              <div>
+                <span className="font-medium">Tipo de Serviço:</span>
+                {cliente.tipoServico.map((tipo, idx) => (
+                  <div
+                    key={idx}
+                    className="ml-1 bg-[#ede9fe] text-xs font-semibold px-3 py-1 rounded-full border border-secondary w-fit"
+                  >
+                    <span className="text-nowrap text-secondary">
+                      {tipo.replace(/_/g, ' ')}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
           </Card>
           {/* Empresa */}
           {cliente.empresa && (
