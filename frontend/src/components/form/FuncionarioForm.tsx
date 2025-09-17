@@ -12,7 +12,6 @@ import {
   funcionarioSchema,
   TipoUsuarioEnum,
 } from '@/schemas/funcionario.schema';
-import { convertDateToPostgres } from '@/utils/date/convertDateToPostgres';
 import { makeName } from '@/utils/makeName';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
@@ -95,32 +94,32 @@ export const FuncionarioForm = ({
       const cleanData = {
         ...data,
       };
-      const tipoPessoaOuEmpresa = data.tipoPessoaOuEmpresa;
+      // const tipoPessoaOuEmpresa = data.tipoPessoaOuEmpresa;
       if ('tipoPessoaOuEmpresa' in cleanData) {
         delete (cleanData as any).tipoPessoaOuEmpresa;
       }
 
-      if (tipoPessoaOuEmpresa === 'pessoa') {
-        Object.assign(cleanData, {
-          pessoa: {
-            ...data.pessoa,
-            dataNascimento: convertDateToPostgres(
-              data.pessoa?.dataNascimento as string
-            ),
-          },
-        });
-        delete (cleanData as any).empresa;
-      } else {
-        Object.assign(cleanData, {
-          empresa: {
-            ...data.empresa,
-            dataAbertura: convertDateToPostgres(
-              data.empresa?.dataAbertura as string
-            ),
-          },
-        });
-        delete (cleanData as any).pessoa;
-      }
+      // if (tipoPessoaOuEmpresa === 'pessoa') {
+      //   Object.assign(cleanData, {
+      //     pessoa: {
+      //       ...data.pessoa,
+      //       dataNascimento: convertDateToPostgres(
+      //         data.pessoa?.dataNascimento as string
+      //       ),
+      //     },
+      //   });
+      //   delete (cleanData as any).empresa;
+      // } else {
+      //   Object.assign(cleanData, {
+      //     empresa: {
+      //       ...data.empresa,
+      //       dataAbertura: convertDateToPostgres(
+      //         data.empresa?.dataAbertura as string
+      //       ),
+      //     },
+      //   });
+      //   delete (cleanData as any).pessoa;
+      // }
       setLoading(true);
 
       const url = `/api/external/funcionario/save`;
