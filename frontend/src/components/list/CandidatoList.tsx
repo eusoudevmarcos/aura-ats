@@ -113,7 +113,7 @@ const CandidatoList: React.FC = () => {
   return (
     <Card classNameContainer="px-6 py-2">
       <div className="flex justify-between flex-wrap p-2 items-center mb-4">
-        <h2 className="text-xl font-bold">Lista de Candidatos</h2>
+        <h2 className="text-xl font-bold">Lista de Profissionais</h2>
 
         <input
           type="text"

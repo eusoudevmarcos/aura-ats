@@ -22,7 +22,7 @@ export default function Profissionais() {
       </PrimaryButton>
 
       <Modal
-        title="Cadastrar Candidato"
+        title="Cadastrar Profissionais"
         isOpen={showClientForm}
         onClose={() => setShowClientForm(false)}
       >
