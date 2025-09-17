@@ -81,7 +81,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
   const submitHandler = async (data: any) => {
     console.log('aqui');
     if (onSubmit) onSubmit(data);
-
+    delete data.cliente;
     const payload: VagaInput = { ...data };
 
     setLoading(true);

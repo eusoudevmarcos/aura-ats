@@ -336,7 +336,6 @@ const VagaPage: React.FC = () => {
           }}
           initialValues={vaga}
         />
-        <p>Formulário de edição da vaga viria aqui.</p>
       </Modal>
     </div>
   );
