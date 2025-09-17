@@ -19,14 +19,14 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
   {
     label: 'Nome',
     key: 'pessoa.nome',
-    render: (value, row) => row.pessoa?.nome || 'N/A',
+    render: (value, row) => row.pessoa?.nome || '-',
   },
 
   { label: 'Área Candidato', key: 'areaCandidato' },
   {
     label: 'Especialidade',
     key: 'especialidade.nome',
-    render: (_, row) => row.especialidade?.nome || 'N/A',
+    render: (_, row) => row.especialidade?.nome || '-',
   },
   { label: 'RQE', key: 'rqe' },
 
@@ -49,7 +49,7 @@ const CandidatoList: React.FC = () => {
     const fetchCandidatos = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/api/external/vaga', {
+        const response = await api.get('/api/external/candidato', {
           params: {
             page,
             pageSize,

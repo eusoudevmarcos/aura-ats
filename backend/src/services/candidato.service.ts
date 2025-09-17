@@ -1,7 +1,8 @@
 // src/services/candidato.service.ts
-import { Candidato, Especialidade } from "@prisma/client";
+import { AreaCandidato, Candidato, Especialidade } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
+import { normalizeCandidatoData } from "../helper/normalize/candidato.normalize";
 import { validateBasicFieldsCandidato } from "../helper/validate/candidato.validate";
 import prisma from "../lib/prisma";
 import { CandidatoRepository } from "../repository/candidato.repository";
@@ -65,13 +66,38 @@ export class CandidatoService {
     candidatoData.pessoa.cpf = candidatoData.pessoa.cpf.replace(/\D/g, "");
     validateBasicFieldsCandidato(candidatoData);
 
+    candidatoData = normalizeCandidatoData(candidatoData);
+
     const buildNestedOperation = new BuildNestedOperation();
-    const { id, ...rest } = candidatoData;
-    let data = {};
-    if (rest) {
-      data = buildNestedOperation.build(rest);
+
+    let CandidatoData = {
+      id: candidatoData?.id,
+      rqe: candidatoData.rqe,
+      crm: candidatoData.crm,
+      corem: candidatoData.coren,
+      areaCandidato: candidatoData.areaCandidato as AreaCandidato,
+    } as any;
+
+    const { id, rqe, areaCandidato, crm, corem, ...rest } = candidatoData;
+
+    if (rest.pessoa) {
+      CandidatoData.pessoa = buildNestedOperation.build(rest.pessoa);
     }
 
+    if (rest.especialidade || rest.especialidadeId) {
+      if (rest.especialidadeId) {
+        rest.especialidade.id = rest.especialidadeId;
+      }
+      CandidatoData.especialidade = buildNestedOperation.build(
+        rest.especialidade
+      );
+    }
+
+    if (rest.formacoes || rest.formacoes) {
+      CandidatoData.formacoes = buildNestedOperation.build(rest.formacoes);
+    }
+
+    console.log(CandidatoData);
     const includeRelations = {
       pessoa: {
         include: {
@@ -83,16 +109,18 @@ export class CandidatoService {
       formacoes: true,
     };
 
-    if (id) {
-      const { id, ...updateData } = candidatoData as CandidatoUpdateInput;
+    console.log(CandidatoData);
+
+    if (CandidatoData.id) {
+      const { id, ...updateData } = CandidatoData as CandidatoUpdateInput;
       return await prisma.candidato.update({
         where: { id: id },
-        data: data as any,
+        data: updateData as any,
         include: includeRelations,
       });
     } else {
       return await prisma.candidato.create({
-        data: data as any,
+        data: CandidatoData as any,
         include: includeRelations,
       });
     }

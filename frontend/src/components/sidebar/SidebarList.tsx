@@ -13,7 +13,7 @@ export const getNavItems = (user: any) => {
   const navItems = [
     {
       icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
-      label: 'Atividade',
+      label: 'Atividades',
       href: '/atividades/agendas',
     },
   ];
@@ -43,6 +43,16 @@ export const getNavItems = (user: any) => {
   ) {
     navItems.push(
       {
+        icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+        label: 'Agenda',
+        href: '/agenda',
+      },
+      {
+        icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
+        label: 'Clientes',
+        href: '/clientes',
+      },
+      {
         icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
         label: 'Vagas',
         href: '/vagas',
@@ -52,10 +62,11 @@ export const getNavItems = (user: any) => {
         label: 'Profissionais',
         href: '/profissionais',
       },
+
       {
-        icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-        label: 'Clientes',
-        href: '/clientes',
+        icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+        label: 'Taferas',
+        href: '/tarefas',
       },
       {
         icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,

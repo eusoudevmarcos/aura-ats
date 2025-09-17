@@ -65,7 +65,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     setLoading(true);
 
     try {
-      const endpoint = payload.id ? `/candidato/${payload.id}` : '/candidato';
+      const endpoint = payload.id
+        ? `/api/external/candidato/${payload.id}`
+        : '/api/external/candidato';
       const method = payload.id ? api.put : api.post;
 
       const response = await method(endpoint, payload);

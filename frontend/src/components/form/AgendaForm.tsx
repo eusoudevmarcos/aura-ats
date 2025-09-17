@@ -10,9 +10,7 @@ import { FormSelect } from '@/components/input/FormSelect';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import { AgendaInput, agendaSchema } from '@/schemas/agenda.schema';
-import { CreateEventRequestBody } from '@/type/calendar.type';
-import { useSession } from 'next-auth/react';
-import { ConnectGoogleButton } from '../button/GoogleAuth';
+// import { ConnectGoogleButton } from '../button/GoogleAuth';
 
 type AgendaFormProps = {
   onSuccess: (msg: boolean) => void;
@@ -24,7 +22,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     null
   );
   const [isEtapa, setIsEtapa] = useState<boolean>(false);
-  const { data: session } = useSession();
+  // const { data: session } = useSession();
 
   const methods = useForm<AgendaInput>({
     resolver: zodResolver(agendaSchema),
@@ -63,38 +61,38 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
   // removido sincronização anterior de dataHora
 
-  const CreateEventForm = async (event: React.FormEvent) => {
-    event.preventDefault();
+  // const CreateEventForm = async (event: React.FormEvent) => {
+  //   event.preventDefault();
 
-    if (!session) {
-      alert('Você precisa estar logado para criar um evento.');
-      return;
-    }
+  // if (!session) {
+  //   alert('Você precisa estar logado para criar um evento.');
+  //   return;
+  // }
 
-    const eventData: CreateEventRequestBody = {
-      summary: 'Reunião de Equipe',
-      description: 'Discutir o progresso do projeto.',
-      start: '2025-08-27T10:00:00',
-      end: '2025-08-27T11:00:00',
-    };
+  //   const eventData: CreateEventRequestBody = {
+  //     summary: 'Reunião de Equipe',
+  //     description: 'Discutir o progresso do projeto.',
+  //     start: '2025-08-27T10:00:00',
+  //     end: '2025-08-27T11:00:00',
+  //   };
 
-    const response = await fetch('/api/create-event', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(eventData),
-    });
+  //   const response = await fetch('/api/create-event', {
+  //     method: 'POST',
+  //     headers: {
+  //       'Content-Type': 'application/json',
+  //     },
+  //     body: JSON.stringify(eventData),
+  //   });
 
-    const result = await response.json();
+  //   const result = await response.json();
 
-    if (response.ok) {
-      alert(result.message);
-      console.log('Evento criado:', result.event);
-    } else {
-      alert(`Erro: ${result.message}`);
-    }
-  };
+  //   if (response.ok) {
+  //     alert(result.message);
+  //     console.log('Evento criado:', result.event);
+  //   } else {
+  //     alert(`Erro: ${result.message}`);
+  //   }
+  // };
 
   async function onSubmit(data: AgendaInput) {
     const validationData: any = { ...data };
@@ -262,15 +260,15 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda'}
         </button>
 
-        <ConnectGoogleButton />
-
+        {/* <ConnectGoogleButton /> */}
+        {/* 
         <button
           onClick={CreateEventForm}
           type="button"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
         >
           {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda  no google'}
-        </button>
+        </button> */}
       </form>
     </FormProvider>
   );
