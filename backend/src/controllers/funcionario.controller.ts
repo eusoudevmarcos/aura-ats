@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import { toUsuarioDTO } from "../dto/funcionario.dto";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { UsuarioSistemaService } from "../services/usuarioSistema.service";
 
@@ -29,8 +30,7 @@ export class FuncionarioController {
   async getById(req: Request, res: Response) {
     try {
       const funcionario = await this.service.getById(req.params.uid as string);
-      console.log(funcionario);
-      return res.status(200).json(nonEmptyAndConvertDataDTO(funcionario));
+      return res.status(200).json(toUsuarioDTO(funcionario));
     } catch (error: any) {
       return res.status(400).json({
         error: "Erro ao buscar funcionários",

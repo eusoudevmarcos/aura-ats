@@ -33,7 +33,7 @@ export const getNavItems = (user: any) => {
       {
         icon: <UsersIcon className="w-5 h-5 text-inherit" />,
         label: 'perfil',
-        href: '/perfil',
+        href: '/profile',
       },
       {
         icon: <CalendarIcon className="w-5 h-5 text-inherit" />,

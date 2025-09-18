@@ -160,8 +160,6 @@ const Toolbar = ({ collapsed, user }: any) => {
 
 const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   const [collapsed, setCollapsed] = useState(true);
-  const [isShowLabel, setIsShowLabel] = useState(false);
-  const [showToolbarUser, setShowToolbarUser] = useState(false);
   const router = useRouter();
   const user = useUser();
   // Sempre colapsa o menu ao trocar de rota
@@ -202,8 +200,6 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                       ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
                       : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                   } ${collapsed ? 'justify-center px-3' : ''}`}
-                  onMouseEnter={() => setIsShowLabel(true)}
-                  onMouseLeave={() => setIsShowLabel(false)}
                 >
                   <p>{item.icon}</p>
                   <span
@@ -248,8 +244,6 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                         ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
                         : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                     } ${collapsed ? 'justify-center px-0' : ''}`}
-                    onMouseEnter={() => setIsShowLabel(true)}
-                    onMouseLeave={() => setIsShowLabel(false)}
                   >
                     {item.icon}
                     <span
