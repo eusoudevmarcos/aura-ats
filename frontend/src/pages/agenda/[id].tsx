@@ -3,12 +3,14 @@ import api from '@/axios';
 import Card from '@/components/Card';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
+import { useCliente } from '@/context/AuthContext';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
 const AgendaPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
+  const isCliente = useCliente();
 
   const [agenda, setAgenda] = useState<any | null>(null);
   const [loading, setLoading] = useState(true);
@@ -79,28 +81,27 @@ const AgendaPage: React.FC = () => {
           <h1 className="text-2xl font-bold text-center text-primary w-full">
             Detalhes da Agenda
           </h1>
-          <div className="flex gap-2">
-            <button
-              className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
-              onClick={() => setShowModalEdit(true)}
-            >
-              <EditPenIcon />
-            </button>
-            <button
-              className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110"
-              onClick={handleTrash}
-            >
-              <TrashIcon />
-            </button>
-          </div>
+          {isCliente && (
+            <div className="flex gap-2">
+              <button
+                className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
+                onClick={() => setShowModalEdit(true)}
+              >
+                <EditPenIcon />
+              </button>
+              <button
+                className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110"
+                onClick={handleTrash}
+              >
+                <TrashIcon />
+              </button>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-wrap gap-4">
           {/* Sessão Dados da Agenda */}
           <Card title="Dados da Agenda">
-            <div>
-              <span className="font-medium">ID:</span> {agenda.id}
-            </div>
             <div>
               <span className="font-medium">Data e Hora:</span>{' '}
               {agenda.dataHora
@@ -119,9 +120,6 @@ const AgendaPage: React.FC = () => {
           {/* Sessão Localização */}
           {agenda.localizacao && (
             <Card title="Localização">
-              <div>
-                <span className="font-medium">ID:</span> {agenda.localizacao.id}
-              </div>
               {agenda.localizacao.cidade && (
                 <div>
                   <span className="font-medium">Cidade:</span>{' '}
@@ -177,9 +175,6 @@ const AgendaPage: React.FC = () => {
           {agenda.vaga && (
             <Card title="Vaga Associada">
               <div>
-                <span className="font-medium">ID:</span> {agenda.vaga.id}
-              </div>
-              <div>
                 <span className="font-medium">Título:</span>{' '}
                 {agenda.vaga.titulo || 'N/A'}
               </div>
@@ -194,9 +189,6 @@ const AgendaPage: React.FC = () => {
           {/* Sessão Etapa Atual */}
           {agenda.etapaAtual && (
             <Card title="Etapa Atual do Processo Seletivo">
-              <div>
-                <span className="font-medium">ID:</span> {agenda.etapaAtual.id}
-              </div>
               <div>
                 <span className="font-medium">Nome:</span>{' '}
                 {agenda.etapaAtual.nome}

@@ -3,30 +3,26 @@ import { AgendaForm } from '@/components/form/AgendaForm';
 import { PlusIcon } from '@/components/icons';
 import AgendaList from '@/components/list/AgendaList';
 import Modal from '@/components/modal/Modal';
-import { useUser } from '@/hook/useUser';
-import { TipoUsuarioEnum } from '@/schemas/funcionario.schema';
+import { useCliente } from '@/context/AuthContext';
 import { useState } from 'react';
 
 export default function Agenda() {
   const [showAgendaForm, setShowAgendaForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const user = useUser();
-
+  const isCliente = useCliente();
   return (
     <>
       <AgendaList key={refreshKey} />
 
-      {user.tipo !== TipoUsuarioEnum.enum.CLIENTE_ATS &&
-        user.tipo !== TipoUsuarioEnum.enum.CLIENTE_ATS_CRM &&
-        user.tipo !== TipoUsuarioEnum.enum.CLIENTE_CRM && (
-          <PrimaryButton
-            className="float-right mt-4"
-            onClick={() => setShowAgendaForm(true)}
-          >
-            <PlusIcon />
-            Cadastrar Agendamento
-          </PrimaryButton>
-        )}
+      {isCliente && (
+        <PrimaryButton
+          className="float-right mt-4"
+          onClick={() => setShowAgendaForm(true)}
+        >
+          <PlusIcon />
+          Cadastrar Agendamento
+        </PrimaryButton>
+      )}
 
       <Modal
         title="Cadastrar Agendamento"

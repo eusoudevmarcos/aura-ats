@@ -1,4 +1,4 @@
-import { TipoUsuario } from '@/schemas/funcionario.schema';
+import { TipoUsuario, TipoUsuarioEnum } from '@/schemas/funcionario.schema';
 import {
   createContext,
   ReactNode,
@@ -59,6 +59,15 @@ export function useAuth(): AuthContextType {
 export function useUser(): User | null {
   const { user } = useAuth();
   return user;
+}
+
+export function useCliente(): boolean {
+  const { user } = useAuth();
+  return (
+    user?.tipo !== TipoUsuarioEnum.enum.CLIENTE_ATS &&
+    user?.tipo !== TipoUsuarioEnum.enum.CLIENTE_ATS_CRM &&
+    user?.tipo !== TipoUsuarioEnum.enum.CLIENTE_CRM
+  );
 }
 
 export const onLogout = () => {
