@@ -1,5 +1,5 @@
 model Habilidade {
-  id             String                @id @default(uuid())
+  id             String                @id @default(uuid(7))
   nome           String                @unique
   tipoHabilidade String?
   candidatos     CandidatoHabilidade[]
@@ -7,7 +7,7 @@ model Habilidade {
 }
 
 model Contato {
-  id        String   @id @default(uuid())
+  id        String   @id @default(uuid(7))
   telefone  String?
   whatsapp  String?
   email     String?
@@ -18,7 +18,7 @@ model Contato {
 }
 
 model Localizacao {
-  id          String       @id @default(uuid())
+  id          String       @id @default(uuid(7))
   cep         String?
   cidade      String?
   bairro      String?

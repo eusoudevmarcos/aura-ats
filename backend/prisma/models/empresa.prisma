@@ -1,5 +1,5 @@
 model Empresa {
-  id             String          @id @default(uuid())
+  id             String          @id @default(uuid(7))
   razaoSocial    String
   cnpj           String
   dataAbertura   DateTime?
@@ -17,7 +17,7 @@ model Empresa {
 }
 
 model Socio {
-  id        String    @id @default(uuid())
+  id        String    @id @default(uuid(7))
   pessoaId  String
   empresaId String
   tipoSocio TipoSocio

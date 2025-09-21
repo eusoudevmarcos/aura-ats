@@ -1,5 +1,5 @@
 model Pessoa {
-  id                    String          @id @default(uuid())
+  id                    String          @id @default(uuid(7))
   nome                  String
   cpf                   String?
   dataNascimento        DateTime?

@@ -6,7 +6,7 @@ model Especialidade {
 }
 
 model Candidato {
-  id              String                @id @default(uuid())
+  id              String                @id @default(uuid(7))
   crm             String?
   corem           String?
   rqe             String?
@@ -22,7 +22,7 @@ model Candidato {
 }
 
 model Formacao {
-  id                   String     @id @default(uuid())
+  id                   String     @id @default(uuid(7))
   instituicao          String?    @default("A definir")
   curso                String?    @default("A definir")
   dataInicio           DateTime?

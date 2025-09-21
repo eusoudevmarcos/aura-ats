@@ -1,18 +1,22 @@
 model AgendaVaga {
-  id            String                 @id @default(uuid())
-  dataHora      DateTime
-  tipoEvento    TipoEventoAgenda
-  link          String?
-  vagaId        String?
-  localizacaoId String?
+  id         String           @id @default(uuid(7))
+  dataHora   DateTime
+  tipoEvento TipoEventoAgenda
+  link       String?
+
+  // relationship
   etapaAtualId  String?
   etapaAtual    ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
+  localizacaoId String?
   localizacao   Localizacao?           @relation(fields: [localizacaoId], references: [id])
+  vagaId        String?
   vaga          Vaga?                  @relation(fields: [vagaId], references: [id])
+  clienteId     String?
+  cliente       Cliente?               @relation(fields: [clienteId], references: [id])
 }
 
 model ProcessoSeletivoEtapa {
-  id           String            @id @default(uuid())
+  id           String            @id @default(uuid(7))
   nome         String
   tipo         TipoEtapa
   ordem        Int
