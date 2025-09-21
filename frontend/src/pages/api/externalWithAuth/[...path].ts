@@ -1,4 +1,5 @@
 // pages/api/externalWithAuth/[...path].ts (Ajuste AQUI)
+import redis from '@/lib/redis';
 import axios from 'axios';
 import { parse } from 'cookie';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -29,29 +30,50 @@ export default async function handler(
       `${green}${process.env.NEXT_PUBLIC_API_URL}/api${urlToExternalBackend}${reset}`
     );
 
+    if (req.method === 'GET') {
+      // Gera uma chave única de cache (inclui path + query)
+      const cacheKey = `proxy:${req.method}:${path}:${JSON.stringify(
+        req.query
+      )}`;
+
+      // 1. Verifica no cache
+      const cached = await redis.get(cacheKey);
+
+      if (cached) {
+        return res.status(200).json({ data: cached, cached: true });
+      }
+    }
+    const headers = {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    };
+
     let externalResponse;
     switch (req.method) {
       case 'GET':
         externalResponse = await externalBackendApi.get(urlToExternalBackend, {
+          headers,
           params: req.query,
         });
         break;
       case 'POST':
         externalResponse = await externalBackendApi.post(
           urlToExternalBackend,
-          req.body
+          req.body,
+          { headers }
         );
         break;
       case 'PUT':
         externalResponse = await externalBackendApi.put(
           urlToExternalBackend,
-          req.body
+          req.body,
+          { headers }
         );
         break;
       case 'DELETE':
         externalResponse = await externalBackendApi.delete(
           urlToExternalBackend,
-          { data: req.body }
+          { headers, data: req.body }
         );
         break;
       default:
@@ -59,6 +81,8 @@ export default async function handler(
           .status(405)
           .json({ error: 'Método não permitido nesta rota de proxy.' });
     }
+
+    await redis.set(cacheKey, externalResponse.data, { ex: 300 });
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {

@@ -97,7 +97,7 @@ const ClientList: React.FC<{
         }
 
         const response = await api.get<Pagination<Cliente[]>>(
-          '/api/external/cliente',
+          '/api/externalWithAuth/cliente',
           {
             params,
           }
@@ -238,6 +238,7 @@ const ClientList: React.FC<{
           </div>
         </Modal>
       </div>
+
       <Table
         columns={columns}
         data={dadosFiltrados}

@@ -29,7 +29,7 @@ export default function Clientes() {
         <ClienteForm
           onSuccess={() => {
             setShowClientForm(false);
-            setRefreshKey(prev => prev + 1); // força re-render do ClientList
+            setRefreshKey(prev => prev + 1);
           }}
         />
       </Modal>

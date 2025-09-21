@@ -46,7 +46,7 @@ export const getNavItems = (user: any) => {
   if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
     navItems.push({
       icon: <EmployeesIcon className="w-5 h-5 text-inherit" />,
-      label: 'Funcionarios',
+      label: 'Usuarios do sistema',
       href: `/funcionarios`,
     });
   }
@@ -59,6 +59,20 @@ export const getNavItems = (user: any) => {
       icon: <UsersIcon className="w-5 h-5 text-inherit" />,
       label: 'Prospecções',
       href: '/prospeccoes/',
+    });
+  }
+
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM ||
+    user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
+  ) {
+    navItems.push({
+      icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
+      label: 'Vagas',
+      href: '/vagas',
     });
   }
 
@@ -77,11 +91,7 @@ export const getNavItems = (user: any) => {
         label: 'Clientes',
         href: '/clientes',
       },
-      {
-        icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
-        label: 'Vagas',
-        href: '/vagas',
-      },
+
       {
         icon: <UsersIcon className="w-5 h-5 text-inherit" />,
         label: 'Profissionais',

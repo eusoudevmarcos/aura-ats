@@ -2,7 +2,6 @@ import { AgendaForm } from '@/components/form/AgendaForm';
 import AgendaList from '@/components/list/AgendaList';
 import Modal from '@/components/modal/Modal';
 import AtividadeLayout from '@/layout/AtividadesLayout';
-import { SessionProvider } from 'next-auth/react';
 import { useState } from 'react';
 
 export default function Agendas() {
@@ -20,8 +19,8 @@ export default function Agendas() {
 
   return (
     <AtividadeLayout>
-      <SessionProvider>
-        {/* <button
+      {/* <SessionProvider> */}
+      {/* <button
           className="buttonPrimary flex items-center gap-2"
           onClick={() => setIsModalOpen(true)}
         >
@@ -29,16 +28,16 @@ export default function Agendas() {
           Cadastrar Agenda
         </button> */}
 
-        <AgendaList key={refreshKey} />
+      <AgendaList key={refreshKey} />
 
-        <Modal
-          isOpen={isModalOpen}
-          onClose={handleCloseModal}
-          title="Cadastro de Agenda"
-        >
-          <AgendaForm onSuccess={onSuccess} />
-        </Modal>
-      </SessionProvider>
+      <Modal
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        title="Cadastro de Agenda"
+      >
+        <AgendaForm onSuccess={onSuccess} />
+      </Modal>
+      {/* </SessionProvider> */}
     </AtividadeLayout>
   );
 }

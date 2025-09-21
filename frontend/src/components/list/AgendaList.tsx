@@ -61,7 +61,7 @@ const AgendaList: React.FC = () => {
       setLoading(true);
       try {
         const response = await api.get<Pagination<AgendaVaga[]>>(
-          '/api/external/agenda'
+          '/api/externalWithAuth/agenda'
         );
         const data = Array.isArray(response.data?.data)
           ? response.data.data

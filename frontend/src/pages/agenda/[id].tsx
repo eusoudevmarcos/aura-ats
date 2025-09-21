@@ -24,7 +24,7 @@ const AgendaPage: React.FC = () => {
       setLoading(true);
       setErro(null);
       try {
-        const res = await api.get(`/api/external/agenda/${id}`);
+        const res = await api.get(`/api/externalWithAuth/agenda/${id}`);
         setAgenda(res.data);
       } catch (_) {
         setErro('Agenda não encontrada ou erro ao buscar dados.');
@@ -41,7 +41,7 @@ const AgendaPage: React.FC = () => {
     if (!agenda) return;
     if (confirm('Tem certeza que deseja excluir esta agenda?')) {
       try {
-        await api.delete(`/api/external/agenda/${agenda.id}`);
+        await api.delete(`/api/externalWithAuth/agenda/${agenda.id}`);
         router.push('/agendas');
       } catch {
         alert('Erro ao excluir agenda.');

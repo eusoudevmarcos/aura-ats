@@ -7,6 +7,7 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import { AuthProvider } from '@/context/AuthContext';
+import { isAlwaysPublicPath } from '@/middleware';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
 
@@ -45,7 +46,7 @@ function App({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
           </MainLayout>
         </>
-      ) : isPublic ? (
+      ) : isPublic || isAlwaysPublicPath(router.pathname) ? (
         <>
           <SpeedInsights />
           <Component {...pageProps} />

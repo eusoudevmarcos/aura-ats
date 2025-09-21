@@ -24,7 +24,8 @@ import {
   TipoContratoEnum,
   TipoHabilidadeEnum,
   VagaInput,
-  vagaSchema,
+  VagaWithClienteInput,
+  vagaWithClienteSchema,
 } from '@/schemas/vaga.schema';
 import { FormArrayInput } from '../input/FormArrayInput';
 import ClienteSearch from '../search/ClienteSearch';
@@ -34,7 +35,7 @@ type VagaFormProps = {
   formContexto?: UseFormReturn<VagaInput>;
   onSubmit?: (data: VagaInput) => void;
   onSuccess?: (data: any) => void;
-  initialValues?: Partial<VagaInput>;
+  initialValues?: Partial<VagaWithClienteInput>;
 };
 
 const VagaForm: React.FC<VagaFormProps> = ({
@@ -45,10 +46,9 @@ const VagaForm: React.FC<VagaFormProps> = ({
   const [loading, setLoading] = useState(false);
   const [habilidadesAllow, setHabilidadesAllow] = useState(false);
   const [beneficiosAllow, setBeneficiosAllow] = useState(false);
-  // const [clientes, setClientes] = useState<{ id: string; nome: string }[]>([]);
 
-  const methods = useForm<VagaInput>({
-    resolver: zodResolver(vagaSchema) as any,
+  const methods = useForm<VagaWithClienteInput>({
+    resolver: zodResolver(vagaWithClienteSchema),
     mode: 'onChange',
     defaultValues: {
       ...initialValues,
@@ -87,7 +87,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
     setLoading(true);
 
     try {
-      const url = '/api/external/vaga';
+      const url = '/api/externalWithAuth/vaga';
       // const endpoint = payload.id ? `${url}` : url;
 
       const response = await api.post(url, payload);
@@ -119,6 +119,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
               empresa: { ...initialValues?.cliente?.empresa },
               clienteId: initialValues?.clienteId,
             }}
+            showInput={!initialValues?.clienteId}
           />
         </div>
 
@@ -144,14 +145,14 @@ const VagaForm: React.FC<VagaFormProps> = ({
           </>
         </FormSelect>
 
-        {tipoSalario !== 'A COMBINAR' && (
+        {/* {tipoSalario !== 'A COMBINAR' && (
           <FormInput
             name="salario"
             register={register}
             label="Salário"
             inputProps={{ type: 'number', step: '0.01' }}
           />
-        )}
+        )} */}
 
         <FormSelect
           name="categoria"

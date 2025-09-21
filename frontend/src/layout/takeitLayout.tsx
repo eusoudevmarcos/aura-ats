@@ -36,7 +36,7 @@ export default function TakeitLayout({ children, fit }: Props) {
     setResults(null);
 
     try {
-      const response = await api.get('/api/external/take-it/search', {
+      const response = await api.get('/api/externalWithAuth/take-it/search', {
         params: {
           query: input,
           tipo: typeColumns,

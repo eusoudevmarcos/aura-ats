@@ -35,6 +35,7 @@ export const funcionarioSchema = z.object({
   tipoPessoaOuEmpresa: z.enum(['pessoa', 'empresa']),
   pessoa: pessoaSchema.optional(),
   empresa: empresaSchema.optional(),
+  empresaId: z.uuid().optional(),
 });
 
 export type FuncionarioInput = z.infer<typeof funcionarioSchema>;

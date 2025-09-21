@@ -161,7 +161,7 @@ const VagaList: React.FC = () => {
       setIsLoading(true);
       try {
         const response = await api.get<Pagination<VagaWithRelations[]>>(
-          '/api/external/vaga',
+          '/api/externalWithAuth/vaga',
           {
             params: {
               page,

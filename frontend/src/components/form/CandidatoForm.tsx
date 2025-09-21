@@ -47,7 +47,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     try {
       // Suponha que você tenha um endpoint para buscar especialidades
       const response = await api.get<{ id: number; nome: string }[]>(
-        '/api/external/candidato/especialidades'
+        '/api/externalWithAuth/candidato/especialidades'
       );
       setEspecialidades(response.data);
     } catch (error) {
@@ -70,12 +70,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     setLoading(true);
 
     try {
-      const endpoint = payload.id
-        ? `/api/external/candidato/${payload.id}`
-        : '/api/external/candidato';
-      // const method = payload.id ? api.put : api.post;
-
-      const response = await api.post('/api/external/candidato', payload);
+      const response = await api.post(
+        '/api/externalWithAuth/candidato',
+        payload
+      );
       if (response.status >= 200 && response.status < 300) {
         onSuccess?.(response.data);
         // alert('Profissional salvo com sucesso!');

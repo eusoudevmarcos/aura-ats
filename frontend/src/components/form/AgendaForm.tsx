@@ -103,7 +103,9 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
     try {
       const isEdit = !!agendaData;
-      const url = isEdit ? '/api/external/agenda' : '/api/external/agenda';
+      const url = isEdit
+        ? '/api/externalWithAuth/agenda'
+        : '/api/externalWithAuth/agenda';
 
       // monta dataHora string final para backend
       const { data: d, hora: h, ...rest } = result.data as any;

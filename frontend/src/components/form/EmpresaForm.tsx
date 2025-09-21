@@ -11,11 +11,13 @@ type EmpresaFormProps<T extends FieldValues> = {
   formContexto?: UseFormReturn<T>;
   onSubmit?: (data: any) => void;
   include?: { localizacao?: boolean; contatos?: boolean };
+  disabledFields?: boolean;
 };
 
 const EmpresaForm = ({
   namePrefix = 'empresa',
   include,
+  disabledFields = false,
 }: EmpresaFormProps<any>) => {
   const cnpj = makeName<EmpresaInput>(namePrefix, 'cnpj');
   const razaoSocial = makeName<EmpresaInput>(namePrefix, 'razaoSocial');
@@ -29,7 +31,10 @@ const EmpresaForm = ({
         maskProps={{ mask: '00.000.000/0000-00' }}
         label="CNPJ"
         placeholder="00.000.000/0000-00"
-        inputProps={{ classNameContainer: 'col-span-2' }}
+        inputProps={{
+          classNameContainer: 'col-span-2',
+          disabled: disabledFields,
+        }}
       />
 
       <FormInput
@@ -39,6 +44,7 @@ const EmpresaForm = ({
           type: 'text',
           placeholder: '00/00/0000',
           classNameContainer: 'col-span-2',
+          disabled: disabledFields,
         }}
         maskProps={{ mask: '00/00/0000' }}
       />
@@ -47,14 +53,20 @@ const EmpresaForm = ({
         name={razaoSocial}
         label="Razão Social"
         placeholder="Ex: Aura ATS .LTDA"
-        inputProps={{ classNameContainer: 'col-span-2' }}
+        inputProps={{
+          classNameContainer: 'col-span-2',
+          disabled: disabledFields,
+        }}
       />
 
       <FormInput
         name={nomeFantasia}
         label="Nome Fantasia"
         placeholder="Ex: Aura ATS .LTDA"
-        inputProps={{ classNameContainer: 'col-span-2' }}
+        inputProps={{
+          classNameContainer: 'col-span-2',
+          disabled: disabledFields,
+        }}
       />
 
       <div className="col-span-full flex flex-col gap-2">

@@ -1,6 +1,6 @@
 'use client';
 
-import { signIn, useSession } from 'next-auth/react';
+import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { PrimaryButton } from './PrimaryButton';
 
@@ -17,7 +17,7 @@ export function ConnectGoogleButton() {
   }
 
   const handleConnectGoogle = () => {
-    signIn('google', { callbackUrl: window.location.href });
+    // signIn('google', { callbackUrl: window.location.href });
   };
 
   return (

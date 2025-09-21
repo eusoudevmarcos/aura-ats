@@ -1,6 +1,6 @@
 // src/schemas/vaga.schema.ts
 import { z } from 'zod';
-import { clienteSchema } from './cliente.schema';
+import { clienteWithEmpresaSchema } from './cliente.schema';
 
 export const CategoriaVagaEnum = z.enum(
   [
@@ -59,6 +59,7 @@ export const habilidadeSchema = z.object({
   tipoHabilidade: TipoHabilidadeEnum,
   nivelExigido: NivelExigidoEnum,
 });
+
 export type HabilidadeInput = z.infer<typeof habilidadeSchema>;
 
 // SCHEMA PARA UM ÚNICO BENEFÍCIO
@@ -68,35 +69,37 @@ export const beneficioSchema = z.object({
 });
 export type BeneficioInput = z.infer<typeof beneficioSchema>;
 
+// VAGA
 export const vagaSchema = z.object({
   id: z.uuid().optional(),
-  cliente: clienteSchema.nullable().nullish().optional(),
-  clienteId: z.uuid('Um cliente é obrigatória'),
   titulo: z.string().min(3, 'O título da vaga é obrigatório.'),
-  descricao: z
-    .string()
-    .min(20, 'A descrição da vaga deve ter no mínimo 20 caracteres.'),
-  // requisitos: z.string().optional(),
-  // responsabilidades: z.string().optional(),
-  categoria: CategoriaVagaEnum.optional(),
   status: StatusVagaEnum.default('ATIVA').optional(),
-  tipoContrato: TipoContratoEnum.optional(),
   nivelExperiencia: NivelExperienciaEnum.optional(),
-
-  // localizacao: localizacaoSchema,
-
-  // habilidades: z.array(habilidadeSchema),
-  // beneficios: z.array(beneficioSchema),
-
+  tipoContrato: TipoContratoEnum.optional(),
+  categoria: CategoriaVagaEnum.optional(),
   tipoSalario: z.string().optional(),
-  salario: z
-    .string()
-    .trim()
-    .transform(val => val.replace(',', '.'))
-    .pipe(z.coerce.number())
-    .pipe(z.number().positive('O salário deve ser um valor positivo.'))
+  descricao: z.string().min(20, 'minimo 20 caracteres'),
+});
+export type VagaInput = z.infer<typeof vagaSchema>;
+
+// VAGA + Cliente
+export const vagaWithClienteSchema = vagaSchema.extend({
+  cliente: z
+    .lazy(() => clienteWithEmpresaSchema)
     .nullable()
     .optional(),
+  clienteId: z.string(),
 });
+export type VagaWithClienteInput = z.infer<typeof vagaWithClienteSchema>;
 
-export type VagaInput = z.infer<typeof vagaSchema>;
+// VAGA + Cliente + PROFISSIONAIS
+// export const vagaWithClienteAndCandidatosSchema = vagaSchema.extend({
+//   cliente: z
+//     .lazy(() => clienteSchema)
+//     .nullable()
+//     .optional(),
+//   clienteId: z.string(),
+// });
+// export type vagaWithClienteAndCandidatosInput = z.infer<
+//   typeof vagaWithClienteAndCandidatosSchema
+// >;

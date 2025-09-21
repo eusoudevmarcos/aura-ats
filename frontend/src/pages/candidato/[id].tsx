@@ -23,7 +23,7 @@ const CandidatoPage: React.FC = () => {
       setLoading(true);
       setErro(null);
       try {
-        const res = await api.get(`/api/external/candidato/${id}`);
+        const res = await api.get(`/api/externalWithAuth/candidato/${id}`);
         setCandidato(res.data);
       } catch (_) {
         setErro('Candidato não encontrado ou erro ao buscar dados.');

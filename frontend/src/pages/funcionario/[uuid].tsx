@@ -24,7 +24,9 @@ const FuncionarioPage: React.FC = () => {
       setLoading(true);
       setErro(null);
       try {
-        const response = await api.get(`/api/external/funcionario/${uuid}`);
+        const response = await api.get(
+          `/api/externalWithAuth/funcionario/${uuid}`
+        );
         setFuncionario(response.data);
       } catch (_: any) {
         setErro('Funcionário não encontrado ou erro ao buscar dados.');
@@ -79,10 +81,7 @@ const FuncionarioPage: React.FC = () => {
             >
               <EditPenIcon />
             </button>
-            <button
-              className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
-              // onClick={() => handleTrash()}
-            >
+            <button className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer">
               <TrashIcon />
             </button>
           </div>
@@ -156,11 +155,7 @@ const FuncionarioPage: React.FC = () => {
                 <p>
                   <span className="font-medium">Data de Abertura:</span>{' '}
                   <span className="text-secondary">
-                    {funcionario.empresa.dataAbertura
-                      ? new Date(
-                          funcionario.empresa.dataAbertura
-                        ).toLocaleDateString('pt-BR')
-                      : ''}
+                    {funcionario.empresa.dataAbertura}
                   </span>
                 </p>
               )}
@@ -184,7 +179,7 @@ const FuncionarioPage: React.FC = () => {
               setFuncionario(funcionario);
               setShowModalEdit(false);
             }}
-            funcionarioData={funcionario}
+            initialValues={funcionario}
           />
         )}
       </Modal>

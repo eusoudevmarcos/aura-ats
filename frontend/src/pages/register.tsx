@@ -1,20 +1,20 @@
-import { useState } from "react";
-import { useRouter } from "next/router";
-import api from "@/axios";
+import api from '@/axios';
+import { useRouter } from 'next/router';
+import { useState } from 'react';
 
 export default function RegisterPage() {
   const router = useRouter();
   const [form, setForm] = useState({
-    name: "",
-    email: "",
-    password: "",
+    name: '',
+    email: '',
+    password: '',
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+    setForm(prev => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -24,20 +24,20 @@ export default function RegisterPage() {
 
     try {
       const res = await api.post(
-        "/api/external/register",
+        '/api/externalWithAuth/register',
         JSON.stringify(form),
         {
-          headers: { "Content-Type": "application/json" },
+          headers: { 'Content-Type': 'application/json' },
         }
       );
 
       if (res.status !== 200)
-        throw new Error(res.statusText || "Erro ao registrar");
+        throw new Error(res.statusText || 'Erro ao registrar');
 
-      alert("Usuário registrado com sucesso!");
-      router.push("/login"); // redireciona para login se quiser
+      alert('Usuário registrado com sucesso!');
+      router.push('/login'); // redireciona para login se quiser
     } catch (err: any) {
-      setError(err.message || "Erro inesperado");
+      setError(err.message || 'Erro inesperado');
     } finally {
       setLoading(false);
     }
@@ -90,7 +90,7 @@ export default function RegisterPage() {
           className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
           disabled={loading}
         >
-          {loading ? "Registrando..." : "Registrar"}
+          {loading ? 'Registrando...' : 'Registrar'}
         </button>
       </form>
     </div>

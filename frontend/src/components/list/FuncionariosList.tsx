@@ -54,9 +54,7 @@ function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
         nome: f.pessoa?.nome,
         email: f.pessoa?.contatos?.[0]?.email || f.email,
         tipoUsuario: f.tipoUsuario,
-        dataNascimento: f.pessoa?.dataNascimento
-          ? new Date(f.pessoa?.dataNascimento).toLocaleDateString('pt-BR')
-          : '-',
+        dataNascimento: f.pessoa?.dataNascimento ?? '-',
         id: f.id,
       };
     } else if ('empresa' in f) {
@@ -64,9 +62,7 @@ function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
         nome: f.empresa?.razaoSocial,
         email: f.empresa?.contatos?.[0]?.email || f.email,
         tipoUsuario: f.tipoUsuario,
-        dataNascimento: f.empresa?.dataAbertura
-          ? new Date(f.empresa?.dataAbertura).toLocaleDateString('pt-BR')
-          : '-',
+        dataNascimento: f.empresa?.dataAbertura ?? '-',
         id: f.id,
       };
     }
@@ -105,7 +101,7 @@ const FuncionariosList: React.FC = () => {
       setLoading(true);
       try {
         const response = await api.get<Pagination<Funcionario[]>>(
-          '/api/external/funcionario',
+          '/api/externalWithAuth/funcionario',
           {
             params: {
               page,

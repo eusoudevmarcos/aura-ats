@@ -67,7 +67,7 @@ const CandidatoList: React.FC = () => {
     const fetchCandidatos = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/api/external/candidato', {
+        const response = await api.get('/api/externalWithAuth/candidato', {
           params: {
             page,
             pageSize,

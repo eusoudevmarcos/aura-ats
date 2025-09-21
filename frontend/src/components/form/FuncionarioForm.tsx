@@ -7,6 +7,7 @@ import api from '@/axios';
 import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import PessoaForm from '@/components/form/PessoaForm';
+import Tabs from '@/components/utils/Tabs';
 import {
   FuncionarioInput,
   funcionarioSchema,
@@ -16,22 +17,28 @@ import { makeName } from '@/utils/makeName';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
+import ClienteSearch from '../search/ClienteSearch';
 
 type FuncionarioFormProps = {
   onSuccess: (msg: any) => void;
-  funcionarioData?: Partial<FuncionarioInput>;
+  initialValues?: Partial<FuncionarioInput>;
 };
 
 export const FuncionarioForm = ({
   onSuccess,
-  funcionarioData,
+  initialValues,
 }: FuncionarioFormProps) => {
   const [loading, setLoading] = useState(false);
+  const [disabledFieldsEmpresa, setDisabledFieldsEmpresa] = useState(false);
+  const [currentTab, setCurrentTab] = useState<
+    'Selecionar Cliente' | 'Cadastrar Cliente'
+  >('Selecionar Cliente');
+
   const defaultValues = useMemo(() => {
-    if (funcionarioData) {
+    if (initialValues) {
       return {
-        ...funcionarioData,
-        tipoPessoaOuEmpresa: funcionarioData?.pessoa ? 'pessoa' : 'empresa',
+        ...initialValues,
+        tipoPessoaOuEmpresa: initialValues?.pessoa ? 'pessoa' : 'empresa',
       } as FuncionarioInput;
     }
     return {
@@ -41,7 +48,7 @@ export const FuncionarioForm = ({
         cargo: '',
       },
     } as Partial<FuncionarioInput>;
-  }, [funcionarioData]);
+  }, [initialValues]);
 
   const methods = useForm<FuncionarioInput>({
     resolver: zodResolver(funcionarioSchema),
@@ -63,15 +70,28 @@ export const FuncionarioForm = ({
   const setor = makeName<FuncionarioInput>('funcionario', 'setor');
   const cargo = makeName<FuncionarioInput>('funcionario', 'cargo');
 
+  const isClienteUsuario =
+    tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS ||
+    tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
+    tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_CRM;
+
   useEffect(() => {
-    if (funcionarioData) {
+    if (initialValues) {
       reset(defaultValues);
     }
-  }, [funcionarioData, reset, defaultValues]);
+  }, [initialValues, reset, defaultValues]);
 
   useEffect(() => {
     setValue(setor, tipoUsuario, { shouldValidate: true, shouldDirty: true });
     setValue(cargo, tipoUsuario, { shouldValidate: true, shouldDirty: true });
+
+    if (
+      tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS ||
+      tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
+      tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_CRM
+    ) {
+      setValue('tipoPessoaOuEmpresa', 'empresa');
+    }
   }, [tipoUsuario, setValue, setor, cargo]);
 
   useEffect(() => {
@@ -94,35 +114,13 @@ export const FuncionarioForm = ({
       const cleanData = {
         ...data,
       };
-      // const tipoPessoaOuEmpresa = data.tipoPessoaOuEmpresa;
       if ('tipoPessoaOuEmpresa' in cleanData) {
         delete (cleanData as any).tipoPessoaOuEmpresa;
       }
 
-      // if (tipoPessoaOuEmpresa === 'pessoa') {
-      //   Object.assign(cleanData, {
-      //     pessoa: {
-      //       ...data.pessoa,
-      //       dataNascimento: convertDateToPostgres(
-      //         data.pessoa?.dataNascimento as string
-      //       ),
-      //     },
-      //   });
-      //   delete (cleanData as any).empresa;
-      // } else {
-      //   Object.assign(cleanData, {
-      //     empresa: {
-      //       ...data.empresa,
-      //       dataAbertura: convertDateToPostgres(
-      //         data.empresa?.dataAbertura as string
-      //       ),
-      //     },
-      //   });
-      //   delete (cleanData as any).pessoa;
-      // }
       setLoading(true);
 
-      const url = `/api/external/funcionario/save`;
+      const url = `/api/externalWithAuth/funcionario/save`;
       const response = await api.post(url, cleanData);
       onSuccess(response.data);
       reset(response.data);
@@ -133,6 +131,17 @@ export const FuncionarioForm = ({
       setLoading(false);
     }
   }
+
+  const onSuccessClienteSearch = (cliente: any) => {
+    setValue('empresaId', cliente.empresa.id);
+    setDisabledFieldsEmpresa(true);
+  };
+
+  const onDeleteClienteSearch = () => {
+    const currentValues = methods.getValues();
+    reset({ ...currentValues, empresa: '' as any });
+    setDisabledFieldsEmpresa(false);
+  };
 
   // UseEffect para depurar erros
   useEffect(() => {
@@ -157,7 +166,9 @@ export const FuncionarioForm = ({
           <FormSelect
             name="tipoUsuario"
             label="Tipo de funcionário"
-            selectProps={{ classNameContainer: 'col-span-full' }}
+            selectProps={{
+              classNameContainer: 'col-span-full',
+            }}
             placeholder="Selecione o Tipo de Usuario"
           >
             <>
@@ -205,9 +216,7 @@ export const FuncionarioForm = ({
             }}
           />
 
-          {tipoUsuario !== TipoUsuarioEnum.enum.CLIENTE_ATS &&
-          tipoUsuario !== TipoUsuarioEnum.enum.CLIENTE_ATS_CRM &&
-          tipoUsuario !== TipoUsuarioEnum.enum.CLIENTE_CRM ? (
+          {!isClienteUsuario ? (
             <>
               <FormInput
                 name={setor}
@@ -225,19 +234,63 @@ export const FuncionarioForm = ({
           )}
         </Card>
 
-        <Card title="Tipo de Funcionário (Pessoa ou Empresa)">
+        <Card
+          title={`Tipo de Funcionário ${
+            isClienteUsuario ? '(Cliente)' : '(Pessoa ou Empresa)'
+          }`}
+        >
           <FormSelect
             name="tipoPessoaOuEmpresa"
-            selectProps={{ classNameContainer: 'mb-4' }}
+            selectProps={{
+              classNameContainer: 'mb-4',
+              disabled: !tipoUsuario || isClienteUsuario,
+            }}
           >
             <>
-              <option value="pessoa">Pessoa</option>
-              <option value="empresa">Empresa</option>
+              {!isClienteUsuario && <option value="pessoa">Pessoa</option>}
+              <option value="empresa">
+                {isClienteUsuario ? 'Cliente' : 'Empresa'}
+              </option>
             </>
           </FormSelect>
 
-          {tipoPessoaOuEmpresa === 'pessoa' && <PessoaForm />}
-          {tipoPessoaOuEmpresa === 'empresa' && <EmpresaForm />}
+          {tipoPessoaOuEmpresa === 'pessoa' && tipoUsuario && <PessoaForm />}
+
+          {tipoPessoaOuEmpresa === 'empresa' && isClienteUsuario ? (
+            <Tabs
+              tabs={['Pesquisar Cliente', 'Cadastrar Cliente']}
+              currentTab={currentTab}
+              classNameContainer="mt-4"
+              classNameTabs="mb-2"
+              classNameContent="pt-2"
+              onTabChange={tab => setCurrentTab(tab as typeof currentTab)}
+            >
+              <>
+                <ClienteSearch
+                  onSuccess={onSuccessClienteSearch}
+                  initialValuesProps={
+                    initialValues?.empresa
+                      ? {
+                          empresa: { ...initialValues?.empresa },
+                          clienteId: initialValues?.id,
+                        }
+                      : null
+                  }
+                  onDelete={onDeleteClienteSearch}
+                />
+              </>
+
+              <>
+                <EmpresaForm disabledFields={disabledFieldsEmpresa} />
+              </>
+            </Tabs>
+          ) : tipoPessoaOuEmpresa === 'pessoa' ? (
+            tipoUsuario && <PessoaForm />
+          ) : (
+            <>
+              <EmpresaForm />
+            </>
+          )}
         </Card>
 
         <PrimaryButton
@@ -247,7 +300,7 @@ export const FuncionarioForm = ({
         >
           {loading
             ? 'Carregando...'
-            : funcionarioData
+            : initialValues
             ? 'Salvar Alterações'
             : 'Cadastrar Funcionário'}
         </PrimaryButton>
