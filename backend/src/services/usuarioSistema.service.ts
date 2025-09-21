@@ -85,12 +85,13 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     validateBasicFields(data);
 
     const normalizedData = normalizeData(data);
+
     if (!data.id) {
       await this.checkDuplicates(normalizedData);
     }
 
     const usuarioData = await buildUsuarioData(normalizedData);
-    console.log(usuarioData);
+
     const relationsShip = {
       pessoa: {
         include: {

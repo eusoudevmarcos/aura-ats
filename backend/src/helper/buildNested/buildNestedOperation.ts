@@ -10,7 +10,7 @@ type NestedData = Record<string, any>;
  * Trata recursivamente campos aninhados (arrays/objetos) até maxDepth.
  */
 export class BuildNestedOperation {
-  constructor(private maxDepth = 20) {}
+  constructor(private maxDepth = 20, private debug = false) {}
 
   public build(
     entityData: NestedData | NestedData[] | undefined,
@@ -19,15 +19,27 @@ export class BuildNestedOperation {
     const depth = _opts?._depth ?? 0;
     const seen = _opts?._seen ?? new WeakSet<object>();
 
-    if (entityData === undefined || entityData === null) return undefined;
+    if (entityData === undefined || entityData === null) {
+      if (this.debug)
+        console.debug(
+          `[BuildNested] depth=${depth}: valor undefined/null ignorado`
+        );
+      return undefined;
+    }
+
     if (depth > this.maxDepth) {
       throw new Error(
-        `buildNestedOperation: max depth ${this.maxDepth} exceeded`
+        `buildNestedOperation: max depth ${this.maxDepth} excedido`
       );
     }
 
     // Arrays de primitivos -> retorna o array bruto (ex.: enum[] ou string[]).
     if (Array.isArray(entityData) && this.isArrayOfPrimitives(entityData)) {
+      if (this.debug)
+        console.debug(
+          `[BuildNested] depth=${depth}: array de primitivos`,
+          entityData
+        );
       return entityData;
     }
 
@@ -39,9 +51,9 @@ export class BuildNestedOperation {
 
       for (const item of entityData) {
         if (!item || typeof item !== "object") {
-          // fallback: empurra primitivo como create
-          create.push(item);
-          continue;
+          throw new Error(
+            `buildNestedOperation: item inválido no array em depth=${depth}`
+          );
         }
 
         if (item.id) {
@@ -51,23 +63,32 @@ export class BuildNestedOperation {
 
           if (hasOtherFields) {
             const id = item.id;
-            // processa recursivamente os campos de update (sem o id)
             const updateData = this.processEntityData(
               this.stripId(item),
               depth + 1,
               seen
             );
-            update.push({
-              where: { id },
-              data: updateData,
-            });
+            update.push({ where: { id }, data: updateData });
+            if (this.debug)
+              console.debug(`[BuildNested] depth=${depth}: update ->`, {
+                id,
+                updateData,
+              });
           } else {
             connect.push({ id: item.id });
+            if (this.debug)
+              console.debug(`[BuildNested] depth=${depth}: connect ->`, {
+                id: item.id,
+              });
           }
         } else {
-          // sem id => create (processado recursivamente)
           const createData = this.processEntityData(item, depth + 1, seen);
           create.push(createData);
+          if (this.debug)
+            console.debug(
+              `[BuildNested] depth=${depth}: create ->`,
+              createData
+            );
         }
       }
 
@@ -75,21 +96,18 @@ export class BuildNestedOperation {
       if (create.length) result.create = create;
       if (update.length) result.update = update;
       if (connect.length) result.connect = connect;
+
       return Object.keys(result).length ? result : undefined;
     }
 
     // Objeto simples
     if (typeof entityData === "object") {
-      // Protege contra ciclos por referência
       if (seen.has(entityData)) {
-        throw new Error(
-          "buildNestedOperation: detected cyclic reference in input"
-        );
+        throw new Error("buildNestedOperation: referência cíclica detectada");
       }
       seen.add(entityData);
 
       if (entityData.id) {
-        // existe id -> decide entre update (se tem outros campos) ou connect
         const hasOtherFields = Object.keys(entityData).some(
           (k) => k !== "id" && entityData[k] !== undefined
         );
@@ -101,23 +119,33 @@ export class BuildNestedOperation {
             depth + 1,
             seen
           );
-          return {
-            update: {
-              where: { id },
-              data: updateData,
-            },
-          };
+          if (this.debug)
+            console.debug(`[BuildNested] depth=${depth}: objeto update ->`, {
+              id,
+              updateData,
+            });
+          return { update: { where: { id }, data: updateData } };
         } else {
+          if (this.debug)
+            console.debug(`[BuildNested] depth=${depth}: objeto connect ->`, {
+              id: entityData.id,
+            });
           return { connect: { id: entityData.id } };
         }
       } else {
-        // sem id -> create (processa campos recursivamente)
         const createData = this.processEntityData(entityData, depth + 1, seen);
+        if (this.debug)
+          console.debug(
+            `[BuildNested] depth=${depth}: objeto create ->`,
+            createData
+          );
         return { create: createData };
       }
     }
 
-    return undefined;
+    throw new Error(
+      `buildNestedOperation: padrão de dados inválido em depth=${depth}`
+    );
   }
 
   private processEntityData(
@@ -129,35 +157,29 @@ export class BuildNestedOperation {
 
     for (const key of Object.keys(obj)) {
       const value = obj[key];
-
       if (value === undefined) continue;
 
-      // primitivos e Date
       if (this.isPrimitive(value)) {
         result[key] = value;
         continue;
       }
 
-      // array de primitivos -> manter array (ou você pode optar por { set: [...] } se preferir)
       if (Array.isArray(value) && this.isArrayOfPrimitives(value)) {
         result[key] = value;
         continue;
       }
 
-      // objetos/arrays -> processa recursivamente
       if (Array.isArray(value) || typeof value === "object") {
-        const nested = this.build(value, {
-          _depth: depth,
-          _seen: seen,
-        });
+        const nested = this.build(value, { _depth: depth, _seen: seen });
         if (nested !== undefined) {
           result[key] = nested;
         }
         continue;
       }
 
-      // fallback
-      result[key] = value;
+      throw new Error(
+        `processEntityData: valor inválido detectado na chave "${key}" em depth=${depth}`
+      );
     }
 
     return result;

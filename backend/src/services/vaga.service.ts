@@ -48,15 +48,16 @@ export class VagaService {
   async getAll({ page = 1, pageSize = 10, search = "" }: Pagination) {
     const skip = (page - 1) * pageSize;
 
-    const where = buildWhere<Prisma.VagaWhereInput>(search, [
-      "titulo",
-      "descricao",
-      "empresa.cpnj",
-      "localizacao.cidade",
-      "localizacao.uf",
-      "localizacao.cidade",
-      "create_at",
-    ]);
+    const where = buildWhere<Prisma.VagaWhereInput>({
+      search,
+      fields: [
+        "titulo",
+        "cliente.empresa.cnpj",
+        "descricao",
+        "localizacao.cidade",
+        "localizacao.uf",
+      ],
+    });
 
     const [vagas, total] = await prisma.$transaction([
       prisma.vaga.findMany({
@@ -75,6 +76,68 @@ export class VagaService {
         },
       }),
       prisma.vaga.count(),
+    ]);
+
+    return {
+      data: vagas,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  async getAllByUsuario({
+    page = 1,
+    pageSize = 10,
+    search = "",
+    usuarioId,
+  }: Pagination & { usuarioId: string }) {
+    const skip = (page - 1) * pageSize;
+
+    const where = buildWhere<Prisma.VagaWhereInput>(
+      {
+        search: search,
+        fields: [
+          "titulo",
+          "descricao",
+          "cliente.empresa.cpnj",
+          "localizacao.cidade",
+          "localizacao.uf",
+          "localizacao.cidade",
+          "create_at",
+          "cliente.empresa.usuarioSistema.id",
+        ],
+      },
+      {
+        search: usuarioId,
+        fields: ["cliente.empresa.usuarioSistema.id"],
+      }
+    );
+
+    const [vagas, total] = await prisma.$transaction([
+      prisma.vaga.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          create_at: "desc",
+        },
+        where,
+        include: {
+          beneficios: true,
+          habilidades: { include: { habilidade: true } },
+          anexos: true,
+          localizacao: true,
+          cliente: {
+            include: {
+              empresa: {
+                include: { usuarioSistema: true },
+              },
+            },
+          },
+        },
+      }),
+      prisma.vaga.count({ where }),
     ]);
 
     return {

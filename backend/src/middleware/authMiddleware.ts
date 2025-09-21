@@ -1,14 +1,19 @@
-// authMiddleware.ts (SUGESTÃO DE MELHORIA)
-import { Request, Response, NextFunction } from "express";
+// authMiddleware.ts
+import { parse } from "cookie";
+import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { parse } from "cookie"; // Importe o parser de cookie
 
 declare global {
   namespace Express {
     interface Request {
       user?: {
-        id: string;
-        // role: UserRole; // Adicione o papel se aplicável
+        uid: string;
+        email: string;
+        tipo: string;
+        nome?: string;
+        cpf?: string;
+        razaoSocial?: string;
+        cnpj?: string;
       };
     }
   }
@@ -27,17 +32,17 @@ export const authMiddleware = (
 
   let token: string | undefined;
 
-  // 1. Tentar obter o token do cabeçalho Authorization (Bearer)
+  // 1. Authorization: Bearer
   const authHeader = req.headers.authorization;
-  if (authHeader && authHeader.startsWith("Bearer ")) {
+  if (authHeader?.startsWith("Bearer ")) {
     token = authHeader.split(" ")[1];
   }
 
-  // 2. Se não encontrou no Authorization, tentar do cabeçalho Cookie
+  // 2. Cookies
   if (!token && req.headers.cookie) {
     try {
       const cookies = parse(req.headers.cookie);
-      token = cookies.token; // Pega o cookie com nome 'token'
+      token = cookies.token;
     } catch (e) {
       console.warn("Erro ao parsear cookies:", e);
     }
@@ -50,7 +55,7 @@ export const authMiddleware = (
   }
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET) as { id: string }; // Tipo simplificado
+    const decoded = jwt.verify(token, JWT_SECRET) as Request["user"];
     req.user = decoded;
     next();
   } catch (error) {
@@ -58,7 +63,7 @@ export const authMiddleware = (
     if (error instanceof jwt.TokenExpiredError) {
       return res
         .status(401)
-        .json({ message: "Token expirado. Por favor, faça login novamente." });
+        .json({ message: "Token expirado. Faça login novamente." });
     }
     if (error instanceof jwt.JsonWebTokenError) {
       return res
@@ -67,6 +72,6 @@ export const authMiddleware = (
     }
     return res
       .status(500)
-      .json({ message: "Erro interno do servidor na validação do token." });
+      .json({ message: "Erro interno na validação do token." });
   }
 };
