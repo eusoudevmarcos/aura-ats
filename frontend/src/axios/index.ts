@@ -37,20 +37,44 @@ const api = axios.create({
   withCredentials: true,
 });
 
-// Interceptador de resposta para mostrar mensagem de sucesso ou erro
+// Interceptador de resposta para mostrar mensagem de sucesso ou erro (exceto para GET)
 api.interceptors.response.use(
   response => {
-    if (typeof window !== 'undefined') {
-      showFloatingNotification('Requisição realizada com sucesso!', 'success');
+    if (
+      typeof window !== 'undefined' &&
+      response?.config?.method?.toUpperCase() !== 'GET'
+    ) {
+      let mensagem = 'Requisição realizada com sucesso!';
+      const metodo = response?.config?.method?.toUpperCase();
+      if (metodo === 'POST') {
+        mensagem = 'Cadastro realizado com sucesso!';
+      } else if (metodo === 'PUT') {
+        mensagem = 'Edição realizada com sucesso!';
+      } else if (metodo === 'DELETE') {
+        mensagem = 'Remoção realizada com sucesso!';
+      }
+      showFloatingNotification(mensagem, 'success');
     }
     return response;
   },
   error => {
-    if (typeof window !== 'undefined') {
+    if (
+      typeof window !== 'undefined' &&
+      error?.config?.method?.toUpperCase() !== 'GET'
+    ) {
+      let mensagemErro = 'Erro ao realizar requisição!';
+      const metodo = error?.config?.method?.toUpperCase();
+      if (metodo === 'POST') {
+        mensagemErro = 'Erro ao realizar cadastro!';
+      } else if (metodo === 'PUT') {
+        mensagemErro = 'Erro ao realizar edição!';
+      } else if (metodo === 'DELETE') {
+        mensagemErro = 'Erro ao realizar remoção!';
+      }
       const msg =
         error?.response?.data?.message ||
         error?.message ||
-        'Erro ao realizar requisição!';
+        mensagemErro;
       showFloatingNotification(msg, 'error');
     }
     return Promise.reject(error);

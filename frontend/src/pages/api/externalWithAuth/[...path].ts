@@ -30,12 +30,13 @@ export default async function handler(
       `${green}${process.env.NEXT_PUBLIC_API_URL}/api${urlToExternalBackend}${reset}`
     );
 
+    const cacheKey = `proxy:${req.method}:${externalPath}:${JSON.stringify(
+      req.query
+    )}`;
+
+    // if (process.env.NODE_ENV === 'production') {
     if (req.method === 'GET') {
       // Gera uma chave única de cache (inclui path + query)
-      const cacheKey = `proxy:${req.method}:${path}:${JSON.stringify(
-        req.query
-      )}`;
-
       // 1. Verifica no cache
       const cached = await redis.get(cacheKey);
 
@@ -43,6 +44,8 @@ export default async function handler(
         return res.status(200).json({ data: cached, cached: true });
       }
     }
+    // }
+
     const headers = {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${token}`,
@@ -82,7 +85,9 @@ export default async function handler(
           .json({ error: 'Método não permitido nesta rota de proxy.' });
     }
 
-    await redis.set(cacheKey, externalResponse.data, { ex: 300 });
+    // if (process.env.NODE_ENV === 'production') {
+    await redis.set(cacheKey, externalResponse.data.data, { ex: 300 });
+    // }
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {
