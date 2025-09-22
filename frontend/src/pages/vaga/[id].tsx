@@ -146,7 +146,7 @@ const VagaPage: React.FC = () => {
           <div className="flex items-center">
             <span className="font-medium">Data Publicação:</span>
             <p className="ml-2 text-secondary inline-block">
-              {formatDate(vaga.dataPublicacao)}
+              {vaga.dataPublicacao}
             </p>
           </div>
           {vaga.dataFechamento && (
