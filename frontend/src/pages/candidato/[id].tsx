@@ -4,6 +4,7 @@ import Card from '@/components/Card';
 import CandidatoForm from '@/components/form/CandidatoForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
@@ -327,6 +328,65 @@ const CandidatoPage: React.FC = () => {
             </Card>
           )}
         </div>
+      </section>
+
+      <div className="flex justify-center mt-10 mb-4 relative">
+        <h3 className="text-2xl font-bold text-center text-primary w-full ">
+          VAGAS CANDIDATADAS
+        </h3>
+      </div>
+
+      <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-between">
+        {candidato?.vagas && candidato.vagas.length > 0 ? (
+          <>
+            {candidato?.vagas.map((vaga: any) => (
+              <Link
+                href={`/vaga/${vaga.id}`}
+                className="w-full lg:max-w-[330px]"
+                key={vaga.id}
+              >
+                <Card
+                  title={{
+                    className: 'text-xl text-center',
+                    label: vaga.titulo,
+                  }}
+                  classNameContainer="cursor-pointer shadow-sm border border-gray-200 hover:scale-105 hover:shadow-md text-sm px-6 py-4"
+                >
+                  <div className="flex flex-col justify-between gap-2 mt-2">
+                    <div className="text-sm">
+                      <span>Publicado:</span>
+                      <span className="text-secondary">
+                        {vaga.dataPublicacao}
+                      </span>
+                    </div>
+
+                    <div>
+                      <span className="font-medium">Status:</span>
+                      <span className="ml-1 text-secondary">{vaga.status}</span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <span className="font-medium">Categoria:</span>
+                    <span className="ml-1 text-secondary">
+                      {vaga.categoria}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="font-medium">Tipo de Salário:</span>
+                    <span className="ml-1 text-secondary">
+                      {vaga.tipoSalario}
+                    </span>
+                  </div>
+                </Card>
+              </Link>
+            ))}
+          </>
+        ) : (
+          <span className="text-primary text-center">
+            Nenhuma vaga cadastrada para este cliente.
+          </span>
+        )}
       </section>
 
       <Modal

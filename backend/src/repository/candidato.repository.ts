@@ -121,9 +121,11 @@ export class CandidatoRepository {
 
   async findByIdWithTransaction(
     id: string,
-    tx: PrismaTransactionClient
+    tx: PrismaTransactionClient,
+    vagasPage: number = 1,
+    vagasPageSize: number = 5
   ): Promise<Candidato | null> {
-    return await tx.candidato.findUnique({
+    const candidato = await tx.candidato.findUnique({
       where: { id },
       include: {
         pessoa: {
@@ -133,10 +135,43 @@ export class CandidatoRepository {
           },
         },
         especialidade: true,
-        vagas: true,
         formacoes: true,
       },
     });
+
+    if (!candidato) return null;
+
+    const vagas = await tx.vaga.findMany({
+      where: {
+        candidatos: {
+          some: { id: candidato.id },
+        },
+      },
+      skip: (vagasPage - 1) * vagasPageSize,
+      take: vagasPageSize,
+      orderBy: {
+        dataPublicacao: "desc",
+      },
+    });
+
+    const totalVagas = await tx.vaga.count({
+      where: {
+        candidatos: {
+          some: { id: candidato.id },
+        },
+      },
+    });
+
+    return {
+      ...candidato,
+      vagas,
+      _vagasPaginacao: {
+        page: vagasPage,
+        pageSize: vagasPageSize,
+        total: totalVagas,
+        totalPages: Math.ceil(totalVagas / vagasPageSize),
+      },
+    } as any;
   }
 
   async findById(id: string): Promise<Candidato | null> {
@@ -156,8 +191,8 @@ export class CandidatoRepository {
         include: {
           pessoa: {
             include: {
-              contatos: true, // <<< ISSO PRECISA ESTAR AQUI!
-              localizacoes: true, // <<< ISSO PRECISA ESTAR AQUI!
+              contatos: true,
+              localizacoes: true,
             },
           },
           especialidade: true,
