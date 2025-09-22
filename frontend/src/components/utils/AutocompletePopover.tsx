@@ -116,7 +116,7 @@ export const AutocompletePopover = <TSelected,>({
 
     const left = Math.max(8, rect.left);
     const width = Math.max(minWidth ?? rect.width, 200);
-    let top =
+    const top =
       placement === 'bottom'
         ? rect.bottom + window.scrollY
         : rect.top + window.scrollY - height;
