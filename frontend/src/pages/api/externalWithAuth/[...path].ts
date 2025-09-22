@@ -8,6 +8,23 @@ const externalBackendApi = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
 });
 
+async function invalidateGetCache(externalPath: string) {
+  let cursor = '0';
+  do {
+    const [nextCursor, keys] = await redis.scan(cursor, {
+      match: `proxy:GET:${externalPath}:*`,
+      count: 100,
+    });
+    if (keys.length > 0) {
+      await redis.del(...keys);
+      console.log(
+        `🗑️ Cache invalidado para ${externalPath}: ${keys.length} keys`
+      );
+    }
+    cursor = nextCursor;
+  } while (cursor !== '0');
+}
+
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -34,15 +51,15 @@ export default async function handler(
       req.query
     )}`;
 
-    // if (process.env.NODE_ENV === 'production') {
-    if (req.method === 'GET') {
-      const data = await redis.get(cacheKey);
+    if (process.env.NODE_ENV === 'production') {
+      if (req.method === 'GET') {
+        const data = await redis.get(cacheKey);
 
-      if (data) {
-        return res.status(200).json({ cached: true, ...data });
+        if (data) {
+          return res.status(200).json({ cached: true, ...data });
+        }
       }
     }
-    // }
 
     const headers = {
       'Content-Type': 'application/json',
@@ -63,6 +80,7 @@ export default async function handler(
           req.body,
           { headers }
         );
+        if (externalPath) await invalidateGetCache(externalPath);
         break;
       case 'PUT':
         externalResponse = await externalBackendApi.put(
@@ -70,12 +88,14 @@ export default async function handler(
           req.body,
           { headers }
         );
+        if (externalPath) await invalidateGetCache(externalPath);
         break;
       case 'DELETE':
         externalResponse = await externalBackendApi.delete(
           urlToExternalBackend,
           { headers, data: req.body }
         );
+        if (externalPath) await invalidateGetCache(externalPath);
         break;
       default:
         return res
@@ -83,11 +103,11 @@ export default async function handler(
           .json({ error: 'Método não permitido nesta rota de proxy.' });
     }
 
-    // if (process.env.NODE_ENV === 'production') {
-    if (externalResponse?.data) {
-      await redis.set(cacheKey, externalResponse?.data, { ex: 300 });
+    if (process.env.NODE_ENV === 'production') {
+      if (externalResponse?.data) {
+        await redis.set(cacheKey, externalResponse?.data, { ex: 300 });
+      }
     }
-    // }
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {
