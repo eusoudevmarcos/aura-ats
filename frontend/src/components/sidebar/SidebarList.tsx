@@ -58,7 +58,7 @@ export const getNavItems = (user: any) => {
     navItems.push({
       icon: <UsersIcon className="w-5 h-5 text-inherit" />,
       label: 'Prospecções',
-      href: '/prospecções/',
+      href: '/prospeccoes/',
     });
   }
 
