@@ -37,6 +37,7 @@ export default async function handler(
 
     res.status(200).json({ uid });
   } catch (err: any) {
+    console.log(err);
     res.status(err?.response?.status || 500).json({
       error: err?.response?.data?.error || 'Erro desconhecido no login.',
       details: err?.response?.data,
