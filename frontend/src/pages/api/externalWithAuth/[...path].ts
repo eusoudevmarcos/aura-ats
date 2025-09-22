@@ -36,12 +36,10 @@ export default async function handler(
 
     // if (process.env.NODE_ENV === 'production') {
     if (req.method === 'GET') {
-      // Gera uma chave única de cache (inclui path + query)
-      // 1. Verifica no cache
-      const cached = await redis.get(cacheKey);
+      const data = await redis.get(cacheKey);
 
-      if (cached) {
-        return res.status(200).json({ data: cached, cached: true });
+      if (data) {
+        return res.status(200).json({ cached: true, ...data });
       }
     }
     // }
@@ -86,7 +84,9 @@ export default async function handler(
     }
 
     // if (process.env.NODE_ENV === 'production') {
-    await redis.set(cacheKey, externalResponse.data.data, { ex: 300 });
+    if (externalResponse?.data) {
+      await redis.set(cacheKey, externalResponse?.data, { ex: 300 });
+    }
     // }
 
     res.status(externalResponse.status).json(externalResponse.data);
