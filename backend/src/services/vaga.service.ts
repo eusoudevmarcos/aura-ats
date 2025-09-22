@@ -158,6 +158,24 @@ export class VagaService {
         anexos: true,
         localizacao: true,
         cliente: { include: { empresa: true } },
+        candidatos: {
+          select: {
+            pessoa: {
+              select: {
+                nome: true,
+              },
+            },
+            id: true,
+            crm: true,
+            areaCandidato: true,
+            rqe: true,
+            especialidade: {
+              select: {
+                nome: true,
+              },
+            },
+          },
+        },
       },
     });
 
@@ -196,6 +214,64 @@ export class VagaService {
         include: relationsShip,
       });
     }
+  }
+
+  async vincularCandidatos(id: string, candidatos: string[]) {
+    if (!id || !Array.isArray(candidatos) || candidatos.length === 0) {
+      throw new Error("ID da vaga e lista de candidatos são obrigatórios.");
+    }
+
+    // Busca os IDs dos candidatos já vinculados à vaga
+    const vagaExistente = await prisma.vaga.findUnique({
+      where: { id },
+      select: { candidatos: { select: { id: true } } },
+    });
+
+    if (!vagaExistente) {
+      throw new Error("Vaga não encontrada.");
+    }
+
+    const idsJaVinculados = vagaExistente.candidatos.map((c) => c.id);
+
+    // Filtra apenas os candidatos que ainda não estão vinculados
+    const novosCandidatos = candidatos.filter(
+      (candidatoId) => !idsJaVinculados.includes(candidatoId)
+    );
+
+    // Se não houver novos candidatos para vincular, apenas retorna a vaga atualizada
+    if (novosCandidatos.length === 0) {
+      return await prisma.vaga.findUnique({
+        where: { id },
+        include: {
+          beneficios: true,
+          habilidades: { include: { habilidade: true } },
+          anexos: true,
+          localizacao: true,
+          cliente: { include: { empresa: true } },
+          candidatos: true,
+        },
+      });
+    }
+
+    // Conecta apenas os novos candidatos (upsert-like)
+    const vagaAtualizada = await prisma.vaga.update({
+      where: { id },
+      data: {
+        candidatos: {
+          connect: novosCandidatos.map((candidatoId) => ({ id: candidatoId })),
+        },
+      },
+      include: {
+        beneficios: true,
+        habilidades: { include: { habilidade: true } },
+        anexos: true,
+        localizacao: true,
+        cliente: { include: { empresa: true } },
+        candidatos: true,
+      },
+    });
+
+    return vagaAtualizada;
   }
 
   private async checkDuplicates(data: any): Promise<void> {

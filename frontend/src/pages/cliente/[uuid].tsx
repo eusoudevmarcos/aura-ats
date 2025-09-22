@@ -319,7 +319,7 @@ const ClientePage: React.FC<{
                         {vaga._count.candidatos}
                       </span>
                     </div>
-
+                    {/* 
                     <div className="flex items-center">
                       <span className="material-icons-outlined">
                         visibility
@@ -327,7 +327,7 @@ const ClientePage: React.FC<{
                       <span className="ml-1 text-secondary">
                         {vaga._count.candidatos}
                       </span>
-                    </div>
+                    </div> */}
                   </div>
                 </Card>
               </Link>

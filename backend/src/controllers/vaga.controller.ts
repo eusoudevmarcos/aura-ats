@@ -55,10 +55,26 @@ export class VagaController {
   }
 
   async getById(req: Request, res: Response): Promise<Response> {
-    console.log("Olá");
     const { id } = req.params;
     try {
       const vaga = await this.service.getById(id);
+      return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
+    } catch (error: any) {
+      console.error("Error fetching vaga by ID:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async vincularCandidato(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    console.log(id);
+    try {
+      const vaga = await this.service.vincularCandidatos(
+        id,
+        req.body.candidatos
+      );
       return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
     } catch (error: any) {
       console.error("Error fetching vaga by ID:", error);

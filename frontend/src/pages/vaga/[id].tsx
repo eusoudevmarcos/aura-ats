@@ -1,9 +1,13 @@
 // pages/vaga/[uuid].tsx
 import api from '@/axios'; // Certifique-se que o caminho está correto
+import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card'; // Certifique-se que o caminho está correto
+import CandidatoForm from '@/components/form/CandidatoForm';
 import VagaForm from '@/components/form/VagaForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons'; // Certifique-se que o caminho está correto
 import Modal from '@/components/modal/Modal'; // Certifique-se que o caminho está correto
+import CandidatoSearch from '@/components/search/CandidatoSearch';
+import Tabs from '@/components/utils/Tabs';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -16,23 +20,25 @@ const VagaPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
+  const [showModalCandidato, setShowModalCandidato] = useState(false);
+  const [currentTab, setCurrentTab] = useState('');
+
+  const fetchVaga = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await api.get(`/api/external/vaga/${id}`);
+      setVaga(res.data);
+    } catch (_) {
+      setError('Vaga não encontrada ou erro ao buscar dados.');
+      setVaga(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
     if (!id) return;
-
-    const fetchVaga = async () => {
-      setLoading(true);
-      setError(null);
-      try {
-        const res = await api.get(`/api/external/vaga/${id}`);
-        setVaga(res.data);
-      } catch (_) {
-        setError('Vaga não encontrada ou erro ao buscar dados.');
-        setVaga(null);
-      } finally {
-        setLoading(false);
-      }
-    };
 
     fetchVaga();
   }, [id]);
@@ -338,6 +344,90 @@ const VagaPage: React.FC = () => {
           </Card>
         )}
       </div>
+
+      <div className="flex mt-10"></div>
+
+      <div className="flex justify-center mt-10 mb-4 relative">
+        <h3 className="text-2xl font-bold text-center text-primary w-full ">
+          Profissionais
+        </h3>
+
+        <PrimaryButton
+          className="float-right flex text-nowrap absolute right-0"
+          onClick={() => setShowModalCandidato(true)}
+        >
+          + Adicionar Candidato
+        </PrimaryButton>
+
+        <Modal
+          title={`${currentTab} Profissional`}
+          isOpen={showModalCandidato}
+          onClose={() => setShowModalCandidato(false)}
+        >
+          <Tabs
+            tabs={['Consultar', 'Cadastrar']}
+            currentTab={currentTab}
+            classNameContainer="mt-4"
+            classNameTabs="mb-2"
+            classNameContent="pt-2"
+            onTabChange={tab => setCurrentTab(tab as typeof currentTab)}
+          >
+            <CandidatoSearch
+              idVaga={vaga.id}
+              onSuccess={async () => {
+                setShowModalCandidato(false);
+                await fetchVaga();
+              }}
+              onDelete={() => console.log('Removido')}
+            />
+
+            <CandidatoForm></CandidatoForm>
+          </Tabs>
+        </Modal>
+      </div>
+
+      <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-start">
+        {vaga.candidatos &&
+          vaga.candidatos.map((candidato: any, idx: number) => {
+            // Exclui o campo 'id' da listagem
+            const { id, ...dadosCandidato } = candidato;
+            return (
+              <Link
+                href={`/candidato/${candidato.id}`}
+                className="w-full lg:max-w-[320px]"
+                key={candidato.id}
+              >
+                <Card key={idx}>
+                  <div className="flex flex-col gap-1">
+                    <div className="flex gap-2">
+                      {/* <span className="font-semibold">Nome:</span> */}
+                      <span className="font-bold uppercase">
+                        {candidato.pessoa.nome ?? '-'}
+                      </span>
+                    </div>
+
+                    <div className="flex gap-2 text-sm">
+                      <span className="font-semibold">Área:</span>
+                      <span>{candidato.areaCandidato ?? '-'}</span>
+                    </div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="font-semibold">CRM:</span>
+                      <span>{candidato.crm ?? '-'}</span>
+                    </div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="font-semibold">RQE:</span>
+                      <span>{candidato.rqe ?? '-'}</span>
+                    </div>
+                    <div className="flex gap-2 text-sm">
+                      <span className="font-semibold">Especialidade:</span>
+                      <span>{candidato?.especialidade?.nome ?? '-'}</span>
+                    </div>
+                  </div>
+                </Card>
+              </Link>
+            );
+          })}
+      </section>
 
       {/* Modal de Edição (Placeholder) */}
       <Modal
