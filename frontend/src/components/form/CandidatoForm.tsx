@@ -29,13 +29,23 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     { id: number; nome: string }[]
   >([]);
 
+  const defaultValues = !!initialValues
+    ? {
+        ...initialValues,
+        especialidadeId: String(initialValues?.especialidadeId),
+      }
+    : {
+        pessoa: {
+          nome: '',
+          cpf: '',
+          dataNascimento: '',
+        },
+      };
+
   const methods = useForm<CandidatoInput>({
     resolver: zodResolver(candidatoSchema),
     mode: 'onChange',
-    defaultValues: {
-      ...initialValues,
-      especialidadeId: String(initialValues?.especialidadeId),
-    },
+    defaultValues: defaultValues,
   });
 
   const { handleSubmit, watch } = methods;
