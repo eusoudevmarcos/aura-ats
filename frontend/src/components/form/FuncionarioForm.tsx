@@ -31,30 +31,41 @@ export const FuncionarioForm = ({
   const [loading, setLoading] = useState(false);
   const [disabledFieldsEmpresa, setDisabledFieldsEmpresa] = useState(false);
   const [currentTab, setCurrentTab] = useState<
-    'Selecionar Cliente' | 'Cadastrar Cliente'
-  >('Selecionar Cliente');
+    'Pesquisar Cliente' | 'Cadastrar Cliente'
+  >('Pesquisar Cliente');
 
-  // Ajuste dos valores iniciais para refletir a estrutura correta
+  // Ajuste dos valores iniciais para refletir a estrutura correta do Prisma
   const defaultValues = useMemo(() => {
     if (initialValues) {
-      // Ajusta para garantir que pessoa está dentro de funcionario e empresa dentro de cliente
-      let tipoPessoaOuEmpresa = 'empresa';
+      // Garante que os dados estejam no formato esperado pelo schema do Prisma
+      let tipoPessoaOuEmpresa: 'funcionario.pessoa' | 'cliente.empresa' =
+        'funcionario.pessoa';
       let funcionario: any = initialValues.funcionario || {};
       let cliente: any = initialValues.cliente || {};
 
+      // Se já vier pessoa fora, coloca dentro de funcionario
       if ((initialValues as any).pessoa) {
-        tipoPessoaOuEmpresa = 'pessoa';
+        tipoPessoaOuEmpresa = 'funcionario.pessoa';
         funcionario = {
           ...funcionario,
           pessoa: (initialValues as any).pessoa,
         };
       }
+      // Se já vier empresa fora, coloca dentro de cliente
       if ((initialValues as any).empresa) {
-        tipoPessoaOuEmpresa = 'empresa';
+        tipoPessoaOuEmpresa = 'cliente.empresa';
         cliente = {
           ...cliente,
           empresa: (initialValues as any).empresa,
         };
+      }
+      // Se já vier empresa dentro de cliente, seta tipoPessoaOuEmpresa corretamente
+      if (cliente.empresa) {
+        tipoPessoaOuEmpresa = 'cliente.empresa';
+      }
+      // Se já vier pessoa dentro de funcionario, seta tipoPessoaOuEmpresa corretamente
+      if (funcionario.pessoa) {
+        tipoPessoaOuEmpresa = 'funcionario.pessoa';
       }
 
       return {
@@ -105,10 +116,8 @@ export const FuncionarioForm = ({
     }
   }, [initialValues, reset, defaultValues]);
 
+  // Quando o tipoUsuario for cliente, força o tipoPessoaOuEmpresa para 'cliente.empresa'
   useEffect(() => {
-    setValue(setor, tipoUsuario, { shouldValidate: true, shouldDirty: true });
-    setValue(cargo, tipoUsuario, { shouldValidate: true, shouldDirty: true });
-
     if (
       tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS ||
       tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
@@ -116,8 +125,9 @@ export const FuncionarioForm = ({
     ) {
       setValue('tipoPessoaOuEmpresa', 'cliente.empresa');
     }
-  }, [tipoUsuario, setValue, setor, cargo]);
+  }, [tipoUsuario, setValue]);
 
+  // Limpa os campos de acordo com o tipoPessoaOuEmpresa
   useEffect(() => {
     if (tipoPessoaOuEmpresa === 'funcionario.pessoa') {
       // Limpa empresa de dentro de cliente
@@ -125,7 +135,7 @@ export const FuncionarioForm = ({
         shouldValidate: true,
         shouldDirty: true,
       });
-    } else {
+    } else if (tipoPessoaOuEmpresa === 'cliente.empresa') {
       // Limpa pessoa de dentro de funcionario
       setValue('funcionario.pessoa', undefined, {
         shouldValidate: true,
@@ -137,7 +147,7 @@ export const FuncionarioForm = ({
 
   async function onSubmit(data: FuncionarioInput): Promise<void> {
     try {
-      // Monta o objeto para enviar no formato correto
+      // Monta o objeto para enviar no formato correto do Prisma
       const cleanData: any = {
         ...data,
       };
@@ -147,9 +157,13 @@ export const FuncionarioForm = ({
         delete cleanData.tipoPessoaOuEmpresa;
       }
 
-      // Garante que pessoa está dentro de funcionario e empresa dentro de cliente
+      // Ajusta estrutura para o Prisma
       if (tipoPessoaOuEmpresa === 'funcionario.pessoa') {
-        // Se existir pessoa fora, move para dentro de funcionario
+        // Remove empresa de cliente se existir
+        if (cleanData.cliente && cleanData.cliente.empresa) {
+          delete cleanData.cliente.empresa;
+        }
+        // Garante que pessoa está dentro de funcionario
         if ((cleanData as any).pessoa) {
           cleanData.funcionario = {
             ...cleanData.funcionario,
@@ -157,12 +171,12 @@ export const FuncionarioForm = ({
           };
           delete cleanData.pessoa;
         }
-        // Remove empresa de cliente se existir
-        if (cleanData.cliente && cleanData.cliente.empresa) {
-          delete cleanData.cliente.empresa;
-        }
       } else if (tipoPessoaOuEmpresa === 'cliente.empresa') {
-        // Se existir empresa fora, move para dentro de cliente
+        // Remove pessoa de funcionario se existir
+        if (cleanData.funcionario && cleanData.funcionario.pessoa) {
+          delete cleanData.funcionario.pessoa;
+        }
+        // Garante que empresa está dentro de cliente
         if ((cleanData as any).empresa) {
           cleanData.cliente = {
             ...cleanData.cliente,
@@ -170,10 +184,17 @@ export const FuncionarioForm = ({
           };
           delete cleanData.empresa;
         }
-        // Remove pessoa de funcionario se existir
-        if (cleanData.funcionario && cleanData.funcionario.pessoa) {
-          delete cleanData.funcionario.pessoa;
-        }
+      }
+
+      // Remove campos vazios para evitar conflitos com o Prisma
+      if (
+        cleanData.funcionario &&
+        Object.keys(cleanData.funcionario).length === 0
+      ) {
+        delete cleanData.funcionario;
+      }
+      if (cleanData.cliente && Object.keys(cleanData.cliente).length === 0) {
+        delete cleanData.cliente;
       }
 
       setLoading(true);
@@ -184,7 +205,9 @@ export const FuncionarioForm = ({
       reset(response.data);
     } catch (error: any) {
       console.log('Erro ao processar funcionário:', error);
-      alert(error.response.data.details.message);
+      alert(
+        error?.response?.data?.details?.message || 'Erro ao salvar funcionário'
+      );
     } finally {
       setLoading(false);
     }
@@ -192,7 +215,8 @@ export const FuncionarioForm = ({
 
   const onSuccessClienteSearch = (cliente: any) => {
     // Seta o id da empresa dentro de cliente
-    setValue('cliente.empresa.id', cliente.empresa.id);
+    // setValue('cliente.empresa.id', cliente.empresa.id);
+    setValue('cliente.empresaId', cliente.empresa.id);
     setDisabledFieldsEmpresa(true);
   };
 
@@ -208,11 +232,10 @@ export const FuncionarioForm = ({
 
   // UseEffect para depurar erros
   useEffect(() => {
-    console.log('isValid:', isValid);
     if (Object.keys(errors).length > 0) {
-      console.log('Errors:', errors);
+      console.log('Erros do formulário:', errors);
     }
-  }, [isValid, errors]);
+  }, [errors]);
 
   return (
     <FormProvider {...methods}>
@@ -292,9 +315,7 @@ export const FuncionarioForm = ({
                 inputProps={{ classNameContainer: 'col-span-2' }}
               />
             </>
-          ) : (
-            <></>
-          )}
+          ) : null}
         </Card>
 
         <Card
@@ -310,8 +331,10 @@ export const FuncionarioForm = ({
             }}
           >
             <>
-              {!isClienteUsuario && <option value="pessoa">Pessoa</option>}
-              <option value="empresa">
+              {!isClienteUsuario && (
+                <option value="funcionario.pessoa">Pessoa</option>
+              )}
+              <option value="cliente.empresa">
                 {isClienteUsuario ? 'Cliente' : 'Empresa'}
               </option>
             </>

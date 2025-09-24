@@ -34,10 +34,12 @@ export const funcionarioSchema = z.object({
       pessoaId: z.uuid().optional(),
     })
     .optional(),
-  cliente: z.object({
-    empresa: empresaSchema.optional(),
-    empresaId: z.uuid().optional(),
-  }),
+  cliente: z
+    .object({
+      empresa: empresaSchema.optional(),
+      empresaId: z.uuid().optional(),
+    })
+    .optional(),
   tipoPessoaOuEmpresa: z.enum(['funcionario.pessoa', 'cliente.empresa']),
 });
 
