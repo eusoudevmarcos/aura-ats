@@ -60,6 +60,22 @@ export const EspecialidadesEnum = [
   { nome: "Urologia", sigla: "URO" },
 ];
 
+export const BeneficiosEnum = [
+  { nome: "Vale Transporte", descricao: "Auxílio deslocamento" },
+  { nome: "Vale Refeição", descricao: "Vale para refeições diárias" },
+  { nome: "Vale Alimentação", descricao: "Auxílio alimentação mensal" },
+  { nome: "Plano de Saúde", descricao: "Plano de saúde completo" },
+  { nome: "Plano Odontológico", descricao: "Plano odontológico" },
+  {
+    nome: "Auxílio Home Office",
+    descricao: "Ajuda de custo para trabalho remoto",
+  },
+  { nome: "Seguro de Vida", descricao: "Seguro de vida corporativo" },
+  { nome: "GymPass", descricao: "Acesso a academias parceiras" },
+  { nome: "Bolsa de Estudos", descricao: "Ajuda de custo para cursos" },
+  { nome: "Day Off", descricao: "Folga no dia do aniversário" },
+];
+
 async function main() {
   try {
     console.log(
@@ -67,13 +83,25 @@ async function main() {
       process.env.DATABASE_URL ? "Carregada" : "Não Carregada"
     );
 
-    const results = await prisma.especialidade.createManyAndReturn({
+    // Especialidades
+    const resultsEspecialidades = await prisma.especialidade.createMany({
       data: EspecialidadesEnum,
       skipDuplicates: true,
     });
     console.log(
-      `✅ Seed concluído! ${results.length} especialidades adicionadas/atualizadas.`
+      `✅ ${resultsEspecialidades.count} especialidades adicionadas/atualizadas.`
     );
+
+    // Benefícios
+    const resultsBeneficios = await prisma.beneficio.createMany({
+      data: BeneficiosEnum,
+      skipDuplicates: true,
+    });
+    console.log(
+      `✅ ${resultsBeneficios.count} benefícios adicionados/atualizados.`
+    );
+
+    console.log("🎉 Seed concluído com sucesso!");
   } catch (error) {
     console.error("❌ Erro durante a operação de seed:", error);
     throw error;

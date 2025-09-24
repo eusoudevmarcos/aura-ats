@@ -1,51 +1,55 @@
-model Especialidade {
-  id        Int         @id @default(autoincrement())
-  nome      String      @unique
-  sigla     String
-  candidato Candidato[]
+model Candidato {
+    id            String        @id @default(uuid(7))
+    crm           String?
+    corem         String?
+    rqe           String?
+    areaCandidato AreaCandidato
+
+    especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
+    especialidadeId Int?
+
+    pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
+    pessoaId String @unique
+
+    candidaturaVaga CandidaturaVaga[]
+    formacoes       Formacao[]
+
+    @@index([especialidadeId])
+    @@schema("Candidato")
 }
 
-model Candidato {
-  id              String                @id @default(uuid(7))
-  crm             String?
-  corem           String?
-  rqe             String?
-  areaCandidato   AreaCandidato
-  pessoaId        String                @unique
-  especialidadeId Int?
-  especialidade   Especialidade?        @relation(fields: [especialidadeId], references: [id])
-  pessoa          Pessoa                @relation(fields: [pessoaId], references: [id])
-  habilidades     CandidatoHabilidade[]
-  CandidaturaVaga CandidaturaVaga[]
-  formacoes       Formacao[]
-  vagas           Vaga[]                @relation("CandidatoToVaga")
+model Especialidade {
+    id        Int         @id @default(autoincrement())
+    nome      String      @unique
+    sigla     String
+    candidato Candidato[]
+
+    @@schema("Especialidade")
 }
 
 model Formacao {
-  id                   String     @id @default(uuid(7))
-  instituicao          String?    @default("A definir")
-  curso                String?    @default("A definir")
-  dataInicio           DateTime?
-  dataFim              DateTime?
-  dataInicioResidencia DateTime?
-  dataFimResidencia    DateTime?
-  candidatoId          String?
-  Candidato            Candidato? @relation(fields: [candidatoId], references: [id])
+    id                   String    @id @default(uuid(7))
+    instituicao          String?   @default("A definir")
+    curso                String?   @default("A definir")
+    dataInicio           DateTime?
+    dataFim              DateTime?
+    dataInicioResidencia DateTime?
+    dataFimResidencia    DateTime?
+
+    candidato   Candidato? @relation(fields: [candidatoId], references: [id])
+    candidatoId String?
+
+    @@index([candidatoId])
+    @@schema("Formacao")
 }
 
-model CandidatoHabilidade {
-  candidatoId     String
-  habilidadeId    String
-  nivel           String?
-  experienciaAnos Int?
-  candidato       Candidato  @relation(fields: [candidatoId], references: [id])
-  habilidade      Habilidade @relation(fields: [habilidadeId], references: [id])
-
-  @@id([candidatoId, habilidadeId])
-}
-
-enum AreaCandidato {
-  MEDICINA
-  ENFERMAGEM
-  OUTRO
-}
+// model CandidatoHabilidade {
+//   candidatoId     String
+//   habilidadeId    String
+//   nivel           String?
+//   experienciaAnos Int?
+//   candidato       Candidato  @relation(fields: [candidatoId], references: [id])
+//   habilidade      Habilidade @relation(fields: [habilidadeId], references: [id])
+//
+//   @@id([candidatoId, habilidadeId])
+// }

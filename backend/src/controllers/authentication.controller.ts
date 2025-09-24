@@ -20,10 +20,16 @@ export default class AuthenticationController {
           .json({ error: "Email e senha são obrigatórios." });
       }
 
-      // Busca o funcionário pelo email no banco
       const usuarioSistema = await prisma.usuarioSistema.findUnique({
         where: { email: username },
-        include: { pessoa: true, empresa: true },
+        include: {
+          funcionario: {
+            include: { pessoa: true },
+          },
+          cliente: {
+            include: { empresa: true },
+          },
+        },
       });
 
       if (!usuarioSistema) {
@@ -35,7 +41,6 @@ export default class AuthenticationController {
         return res.status(401).json({ error: "Credenciais inválidas" });
       }
 
-      // Verifica a senha
       const senhaCorreta = await bcrypt.compare(
         password,
         usuarioSistema.password
@@ -57,15 +62,15 @@ export default class AuthenticationController {
         tipo: usuarioSistema.tipoUsuario,
       };
 
-      if (usuarioSistema.pessoa) {
+      if (usuarioSistema.funcionario?.pessoa) {
         Object.assign(infoUser, {
-          nome: usuarioSistema.pessoa?.nome,
-          cpf: usuarioSistema.pessoa?.cpf,
+          nome: usuarioSistema.funcionario?.pessoa?.nome,
+          cpf: usuarioSistema.funcionario?.pessoa?.cpf,
         });
-      } else if (usuarioSistema.empresa) {
+      } else if (usuarioSistema.cliente?.empresa) {
         Object.assign(infoUser, {
-          razaoSocial: usuarioSistema.empresa?.razaoSocial,
-          cnpj: usuarioSistema.empresa?.cnpj,
+          razaoSocial: usuarioSistema.cliente.empresa?.razaoSocial,
+          cnpj: usuarioSistema.cliente.empresa?.cnpj,
         });
       }
 

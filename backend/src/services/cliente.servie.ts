@@ -28,21 +28,20 @@ export class ClienteService extends BuildNestedOperation {
             socios: true,
           },
         },
-        vagas: {
-          select: {
-            id: true,
-            categoria: true,
-            dataPublicacao: true,
-            status: true,
-            tipoSalario: true,
-            titulo: true,
-            _count: {
-              select: {
-                candidatos: true,
-              },
-            },
-          },
-        },
+        // vagas: {
+        //   select: {
+        //     id: true,
+        //     titulo: true,
+        //     categoria: true,
+        //     dataPublicacao: true,
+        //     status: true,
+        //     _count: {
+        //       select: {
+        //         candidaturas: true,
+        //       },
+        //     },
+        //   },
+        // },
       },
     });
   }

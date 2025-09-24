@@ -1,0 +1,25 @@
+model Localizacao {
+    id          String  @id @default(uuid(7))
+    cep         String?
+    cidade      String?
+    bairro      String?
+    uf          String
+    estado      String?
+    complemento String?
+    logradouro  String?
+    regiao      String?
+    descricao   String?
+
+    agenda Agenda[]
+    vaga   Vaga[]
+
+    empresa   Empresa? @relation(fields: [empresaId], references: [id])
+    empresaId String?
+
+    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
+    pessoaId String?
+
+    @@index([pessoaId])
+    @@index([empresaId])
+    @@schema("Localizacao")
+}

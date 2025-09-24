@@ -31,6 +31,11 @@ export class VagaService {
           habilidades: true,
           anexos: true,
           localizacao: true,
+          _count: {
+            select: {
+              candidaturas: true,
+            },
+          },
         },
       }),
       prisma.vaga.count({ where: { clienteId } }),
@@ -45,10 +50,58 @@ export class VagaService {
     };
   }
 
-  async getAll({ page = 1, pageSize = 10, search = "" }: Pagination) {
+  async getAllByCandidato(
+    candidatoId: string,
+    { page = 1, pageSize = 10 }: Pagination
+  ) {
     const skip = (page - 1) * pageSize;
 
-    const where = buildWhere<Prisma.VagaWhereInput>({
+    // Busca vagas onde o candidato tem candidaturas
+    const [vagas, total] = await prisma.$transaction([
+      prisma.vaga.findMany({
+        where: {
+          candidaturas: {
+            some: {
+              candidatoId: candidatoId,
+            },
+          },
+        },
+        skip,
+        orderBy: {
+          create_at: "desc",
+        },
+        take: pageSize,
+      }),
+      prisma.vaga.count({
+        where: {
+          candidaturas: {
+            some: {
+              candidatoId: candidatoId,
+            },
+          },
+        },
+      }),
+    ]);
+
+    return {
+      data: vagas,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  async getAll({
+    page = 1,
+    pageSize = 10,
+    search = "",
+    clienteId,
+  }: Pagination & { clienteId?: string }) {
+    const skip = (page - 1) * pageSize;
+
+    // Monta o where base para pesquisa textual
+    let where = buildWhere<Prisma.VagaWhereInput>({
       search,
       fields: [
         "titulo",
@@ -59,6 +112,27 @@ export class VagaService {
       ],
     });
 
+    if (clienteId) {
+      if (where.OR) {
+        where = {
+          AND: [{ cliente: { id: clienteId } }, { ...where }],
+        };
+      } else {
+        where = {
+          ...where,
+          cliente: { id: clienteId },
+        };
+      }
+    }
+
+    const relations = {
+      beneficios: true,
+      habilidades: true,
+      anexos: true,
+      localizacao: true,
+      cliente: true,
+    };
+
     const [vagas, total] = await prisma.$transaction([
       prisma.vaga.findMany({
         skip,
@@ -67,15 +141,9 @@ export class VagaService {
           create_at: "desc",
         },
         where,
-        include: {
-          beneficios: true,
-          habilidades: true,
-          anexos: true,
-          localizacao: true,
-          cliente: true,
-        },
+        include: relations,
       }),
-      prisma.vaga.count(),
+      prisma.vaga.count({ where }),
     ]);
 
     return {
@@ -130,9 +198,7 @@ export class VagaService {
           localizacao: true,
           cliente: {
             include: {
-              empresa: {
-                include: { usuarioSistema: true },
-              },
+              usuarioSistema: true,
             },
           },
         },
@@ -158,20 +224,24 @@ export class VagaService {
         anexos: true,
         localizacao: true,
         cliente: { include: { empresa: true } },
-        candidatos: {
-          select: {
-            pessoa: {
+        candidaturas: {
+          include: {
+            candidato: {
               select: {
-                nome: true,
-              },
-            },
-            id: true,
-            crm: true,
-            areaCandidato: true,
-            rqe: true,
-            especialidade: {
-              select: {
-                nome: true,
+                id: true,
+                crm: true,
+                areaCandidato: true,
+                rqe: true,
+                pessoa: {
+                  select: {
+                    nome: true,
+                  },
+                },
+                especialidade: {
+                  select: {
+                    nome: true,
+                  },
+                },
               },
             },
           },
@@ -183,7 +253,18 @@ export class VagaService {
       throw new Error("Vaga não encontrada.");
     }
 
-    return vaga;
+    // Transforma candidaturas em array simples de candidatos
+    const candidatos = vaga.candidaturas.map(
+      (candidatura) => candidatura.candidato
+    );
+
+    // Retorna a vaga com candidatos como array simples
+    const { candidaturas, ...vagaSemCandidaturas } = vaga;
+
+    return {
+      ...vagaSemCandidaturas,
+      candidatos,
+    };
   }
 
   async save(vagaData: VagaSaveInput): Promise<Vaga> {
@@ -224,21 +305,28 @@ export class VagaService {
     // Busca os IDs dos candidatos já vinculados à vaga
     const vagaExistente = await prisma.vaga.findUnique({
       where: { id },
-      select: { candidatos: { select: { id: true } } },
+      select: {
+        candidaturas: {
+          select: {
+            candidatoId: true,
+          },
+        },
+      },
     });
 
     if (!vagaExistente) {
       throw new Error("Vaga não encontrada.");
     }
 
-    const idsJaVinculados = vagaExistente.candidatos.map((c) => c.id);
+    // Corrigido: extrair os candidatoIds das candidaturas existentes
+    const idsJaVinculados = vagaExistente.candidaturas.map(
+      (candidatura) => candidatura.candidatoId
+    );
 
-    // Filtra apenas os candidatos que ainda não estão vinculados
     const novosCandidatos = candidatos.filter(
       (candidatoId) => !idsJaVinculados.includes(candidatoId)
     );
 
-    // Se não houver novos candidatos para vincular, apenas retorna a vaga atualizada
     if (novosCandidatos.length === 0) {
       return await prisma.vaga.findUnique({
         where: { id },
@@ -248,26 +336,31 @@ export class VagaService {
           anexos: true,
           localizacao: true,
           cliente: { include: { empresa: true } },
-          candidatos: true,
+          candidaturas: { include: { candidato: true } },
         },
       });
     }
 
-    // Conecta apenas os novos candidatos (upsert-like)
-    const vagaAtualizada = await prisma.vaga.update({
+    await prisma.$transaction(
+      novosCandidatos.map((candidatoId) =>
+        prisma.candidaturaVaga.create({
+          data: {
+            vagaId: id,
+            candidatoId: candidatoId,
+          },
+        })
+      )
+    );
+
+    const vagaAtualizada = await prisma.vaga.findUnique({
       where: { id },
-      data: {
-        candidatos: {
-          connect: novosCandidatos.map((candidatoId) => ({ id: candidatoId })),
-        },
-      },
       include: {
         beneficios: true,
         habilidades: { include: { habilidade: true } },
         anexos: true,
         localizacao: true,
         cliente: { include: { empresa: true } },
-        candidatos: true,
+        candidaturas: { include: { candidato: true } },
       },
     });
 

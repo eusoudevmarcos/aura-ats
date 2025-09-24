@@ -19,23 +19,29 @@ export class UsuarioSistemaService extends BuildNestedOperation {
   }
 
   async getById(id: string) {
-    console.log(id);
     return await prisma.usuarioSistema.findFirst({
       where: { id },
       include: {
-        pessoa: {
+        funcionario: {
           include: {
-            contatos: true,
-            localizacoes: true,
+            pessoa: {
+              include: {
+                contatos: true,
+                localizacoes: true,
+              },
+            },
           },
         },
-        empresa: {
+        cliente: {
           include: {
-            contatos: true,
-            localizacoes: true,
+            empresa: {
+              include: {
+                contatos: true,
+                localizacoes: true,
+              },
+            },
           },
         },
-        funcionario: true,
       },
     });
   }
@@ -48,21 +54,15 @@ export class UsuarioSistemaService extends BuildNestedOperation {
         skip: skip,
         take: pageSize,
         include: {
-          funcionario: true,
-          pessoa: true,
-          // {
-          //   include: {
-          //     contatos: true,
-          //     localizacoes: true,
-          //   },
-          // },
-          empresa: true,
-          // {
-          //   include: {
-          //     contatos: true,
-          //     localizacoes: true,
-          //   },
-          // },
+          funcionario: {
+            include: {
+              pessoa: {
+                select: { nome: true },
+              },
+            },
+          },
+
+          cliente: { include: { empresa: true } },
         },
       });
 
@@ -93,21 +93,8 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     const usuarioData = await buildUsuarioData(normalizedData);
 
     const relationsShip = {
-      pessoa: {
-        include: {
-          contatos: true,
-          localizacoes: true,
-        },
-      },
-      empresa: {
-        include: {
-          contatos: true,
-          localizacoes: true,
-          representantes: true,
-          socios: true,
-        },
-      },
-      funcionario: true,
+      funcionario: { include: { pessoa: true } },
+      cliente: { include: { empresa: true } },
     };
 
     if (!data.id) {

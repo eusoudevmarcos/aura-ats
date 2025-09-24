@@ -1,4 +1,4 @@
-import { AgendaVaga } from "@prisma/client";
+import { Agenda, CategoriaVaga, TipoEventoAgenda } from "@prisma/client";
 import { injectable } from "tsyringe";
 import { normalizeDataAgenda } from "../helper/normalize/agenda.normalize";
 import prisma from "../lib/prisma";
@@ -8,66 +8,70 @@ import prisma from "../lib/prisma";
 export type AgendaInput = {
   dataHora: Date | string;
   link?: string;
-  tipoEvento:
-    | "TRIAGEM_INICIAL"
-    | "ENTREVISTA_RH"
-    | "ENTREVISTA_GESTOR"
-    | "TESTE_TECNICO"
-    | "TESTE_PSICOLOGICO"
-    | "DINAMICA_GRUPO"
-    | "PROPOSTA"
-    | "OUTRO";
+  tipoEvento: TipoEventoAgenda;
   localizacaoId?: string | null;
   vagaId?: string | null;
   etapaAtualId?: string | null;
+  categoria: CategoriaVaga;
+  triagem?: TriagemVaga;
+  clienteId?: string;
+};
+
+export type TriagemVaga = {
+  id: string;
+  ativa: boolean;
+  create_at: Date;
+  update_at: Date;
+  vagaId: string;
+  Agenda: Agenda[];
 };
 
 @injectable()
 export class AgendaService {
   constructor() {}
 
-  async create(agendaData: AgendaInput): Promise<AgendaVaga> {
+  async create(agendaData: AgendaInput): Promise<Agenda> {
     agendaData = normalizeDataAgenda(agendaData);
 
-    return await prisma.agendaVaga.create({
+    return await prisma.agenda.create({
       data: {
         dataHora: new Date(agendaData.dataHora),
         link: agendaData.link,
         tipoEvento: agendaData.tipoEvento,
         localizacaoId: agendaData.localizacaoId,
-        vagaId: agendaData.vagaId ?? undefined,
-        etapaAtualId: agendaData.etapaAtualId,
+        triagemId: agendaData.vagaId ?? undefined,
+        clienteId: agendaData.clienteId ?? undefined,
       },
     });
   }
 
-  async update(agendaId: string, agendaData: any): Promise<AgendaVaga> {
-    return await prisma.agendaVaga.update({
+  async update(agendaId: string, agendaData: any): Promise<Agenda> {
+    return await prisma.agenda.update({
       where: { id: agendaId },
       data: {
         dataHora: agendaData.dataHora,
         link: agendaData.link,
         tipoEvento: agendaData.tipoEvento,
         localizacaoId: agendaData.localizacaoId,
-        vagaId: agendaData.vagaId,
-        etapaAtualId: agendaData.etapaAtualId,
+        triagemId: agendaData.vagaId ?? undefined,
+        clienteId: agendaData.clienteId ?? undefined,
       },
     });
   }
 
   async delete(agendaId: string): Promise<void> {
-    await prisma.agendaVaga.delete({
+    await prisma.agenda.delete({
       where: { id: agendaId },
     });
   }
 
-  async findById(id: string): Promise<AgendaVaga | null> {
-    return await prisma.agendaVaga.findUnique({
+  async findById(id: string): Promise<Agenda | null> {
+    return await prisma.agenda.findUnique({
       where: { id },
       include: {
-        vaga: true,
+        triagem: { include: { agenda: true } },
         localizacao: true,
-        etapaAtual: true,
+        cliente: true,
       },
     });
   }
@@ -76,7 +80,7 @@ export class AgendaService {
     page: number = 1,
     pageSize: number = 10
   ): Promise<{
-    data: AgendaVaga[];
+    data: Agenda[];
     total: number;
     page: number;
     pageSize: number;
@@ -84,17 +88,17 @@ export class AgendaService {
   }> {
     const skip = (page - 1) * pageSize;
     const [data, total] = await Promise.all([
-      prisma.agendaVaga.findMany({
+      prisma.agenda.findMany({
         skip,
         take: pageSize,
         include: {
-          vaga: true,
+          triagem: true,
           localizacao: true,
-          etapaAtual: true,
+          cliente: true,
         },
         orderBy: { dataHora: "desc" },
       }),
-      prisma.agendaVaga.count(),
+      prisma.agenda.count(),
     ]);
     return {
       data,

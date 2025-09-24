@@ -143,7 +143,7 @@ export class CandidatoRepository {
 
     const vagas = await tx.vaga.findMany({
       where: {
-        candidatos: {
+        candidaturas: {
           some: { id: candidato.id },
         },
       },
@@ -156,7 +156,7 @@ export class CandidatoRepository {
 
     const totalVagas = await tx.vaga.count({
       where: {
-        candidatos: {
+        candidaturas: {
           some: { id: candidato.id },
         },
       },

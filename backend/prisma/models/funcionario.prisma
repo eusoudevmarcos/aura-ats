@@ -1,0 +1,16 @@
+model Funcionario {
+    // ARQUITETURA CORRETA ✅
+    id    String  @id @default(uuid(7))
+    setor String? @db.VarChar(100)
+    cargo String? @db.VarChar(100)
+
+    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id])
+    usuarioSistemaId String?         @unique
+
+    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
+    pessoaId String? @unique
+
+    @@index([pessoaId])
+    @@index([usuarioSistemaId])
+    @@schema("Funcionario")
+}

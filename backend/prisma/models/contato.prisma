@@ -1,0 +1,14 @@
+model Contato {
+    id       String  @id @default(uuid(7))
+    telefone String?
+    whatsapp String?
+    email    String?
+
+    empresa   Empresa? @relation(fields: [empresaId], references: [id])
+    empresaId String?
+
+    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
+    pessoaId String?
+
+    @@schema("Contato")
+}

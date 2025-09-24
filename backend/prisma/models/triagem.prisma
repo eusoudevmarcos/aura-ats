@@ -1,0 +1,15 @@
+model TriagemVaga {
+    id        String   @id @default(uuid(7))
+    ativa     Boolean  @default(true)
+    create_at DateTime @default(now())
+    update_at DateTime @updatedAt
+
+    // relacionamento
+    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vagaId String
+
+    agenda Agenda[]
+
+    @@index([vagaId])
+    @@schema("TriagemVaga")
+}

@@ -1,28 +1,23 @@
 model Pessoa {
-  id                    String          @id @default(uuid(7))
-  nome                  String
-  cpf                   String?
-  dataNascimento        DateTime?
-  rg                    String?
-  estadoCivil           EstadoCivil?
-  createdAt             DateTime        @default(now())
-  updatedAt             DateTime        @updatedAt
-  empresaRepresentadaId String?
-  candidato             Candidato?
-  contatos              Contato[]
-  localizacoes          Localizacao[]
-  empresaRepresentada   Empresa?        @relation("EmpresaRepresentantes", fields: [empresaRepresentadaId], references: [id])
-  socios                Socio[]
-  usuarioSistema        UsuarioSistema?
+    id             String       @id @default(uuid(7))
+    nome           String
+    cpf            String?
+    rg             String?
+    dataNascimento DateTime?
+    createdAt      DateTime     @default(now())
+    updatedAt      DateTime     @updatedAt
+    estadoCivil    EstadoCivil?
+    candidato      Candidato?
 
-  @@unique([cpf])
-}
+    contatos     Contato[]
+    localizacoes Localizacao[]
+    socios       Socio[]
 
-enum EstadoCivil {
-  SOLTEIRO
-  CASADO
-  DIVORCIADO
-  VIUVO
-  SEPARADO
-  UNIAO_ESTAVEL
+    empresaRepresentada   Empresa?     @relation("EmpresaRepresentantes", fields: [empresaRepresentadaId], references: [id])
+    empresaRepresentadaId String?
+    funcionario           Funcionario?
+
+    @@unique([cpf])
+    @@index([empresaRepresentadaId])
+    @@schema("Pessoa")
 }

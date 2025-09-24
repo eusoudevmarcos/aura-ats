@@ -1,47 +1,12 @@
 model UsuarioSistema {
-  id          String      @id @default(uuid(7))
-  email       String
-  password    String
-  tipoUsuario TipoUsuario
+    id          String      @id @default(uuid(7))
+    email       String
+    password    String
+    tipoUsuario TipoUsuario
 
-  // ARQUITETURA ERRADA ❌
-  funcionario Funcionario?
-  empresaId   String?      @unique
-  empresa     Empresa?     @relation(fields: [empresaId], references: [id])
-  pessoaId    String?      @unique
-  pessoa      Pessoa?      @relation(fields: [pessoaId], references: [id])
+    funcionario Funcionario?
+    cliente     Cliente?
 
-  // ARQUITETURA CORRETA ✅
-  // funcionarioId   String?      @unique
-  // funcionario Funcionario? @relation(fields: [funcionarioId], references: [id])
-  // cliente     Cliente?     @relation(fields: [clienteId], references: [id])
-  // clienteId   String?      @unique
-
-  @@unique([email])
-}
-
-model Funcionario {
-  // pessoaId    String?      @unique
-  // pessoa      Pessoa?      @relation(fields: [pessoaId], references: [id])
-  id               String         @id @default(uuid(7))
-  setor            String?        @db.VarChar(100)
-  cargo            String?        @db.VarChar(100)
-  usuarioSistemaId String         @unique
-  usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
-}
-
-enum TipoUsuario {
-  ADMIN_SISTEMA
-  ADMINISTRATIVO
-  MODERADOR
-  RECRUTADOR
-  VENDEDOR
-  CLIENTE_ATS
-  CLIENTE_ATS_CRM
-  CLIENTE_CRM
-}
-
-enum TipoPessoa {
-  FISICA
-  JURIDICA
+    @@unique([email])
+    @@schema("UsuarioSistema")
 }

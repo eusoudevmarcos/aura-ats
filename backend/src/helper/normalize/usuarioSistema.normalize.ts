@@ -3,39 +3,40 @@ import { convertAnyDateToPostgres } from "../../utils/convertDateToPostgres";
 export const normalizeData = (data: any) => {
   let newData = { ...data };
 
-  if (data?.pessoa) {
-    if (data?.pessoa?.cpf) {
-      newData.pessoa = {
-        ...newData.pessoa,
-        cpf: data.pessoa.cpf.replace(/\D/g, ""),
+  if (data?.funcionario.pessoa) {
+    if (data?.funcionario.pessoa?.cpf) {
+      newData.funcionario.pessoa = {
+        ...newData.funcionario.pessoa,
+        cpf: data.funcionario.pessoa.cpf.replace(/\D/g, ""),
       };
     } else {
-      newData.pessoa = { ...newData.pessoa };
+      newData.funcionario.pessoa = { ...newData.funcionario.pessoa };
     }
-    newData.pessoa = convertAnyDateToPostgres(newData.pessoa);
+    newData.funcionario.pessoa = convertAnyDateToPostgres(
+      newData.funcionario.pessoa
+    );
   }
 
-  if (data?.pessoaId) {
-    newData.pessoa = { id: data.pessoaId };
+  if (data?.funcionario.pessoaId) {
+    newData.funcionario.pessoa = { id: data.funcionario.pessoaId };
   }
 
   // Normaliza dados de empresa
-  if (data?.empresa) {
-    if (data?.empresa?.cnpj) {
-      newData.empresa = {
-        ...newData.empresa,
-        cnpj: data.empresa.cnpj.replace(/\D/g, ""),
+  if (data?.cliente.empresa) {
+    if (data?.cliente.empresa?.cnpj) {
+      newData.cliente.empresa = {
+        ...newData.cliente.empresa,
+        cnpj: data.cliente.empresa.cnpj.replace(/\D/g, ""),
       };
     } else {
-      newData.empresa = { ...newData.empresa };
+      newData.cliente.empresa = { ...newData.cliente.empresa };
     }
-    newData.empresa = convertAnyDateToPostgres(newData.empresa);
+    newData.cliente.empresa = convertAnyDateToPostgres(newData.cliente.empresa);
   }
 
-  if (data?.empresaId) {
-    if (!newData.empresa) newData.empresa = {};
-    newData.empresa = { id: data.empresaId };
-    console.log("ENTROU AQUI");
+  if (data?.cliente.empresaId) {
+    if (!newData.cliente.empresa) newData.cliente.empresa = {};
+    newData.cliente.empresa = { id: data.cliente.empresaId };
   }
 
   return newData;

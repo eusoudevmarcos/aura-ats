@@ -1,16 +1,21 @@
 model Cliente {
-  id          String        @id @default(uuid(7))
-  empresaId   String        @unique
-  tipoServico TipoServico[]
-  status      StatusCliente
-  empresa     Empresa       @relation(fields: [empresaId], references: [id])
-  vagas       Vaga[]
-  agendas     AgendaVaga[]
-}
+    id String @id @default(uuid(7))
 
-enum TipoServico {
-  RECRUTAMENTO_CONTRATUAL
-  RECRUTAMENTO_DISPARO_CURRICULO
-  RECRUTAMENTO_INFORMACAO
-  PLATAFORMA
+    tipoServico TipoServico[]
+    status      StatusCliente
+
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    vagas   Vaga[]
+    agendas Agenda[]
+
+    empresa   Empresa @relation(fields: [empresaId], references: [id])
+    empresaId String  @unique
+
+    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id])
+    usuarioSistemaId String?         @unique
+
+    @@index([empresaId])
+    @@schema("Cliente")
 }

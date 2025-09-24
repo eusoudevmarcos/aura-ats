@@ -1,38 +1,73 @@
-model AgendaVaga {
-  id         String           @id @default(uuid(7))
-  dataHora   DateTime
-  tipoEvento TipoEventoAgenda
-  link       String?
+model Agenda {
+    id         String           @id @default(uuid(7))
+    dataHora   DateTime
+    link       String?
+    tipoEvento TipoEventoAgenda
 
-  // relationship
-  etapaAtualId  String?
-  etapaAtual    ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
-  localizacaoId String?
-  localizacao   Localizacao?           @relation(fields: [localizacaoId], references: [id])
-  vagaId        String?
-  vaga          Vaga?                  @relation(fields: [vagaId], references: [id])
-  clienteId     String?
-  cliente       Cliente?               @relation(fields: [clienteId], references: [id])
+    etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
+    etapaAtualId String?
+
+    localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
+    localizacaoId String?
+
+    vaga   Vaga?   @relation(fields: [vagaId], references: [id])
+    vagaId String?
+
+    cliente           Cliente?            @relation(fields: [clienteId], references: [id])
+    clienteId         String?
+    agendaCandidatura AgendaCandidatura[]
+    triagem           TriagemVaga?        @relation(fields: [triagemId], references: [id])
+    triagemId         String?
+
+    @@schema("Agenda")
 }
 
 model ProcessoSeletivoEtapa {
-  id           String            @id @default(uuid(7))
-  nome         String
-  tipo         TipoEtapa
-  ordem        Int
-  descricao    String?
-  ativa        Boolean           @default(true)
-  agendaVaga   AgendaVaga[]
-  candidaturas CandidaturaVaga[]
+    id           String            @id @default(uuid(7))
+    nome         String
+    tipo         TipoEtapa
+    ordem        Int
+    descricao    String?
+    ativa        Boolean           @default(true)
+    agendaVaga   Agenda[]
+    candidaturas CandidaturaVaga[]
+
+    @@schema("ProcessoSeletivoEtapa")
 }
 
-enum TipoEventoAgenda {
-  TRIAGEM_INICIAL
-  ENTREVISTA_RH
-  ENTREVISTA_GESTOR
-  TESTE_TECNICO
-  TESTE_PSICOLOGICO
-  DINAMICA_GRUPO
-  PROPOSTA
-  OUTRO
+// model Agenda {
+//     id       String   @id @default(uuid(7))
+//     dataHora DateTime
+//     link     String?
+
+//     // relationship
+//     AgendaCandidatura AgendaCandidatura[]
+//     tipoEvento        TipoEventoAgenda
+
+//     localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
+//     localizacaoId String?
+
+//     cliente   Cliente? @relation(fields: [clienteId], references: [id])
+//     clienteId String?
+
+//     // renomeado para padronização camelCase (era "Triagem")
+//     triagem   TriagemVaga? @relation(fields: [triagemId], references: [id])
+//     triagemId String?
+
+//     @@index([localizacaoId])
+//     @@index([clienteId])
+//     @@index([triagemId])
+//     @@schema("Agenda")
+// }
+
+model AgendaCandidatura {
+    id String @id @default(uuid(7))
+
+    agenda   Agenda @relation(fields: [agendaId], references: [id])
+    agendaId String
+
+    candidatura   CandidaturaVaga @relation(fields: [candidaturaId], references: [id])
+    candidaturaId String
+
+    @@schema("AgendaCandidatura")
 }

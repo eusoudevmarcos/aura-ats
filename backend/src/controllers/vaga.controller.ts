@@ -43,9 +43,62 @@ export class VagaController {
         return res.status(200).json(vagas);
       }
 
-      const vagas = await this.service.getAll({ page, pageSize, search });
-
+      const vagas = await this.service.getAll({
+        page,
+        pageSize,
+        search,
+      });
       return res.status(200).json(vagas);
+    } catch (error: any) {
+      console.error("Error fetching vagas:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async getAllByClienteId(req: Request, res: Response): Promise<Response> {
+    try {
+      const clienteId = req.params.clienteId;
+      if (!clienteId) throw "ID do cliente é obrigatorio";
+
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const pageSize = req.query.pageSize
+        ? parseInt(req.query.pageSize as string, 10)
+        : 10;
+      const search = req.query.search as string;
+
+      const vagas = await this.service.getAllByCliente(clienteId, {
+        page,
+        pageSize,
+        search,
+      });
+      return res.status(200).json(nonEmptyAndConvertDataDTO(vagas));
+    } catch (error: any) {
+      console.error("Error fetching vagas:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async getAllByCandidatoId(req: Request, res: Response): Promise<Response> {
+    try {
+      const candidatoId = req.params.candidatoId;
+      if (!candidatoId) throw "ID do cliente é obrigatorio";
+
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const pageSize = req.query.pageSize
+        ? parseInt(req.query.pageSize as string, 10)
+        : 10;
+      const search = req.query.search as string;
+
+      const vagas = await this.service.getAllByCandidato(candidatoId, {
+        page,
+        pageSize,
+        search,
+      });
+      return res.status(200).json(nonEmptyAndConvertDataDTO(vagas));
     } catch (error: any) {
       console.error("Error fetching vagas:", error);
       return res
@@ -66,7 +119,6 @@ export class VagaController {
         .json({ message: "Internal server error", error: error.message });
     }
   }
-
   async vincularCandidato(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
     console.log(id);

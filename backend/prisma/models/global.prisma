@@ -1,37 +1,164 @@
-model Habilidade {
-  id             String                @id @default(uuid(7))
-  nome           String                @unique
-  tipoHabilidade String?
-  candidatos     CandidatoHabilidade[]
-  vagas          VagaHabilidade[]
+enum CategoriaVaga {
+    TECNOLOGIA
+    SAUDE
+    ADMINISTRATIVO
+    FINANCEIRO
+    RECURSOS_HUMANOS
+    MARKETING
+    VENDAS
+    OUTROS
+
+    @@schema("CategoriaVaga")
 }
 
-model Contato {
-  id        String   @id @default(uuid(7))
-  telefone  String?
-  whatsapp  String?
-  email     String?
-  pessoaId  String?
-  empresaId String?
-  empresa   Empresa? @relation(fields: [empresaId], references: [id])
-  pessoa    Pessoa?  @relation(fields: [pessoaId], references: [id])
+enum StatusVaga {
+    ATIVA
+    PAUSADA
+    ENCERRADA
+    ARQUIVADA
+
+    @@schema("StatusVaga")
 }
 
-model Localizacao {
-  id          String       @id @default(uuid(7))
-  cep         String?
-  cidade      String?
-  bairro      String?
-  uf          String
-  estado      String?
-  complemento String?
-  logradouro  String?
-  regiao      String?
-  pessoaId    String?
-  empresaId   String?
-  descricao   String?
-  agendaVaga  AgendaVaga[]
-  empresa     Empresa?     @relation(fields: [empresaId], references: [id])
-  pessoa      Pessoa?      @relation(fields: [pessoaId], references: [id])
-  vaga        Vaga[]
+enum TipoContrato {
+    CLT
+    PJ
+    ESTAGIO
+    FREELANCER
+    TEMPORARIO
+
+    @@schema("TipoContrato")
+}
+
+enum NivelExperiencia {
+    ESTAGIO
+    JUNIOR
+    PLENO
+    SENIOR
+    ESPECIALISTA
+    GERENTE
+
+    @@schema("NivelExperiencia")
+}
+
+enum TipoEtapa {
+    APLICACAO
+    TRIAGEM
+    TESTE
+    ENTREVISTA
+    OFERTA
+    CONTRATACAO
+
+    @@schema("TipoEtapa")
+}
+
+enum StatusCandidatura {
+    APLICADO
+    EM_ANALISE
+    ENTREVISTA_AGENDADA
+    ENTREVISTA_CONCLUIDA
+    OFERTA_ENVIADA
+    OFERTA_ACEITA
+    OFERTA_RECUSADA
+    DESCLASSIFICADO
+    CONTRATADO
+
+    @@schema("StatusCandidatura")
+}
+
+enum TipoServico {
+    RECRUTAMENTO_CONTRATUAL
+    RECRUTAMENTO_DISPARO_CURRICULO
+    RECRUTAMENTO_INFORMACAO
+    PLATAFORMA
+
+    @@schema("TipoServico")
+}
+
+enum AreaCandidato {
+    MEDICINA
+    ENFERMAGEM
+    OUTRO
+
+    @@schema("AreaCandidato")
+}
+
+enum StatusCliente {
+    PROSPECT
+    LEAD
+    ATIVO
+    INATIVO
+    PENDENTE
+
+    @@schema("StatusCliente")
+}
+
+enum TipoEventoAgenda {
+    TRIAGEM_INICIAL
+    ENTREVISTA_RH
+    ENTREVISTA_GESTOR
+    TESTE_TECNICO
+    TESTE_PSICOLOGICO
+    DINAMICA_GRUPO
+    PROPOSTA
+    OUTRO
+
+    @@schema("TipoEventoAgenda")
+}
+
+// novos enums para vaga/salário
+enum Moeda {
+    BRL
+    USD
+    EUR
+
+    @@schema("Moeda")
+}
+
+enum PeriodicidadeSalario {
+    HORA
+    DIA
+    MES
+    ANO
+
+    @@schema("PeriodicidadeSalario")
+}
+
+enum TipoSocio {
+    REPRESENTANTE
+    SOCIO
+    ADMINISTRADOR
+
+    @@schema("TipoSocio")
+}
+
+enum EstadoCivil {
+    SOLTEIRO
+    CASADO
+    DIVORCIADO
+    VIUVO
+    SEPARADO
+    UNIAO_ESTAVEL
+
+    @@schema("EstadoCivil")
+}
+
+enum TipoUsuario {
+    ADMIN_SISTEMA
+    ADMINISTRATIVO
+    MODERADOR
+    RECRUTADOR
+    VENDEDOR
+    CLIENTE_ATS
+    CLIENTE_ATS_CRM
+    CLIENTE_CRM
+
+    @@schema("TipoUsuario")
+}
+
+enum TipoPessoa {
+    FISICA
+    JURIDICA
+
+    @@schema("TipoPessoa")
 }

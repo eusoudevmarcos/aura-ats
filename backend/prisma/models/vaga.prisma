@@ -1,305 +1,123 @@
 model Vaga {
-  id                String            @id @default(uuid(7))
-  titulo            String
-  descricao         String
-  requisitos        String?
-  responsabilidades String?
-  dataPublicacao    DateTime          @default(now())
-  dataFechamento    DateTime?
-  create_at         DateTime          @default(now())
-  update_at         DateTime          @updatedAt
-  categoria         CategoriaVaga
-  status            StatusVaga
-  tipoContrato      TipoContrato?
-  nivelExperiencia  NivelExperiencia?
-  areaCandidato     AreaCandidato?
-  clienteId         String?
-  localizacaoId     String?
-  salario           Float?
-  tipoSalario       String?
-  agendaVaga        AgendaVaga[]
-  beneficios        Beneficio[]
-  CandidaturaVaga   CandidaturaVaga[]
-  cliente           Cliente?          @relation(fields: [clienteId], references: [id])
-  localizacao       Localizacao?      @relation(fields: [localizacaoId], references: [id])
-  anexos            VagaAnexo[]
-  habilidades       VagaHabilidade[]
-  candidatos        Candidato[]       @relation("CandidatoToVaga")
+    id                String                @id @default(uuid(7))
+    titulo            String
+    descricao         String
+    requisitos        String?
+    responsabilidades String?
+    dataPublicacao    DateTime              @default(now())
+    dataFechamento    DateTime?
+    create_at         DateTime              @default(now())
+    update_at         DateTime              @updatedAt
+    categoria         CategoriaVaga
+    status            StatusVaga
+    tipoContrato      TipoContrato?
+    nivelExperiencia  NivelExperiencia?
+    areaCandidato     AreaCandidato?
+    salario           Decimal?              @db.Decimal(12, 2)
+    moeda             Moeda?
+    tipoSalario       String?
+    periodicidade     PeriodicidadeSalario?
+    agendaVaga        Agenda[]
+    triagens          TriagemVaga[]
+    beneficios        VagaBeneficio[]
+    anexos            VagaAnexo[]
+    habilidades       VagaHabilidade[]
+    candidaturas      CandidaturaVaga[]
+
+    cliente   Cliente? @relation(fields: [clienteId], references: [id])
+    clienteId String?
+
+    localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
+    localizacaoId String?
+
+    @@index([localizacaoId])
+    @@index([clienteId])
+    @@schema("Vaga")
 }
 
 model VagaHabilidade {
-  nivelExigido String?
-  vagaId       String
-  habilidadeId String
-  habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
-  vaga         Vaga       @relation(fields: [vagaId], references: [id])
+    nivelExigido String?
 
-  @@id([vagaId, habilidadeId])
+    habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
+    habilidadeId String
+
+    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vagaId String
+
+    @@id([vagaId, habilidadeId])
+    @@schema("VagaHabilidade")
 }
 
 model CandidaturaVaga {
-  id            String                 @id @default(uuid(7))
-  candidatoId   String
-  vagaId        String
-  status        StatusCandidatura      @default(APLICADO)
-  dataAplicacao DateTime               @default(now())
-  observacoes   String?
-  etapaAtualId  String?
-  candidato     Candidato              @relation(fields: [candidatoId], references: [id])
-  etapaAtual    ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
-  vaga          Vaga                   @relation(fields: [vagaId], references: [id])
+    id            String            @id @default(uuid(7))
+    status        StatusCandidatura @default(APLICADO)
+    dataAplicacao DateTime          @default(now())
+    observacoes   String?
 
-  @@unique([candidatoId, vagaId])
+    candidato   Candidato @relation(fields: [candidatoId], references: [id])
+    candidatoId String
+
+    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vagaId String
+
+    agendaCandidatura       AgendaCandidatura[]
+    processoSeletivoEtapa   ProcessoSeletivoEtapa? @relation(fields: [processoSeletivoEtapaId], references: [id])
+    processoSeletivoEtapaId String?
+
+    @@unique([candidatoId, vagaId])
+    @@schema("CandidaturaVaga")
 }
 
 model Anexo {
-  id          String      @id @default(uuid(7))
-  nomeArquivo String
-  url         String
-  tipo        String?
-  tamanhoKb   Int?
-  vagas       VagaAnexo[]
+    id          String  @id @default(uuid(7))
+    nomeArquivo String
+    url         String
+    tipo        String?
+    tamanhoKb   Int?
+
+    vagas VagaAnexo[]
+
+    @@schema("Anexo")
 }
 
 model VagaAnexo {
-  vagaId  String
-  anexoId String
-  anexo   Anexo  @relation(fields: [anexoId], references: [id])
-  vaga    Vaga   @relation(fields: [vagaId], references: [id])
+    anexo   Anexo  @relation(fields: [anexoId], references: [id])
+    anexoId String
 
-  @@id([vagaId, anexoId])
+    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vagaId String
+
+    @@id([vagaId, anexoId])
+    @@schema("VagaAnexo")
 }
 
+// normalização: separar catálogo de benefícios e vínculo
 model Beneficio {
-  id        String  @id @default(uuid(7))
-  nome      String  @unique
-  descricao String?
-  vagaId    String?
-  vaga      Vaga?   @relation(fields: [vagaId], references: [id])
+    id        String          @id @default(uuid(7))
+    nome      String          @unique
+    descricao String?
+    vagas     VagaBeneficio[]
+
+    @@schema("Beneficio")
 }
 
-enum CategoriaVaga {
-  TECNOLOGIA
-  SAUDE
-  ADMINISTRATIVO
-  FINANCEIRO
-  RECURSOS_HUMANOS
-  MARKETING
-  VENDAS
-  OUTROS
+model VagaBeneficio {
+    beneficio   Beneficio @relation(fields: [beneficioId], references: [id])
+    beneficioId String
+
+    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vagaId String
+
+    @@id([vagaId, beneficioId])
+    @@schema("VagaBeneficio")
 }
 
-enum StatusVaga {
-  ATIVA
-  PAUSADA
-  ENCERRADA
-  ARQUIVADA
-}
+model Habilidade {
+    id             String           @id @default(uuid(7))
+    nome           String           @unique
+    tipoHabilidade String?
+    // candidatos     CandidatoHabilidade[]
+    vagas          VagaHabilidade[]
 
-enum TipoContrato {
-  CLT
-  PJ
-  ESTAGIO
-  FREELANCER
-  TEMPORARIO
+    @@schema("Habilidade")
 }
-
-enum NivelExperiencia {
-  ESTAGIO
-  JUNIOR
-  PLENO
-  SENIOR
-  ESPECIALISTA
-  GERENTE
-}
-
-enum TipoEtapa {
-  APLICACAO
-  TRIAGEM
-  TESTE
-  ENTREVISTA
-  OFERTA
-  CONTRATACAO
-}
-
-enum StatusCandidatura {
-  APLICADO
-  EM_ANALISE
-  ENTREVISTA_AGENDADA
-  ENTREVISTA_CONCLUIDA
-  OFERTA_ENVIADA
-  OFERTA_ACEITA
-  OFERTA_RECUSADA
-  DESCLASSIFICADO
-  CONTRATADO
-}
-
-/**
- * model Vaga {
- * id                String    @id @default(uuid(7))
- * titulo            String
- * descricao         String
- * requisitos        String?
- * responsabilidades String?
- * dataPublicacao    DateTime  @default(now())
- * dataFechamento    DateTime?
- * createdAt         DateTime  @default(now())
- * updatedAt         DateTime  @updatedAt
- * categoriaId      String
- * status           StatusVaga        @default(ATIVA)
- * tipoContrato     TipoContrato?
- * nivelExperiencia NivelExperiencia?
- * areaCandidatoId  String?
- * clienteId        String
- * localizacaoId    String?
- * faixaSalarialId  String?
- * // Relacionamentos
- * cliente       Cliente        @relation(fields: [clienteId], references: [id])
- * localizacao   Localizacao?   @relation(fields: [localizacaoId], references: [id])
- * faixaSalarial FaixaSalarial? @relation(fields: [faixaSalarialId], references: [id])
- * agenda       AgendaVaga[]
- * beneficios   VagaBeneficio[]
- * candidaturas CandidaturaVaga[]
- * anexos       VagaAnexo[]
- * habilidades  VagaHabilidade[]
- * candidatos   Candidato[]       @relation("CandidatoToVaga")
- * @@index([status])
- * @@index([categoriaId])
- * @@index([clienteId])
- * }
- * model CandidaturaVaga {
- * id            String                 @id @default(uuid(7))
- * candidatoId   String
- * vagaId        String
- * status        StatusCandidatura      @default(APLICADO)
- * dataAplicacao DateTime               @default(now())
- * observacoes   String?
- * etapaAtualId  String?
- * candidato     Candidato              @relation(fields: [candidatoId], references: [id])
- * etapaAtual    ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
- * vaga          Vaga                   @relation(fields: [vagaId], references: [id])
- * @@unique([candidatoId, vagaId])
- * }
- * model VagaAnexo {
- * vagaId  String
- * anexoId String
- * anexo   Anexo  @relation(fields: [anexoId], references: [id])
- * vaga    Vaga   @relation(fields: [vagaId], references: [id])
- * @@id([vagaId, anexoId])
- * }
- * model Anexo {
- * id          String      @id @default(uuid(7))
- * nomeArquivo String
- * url         String
- * tipo        String?
- * tamanhoKb   Int?
- * vagas       VagaAnexo[]
- * }
- * model VagaHabilidade {
- * vagaId       String
- * habilidadeId String
- * nivelExigido NivelHabilidade? // enum deixa mais consistente
- * vaga       Vaga       @relation(fields: [vagaId], references: [id])
- * habilidade Habilidade @relation(fields: [habilidadeId], references: [id])
- * @@id([vagaId, habilidadeId])
- * }
- * model VagaBeneficio {
- * vagaId      String
- * beneficioId String
- * vaga      Vaga      @relation(fields: [vagaId], references: [id])
- * beneficio Beneficio @relation(fields: [beneficioId], references: [id])
- * @@id([vagaId, beneficioId])
- * }
- * model Beneficio {
- * id        String          @id @default(uuid(7))
- * nome      String          @unique
- * descricao String?
- * vagas     VagaBeneficio[]
- * }
- * model FaixaSalarial {
- * id     String  @id @default(uuid(7))
- * minimo Float
- * maximo Float
- * tipo   String? // mensal, anual, hora etc.
- * vagas  Vaga[]
- * }
- * // categorias de vaga (igual ao que já estava)
- * enum CategoriaVaga {
- * TECNOLOGIA
- * SAUDE
- * ADMINISTRATIVO
- * FINANCEIRO
- * RECURSOS_HUMANOS
- * MARKETING
- * VENDAS
- * OUTROS
- * }
- * // status da vaga
- * enum StatusVaga {
- * ATIVA
- * PAUSADA
- * ENCERRADA
- * ARQUIVADA
- * }
- * // tipos de contrato
- * enum TipoContrato {
- * CLT
- * PJ
- * ESTAGIO
- * FREELANCER
- * TEMPORARIO
- * }
- * // nível de experiência do candidato
- * enum NivelExperiencia {
- * ESTAGIO
- * JUNIOR
- * PLENO
- * SENIOR
- * ESPECIALISTA
- * GERENTE
- * }
- * // área/vertical do candidato (útil para filtros e agrupamentos)
- * enum AreaCandidato {
- * TECNOLOGIA
- * SAUDE
- * FINANCEIRO
- * ADMINISTRATIVO
- * MARKETING
- * VENDAS
- * RECURSOS_HUMANOS
- * DESIGN
- * PRODUTO
- * OPERACOES
- * JURIDICO
- * LOGISTICA
- * OUTROS
- * }
- * // nível exigido para uma habilidade (substitui string livre)
- * enum NivelHabilidade {
- * BASICO
- * INTERMEDIARIO
- * AVANCADO
- * ESPECIALISTA
- * }
- * // tipos de etapa do processo seletivo (para modelo de etapas)
- * enum TipoEtapa {
- * APLICACAO
- * TRIAGEM
- * TESTE
- * ENTREVISTA
- * OFERTA
- * CONTRATACAO
- * }
- * // status de uma candidatura
- * enum StatusCandidatura {
- * APLICADO
- * EM_ANALISE
- * ENTREVISTA_AGENDADA
- * ENTREVISTA_CONCLUIDA
- * OFERTA_ENVIADA
- * OFERTA_ACEITA
- * OFERTA_RECUSADA
- * DESCLASSIFICADO
- * CONTRATADO
- * }
- */

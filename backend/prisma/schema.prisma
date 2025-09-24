@@ -6,4 +6,6 @@ datasource db {
   provider  = "postgresql"
   url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
+  // relationMode = "prisma"
+  schemas   = ["Agenda", "ProcessoSeletivoEtapa", "AgendaCandidatura", "Localizacao", "Cliente", "Candidato", "Especialidade", "Formacao", "Contato", "Socio", "Empresa", "TipoSocio", "Habilidade", "CategoriaVaga", "StatusVaga", "TipoContrato", "NivelExperiencia", "TipoEtapa", "StatusCandidatura", "TipoServico", "AreaCandidato", "StatusCliente", "TipoEventoAgenda", "Moeda", "PeriodicidadeSalario", "Pessoa", "EstadoCivil", "TriagemVaga", "UsuarioSistema", "Funcionario", "TipoUsuario", "TipoPessoa", "Vaga", "VagaHabilidade", "CandidaturaVaga", "Anexo", "VagaAnexo", "Beneficio", "VagaBeneficio"]
 }

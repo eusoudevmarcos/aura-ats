@@ -1,6 +1,6 @@
+import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { Request, Response } from "express";
 import { AgendaInput, AgendaService } from "../services/agenda.service";
 
 @injectable()
@@ -26,7 +26,7 @@ export class AgendaController {
   async findById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const agenda = await prisma.agendaVaga.findUnique({
+      const agenda = await prisma.agenda.findUnique({
         where: { id },
         include: {
           vaga: true,
@@ -53,7 +53,7 @@ export class AgendaController {
     try {
       const skip = (page - 1) * pageSize;
       const [agendas, total] = await Promise.all([
-        prisma.agendaVaga.findMany({
+        prisma.agenda.findMany({
           skip,
           take: pageSize,
           include: {
@@ -63,7 +63,7 @@ export class AgendaController {
           },
           orderBy: { dataHora: "asc" },
         }),
-        prisma.agendaVaga.count(),
+        prisma.agenda.count(),
       ]);
       return res.status(200).json({
         data: agendas,
@@ -85,7 +85,7 @@ export class AgendaController {
     try {
       const { id } = req.params;
       const data = req.body;
-      const agenda = await prisma.agendaVaga.update({
+      const agenda = await prisma.agenda.update({
         where: { id },
         data: {
           dataHora: data.dataHora,
@@ -110,7 +110,7 @@ export class AgendaController {
   async delete(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.agendaVaga.delete({
+      await prisma.agenda.delete({
         where: { id },
       });
       return res.status(204).send();
