@@ -109,53 +109,57 @@ const FuncionarioPage: React.FC = () => {
               </span>
             </p>
           </Card>
-          {funcionario.pessoa && (
+          {funcionario?.funcionario?.pessoa && (
             <Card title="Dados da Pessoa">
               <p>
                 <span className="font-medium">Nome:</span>{' '}
                 <span className="text-secondary">
-                  {funcionario.pessoa.nome}
+                  {funcionario.funcionario.pessoa.nome}
                 </span>
               </p>
               <p>
                 <span className="font-medium">CPF:</span>{' '}
-                <span className="text-secondary">{funcionario.pessoa.cpf}</span>
+                <span className="text-secondary">
+                  {funcionario.funcionario.pessoa.cpf}
+                </span>
               </p>
               <p>
                 <span className="font-medium">Data de Nascimento:</span>{' '}
                 <span className="text-secondary">
-                  {funcionario?.pessoa?.dataNascimento &&
-                    funcionario?.pessoa?.dataNascimento.toString()}
+                  {funcionario?.funcionario.pessoa?.dataNascimento &&
+                    funcionario?.funcionario.pessoa?.dataNascimento.toString()}
                 </span>
               </p>
               <p>
                 <span className="font-medium">RG:</span>{' '}
-                <span className="text-secondary">{funcionario.pessoa.rg}</span>
+                <span className="text-secondary">
+                  {funcionario.funcionario.pessoa.rg}
+                </span>
               </p>
               {/* <p>
                 <span className="font-medium">Estado Civil:</span> <span className="text-secondary">{funcionario.pessoa.estadoCivil}</span>
               </p> */}
             </Card>
           )}
-          {funcionario.empresa && (
+          {funcionario?.cliente?.empresa && (
             <Card title="Dados da Empresa">
               <p>
                 <span className="font-medium">Razão Social:</span>{' '}
                 <span className="text-secondary">
-                  {funcionario.empresa.razaoSocial}
+                  {funcionario.cliente.empresa.razaoSocial}
                 </span>
               </p>
               <p>
                 <span className="font-medium">CNPJ:</span>{' '}
                 <span className="text-secondary">
-                  {funcionario.empresa.cnpj}
+                  {funcionario.cliente.empresa.cnpj}
                 </span>
               </p>
-              {funcionario?.empresa?.dataAbertura && (
+              {funcionario?.cliente.empresa?.dataAbertura && (
                 <p>
                   <span className="font-medium">Data de Abertura:</span>{' '}
                   <span className="text-secondary">
-                    {funcionario.empresa.dataAbertura}
+                    {funcionario.cliente.empresa.dataAbertura}
                   </span>
                 </p>
               )}
