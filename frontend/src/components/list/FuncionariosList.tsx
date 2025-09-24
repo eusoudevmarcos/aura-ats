@@ -6,71 +6,48 @@ import React, { useEffect, useState } from 'react';
 import Table, { TableColumn } from '../Table';
 
 // Tipos para Pessoa e Empresa
-interface Contato {
-  telefone?: string;
-  whatsapp?: string;
-  email?: string;
-}
-
 interface Pessoa {
-  nome: string;
-  cpf: string;
-  dataNascimento: string;
-  estadoCivil?: string;
-  rg?: number;
-  contatos: Contato[];
+  nome?: string;
 }
 
-interface Empresa {
-  razaoSocial: string;
-  cnpj: string;
-  dataAbertura: string;
-  contatos: Contato[];
-  localizacoes?: { cidade: string; estado: string }[];
-}
-
-type Funcionario = {
-  id?: string;
-  pessoa?: Pessoa;
-  empresa?: Empresa;
+type FuncionarioApi = {
+  id: string;
   email: string;
   password: string;
   tipoUsuario: string;
-  setor?: string;
-  cargo?: string;
+  funcionario: {
+    id: string;
+    setor?: string;
+    cargo?: string;
+    usuarioSistemaId?: string;
+    pessoaId?: string | null;
+    pessoa?: Pessoa | null;
+  } | null;
+  cliente: any; // não utilizado para funcionários
 };
 
 type FuncionarioTabela = {
-  nome?: string;
-  email?: string;
+  id: string;
+  nome: string;
+  email: string;
   tipoUsuario: string;
-  dataNascimento: string;
+  setor: string;
+  cargo: string;
 };
 
-function normalizarTable(funcionarios: Funcionario[]): FuncionarioTabela[] {
-  return funcionarios.map(f => {
-    if ('pessoa' in f) {
-      return {
-        nome: f.pessoa?.nome,
-        email: f.pessoa?.contatos?.[0]?.email || f.email,
-        tipoUsuario: f.tipoUsuario,
-        dataNascimento: f.pessoa?.dataNascimento ?? '-',
-        id: f.id,
-      };
-    } else if ('empresa' in f) {
-      return {
-        nome: f.empresa?.razaoSocial,
-        email: f.empresa?.contatos?.[0]?.email || f.email,
-        tipoUsuario: f.tipoUsuario,
-        dataNascimento: f.empresa?.dataAbertura ?? '-',
-        id: f.id,
-      };
+function normalizarTable(funcionarios: FuncionarioApi[]): FuncionarioTabela[] {
+  return funcionarios.map((f: FuncionarioApi) => {
+    let nome = '-';
+    if (f.funcionario && f.funcionario.pessoa && f.funcionario.pessoa.nome) {
+      nome = f.funcionario.pessoa.nome;
     }
     return {
-      nome: '-',
-      email: '-',
-      tipoUsuario: '-',
-      dataNascimento: '-',
+      id: f.id,
+      nome,
+      email: f.email,
+      tipoUsuario: f.tipoUsuario,
+      setor: f.funcionario?.setor || '-',
+      cargo: f.funcionario?.cargo || '-',
     };
   });
 }
@@ -80,12 +57,13 @@ const columns: TableColumn<FuncionarioTabela>[] = [
   { label: 'Nome', key: 'nome' },
   { label: 'Email', key: 'email' },
   { label: 'Tipo Usuário', key: 'tipoUsuario' },
-  { label: 'Data de Nascimento', key: 'dataNascimento' },
+  { label: 'Setor', key: 'setor' },
+  { label: 'Cargo', key: 'cargo' },
 ];
 
 const FuncionariosList: React.FC = () => {
   const [search, setSearch] = useState('');
-  const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [funcionarios, setFuncionarios] = useState<FuncionarioApi[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
   // Estados para paginação
@@ -100,7 +78,7 @@ const FuncionariosList: React.FC = () => {
     const fetchFuncionarios = async () => {
       setLoading(true);
       try {
-        const response = await api.get<Pagination<Funcionario[]>>(
+        const response = await api.get<Pagination<FuncionarioApi[]>>(
           '/api/externalWithAuth/funcionario',
           {
             params: {
@@ -128,22 +106,24 @@ const FuncionariosList: React.FC = () => {
 
   const dadosFiltrados = dadosTabela.filter(
     f =>
-      f.nome?.toLowerCase().includes(search.toLowerCase()) ||
-      f.email?.toLowerCase().includes(search.toLowerCase()) ||
-      f.tipoUsuario.toLowerCase().includes(search.toLowerCase())
+      f.nome.toLowerCase().includes(search.toLowerCase()) ||
+      f.email.toLowerCase().includes(search.toLowerCase()) ||
+      f.tipoUsuario.toLowerCase().includes(search.toLowerCase()) ||
+      f.setor.toLowerCase().includes(search.toLowerCase()) ||
+      f.cargo.toLowerCase().includes(search.toLowerCase())
   );
 
-  const onRowClick = (row: any) => {
+  const onRowClick = (row: FuncionarioTabela) => {
     router.push(`/funcionario/${row.id}`);
   };
 
   return (
     <Card classNameContainer="mt-6 px-6 py-2">
       <div className="flex justify-between items-center flex-wrap p-2">
-        <h2 className="text-xl font-bold mb-4">Lista de Funcionarios</h2>
+        <h2 className="text-xl font-bold mb-4">Lista de Funcionários</h2>
         <input
           type="text"
-          placeholder="Buscar cliente..."
+          placeholder="Buscar funcionário..."
           value={search}
           onChange={e => setSearch(e.target.value)}
           className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"

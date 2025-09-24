@@ -125,47 +125,46 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               </>
             </FormSelect>
 
-            {areaCandidato !== AreaCandidatoEnum.enum.OUTROS && (
-              <>
-                <FormSelect
-                  selectProps={{ disabled: !areaCandidato }}
-                  name="especialidadeId"
-                  placeholder="Especialidade"
-                >
-                  <>
-                    {especialidades.map(esp => (
-                      <option key={esp.id} value={esp.id}>
-                        {esp.nome}
-                      </option>
-                    ))}
-                  </>
-                </FormSelect>
-
-                {areaCandidato !== AreaCandidatoEnum.enum.MEDICINA && (
-                  <FormInput
-                    name="crm"
-                    placeholder="CRM"
-                    inputProps={{ disabled: !areaCandidato }}
-                  />
-                )}
-
-                {areaCandidato !== AreaCandidatoEnum.enum.ENFERMAGEM && (
-                  <FormInput
-                    name="corem"
-                    placeholder="COREM"
-                    inputProps={{ disabled: !areaCandidato }}
-                  />
-                )}
-
-                {especialidadeId && (
-                  <FormInput
-                    name="rqe"
-                    placeholder="RQE"
-                    inputProps={{ disabled: !areaCandidato }}
-                  />
-                )}
-              </>
+            {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+              <FormSelect
+                selectProps={{ disabled: !areaCandidato }}
+                name="especialidadeId"
+                placeholder="Especialidade"
+              >
+                <>
+                  {especialidades.map(esp => (
+                    <option key={esp.id} value={esp.id}>
+                      {esp.nome}
+                    </option>
+                  ))}
+                </>
+              </FormSelect>
             )}
+
+            {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+              <FormInput
+                name="crm"
+                placeholder="CRM"
+                inputProps={{ disabled: !areaCandidato }}
+              />
+            )}
+
+            {areaCandidato === AreaCandidatoEnum.enum.ENFERMAGEM && (
+              <FormInput
+                name="corem"
+                placeholder="COREM"
+                inputProps={{ disabled: !areaCandidato }}
+              />
+            )}
+
+            {areaCandidato === AreaCandidatoEnum.enum.MEDICINA &&
+              especialidadeId && (
+                <FormInput
+                  name="rqe"
+                  placeholder="RQE"
+                  inputProps={{ disabled: !areaCandidato }}
+                />
+              )}
           </div>
         </Card>
 

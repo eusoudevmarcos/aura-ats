@@ -5,8 +5,10 @@ import Card from '@/components/Card';
 import ClienteForm from '@/components/form/ClienteForm';
 import VagaForm from '@/components/form/VagaForm';
 import { EditPenIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { VagaWithRelations } from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
-import { clienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
+import useFetchWithPagination from '@/hook/useFetchWithPagination';
+import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -14,7 +16,7 @@ import React, { useEffect, useState } from 'react';
 const ITENS_POR_PAGINA = 6;
 
 const ClientePage: React.FC<{
-  initialValues?: clienteWithEmpresaAndVagaInput;
+  initialValues?: ClienteWithEmpresaAndVagaInput;
 }> = ({ initialValues }) => {
   const router = useRouter();
   const { uuid } = router.query;
@@ -23,13 +25,40 @@ const ClientePage: React.FC<{
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showVagasForm, setShowVagasForm] = useState(false);
-  const [cliente, setCliente] = useState<clienteWithEmpresaAndVagaInput | null>(
+  const [cliente, setCliente] = useState<ClienteWithEmpresaAndVagaInput | null>(
     initialValues ?? null
+  );
+
+  const [clienteCarregado, setClienteCarregado] = useState<boolean>(
+    !!initialValues
+  );
+
+  const {
+    data: vagas,
+    total: totalRecords,
+    totalPages,
+    loading: isLoadingVagas,
+    setPage,
+    setPageSize,
+    page,
+    pageSize,
+    refetch: refetchVagas,
+  } = useFetchWithPagination<VagaWithRelations>(
+    `/api/externalWithAuth/vaga/cliente/${cliente?.id}`,
+    cliente && cliente.id ? { search: cliente.id } : {},
+    {
+      pageSize: 5,
+      page: 1,
+      dependencies: [cliente?.id],
+      manual: true,
+      requestOptions: {},
+    }
   );
 
   useEffect(() => {
     if (!uuid || initialValues) {
       setLoading(false);
+      setClienteCarregado(true);
       return;
     }
 
@@ -39,16 +68,25 @@ const ClientePage: React.FC<{
       try {
         const res = await api.get(`/api/externalWithAuth/cliente/${uuid}`);
         setCliente(res.data);
+        setClienteCarregado(true);
       } catch (_) {
         setErro('Cliente não encontrado ou erro ao buscar dados.');
         setCliente(null);
+        setClienteCarregado(false);
       } finally {
         setLoading(false);
       }
     };
 
     fetchCliente();
-  }, [uuid]);
+  }, [uuid, initialValues]);
+
+  // Quando o cliente for carregado, buscar as vagas
+  useEffect(() => {
+    if (clienteCarregado && cliente && cliente.id) {
+      refetchVagas({ search: cliente.id });
+    }
+  }, [clienteCarregado, cliente]);
 
   const handleTrash = async () => {
     if (!cliente) return;
@@ -68,7 +106,6 @@ const ClientePage: React.FC<{
   }, [cliente]);
 
   // Funções de paginação
-  const vagas = cliente?.vagas || [];
   const totalPaginas = Math.ceil(vagas.length / ITENS_POR_PAGINA);
 
   const vagasPaginadas = vagas.slice(
@@ -110,17 +147,18 @@ const ClientePage: React.FC<{
   return (
     <div className="max-w-5xl mx-auto p-1">
       <section>
+        <h1 className="text-2xl font-bold text-center text-primary w-full">
+          CLIENTE
+        </h1>
+
         {!initialValues && (
-          <div className="flex mb-8">
+          <div className="flex mb-8 justify-between">
             <button
               className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110"
               onClick={() => router.back()}
             >
               Voltar
             </button>
-            <h1 className="text-2xl font-bold text-center text-primary w-full">
-              DETALHES DO CLIENTE
-            </h1>
 
             <div className="flex gap-2">
               <button
@@ -140,7 +178,7 @@ const ClientePage: React.FC<{
         )}
 
         <div className="flex flex-col flex-wrap gap-2">
-          <Card>
+          <Card classNameContainer="">
             <div>
               <span className="font-medium">Status:</span>
 
@@ -239,7 +277,7 @@ const ClientePage: React.FC<{
 
       <div className="flex justify-center mt-10 mb-4 relative">
         <h3 className="text-2xl font-bold text-center text-primary w-full ">
-          VAGAS
+          VAGAS CADASTRADAS
         </h3>
 
         <PrimaryButton
@@ -262,7 +300,8 @@ const ClientePage: React.FC<{
               initialValues={{ cliente: cliente, clienteId: cliente.id }}
               onSuccess={vaga => {
                 setShowVagasForm(false);
-                vagasPaginadas.push(vaga);
+                // Atualizar as vagas após cadastrar uma nova vaga
+                refetchVagas({ search: cliente.id });
               }}
             />
           </Modal>
@@ -270,7 +309,14 @@ const ClientePage: React.FC<{
       </div>
 
       <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-between">
-        {vagas.length > 0 ? (
+        {isLoadingVagas ? (
+          <div className="flex justify-center items-center w-full h-32">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+            <span className="ml-4 text-primary text-lg">
+              Carregando vagas...
+            </span>
+          </div>
+        ) : vagas.length > 0 ? (
           <>
             {vagasPaginadas.map((vaga: any) => (
               <Link
@@ -316,18 +362,9 @@ const ClientePage: React.FC<{
                     <div className="flex items-center">
                       <span className="material-icons-outlined">group</span>
                       <span className="ml-1 text-secondary">
-                        {vaga._count.candidatos}
+                        {vaga._count.candidaturas}
                       </span>
                     </div>
-                    {/* 
-                    <div className="flex items-center">
-                      <span className="material-icons-outlined">
-                        visibility
-                      </span>
-                      <span className="ml-1 text-secondary">
-                        {vaga._count.candidatos}
-                      </span>
-                    </div> */}
                   </div>
                 </Card>
               </Link>
@@ -384,6 +421,10 @@ const ClientePage: React.FC<{
           onSuccess={cliente => {
             setShowModalEdit(false);
             setCliente(cliente);
+            // Atualizar as vagas caso o cliente seja editado
+            if (cliente && cliente.id) {
+              refetchVagas({ search: cliente.id });
+            }
           }}
           initialValues={cliente}
         />

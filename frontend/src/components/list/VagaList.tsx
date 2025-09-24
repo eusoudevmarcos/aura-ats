@@ -1,9 +1,8 @@
-import api from '@/axios';
 import Card from '@/components/Card';
-import { Pagination } from '@/type/pagination.type'; // Se este é o seu tipo de paginação
+import useFetchWithPagination from '@/hook/useFetchWithPagination';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
-import Table, { TableColumn } from '../Table'; // Certifique-se que o caminho está correto
+import React, { useState } from 'react';
+import Table, { TableColumn } from '../Table';
 import { FormInput } from '../input/FormInput';
 
 // ===================== ENUMS (Adaptadas para o Frontend) =====================
@@ -42,7 +41,7 @@ export enum NivelExperiencia {
   GERENTE = 'GERENTE',
 }
 
-export enum AreaCandidato { // Assumindo que você tem um enum para isso
+export enum AreaCandidato {
   TI = 'TI',
   ENGENHARIA = 'ENGENHARIA',
   MEDICINA = 'MEDICINA',
@@ -51,7 +50,6 @@ export enum AreaCandidato { // Assumindo que você tem um enum para isso
 }
 
 // ===================== INTERFACES DE DADOS PARA O FRONTEND =====================
-// Interfaces para as relações que serão incluídas na Vaga
 export interface Cliente {
   id: string;
   nome: string;
@@ -89,7 +87,6 @@ export interface VagaHabilidade {
   habilidade: Habilidade; // Incluindo a habilidade relacionada
 }
 
-// Interface principal da Vaga com suas relações expandidas para o Frontend
 export interface VagaWithRelations {
   id: string;
   titulo: string;
@@ -98,7 +95,7 @@ export interface VagaWithRelations {
   responsabilidades?: string | null;
   salario?: number | null;
   tipoSalario?: string | null;
-  dataPublicacao: string | Date; // String no recebimento, Date após conversão
+  dataPublicacao: string | Date;
   dataFechamento?: string | Date | null;
   create_at: string | Date;
   update_at: string | Date;
@@ -109,15 +106,14 @@ export interface VagaWithRelations {
   nivelExperiencia: NivelExperiencia;
   areaCandidato?: AreaCandidato | null;
 
-  // Relações incluídas:
   cliente?: Cliente | null;
-  clienteId?: string | null; // Pode ser útil ter o ID também
+  clienteId?: string | null;
 
   localizacao?: Localizacao | null;
   localizacaoId?: string | null;
 
-  beneficios?: Beneficio[]; // Assume que o backend retorna os benefícios diretamente
-  habilidades?: VagaHabilidade[]; // Assume que o backend retorna VagaHabilidade com Habilidade aninhada
+  beneficios?: Beneficio[];
+  habilidades?: VagaHabilidade[];
   // Candidatos, CandidaturaVaga, AgendaVaga, Anexos (se precisar, inclua também)
 }
 
@@ -146,45 +142,27 @@ const columns: TableColumn<VagaWithRelations>[] = [
 
 const VagaList: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [vagas, setVagas] = useState<VagaWithRelations[]>([]);
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [page, setPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(5);
-  const [totalRecords, setTotalRecords] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
-
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchVagas = async () => {
-      setIsLoading(true);
-      try {
-        const response = await api.get<Pagination<VagaWithRelations[]>>(
-          '/api/externalWithAuth/vaga',
-          {
-            params: {
-              page,
-              pageSize,
-              search: searchQuery,
-            },
-          }
-        );
-        setVagas(response.data.data);
-        setTotalRecords(response.data.total);
-        setTotalPages(response.data.totalPages);
-      } catch (error) {
-        console.log('Erro ao buscar vagas:', error);
-        setVagas([]);
-        setTotalRecords(0);
-        setTotalPages(1);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchVagas();
-  }, [page, pageSize, searchQuery]);
+  const {
+    data: vagas,
+    total: totalRecords,
+    totalPages,
+    loading: isLoading,
+    setPage,
+    setPageSize,
+    page,
+    pageSize,
+  } = useFetchWithPagination<VagaWithRelations>(
+    '/api/externalWithAuth/vaga',
+    { search: searchQuery },
+    {
+      pageSize: 5,
+      page: 1,
+      dependencies: [searchQuery],
+      requestOptions: {},
+    }
+  );
 
   // A filtragem local é mantida caso o backend não suporte 'search'
   // mas o ideal é que o 'search' seja tratado pelo backend na API.

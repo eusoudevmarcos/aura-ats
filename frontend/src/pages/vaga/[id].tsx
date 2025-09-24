@@ -89,6 +89,10 @@ const VagaPage: React.FC = () => {
 
   return (
     <div className="max-w-5xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-center text-primary flex-grow">
+        VAGA
+      </h1>
+
       <div className="flex justify-between items-center mb-8">
         <button
           className="px-4 py-2 bg-primary text-white rounded shadow-md hover:scale-105 transition-transform"
@@ -96,9 +100,7 @@ const VagaPage: React.FC = () => {
         >
           Voltar
         </button>
-        <h1 className="text-2xl font-bold text-center text-primary flex-grow">
-          Detalhes da Vaga
-        </h1>
+
         <div className="flex gap-2">
           <button
             className="px-3 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 transition-transform"
@@ -349,7 +351,7 @@ const VagaPage: React.FC = () => {
 
       <div className="flex justify-center mt-10 mb-4 relative">
         <h3 className="text-2xl font-bold text-center text-primary w-full ">
-          Profissionais
+          PROFISSIONAIS CADASTRADOS
         </h3>
 
         <PrimaryButton

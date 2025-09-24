@@ -34,19 +34,43 @@ export const FuncionarioForm = ({
     'Selecionar Cliente' | 'Cadastrar Cliente'
   >('Selecionar Cliente');
 
+  // Ajuste dos valores iniciais para refletir a estrutura correta
   const defaultValues = useMemo(() => {
     if (initialValues) {
+      // Ajusta para garantir que pessoa está dentro de funcionario e empresa dentro de cliente
+      let tipoPessoaOuEmpresa = 'empresa';
+      let funcionario: any = initialValues.funcionario || {};
+      let cliente: any = initialValues.cliente || {};
+
+      if ((initialValues as any).pessoa) {
+        tipoPessoaOuEmpresa = 'pessoa';
+        funcionario = {
+          ...funcionario,
+          pessoa: (initialValues as any).pessoa,
+        };
+      }
+      if ((initialValues as any).empresa) {
+        tipoPessoaOuEmpresa = 'empresa';
+        cliente = {
+          ...cliente,
+          empresa: (initialValues as any).empresa,
+        };
+      }
+
       return {
         ...initialValues,
-        tipoPessoaOuEmpresa: initialValues?.pessoa ? 'pessoa' : 'empresa',
+        tipoPessoaOuEmpresa,
+        funcionario,
+        cliente,
       } as FuncionarioInput;
     }
     return {
-      tipoPessoaOuEmpresa: 'pessoa',
+      tipoPessoaOuEmpresa: 'funcionario.pessoa',
       funcionario: {
         setor: '',
         cargo: '',
       },
+      cliente: {},
     } as Partial<FuncionarioInput>;
   }, [initialValues]);
 
@@ -90,18 +114,20 @@ export const FuncionarioForm = ({
       tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
       tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_CRM
     ) {
-      setValue('tipoPessoaOuEmpresa', 'empresa');
+      setValue('tipoPessoaOuEmpresa', 'cliente.empresa');
     }
   }, [tipoUsuario, setValue, setor, cargo]);
 
   useEffect(() => {
-    if (tipoPessoaOuEmpresa === 'pessoa') {
-      setValue('empresa', undefined, {
+    if (tipoPessoaOuEmpresa === 'funcionario.pessoa') {
+      // Limpa empresa de dentro de cliente
+      setValue('cliente.empresa', undefined, {
         shouldValidate: true,
         shouldDirty: true,
       });
     } else {
-      setValue('pessoa', undefined, {
+      // Limpa pessoa de dentro de funcionario
+      setValue('funcionario.pessoa', undefined, {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -111,11 +137,43 @@ export const FuncionarioForm = ({
 
   async function onSubmit(data: FuncionarioInput): Promise<void> {
     try {
-      const cleanData = {
+      // Monta o objeto para enviar no formato correto
+      const cleanData: any = {
         ...data,
       };
+
+      // Remove campo auxiliar
       if ('tipoPessoaOuEmpresa' in cleanData) {
-        delete (cleanData as any).tipoPessoaOuEmpresa;
+        delete cleanData.tipoPessoaOuEmpresa;
+      }
+
+      // Garante que pessoa está dentro de funcionario e empresa dentro de cliente
+      if (tipoPessoaOuEmpresa === 'funcionario.pessoa') {
+        // Se existir pessoa fora, move para dentro de funcionario
+        if ((cleanData as any).pessoa) {
+          cleanData.funcionario = {
+            ...cleanData.funcionario,
+            pessoa: (cleanData as any).pessoa,
+          };
+          delete cleanData.pessoa;
+        }
+        // Remove empresa de cliente se existir
+        if (cleanData.cliente && cleanData.cliente.empresa) {
+          delete cleanData.cliente.empresa;
+        }
+      } else if (tipoPessoaOuEmpresa === 'cliente.empresa') {
+        // Se existir empresa fora, move para dentro de cliente
+        if ((cleanData as any).empresa) {
+          cleanData.cliente = {
+            ...cleanData.cliente,
+            empresa: (cleanData as any).empresa,
+          };
+          delete cleanData.empresa;
+        }
+        // Remove pessoa de funcionario se existir
+        if (cleanData.funcionario && cleanData.funcionario.pessoa) {
+          delete cleanData.funcionario.pessoa;
+        }
       }
 
       setLoading(true);
@@ -133,13 +191,18 @@ export const FuncionarioForm = ({
   }
 
   const onSuccessClienteSearch = (cliente: any) => {
-    setValue('empresaId', cliente.empresa.id);
+    // Seta o id da empresa dentro de cliente
+    setValue('cliente.empresa.id', cliente.empresa.id);
     setDisabledFieldsEmpresa(true);
   };
 
   const onDeleteClienteSearch = () => {
     const currentValues = methods.getValues();
-    reset({ ...currentValues, empresa: '' as any });
+    // Limpa empresa de dentro de cliente
+    reset({
+      ...currentValues,
+      cliente: { ...currentValues.cliente, empresa: undefined },
+    });
     setDisabledFieldsEmpresa(false);
   };
 
@@ -254,9 +317,8 @@ export const FuncionarioForm = ({
             </>
           </FormSelect>
 
-          {tipoPessoaOuEmpresa === 'pessoa' && tipoUsuario && <PessoaForm />}
-
-          {tipoPessoaOuEmpresa === 'empresa' && isClienteUsuario ? (
+          {/* Renderização condicional dos formulários de acordo com a estrutura correta */}
+          {tipoPessoaOuEmpresa === 'cliente.empresa' && isClienteUsuario ? (
             <Tabs
               tabs={['Pesquisar Cliente', 'Cadastrar Cliente']}
               currentTab={currentTab}
@@ -269,9 +331,9 @@ export const FuncionarioForm = ({
                 <ClienteSearch
                   onSuccess={onSuccessClienteSearch}
                   initialValuesProps={
-                    initialValues?.empresa
+                    initialValues?.cliente?.empresa
                       ? {
-                          empresa: { ...initialValues?.empresa },
+                          empresa: { ...initialValues?.cliente?.empresa },
                           clienteId: initialValues?.id,
                         }
                       : null
@@ -281,14 +343,17 @@ export const FuncionarioForm = ({
               </>
 
               <>
-                <EmpresaForm disabledFields={disabledFieldsEmpresa} />
+                <EmpresaForm
+                  namePrefix="cliente.empresa"
+                  disabledFields={disabledFieldsEmpresa}
+                />
               </>
             </Tabs>
-          ) : tipoPessoaOuEmpresa === 'pessoa' ? (
-            tipoUsuario && <PessoaForm />
+          ) : tipoPessoaOuEmpresa === 'funcionario.pessoa' ? (
+            tipoUsuario && <PessoaForm namePrefix="funcionario.pessoa" />
           ) : (
             <>
-              <EmpresaForm />
+              <EmpresaForm namePrefix="cliente.empresa" />
             </>
           )}
         </Card>

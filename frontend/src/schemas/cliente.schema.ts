@@ -27,7 +27,7 @@ export const clienteWithEmpresaSchema = clienteSchema.extend({
   empresaId: z.uuid().optional(),
   empresa: empresaSchema,
 });
-export type clienteWithEmpresaInput = z.infer<typeof clienteWithEmpresaSchema>;
+export type ClienteWithEmpresaInput = z.infer<typeof clienteWithEmpresaSchema>;
 
 // Cliente + Empesa + Vaga
 export const clienteWithEmpresaAndVagaSchema = clienteSchema.extend({
@@ -36,6 +36,6 @@ export const clienteWithEmpresaAndVagaSchema = clienteSchema.extend({
   vagas: z.array(z.lazy(() => vagaSchema)).optional(),
   vagaId: z.uuid(),
 });
-export type clienteWithEmpresaAndVagaInput = z.infer<
+export type ClienteWithEmpresaAndVagaInput = z.infer<
   typeof clienteWithEmpresaAndVagaSchema
 >;

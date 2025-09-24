@@ -1,7 +1,10 @@
 import api from '@/axios';
 import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
-import { ClienteInput, clienteSchema } from '@/schemas/cliente.schema';
+import {
+  ClienteWithEmpresaInput,
+  clienteWithEmpresaSchema,
+} from '@/schemas/cliente.schema';
 import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { TipoServicoEnum } from '@/schemas/tipoServicoEnum.schema';
 import { getError } from '@/utils/getError';
@@ -12,10 +15,10 @@ import { PrimaryButton } from '../button/PrimaryButton';
 import { FormSelect } from '../input/FormSelect';
 
 type ClienteFormProps = {
-  formContexto?: UseFormReturn<ClienteInput>;
-  onSubmit?: (data: ClienteInput) => void;
+  formContexto?: UseFormReturn<ClienteWithEmpresaInput>;
+  onSubmit?: (data: ClienteWithEmpresaInput) => void;
   onSuccess?: (data: any) => void;
-  initialValues?: Partial<ClienteInput>;
+  initialValues?: Partial<ClienteWithEmpresaInput>;
   set?: { isProspect: boolean };
 };
 
@@ -26,8 +29,8 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
 }) => {
   const [loading, setLoading] = useState(false);
 
-  const methods = useForm<ClienteInput>({
-    resolver: zodResolver(clienteSchema),
+  const methods = useForm<ClienteWithEmpresaInput>({
+    resolver: zodResolver(clienteWithEmpresaSchema),
     mode: 'onBlur',
     defaultValues: initialValues,
   });
@@ -38,10 +41,12 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     formState: { errors },
   } = methods;
 
-  const submitHandler = async (data: ClienteInput) => {
+  const submitHandler = async (data: ClienteWithEmpresaInput) => {
     if (onSubmit) onSubmit(data);
 
-    const payload: ClienteInput = { ...data } as ClienteInput;
+    const payload: ClienteWithEmpresaInput = {
+      ...data,
+    } as ClienteWithEmpresaInput;
 
     setLoading(true);
 

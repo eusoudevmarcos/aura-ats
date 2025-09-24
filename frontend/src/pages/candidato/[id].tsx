@@ -3,7 +3,9 @@ import api from '@/axios';
 import Card from '@/components/Card';
 import CandidatoForm from '@/components/form/CandidatoForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
+import { VagaWithRelations } from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
+import useFetchWithPagination from '@/hook/useFetchWithPagination';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -16,6 +18,28 @@ const CandidatoPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
+
+  const {
+    data: vagas,
+    total: totalRecords,
+    totalPages,
+    loading: isLoadingVagas,
+    setPage,
+    setPageSize,
+    page,
+    pageSize,
+    refetch: refetchVagas,
+  } = useFetchWithPagination<VagaWithRelations>(
+    `/api/externalWithAuth/vaga/candidato/${candidato?.id}`,
+    candidato && candidato.id ? { search: candidato.id } : {},
+    {
+      pageSize: 5,
+      page: 1,
+      dependencies: [candidato?.id],
+      manual: true,
+      requestOptions: {},
+    }
+  );
 
   useEffect(() => {
     if (!id) return;
@@ -36,6 +60,12 @@ const CandidatoPage: React.FC = () => {
 
     fetchCandidato();
   }, [id]);
+
+  useEffect(() => {
+    if (candidato && candidato.id) {
+      refetchVagas({ search: candidato.id });
+    }
+  }, [candidato]);
 
   const handleTrash = async () => {
     if (!candidato) return;
@@ -70,7 +100,7 @@ const CandidatoPage: React.FC = () => {
 
   return (
     <div className="max-w-6xl mx-auto p-6">
-      <section className="bg-white p-4 rounded-2xl">
+      <section className="p-4 rounded-2xl">
         <div className="flex mb-8">
           <button
             className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110"
@@ -79,7 +109,7 @@ const CandidatoPage: React.FC = () => {
             Voltar
           </button>
           <h1 className="text-2xl font-bold text-center text-primary w-full">
-            Detalhes do Candidato
+            CANDIDATO
           </h1>
           <div className="flex gap-2">
             <button
@@ -110,11 +140,7 @@ const CandidatoPage: React.FC = () => {
               </div>
               <div>
                 <span className="font-medium">Data de Nascimento:</span>{' '}
-                {candidato.pessoa.dataNascimento
-                  ? new Date(
-                      candidato.pessoa.dataNascimento
-                    ).toLocaleDateString('pt-BR')
-                  : 'N/A'}
+                {candidato.pessoa.dataNascimento ?? 'N/A'}
               </div>
               <div>
                 <span className="font-medium">Sexo:</span>{' '}
@@ -337,9 +363,9 @@ const CandidatoPage: React.FC = () => {
       </div>
 
       <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-between">
-        {candidato?.vagas && candidato.vagas.length > 0 ? (
+        {vagas && vagas.length > 0 ? (
           <>
-            {candidato?.vagas.map((vaga: any) => (
+            {vagas.map((vaga: any) => (
               <Link
                 href={`/vaga/${vaga.id}`}
                 className="w-full lg:max-w-[330px]"
