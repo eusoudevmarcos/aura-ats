@@ -1,7 +1,7 @@
 // src/repository/vaga.repository.ts
+import { Prisma, Vaga } from "@prisma/client";
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { Prisma, Vaga } from "@prisma/client";
 import { PrismaTransactionClient } from "../types/prisma.types";
 
 @injectable()
@@ -103,7 +103,7 @@ export class VagaRepository {
       if (vagaDataRaw.eventosAgenda && vagaDataRaw.eventosAgenda.length > 0) {
         if (vagaDataRaw.id) {
           // Clear existing events for update (assuming replacement)
-          await tx.agendaVaga.deleteMany({
+          await tx.agenda.deleteMany({
             where: { vagaId: vaga.id },
           });
         }
@@ -130,7 +130,7 @@ export class VagaRepository {
               }
             }
 
-            await tx.agendaVaga.create({
+            await tx.agenda.create({
               data: {
                 dataHora: eventoRaw.dataHora,
                 tipoEvento: eventoRaw.tipoEvento,
@@ -174,7 +174,7 @@ export class VagaRepository {
       // Step 6: Handle Beneficios (Many-to-Many via VagaBeneficio)
       if (vagaDataRaw.beneficios && vagaDataRaw.beneficios.length > 0) {
         if (vagaDataRaw.id) {
-          await tx.beneficio.deleteMany({ where: { vagaId: vaga.id } });
+          await tx.vagaBeneficio.deleteMany({ where: { vagaId: vaga.id } });
         }
         await Promise.all(
           vagaDataRaw.beneficios.create({

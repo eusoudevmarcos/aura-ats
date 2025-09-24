@@ -45,7 +45,7 @@ export class PessoaRepository {
       include: {
         contatos: true,
         localizacoes: true,
-        usuarioSistema: true,
+        funcionario: { include: { usuarioSistema: true } },
         socios: true,
         candidato: true,
       },
@@ -64,7 +64,7 @@ export class PessoaRepository {
       include: {
         contatos: true,
         localizacoes: true,
-        usuarioSistema: true,
+        funcionario: { include: { usuarioSistema: true } },
         socios: true,
         candidato: true,
       },

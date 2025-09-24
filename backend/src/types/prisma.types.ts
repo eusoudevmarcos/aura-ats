@@ -1,28 +1,24 @@
 // src/utils/prisma.types.ts
 import {
-  Prisma,
-  Pessoa,
-  Empresa,
-  Contato,
-  Localizacao,
-  UsuarioSistema,
-  Funcionario,
-  Cliente,
-  Vaga,
-  Habilidade,
-  Beneficio,
+  Agenda,
   Anexo,
-  Candidato,
-  Formacao,
-  ProcessoSeletivoEtapa,
-  AgendaVaga,
+  Beneficio,
+  Contato,
+  Empresa,
   Especialidade,
+  Formacao,
+  Funcionario,
+  Habilidade,
+  Localizacao,
+  Pessoa,
+  Prisma,
+  PrismaClient,
+  ProcessoSeletivoEtapa,
   Socio,
-  CandidaturaVaga,
-  TipoSocio,
   StatusCliente,
   TipoServico,
-  PrismaClient,
+  TipoSocio,
+  UsuarioSistema,
 } from "@prisma/client";
 
 // Transação do Prisma
@@ -44,7 +40,7 @@ export type ProcessoSeletivoEtapaInput = Omit<
   "id" | "vagaId"
 >;
 export type EventoAgendaInput = Omit<
-  AgendaVaga,
+  Agenda,
   "id" | "vagaId" | "localizacaoId" | "etapaAtualId"
 >;
 
@@ -163,14 +159,14 @@ export type CandidatoCreateUpdateInput = Omit<
     update?: { where: Prisma.FormacaoWhereUniqueInput; data: FormacaoInput }[];
     delete?: Prisma.FormacaoWhereUniqueInput[];
   };
-  habilidades?: {
-    create?: CandidatoHabilidadeCreateInput[];
-    update?: {
-      where: Prisma.CandidatoHabilidadeWhereUniqueInput;
-      data: Omit<CandidatoHabilidadeCreateInput, "habilidade">;
-    }[];
-    delete?: Prisma.CandidatoHabilidadeWhereUniqueInput[];
-  };
+  // habilidades?: {
+  //   create?: CandidatoHabilidadeCreateInput[];
+  //   update?: {
+  //     where: Prisma.CandidatoHabilidadeWhereUniqueInput;
+  //     data: Omit<CandidatoHabilidadeCreateInput, "habilidade">;
+  //   }[];
+  //   delete?: Prisma.CandidatoHabilidadeWhereUniqueInput[];
+  // };
 };
 
 // --- Vaga ---
