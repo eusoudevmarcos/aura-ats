@@ -1,4 +1,5 @@
 // src/modules/Home/AboutSection/AboutSection.tsx
+import Image from 'next/image';
 import React from 'react';
 import { FaGem, FaHandshake, FaHeart, FaLightbulb } from 'react-icons/fa'; // Ícones para os valores
 
@@ -40,7 +41,7 @@ const AboutSection: React.FC = () => {
         <h2 className="text-primary text-3xl md:text-4xl font-bold mb-6">
           Sobre a Aura: O Match Perfeito para o Seu Sucesso
         </h2>
-        <p className="text-md text-gray-500 mx-auto leading-relaxed text-justify">
+        <p className="text-md text-gray-500 mx-auto leading-relaxed text-justify max-w-[900px]">
           Na Aura, não apenas encontramos talentos, construímos o futuro do seu
           negócio. Com apenas 8 anos de mercado mas com profissionais que
           dominam o mercado com mais de 15 anos de experiência trabalhando com
@@ -51,11 +52,22 @@ const AboutSection: React.FC = () => {
         </p>
       </div>
 
-      <div>
+      <div className="w-full max-w-[1440px] mx-auto">
+        <Image
+          src="/landing-page/nossos-servicos.png"
+          alt="sobre nós"
+          width={1900}
+          height={1080}
+          className="w-full"
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
+
+      <div className="flex flex-col justify-center items-center">
         <h3 className="text-2xl md:text-3xl text-primary font-bold mb-6 text-center">
           Nossa Missão
         </h3>
-        <p className="text-justify md:text-lg text-gray-500 leading-relaxed">
+        <p className="md:text-lg text-gray-500 leading-relaxed max-w-[900px] text-justify">
           Superar as expectativas de nossos clientes e candidatos, oferecendo
           soluções de recrutamento e seleção personalizadas, ágeis e eficazes.
           Queremos ser reconhecidos como o parceiro estratégico que entende e
@@ -68,13 +80,34 @@ const AboutSection: React.FC = () => {
         <h3 className="text-2xl md:text-3xl text-primary font-bold mb-6">
           Nossos Valores: A Essência da Nossa Singularidade
         </h3>
-        <p className="text-gray-700">
-          Estes são os pilares que sustentam nossa jornada e nos diferenciam no
-          mercado:
-        </p>
+
+        <div className="flex  justify-center items-center gap-10 flex-wrap">
+          <p className="max-w-[400px] text-justify">
+            Na Aura R&S Labs Ltda, acreditamos que o sucesso de qualquer
+            organizaqdo estå diretamente ligado aos valores que a sustentam. Sdo
+            esses principios que orientam nossas decisöes, moldam nossa cultura
+            e definem como nos relacionamos com nossos clientes, parceiros,
+            candidatos e com a sociedade. Nosso compromisso vai além de
+            preencher vagas: buscamos gerar impacto positivo, criando conexöes
+            estratégicas entre pessoas e oportunidades que transformam
+            realidades. Para isso, norteamos todas as nossas aqöes pelos
+            seguintes valores:
+          </p>
+
+          <div className="max-w-[500px] w-screen">
+            <Image
+              src="/landing-page/sessao-apresentacao.png"
+              alt="sobre nós"
+              width={1900}
+              height={1080}
+              className="w-full"
+              style={{ objectFit: 'cover' }}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-10 mt-8 md:grid-cols-2 sm:grid-cols-1">
+      <div className="grid grid-cols-1 gap-10 mt-8 md:grid-cols-2 sm:grid-cols-1">
         {values.map((value, index) => (
           <div
             key={index}

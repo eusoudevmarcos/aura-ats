@@ -18,31 +18,33 @@ const HomePage: React.FC = () => {
         <HeroSection />
       </section>
 
-      <section className="mb-30" id="platform-section">
-        <PlatformSection />
-      </section>
+      <div className="px-2">
+        <section className="mb-30" id="platform-section">
+          <PlatformSection />
+        </section>
 
-      <section className="mb-30" id="about-section">
-        <AboutSection />
-      </section>
+        <section className="mb-30" id="about-section">
+          <AboutSection />
+        </section>
 
-      <section className="mb-30" id="services-section">
-        <ServicesSection />
-      </section>
+        <section className="mb-30" id="services-section">
+          <ServicesSection />
+        </section>
 
-      <section className="mb-30" id="pricing-section">
-        <PricingSection />
-      </section>
+        <section className="mb-30" id="pricing-section">
+          <PricingSection />
+        </section>
 
-      <section className="mb-30" id="success-cases-section">
-        <SuccessCasesSection />
-      </section>
+        <section className="mb-30" id="success-cases-section">
+          <SuccessCasesSection />
+        </section>
 
-      <section className="mb-30" id="contact-section">
-        <ContactSection />
-      </section>
+        <section className="mb-30" id="contact-section">
+          <ContactSection />
+        </section>
 
-      <ScrollToTop />
+        <ScrollToTop />
+      </div>
     </>
   );
 };

@@ -16,7 +16,7 @@ const PricingSection: React.FC = () => {
   return (
     <section
       id="pricing-section"
-      className="max-w-[1420px] mx-auto text-center bg-bg-color-light text-text-color-primary px-4 py-16"
+      className="max-w-[1420px] mx-auto text-center bg-bg-color-light text-text-color-primary md:px-4 py-16"
     >
       <h2 className="font-black text-2xl md:text-4xl text-primary">
         Planos de Contratação: Encontre o Talento Ideal para Seu Orçamento
