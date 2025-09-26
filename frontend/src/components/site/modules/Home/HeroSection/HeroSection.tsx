@@ -59,18 +59,20 @@ const HeroSection: React.FC = () => {
             className="relative w-full h-full flex items-center justify-center text-secondary"
           >
             <div className="absolute inset-0 w-full h-full">
-              <Image
-                src={slide.imageSrc}
-                alt={slide.altText}
-                fill
-                priority
-                sizes="100vw"
-                className="object-cover w-full h-full blur-[4px]"
-                style={{
-                  boxShadow:
-                    '0 8px 32px 0 rgba(0,0,0,0.18), 0 1.5px 6px 0 rgba(0,0,0,0.10)',
-                }}
-              />
+              <div className="absolute inset-0 w-full h-full">
+                <Image
+                  src={slide.imageSrc}
+                  alt={slide.altText}
+                  fill
+                  priority
+                  sizes="100vw"
+                  className="object-cover w-full h-full blur-[4px] brightness-[0.5]"
+                  style={{
+                    boxShadow:
+                      '0 8px 32px 0 rgba(0,0,0,0.18), 0 2px 10px 0 rgba(0,0,0,0.50)',
+                  }}
+                />
+              </div>
               <div
                 className="
                   absolute top-0 left-0 w-full h-full
