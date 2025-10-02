@@ -2,7 +2,7 @@ model Agenda {
     id         String           @id @default(uuid(7))
     dataHora   DateTime
     link       String?
-    tipoEvento TipoEventoAgenda
+    tipoEvento TipoEventoAgenda @default(TRIAGEM_INICIAL)
 
     etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
     etapaAtualId String?
@@ -19,12 +19,12 @@ model Agenda {
     triagem           TriagemVaga?        @relation(fields: [triagemId], references: [id])
     triagemId         String?
 
-    @@schema("Agenda")
     @@index([etapaAtualId])
     @@index([localizacaoId])
     @@index([vagaId])
     @@index([clienteId])
     @@index([triagemId])
+    @@schema("Agenda")
 }
 
 model ProcessoSeletivoEtapa {
@@ -74,7 +74,7 @@ model AgendaCandidatura {
     candidatura   CandidaturaVaga @relation(fields: [candidaturaId], references: [id])
     candidaturaId String
 
-    @@schema("AgendaCandidatura")
     @@index([agendaId])
     @@index([candidaturaId])
+    @@schema("AgendaCandidatura")
 }
