@@ -1,12 +1,12 @@
 model TriagemVaga {
-    id        String   @id @default(uuid(7))
-    ativa     Boolean  @default(true)
-    create_at DateTime @default(now())
-    update_at DateTime @updatedAt
-
+    id          String            @id @default(uuid(7))
+    ativa       Boolean           @default(true)
+    create_at   DateTime          @default(now())
+    update_at   DateTime          @updatedAt
+    tipoTriagem TipoEventoTriagem @default(TRIAGEM_INICIAL)
     // relacionamento
-    vaga   Vaga   @relation(fields: [vagaId], references: [id])
-    vagaId String
+    vaga        Vaga              @relation(fields: [vagaId], references: [id])
+    vagaId      String
 
     agenda Agenda[]
 

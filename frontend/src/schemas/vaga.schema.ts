@@ -3,6 +3,26 @@ import { z } from 'zod';
 import { clienteWithEmpresaSchema } from './cliente.schema';
 import { localizacaoSchema } from './localizacao.schema';
 
+// TRIAGEM
+export const TipoEventoTriagemEnum = z.enum([
+  'TRIAGEM_INICIAL',
+  'ENTREVISTA_RH',
+  'ENTREVISTA_GESTOR',
+  'TESTE_TECNICO',
+  'TESTE_PSICOLOGICO',
+  'DINAMICA_GRUPO',
+  'PROPOSTA',
+  'OUTRO',
+]);
+export type TipoEventoTriagemEnum = z.infer<typeof TipoEventoTriagemEnum>;
+
+export const triagemSchema = z.object({
+  id: z.uuid().optional(),
+  tipoTriagem: TipoEventoTriagemEnum,
+  ativa: z.boolean().default(true).optional(),
+});
+export type TriagemInput = z.infer<typeof triagemSchema>;
+
 export const CategoriaVagaEnum = z.enum(
   [
     'TECNOLOGIA',
@@ -81,6 +101,7 @@ export const vagaSchema = z.object({
   tipoSalario: z.string().optional(),
   descricao: z.string().min(20, 'minimo 20 caracteres'),
   localizacao: localizacaoSchema.optional(),
+  triagens: z.array(triagemSchema).max(4, 'Máximo de 4 triagens').optional(),
 });
 export type VagaInput = z.infer<typeof vagaSchema>;
 

@@ -11,6 +11,10 @@ router.get("/", authMiddleware, (req, res) =>
   triagemController.getAll(req, res)
 );
 
+router.get("/:vagaId", authMiddleware, (req, res) =>
+  triagemController.getAllByVagaId(req, res)
+);
+
 router.get("/pendentes", authMiddleware, (req, res) =>
   triagemController.getAllPendentes(req, res)
 );

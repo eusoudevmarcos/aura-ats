@@ -106,6 +106,19 @@ enum TipoEventoAgenda {
     @@schema("public")
 }
 
+enum TipoEventoTriagem {
+    TRIAGEM_INICIAL
+    ENTREVISTA_RH
+    ENTREVISTA_GESTOR
+    TESTE_TECNICO
+    TESTE_PSICOLOGICO
+    DINAMICA_GRUPO
+    PROPOSTA
+    OUTRO
+
+    @@schema("public")
+}
+
 // novos enums para vaga/salário
 enum Moeda {
     BRL

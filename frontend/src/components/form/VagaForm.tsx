@@ -31,6 +31,7 @@ import {
 import { FormArrayInput } from '../input/FormArrayInput';
 import ClienteSearch from '../search/ClienteSearch';
 import LocalizacaoForm from './LocalizacaoForm';
+import TriagemForm from './TriagemForm';
 
 type VagaFormProps = {
   formContexto?: UseFormReturn<VagaInput>;
@@ -425,6 +426,9 @@ const VagaForm: React.FC<VagaFormProps> = ({
             />
           </div>
         )}
+
+        {/* Triagens da Vaga */}
+        <TriagemForm />
 
         <div className="flex justify-end col-span-full">
           <PrimaryButton type="submit" disabled={loading}>

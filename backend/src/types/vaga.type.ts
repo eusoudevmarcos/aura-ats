@@ -1,21 +1,14 @@
 import {
   AreaCandidato,
   CategoriaVaga,
+  NivelExperiencia,
+  Prisma,
   StatusVaga,
   TipoContrato,
-  NivelExperiencia,
-  Prisma, // Importe o objeto Prisma para usar os tipos gerados
-  Localizacao, // Importe Localizacao se quiser usá-lo no retorno ou em outros contextos
 } from "@prisma/client";
 
 // --- ENUMS (já estão corretos) ---
-export {
-  CategoriaVaga,
-  StatusVaga,
-  TipoContrato,
-  NivelExperiencia,
-  // ... outros enums que você já definiu
-};
+export { CategoriaVaga, NivelExperiencia, StatusVaga, TipoContrato };
 
 // ===================== INTERFACES DE ENTRADA (INPUT DTOs) =====================
 // Interfaces para dados que vêm do frontend ou são usados para criar/atualizar
@@ -81,6 +74,9 @@ export interface VagaSaveInput {
   // Localização
   localizacao?: LocalizacaoInput; // Se você quiser criar/atualizar a localização junto
   localizacaoId?: string; // Para conectar uma localização existente
+
+  // Triagens da vaga (nested)
+  triagens?: { id?: string; tipoTriagem: string; ativa?: boolean }[];
 }
 
 // ===================== INTERFACES DE SAÍDA (Output DTOs - Se precisar de uma representação específica) =====================

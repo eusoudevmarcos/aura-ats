@@ -50,16 +50,9 @@ export class ClienteService extends BuildNestedOperation {
   async getAll({ page = 1, pageSize = 10, search }: Pagination<any>) {
     const skip = (page - 1) * pageSize;
 
-    // const where = {
-    //   status: { equals: search?.status },
-    //   empresa: {
-    //     razaoSocial: { contains: search?.razaoSocial, mode: "insensitive" },
-    //   },
-    // };
-
     let where = buildWhere<Prisma.ClienteWhereInput>({
       search,
-      fields: ["empresa.razaoSocial"],
+      fields: ["empresa.razaoSocial", "empresa.cnpj"],
     });
 
     const [vagas, total] = await prisma.$transaction([
@@ -73,6 +66,7 @@ export class ClienteService extends BuildNestedOperation {
         },
         where: where,
         select: {
+          id: true,
           tipoServico: true,
           status: true,
           empresa: {

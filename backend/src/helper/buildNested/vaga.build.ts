@@ -22,6 +22,7 @@ export const buildVagaData = async (data: any): Promise<any> => {
     clienteId,
     cliente,
     update_at,
+    triagens,
     ...rest
   } = data;
 
@@ -40,6 +41,25 @@ export const buildVagaData = async (data: any): Promise<any> => {
 
   if (data.localizacao) {
     vagaData.localizacao = buildNestedOperation.build(data.localizacao);
+  }
+
+  if (Array.isArray(triagens) && triagens.length) {
+    // remover duplicados por tipoTriagem
+    const uniqueByTipo = Array.from(
+      new Map(
+        triagens
+          .filter((t: any) => !!t && !!t.tipoTriagem)
+          .slice(0, 4)
+          .map((t: any) => [t.tipoTriagem, t])
+      ).values()
+    );
+
+    vagaData.triagens = buildNestedOperation.build(
+      uniqueByTipo.map((t: any) => ({
+        tipoTriagem: t.tipoTriagem,
+        ativa: t.ativa ?? true,
+      }))
+    );
   }
 
   return vagaData;

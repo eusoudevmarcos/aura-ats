@@ -11,5 +11,9 @@ export const normalizeData = (data: VagaSaveInput) => {
     habilidades:
       data.habilidades?.filter((h: any) => h && (h.nome || h.id)) || [],
     anexos: data.anexos?.filter((a: any) => a && (a.anexoId || a.id)) || [],
+    triagens:
+      data.triagens
+        ?.filter((t: any) => t && (t.tipoTriagem || t.id))
+        ?.slice(0, 4) || [],
   };
 };

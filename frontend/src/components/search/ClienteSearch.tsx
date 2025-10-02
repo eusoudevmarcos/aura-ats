@@ -19,7 +19,6 @@ const ClienteSearch = ({
   const [searchQueryList, setSearchQueryList] = useState<any[]>([]);
   const [page, setPage] = useState<number>(1);
   const [pageSize] = useState<number>(5);
-  console.log(initialValuesProps);
   const [initialValues, setInitialValues] = useState<any>(
     initialValuesProps ?? null
   );
@@ -76,9 +75,7 @@ const ClienteSearch = ({
       const params: any = {
         page,
         pageSize,
-        search: {
-          searchQuery,
-        },
+        search: searchQuery,
       };
 
       const response = await api.get('/api/externalWithAuth/cliente', {

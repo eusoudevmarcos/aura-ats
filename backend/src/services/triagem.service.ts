@@ -1,4 +1,6 @@
-import { inject, injectable } from "tsyringe";
+import { Prisma } from "@prisma/client";
+import { injectable } from "tsyringe";
+import { buildWhere } from "../helper/buildWhere";
 import prisma from "../lib/prisma";
 
 @injectable()
@@ -32,25 +34,71 @@ export class TriagemService {
   }) {
     const skip = (page - 1) * pageSize;
 
-    // Monta o filtro de busca
-    let where: any = {};
-
-    // Se search for um objeto, adiciona os filtros
-    if (search && typeof search === "object") {
-      // Exemplo: search = { status: "PENDENTE" }
-      Object.entries(search).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          where[key] = value;
-        }
-      });
-    }
-
     try {
       const [triagens, total] = await Promise.all([
         prisma.triagemVaga.findMany({
           skip,
           take: pageSize,
+          include: {
+            vaga: true,
+            agenda: true,
+          },
+          orderBy: { create_at: "desc" },
+        }),
+        prisma.triagemVaga.count(),
+      ]);
+
+      return {
+        data: triagens,
+        total,
+        page,
+        pageSize,
+        totalPages: Math.ceil(total / pageSize),
+      };
+    } catch (error) {
+      console.error("Erro ao buscar triagens:", error);
+      throw new Error("Não foi possível buscar as triagens.");
+    }
+  }
+
+  async getAllByVagaId({
+    page = 1,
+    pageSize = 10,
+    search = {},
+    vagaId,
+  }: {
+    page?: number;
+    pageSize?: number;
+    search?: any;
+    vagaId: string;
+  }) {
+    const skip = (page - 1) * pageSize;
+
+    const where = buildWhere<Prisma.TriagemVagaWhereInput>(
+      {
+        search: search,
+        fields: [
+          // "titulo",
+          // "descricao",
+          // "cliente.empresa.cpnj",
+          // "localizacao.cidade",
+          // "localizacao.uf",
+          // "localizacao.cidade",
+          // "create_at",
+          // "cliente.empresa.usuarioSistema.id",
+        ],
+      },
+      {
+        search: vagaId,
+        fields: ["vaga.id"],
+      }
+    );
+    try {
+      const [triagens, total] = await Promise.all([
+        prisma.triagemVaga.findMany({
+          skip,
           where,
+          take: pageSize,
           include: {
             vaga: true,
             agenda: true,

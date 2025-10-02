@@ -349,6 +349,16 @@ const VagaPage: React.FC = () => {
 
       <div className="flex mt-10"></div>
 
+      {/* Acesso às Triagens da Vaga */}
+      <div className="flex justify-center mt-6 mb-6">
+        <Link
+          href={`/vaga/${vaga.id}/triagens`}
+          className="px-4 py-2 bg-primary text-white rounded shadow-md hover:scale-105 transition-transform"
+        >
+          Ver Triagens da Vaga
+        </Link>
+      </div>
+
       <div className="flex justify-center mt-10 mb-4 relative">
         <h3 className="text-2xl font-bold text-center text-primary w-full ">
           PROFISSIONAIS CADASTRADOS

@@ -279,7 +279,25 @@ export class VagaService {
       await this.checkDuplicates(normalizedData);
     }
 
-    const vagaPayload = await buildVagaData(normalizedData);
+    // separar triagens para sincronizar manualmente e garantir no máximo 4 e sem duplicatas
+    const triagensInput = Array.isArray(normalizedData.triagens)
+      ? Array.from(
+          new Map(
+            normalizedData.triagens
+              .filter((t: any) => !!t && !!t.tipoTriagem)
+              .slice(0, 4)
+              .map((t: any) => [
+                t.tipoTriagem,
+                { tipoTriagem: t.tipoTriagem, ativa: t.ativa ?? true },
+              ])
+          ).values()
+        )
+      : [];
+
+    const vagaPayload = await buildVagaData({
+      ...normalizedData,
+      triagens: undefined,
+    });
 
     const relationsShip = {
       localizacao: true,
@@ -293,20 +311,34 @@ export class VagaService {
           },
         },
       },
+      triagens: true,
     };
 
+    let saved: Vaga;
     if (vagaData?.id) {
-      return await prisma.vaga.update({
+      saved = await prisma.vaga.update({
         where: { id: vagaData.id },
         data: vagaPayload,
         include: relationsShip,
       });
     } else {
-      return await prisma.vaga.create({
+      saved = await prisma.vaga.create({
         data: vagaPayload,
         include: relationsShip,
       });
     }
+
+    // sincronizar triagens somente se houver entrada explícita
+    if (triagensInput.length) {
+      await this.syncTriagens(saved.id, triagensInput as any[]);
+      // recarregar vaga com triagens atualizadas
+      saved = (await prisma.vaga.findUnique({
+        where: { id: saved.id },
+        include: relationsShip,
+      })) as Vaga;
+    }
+
+    return saved;
   }
 
   async vincularCandidatos(id: string, candidatos: string[]) {
@@ -418,5 +450,55 @@ export class VagaService {
         );
       }
     }
+  }
+
+  private async syncTriagens(
+    vagaId: string,
+    triagens: { tipoTriagem: string; ativa?: boolean }[]
+  ): Promise<void> {
+    const existing = await prisma.triagemVaga.findMany({
+      where: { vagaId },
+    });
+
+    const desiredByTipo = new Map(
+      triagens.slice(0, 4).map((t) => [t.tipoTriagem, t])
+    );
+    const existingByTipo = new Map(
+      existing.map((e) => [e.tipoTriagem as string, e])
+    );
+
+    const toDelete = existing.filter(
+      (e) => !desiredByTipo.has(e.tipoTriagem as string)
+    );
+    const toCreate = Array.from(desiredByTipo.entries())
+      .filter(([tipo]) => !existingByTipo.has(tipo))
+      .map(([, t]) => t);
+    const toUpdate = existing
+      .filter((e) => desiredByTipo.has(e.tipoTriagem as string))
+      .map((e) => ({
+        id: e.id,
+        ativa: desiredByTipo.get(e.tipoTriagem as string)?.ativa ?? true,
+      }));
+
+    await prisma.$transaction([
+      ...toDelete.map((e) =>
+        prisma.triagemVaga.delete({ where: { id: e.id } })
+      ),
+      ...toCreate.map((t) =>
+        prisma.triagemVaga.create({
+          data: {
+            vagaId,
+            tipoTriagem: t.tipoTriagem as any,
+            ativa: t.ativa ?? true,
+          },
+        })
+      ),
+      ...toUpdate.map((u) =>
+        prisma.triagemVaga.update({
+          where: { id: u.id },
+          data: { ativa: u.ativa },
+        })
+      ),
+    ]);
   }
 }

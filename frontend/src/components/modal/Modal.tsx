@@ -54,12 +54,12 @@ const Modal: React.FC<ModalProps> = ({
     <div
       ref={modalRef}
       onClick={handleBackdropClick}
-      className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-2 transition-opacity duration-200  ${
+      className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-2 transition-opacity duration-200 ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <div
-        className={`bg-white  shadow-md  relative w-full max-w-2xl max-h-[90vh] transition-transform duration-200 !rounded-xl ${
+        className={`bg-white  shadow-md  relative w-full max-w-2xl max-h-[90vh] transition-transform duration-200 !rounded-xl overflow-scroll ${
           visible ? 'scale-100' : 'scale-95'
         }`}
       >

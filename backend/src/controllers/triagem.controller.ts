@@ -40,10 +40,36 @@ export class TriagemController {
       ? parseInt(req.query.pageSize as string, 10)
       : 10;
 
-    const search = req.query;
+    const search = req.query.search;
 
     try {
       const triagens = await this.service.getAll({ page, pageSize, search });
+
+      return res.status(200).json(triagens);
+    } catch (error: any) {
+      return res.status(400).json({
+        error: "Erro ao buscar triagens",
+        message: error.message,
+      });
+    }
+  }
+
+  async getAllByVagaId(req: Request, res: Response) {
+    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+    const pageSize = req.query.pageSize
+      ? parseInt(req.query.pageSize as string, 10)
+      : 10;
+
+    const search = req.query.search;
+    const vagaId = req.params.vagaId;
+
+    try {
+      const triagens = await this.service.getAllByVagaId({
+        page,
+        pageSize,
+        search,
+        vagaId,
+      });
 
       return res.status(200).json(triagens);
     } catch (error: any) {
