@@ -1,9 +1,8 @@
 import api from '@/axios';
+import ClienteInfo from '@/components/cliente/ClienteInfo';
 import AutocompletePopover from '@/components/utils/AutocompletePopover';
-import ClientePage from '@/pages/cliente/[uuid]';
 import { useEffect, useRef, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
-import Card from '../Card';
 import { FormInput } from '../input/FormInput';
 import Modal from '../modal/Modal';
 
@@ -13,6 +12,8 @@ const ClienteSearch = ({
   initialValuesProps = null,
   preview = true,
   showInput = true,
+  isBtnDelete = true,
+  isBtnView = true,
 }: any) => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchQueryList, setSearchQueryList] = useState<any[]>([]);
@@ -135,9 +136,9 @@ const ClienteSearch = ({
   return (
     <>
       {showInput && (
-        <div className="flex flex-row gap-2 w-full">
+        <div className="flex flex-row gap-2 w-full mb-2">
           <div className="relative w-full" ref={autocompleteRef}>
-            <p className="my-2 font-bold">Pesquisa de cliente</p>
+            <p className="my-2 font-bold">Pesquisar cliente</p>
             <FormInput
               name="searchCliente"
               inputProps={{
@@ -183,38 +184,30 @@ const ClienteSearch = ({
 
       {initialValues && (
         <>
-          <Card
-            title={preview && 'Dados do Cliente'}
-            classNameContent="flex justify-between"
-          >
+          <div className="flex justify-between">
             {preview && (
               <div className="flex flex-col justify-between">
-                <p>
-                  CNPJ:
-                  <span className="text-secondary">
-                    {initialValues.empresa.cnpj}
-                  </span>
-                </p>
-                <p>
-                  Razão Social:
-                  <span className="text-secondary">
-                    {initialValues.empresa.razaoSocial}
-                  </span>
-                </p>
+                <ClienteInfo cliente={initialValues} variant="mini" />
               </div>
             )}
             <div className="flex gap-2 relative">
-              <PrimaryButton onClick={() => setOpenModal(!openModal)}>
-                Ver Cliente
-              </PrimaryButton>
-              <BtnDelete />
+              {isBtnView && (
+                <PrimaryButton
+                  className="h-fit !p-1"
+                  onClick={() => setOpenModal(!openModal)}
+                >
+                  <span className="material-icons-outlined">visibility</span>
+                </PrimaryButton>
+              )}
+              {isBtnDelete && <BtnDelete className="h-fit !p-1" />}
             </div>
-          </Card>
-          <Modal isOpen={openModal} onClose={() => setOpenModal(!openModal)}>
-            <>
-              <BtnDelete className="absolute right-14 top-3" />
-              <ClientePage initialValues={initialValues}></ClientePage>
-            </>
+          </div>
+          <Modal
+            isOpen={openModal}
+            onClose={() => setOpenModal(!openModal)}
+            title="Visualiar Cliente"
+          >
+            <ClienteInfo cliente={initialValues}></ClienteInfo>
           </Modal>
         </>
       )}

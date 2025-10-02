@@ -1,5 +1,6 @@
 // src/components/form/VagaForm.tsx
 import api from '@/axios';
+import ModalSuccess from '@/components/modal/ModalSuccess';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useState } from 'react';
 import {
@@ -36,16 +37,22 @@ type VagaFormProps = {
   onSubmit?: (data: VagaInput) => void;
   onSuccess?: (data: any) => void;
   initialValues?: Partial<VagaWithClienteInput>;
+  isBtnDelete?: boolean;
+  isBtnView?: boolean;
 };
 
 const VagaForm: React.FC<VagaFormProps> = ({
   onSubmit,
   onSuccess,
   initialValues,
+  isBtnDelete = true,
+  isBtnView = true,
 }) => {
   const [loading, setLoading] = useState(false);
   const [habilidadesAllow, setHabilidadesAllow] = useState(false);
   const [beneficiosAllow, setBeneficiosAllow] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const methods = useForm<VagaWithClienteInput>({
     resolver: zodResolver(vagaWithClienteSchema),
@@ -55,6 +62,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
       tipoSalario: 'A COMBINAR',
       categoria: 'SAUDE',
       status: 'ATIVA',
+      tipoLocalTrabalho: initialValues?.tipoLocalTrabalho || 'PRESENCIAL',
     },
   });
 
@@ -78,22 +86,42 @@ const VagaForm: React.FC<VagaFormProps> = ({
     defaultValue: initialValues?.categoria,
   });
 
+  // Observa o tipo de local de trabalho
+  const tipoLocalTrabalhoWatch = useWatch({
+    control,
+    name: 'tipoLocalTrabalho',
+    defaultValue: initialValues?.tipoLocalTrabalho || 'PRESENCIAL',
+  });
+
   const submitHandler = async (data: any) => {
-    console.log('aqui');
     if (onSubmit) onSubmit(data);
     delete data.cliente;
+    const { tipoLocalTrabalho } = data;
+    delete data.tipoLocalTrabalho;
+
+    // Ajuste para localização/remoto
     const payload: VagaInput = { ...data };
+
+    if (tipoLocalTrabalho === 'REMOTO') {
+      // Se for remoto, não envia localizacao
+      if ('localizacao' in payload) {
+        delete payload.localizacao;
+      }
+    }
 
     setLoading(true);
 
     try {
       const url = '/api/externalWithAuth/vaga';
-      // const endpoint = payload.id ? `${url}` : url;
 
       const response = await api.post(url, payload);
       if (response.status >= 200 && response.status < 300) {
+        const isEdit = !!initialValues?.id;
+        setSuccessMessage(
+          isEdit ? 'Vaga editada com sucesso!' : 'Vaga cadastrada com sucesso!'
+        );
+        setShowSuccessModal(true);
         onSuccess?.(response.data);
-        alert('Vaga salva com sucesso!');
       }
     } catch (erro: any) {
       console.log('Erro ao salvar vaga:', erro);
@@ -115,11 +143,17 @@ const VagaForm: React.FC<VagaFormProps> = ({
         <div className="col-span-full">
           <ClienteSearch
             onSuccess={onSuccessClienteSearch}
-            initialValuesProps={{
-              empresa: { ...initialValues?.cliente?.empresa },
-              clienteId: initialValues?.clienteId,
-            }}
+            initialValuesProps={
+              initialValues?.cliente?.empresa
+                ? {
+                    empresa: { ...initialValues?.cliente?.empresa },
+                    clienteId: initialValues?.clienteId,
+                  }
+                : null
+            }
             showInput={!initialValues?.clienteId}
+            isBtnDelete={isBtnDelete}
+            isBtnView={isBtnView}
           />
         </div>
 
@@ -245,13 +279,47 @@ const VagaForm: React.FC<VagaFormProps> = ({
           textareaProps={{ classNameContainer: 'col-span-full', rows: 2 }}
         /> */}
 
-        <div className="col-span-full">
-          <LocalizacaoForm namePrefix="localizacao" />
+        {/* Radio para tipo de local de trabalho */}
+        <div className="col-span-full flex flex-col gap-2">
+          <label className="font-semibold text-gray-700 mb-1">
+            Tipo de Local de Trabalho
+          </label>
+          <div className="flex gap-4">
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                value="PRESENCIAL"
+                {...register('tipoLocalTrabalho')}
+                checked={tipoLocalTrabalhoWatch === 'PRESENCIAL'}
+                className="form-radio text-primary focus:ring-primary"
+                onChange={() => setValue('tipoLocalTrabalho', 'PRESENCIAL')}
+              />
+              <span className="ml-2 text-primary font-medium">Presencial</span>
+            </label>
+            <label className="flex items-center cursor-pointer">
+              <input
+                type="radio"
+                value="REMOTO"
+                {...register('tipoLocalTrabalho')}
+                checked={tipoLocalTrabalhoWatch === 'REMOTO'}
+                className="form-radio text-primary focus:ring-primary"
+                onChange={() => setValue('tipoLocalTrabalho', 'REMOTO')}
+              />
+              <span className="ml-2 text-primary font-medium">Remoto</span>
+            </label>
+          </div>
         </div>
+        {/* Só mostra o formulário de localização se NÃO for remoto */}
+        {tipoLocalTrabalhoWatch !== 'REMOTO' && (
+          <div className="col-span-full">
+            <LocalizacaoForm namePrefix="localizacao" />
+          </div>
+        )}
 
         <div className="w-full flex gap-2 items-center col-span-full justify-center">
           <button
             className="flex items-center bg-primary text-white text-sm px-3 py-1 rounded-lg shadow-md text-nowrap"
+            type="button"
             onClick={() => {
               setHabilidadesAllow(!habilidadesAllow);
             }}
@@ -260,6 +328,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           </button>
           <button
             className="flex items-center bg-primary text-white text-sm px-3 py-1 rounded-lg shadow-md text-nowrap"
+            type="button"
             onClick={() => {
               setBeneficiosAllow(!beneficiosAllow);
             }}
@@ -363,6 +432,12 @@ const VagaForm: React.FC<VagaFormProps> = ({
           </PrimaryButton>
         </div>
       </form>
+
+      <ModalSuccess
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        message={successMessage}
+      />
     </FormProvider>
   );
 };

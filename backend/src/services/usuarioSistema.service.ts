@@ -83,7 +83,6 @@ export class UsuarioSistemaService extends BuildNestedOperation {
 
   async save(data: any): Promise<UsuarioSistema> {
     validateBasicFields(data);
-
     const normalizedData = normalizeData(data);
 
     if (!data.id) {
@@ -121,13 +120,13 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     }
 
     // Verifica CPF duplicado se for pessoa
-    if (data.pessoa?.cpf) {
-      if (!data.pessoa.cpf) {
+    if (data?.funcionario?.pessoa?.cpf) {
+      if (!data.funcionario.pessoa.cpf) {
         throw new Error("CPF é obrigatório para usuário tipo Pessoa.");
       }
 
       const pessoaExistente = await this.pessoaRepository.findByCpf(
-        data.pessoa.cpf
+        data.funcionario.pessoa.cpf
       );
       if (pessoaExistente && pessoaExistente.id !== data.pessoa.id) {
         throw new Error(
@@ -137,15 +136,18 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     }
 
     // Verifica CNPJ duplicado se for empresa
-    if (data.empresa?.cnpj) {
-      if (!data.empresa.cnpj) {
+    if (data?.cliente?.empresa?.cnpj) {
+      if (!data?.cliente?.empresa.cnpj) {
         throw new Error("CNPJ é obrigatório para usuário tipo Empresa.");
       }
 
       const empresaExistente = await this.empresaRepository.findByCnpj(
-        data.empresa.cnpj
+        data?.cliente?.empresa.cnpj
       );
-      if (empresaExistente && empresaExistente.id !== data.empresa.id) {
+      if (
+        empresaExistente &&
+        empresaExistente.id !== data?.cliente?.empresa.id
+      ) {
         throw new Error(
           `CNPJ '${data.empresa.cnpj}' já cadastrado para outra empresa.`
         );

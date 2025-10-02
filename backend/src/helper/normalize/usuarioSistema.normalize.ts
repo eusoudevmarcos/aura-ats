@@ -1,42 +1,47 @@
 import { convertAnyDateToPostgres } from "../../utils/convertDateToPostgres";
 
 export const normalizeData = (data: any) => {
-  let newData = { ...data };
+  const newData = { ...data };
 
-  if (data?.funcionario.pessoa) {
-    if (data?.funcionario.pessoa?.cpf) {
-      newData.funcionario.pessoa = {
-        ...newData.funcionario.pessoa,
-        cpf: data.funcionario.pessoa.cpf.replace(/\D/g, ""),
-      };
-    } else {
-      newData.funcionario.pessoa = { ...newData.funcionario.pessoa };
+  // --- Normaliza pessoa ---
+  if (data?.funcionario?.pessoa || data?.funcionario?.pessoaId) {
+    newData.funcionario = { ...newData.funcionario };
+
+    // Mantém o objeto existente ou cria um vazio
+    const pessoa = newData.funcionario.pessoa || {};
+
+    // Se tiver pessoaId, mantém o id
+    if (data.funcionario.pessoaId) {
+      pessoa.id = data.funcionario.pessoaId;
     }
-    newData.funcionario.pessoa = convertAnyDateToPostgres(
-      newData.funcionario.pessoa
-    );
-  }
 
-  if (data?.funcionario.pessoaId) {
-    newData.funcionario.pessoa = { id: data.funcionario.pessoaId };
-  }
-
-  // Normaliza dados de empresa
-  if (data?.cliente.empresa) {
-    if (data?.cliente.empresa?.cnpj) {
-      newData.cliente.empresa = {
-        ...newData.cliente.empresa,
-        cnpj: data.cliente.empresa.cnpj.replace(/\D/g, ""),
-      };
-    } else {
-      newData.cliente.empresa = { ...newData.cliente.empresa };
+    // Normaliza CPF
+    if (pessoa.cpf) {
+      pessoa.cpf = pessoa.cpf.replace(/\D/g, "");
     }
-    newData.cliente.empresa = convertAnyDateToPostgres(newData.cliente.empresa);
+
+    // Converte datas
+    newData.funcionario.pessoa = convertAnyDateToPostgres(pessoa);
   }
 
-  if (data?.cliente.empresaId) {
-    if (!newData.cliente.empresa) newData.cliente.empresa = {};
-    newData.cliente.empresa = { id: data.cliente.empresaId };
+  // --- Normaliza empresa ---
+  if (data?.cliente.empresa || data?.cliente?.empresaId) {
+    newData.cliente = { ...newData.cliente };
+
+    const empresa = newData.cliente.empresa || {};
+
+    // Se tiver empresaId, mantém o id
+    if (data.cliente.empresaId) {
+      empresa.id = data.cliente.empresaId;
+    }
+
+    // Normaliza CNPJ
+    if (empresa.cnpj) {
+      empresa.cnpj = empresa.cnpj.replace(/\D/g, "");
+    }
+
+    // Converte datas
+    newData.cliente.empresa = convertAnyDateToPostgres(empresa);
   }
 
   return newData;

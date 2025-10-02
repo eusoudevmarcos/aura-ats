@@ -1,7 +1,7 @@
 import api from '@/axios';
-import Card from '@/components/Card';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import PessoaForm from '@/components/form/PessoaForm';
+import ModalSuccess from '@/components/modal/ModalSuccess';
 import { CandidatoInput, candidatoSchema } from '@/schemas/candidato.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
@@ -28,6 +28,8 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const [especialidades, setEspecialidades] = useState<
     { id: number; nome: string }[]
   >([]);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const defaultValues = !!initialValues
     ? {
@@ -85,8 +87,14 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         payload
       );
       if (response.status >= 200 && response.status < 300) {
+        const isEdit = !!initialValues?.id;
+        setSuccessMessage(
+          isEdit
+            ? 'Profissional editado com sucesso!'
+            : 'Profissional cadastrado com sucesso!'
+        );
+        setShowSuccessModal(true);
         onSuccess?.(response.data);
-        // alert('Profissional salvo com sucesso!');
       }
     } catch (erro: any) {
       alert(
@@ -100,73 +108,70 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
   return (
     <FormProvider {...methods}>
-      <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-6">
-        <Card title="Dados Pessoais">
-          <PessoaForm namePrefix="pessoa" />
-        </Card>
+      <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-2">
+        <h3 className="text-md font-bold">Dados do Profissional</h3>
+        <PessoaForm namePrefix="pessoa" />
 
-        <Card title="Endereço">
-          <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
-        </Card>
+        <h3>Endereço</h3>
+        <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
 
         {/* <Card title="Formações Acadêmicas">
           <FormacaoForm namePrefix="" />
         </Card> */}
 
-        <Card title="Dados Cadidato">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormSelect name="areaCandidato" placeholder="Área de atuação">
+        <h3 className="text-md font-bold">Dados Cadidato</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <FormSelect name="areaCandidato" placeholder="Área de atuação">
+            <>
+              {AreaCandidatoEnum.options.map(area => (
+                <option key={area} value={area}>
+                  {area.replaceAll('_', ' ')}
+                </option>
+              ))}
+            </>
+          </FormSelect>
+
+          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+            <FormSelect
+              selectProps={{ disabled: !areaCandidato }}
+              name="especialidadeId"
+              placeholder="Especialidade"
+            >
               <>
-                {AreaCandidatoEnum.options.map(area => (
-                  <option key={area} value={area}>
-                    {area.replaceAll('_', ' ')}
+                {especialidades.map(esp => (
+                  <option key={esp.id} value={esp.id}>
+                    {esp.nome}
                   </option>
                 ))}
               </>
             </FormSelect>
+          )}
 
-            {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
-              <FormSelect
-                selectProps={{ disabled: !areaCandidato }}
-                name="especialidadeId"
-                placeholder="Especialidade"
-              >
-                <>
-                  {especialidades.map(esp => (
-                    <option key={esp.id} value={esp.id}>
-                      {esp.nome}
-                    </option>
-                  ))}
-                </>
-              </FormSelect>
-            )}
+          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+            <FormInput
+              name="crm"
+              placeholder="CRM"
+              inputProps={{ disabled: !areaCandidato }}
+            />
+          )}
 
-            {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+          {areaCandidato === AreaCandidatoEnum.enum.ENFERMAGEM && (
+            <FormInput
+              name="corem"
+              placeholder="COREM"
+              inputProps={{ disabled: !areaCandidato }}
+            />
+          )}
+
+          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA &&
+            especialidadeId && (
               <FormInput
-                name="crm"
-                placeholder="CRM"
+                name="rqe"
+                placeholder="RQE"
                 inputProps={{ disabled: !areaCandidato }}
               />
             )}
-
-            {areaCandidato === AreaCandidatoEnum.enum.ENFERMAGEM && (
-              <FormInput
-                name="corem"
-                placeholder="COREM"
-                inputProps={{ disabled: !areaCandidato }}
-              />
-            )}
-
-            {areaCandidato === AreaCandidatoEnum.enum.MEDICINA &&
-              especialidadeId && (
-                <FormInput
-                  name="rqe"
-                  placeholder="RQE"
-                  inputProps={{ disabled: !areaCandidato }}
-                />
-              )}
-          </div>
-        </Card>
+        </div>
 
         <div className="flex justify-end">
           <PrimaryButton type="submit" disabled={loading}>
@@ -174,6 +179,12 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           </PrimaryButton>
         </div>
       </form>
+
+      <ModalSuccess
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        message={successMessage}
+      />
     </FormProvider>
   );
 };

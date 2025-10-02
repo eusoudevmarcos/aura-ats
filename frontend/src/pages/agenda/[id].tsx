@@ -103,17 +103,24 @@ const AgendaPage: React.FC = () => {
           {/* Sessão Dados da Agenda */}
           <Card title="Dados da Agenda">
             <div>
-              <span className="font-medium">Data e Hora:</span>{' '}
-              {agenda.dataHora
-                ? new Date(agenda.dataHora).toLocaleString('pt-BR')
-                : 'N/A'}
+              <span className="font-medium">Data e Hora:</span>
+              <span className="text-secondary ml-2">
+                {agenda.dataHora
+                  ? new Date(agenda.dataHora).toLocaleString('pt-BR')
+                  : 'N/A'}
+              </span>
             </div>
             <div>
-              <span className="font-medium">Tipo do Evento:</span>{' '}
-              {agenda.tipoEvento?.replace(/_/g, ' ') || 'N/A'}
+              <span className="font-medium">Tipo do Evento:</span>
+              <span className="text-secondary ml-2">
+                {agenda.tipoEvento?.replace(/_/g, ' ') || 'N/A'}
+              </span>
             </div>
             <div>
-              <span className="font-medium">Link:</span> {agenda.link || 'N/A'}
+              <span className="font-medium">Link:</span>
+              <span className="text-secondary ml-2">
+                {agenda.link || 'N/A'}
+              </span>
             </div>
           </Card>
 
@@ -122,50 +129,66 @@ const AgendaPage: React.FC = () => {
             <Card title="Localização">
               {agenda.localizacao.cidade && (
                 <div>
-                  <span className="font-medium">Cidade:</span>{' '}
-                  {agenda.localizacao.cidade}
+                  <span className="font-medium">Cidade:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.cidade}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.estado && (
                 <div>
-                  <span className="font-medium">Estado:</span>{' '}
-                  {agenda.localizacao.estado}
+                  <span className="font-medium">Estado:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.estado}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.cep && (
                 <div>
-                  <span className="font-medium">CEP:</span>{' '}
-                  {agenda.localizacao.cep}
+                  <span className="font-medium">CEP:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.cep}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.bairro && (
                 <div>
-                  <span className="font-medium">Bairro:</span>{' '}
-                  {agenda.localizacao.bairro}
+                  <span className="font-medium">Bairro:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.bairro}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.uf && (
                 <div>
-                  <span className="font-medium">UF:</span>{' '}
-                  {agenda.localizacao.uf}
+                  <span className="font-medium">UF:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.uf}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.complemento && (
                 <div>
-                  <span className="font-medium">Complemento:</span>{' '}
-                  {agenda.localizacao.complemento}
+                  <span className="font-medium">Complemento:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.complemento}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.logradouro && (
                 <div>
-                  <span className="font-medium">Logradouro:</span>{' '}
-                  {agenda.localizacao.logradouro}
+                  <span className="font-medium">Logradouro:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.logradouro}
+                  </span>
                 </div>
               )}
               {agenda.localizacao.regiao && (
                 <div>
-                  <span className="font-medium">Região:</span>{' '}
-                  {agenda.localizacao.regiao}
+                  <span className="font-medium">Região:</span>
+                  <span className="text-secondary ml-2">
+                    {agenda.localizacao.regiao}
+                  </span>
                 </div>
               )}
             </Card>
@@ -175,12 +198,16 @@ const AgendaPage: React.FC = () => {
           {agenda.vaga && (
             <Card title="Vaga Associada">
               <div>
-                <span className="font-medium">Título:</span>{' '}
-                {agenda.vaga.titulo || 'N/A'}
+                <span className="font-medium">Título:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.vaga.titulo || 'N/A'}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Status:</span>{' '}
-                {agenda.vaga.status || 'N/A'}
+                <span className="font-medium">Status:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.vaga.status || 'N/A'}
+                </span>
               </div>
               {/* Adicione mais campos relevantes da vaga se necessário */}
             </Card>
@@ -190,24 +217,34 @@ const AgendaPage: React.FC = () => {
           {agenda.etapaAtual && (
             <Card title="Etapa Atual do Processo Seletivo">
               <div>
-                <span className="font-medium">Nome:</span>{' '}
-                {agenda.etapaAtual.nome}
+                <span className="font-medium">Nome:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.etapaAtual.nome}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Tipo:</span>{' '}
-                {agenda.etapaAtual.tipo}
+                <span className="font-medium">Tipo:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.etapaAtual.tipo}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Ordem:</span>{' '}
-                {agenda.etapaAtual.ordem}
+                <span className="font-medium">Ordem:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.etapaAtual.ordem}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Descrição:</span>{' '}
-                {agenda.etapaAtual.descricao || 'N/A'}
+                <span className="font-medium">Descrição:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.etapaAtual.descricao || 'N/A'}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Ativa:</span>{' '}
-                {agenda.etapaAtual.ativa ? 'Sim' : 'Não'}
+                <span className="font-medium">Ativa:</span>
+                <span className="text-secondary ml-2">
+                  {agenda.etapaAtual.ativa ? 'Sim' : 'Não'}
+                </span>
               </div>
             </Card>
           )}

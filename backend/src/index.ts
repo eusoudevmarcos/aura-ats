@@ -11,9 +11,9 @@ import candidatoRoutes from "./routes/candidato.routes";
 import clienteRoutes from "./routes/cliente.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
+import triagemRoutes from "./routes/triagem.routes";
 import userRoutes from "./routes/user.routes";
 import vagaRoutes from "./routes/vaga.routes";
-
 const app = express();
 const PORT = process.env.PORT;
 
@@ -79,6 +79,7 @@ app.use("/api/cliente", clienteRoutes);
 app.use("/api/candidato", candidatoRoutes);
 app.use("/api/vaga", vagaRoutes);
 app.use("/api/agenda", agendaRoute);
+app.use("/api/triagem", triagemRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

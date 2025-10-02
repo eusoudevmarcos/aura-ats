@@ -2,22 +2,19 @@ import bcrypt from "bcryptjs";
 import { BuildNestedOperation } from "./buildNestedOperation";
 
 export const buildUsuarioData = async (data: any): Promise<any> => {
-  console.log("aqui");
   const usuarioData: any = {
+    id: data?.id,
     email: data.email,
     tipoUsuario: data.tipoUsuario,
     password: await bcrypt.hash(data.password, 10),
   };
 
-  if (data.password) {
-    usuarioData.password = await bcrypt.hash(data.password, 10);
-  }
+  delete data.tipoPessoaOuEmpresa;
 
   const buildNestedOperation = new BuildNestedOperation();
 
-  if (data.pessoa) {
-    usuarioData.pessoa = buildNestedOperation.build(data.pessoa);
-
+  if (data?.funcionario && Object.keys(data?.funcionario).length > 0) {
+    usuarioData.funcionario = buildNestedOperation.build(data?.funcionario);
     // if (data.pessoa.contatos) {
     //   usuarioData.pessoa.contatos = this.buildNestedOperation(
     //     data.pessoa.contatos
@@ -29,8 +26,8 @@ export const buildUsuarioData = async (data: any): Promise<any> => {
     //   );
     // }
   }
-  if (data.empresa) {
-    usuarioData.empresa = buildNestedOperation.build(data.empresa);
+  if (data?.cliente && Object.keys(data?.cliente).length > 0) {
+    usuarioData.cliente = buildNestedOperation.build(data.cliente);
 
     // if (data.empresa.contatos) {
     //   usuarioData.empresa.contatos = this.buildNestedOperation(
@@ -42,11 +39,6 @@ export const buildUsuarioData = async (data: any): Promise<any> => {
     //     data.empresa.localizacoes
     //   );
     // }
-  }
-
-  // Funcionário (sempre opcional)
-  if (data.funcionario) {
-    usuarioData.funcionario = buildNestedOperation.build(data.funcionario);
   }
 
   return usuarioData;

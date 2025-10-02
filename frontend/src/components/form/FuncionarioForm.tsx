@@ -6,6 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import api from '@/axios';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import PessoaForm from '@/components/form/PessoaForm';
+import ModalSuccess from '@/components/modal/ModalSuccess';
 import Tabs from '@/components/utils/Tabs';
 import {
   FuncionarioInput,
@@ -35,6 +36,8 @@ export const FuncionarioForm = ({
 
   // Estado para mostrar ou ocultar a senha
   const [showPassword, setShowPassword] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Ajuste dos valores iniciais para refletir a estrutura correta do Prisma
   const defaultValues = useMemo(() => {
@@ -203,6 +206,15 @@ export const FuncionarioForm = ({
 
       const url = `/api/externalWithAuth/funcionario/save`;
       const response = await api.post(url, cleanData);
+
+      const isEdit = !!initialValues?.id;
+      setSuccessMessage(
+        isEdit
+          ? 'Funcionário editado com sucesso!'
+          : 'Funcionário cadastrado com sucesso!'
+      );
+      setShowSuccessModal(true);
+
       onSuccess(response.data);
       reset(response.data);
     } catch (error: any) {
@@ -417,6 +429,12 @@ export const FuncionarioForm = ({
             : 'Cadastrar Funcionário'}
         </PrimaryButton>
       </form>
+
+      <ModalSuccess
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        message={successMessage}
+      />
     </FormProvider>
   );
 };

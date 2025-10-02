@@ -45,8 +45,8 @@ model VagaHabilidade {
     vagaId String
 
     @@id([vagaId, habilidadeId])
-    @@schema("VagaHabilidade")
     @@index([habilidadeId])
+    @@schema("VagaHabilidade")
 }
 
 model CandidaturaVaga {
@@ -66,9 +66,9 @@ model CandidaturaVaga {
     processoSeletivoEtapaId String?
 
     @@unique([candidatoId, vagaId])
-    @@schema("CandidaturaVaga")
     @@index([vagaId])
     @@index([processoSeletivoEtapaId])
+    @@schema("CandidaturaVaga")
 }
 
 model Anexo {
@@ -91,8 +91,8 @@ model VagaAnexo {
     vagaId String
 
     @@id([vagaId, anexoId])
-    @@schema("VagaAnexo")
     @@index([anexoId])
+    @@schema("VagaAnexo")
 }
 
 // normalização: separar catálogo de benefícios e vínculo
@@ -113,8 +113,8 @@ model VagaBeneficio {
     vagaId String
 
     @@id([vagaId, beneficioId])
-    @@schema("VagaBeneficio")
     @@index([beneficioId])
+    @@schema("VagaBeneficio")
 }
 
 model Habilidade {

@@ -1,6 +1,6 @@
 import api from '@/axios';
-import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
+import ModalSuccess from '@/components/modal/ModalSuccess';
 import {
   ClienteWithEmpresaInput,
   clienteWithEmpresaSchema,
@@ -28,6 +28,8 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   initialValues,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
 
   const methods = useForm<ClienteWithEmpresaInput>({
     resolver: zodResolver(clienteWithEmpresaSchema),
@@ -56,6 +58,13 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         payload
       );
       if (response.status >= 200 && response.status < 300) {
+        const isEdit = !!initialValues?.id;
+        setSuccessMessage(
+          isEdit
+            ? 'Cliente editado com sucesso!'
+            : 'Cliente cadastrado com sucesso!'
+        );
+        setShowSuccessModal(true);
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
@@ -64,7 +73,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           'Erro não encontrado'
       );
     } finally {
-      setLoading(true);
+      setLoading(false);
     }
   };
 
@@ -75,7 +84,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         className="space-y-6 flex flex-col"
       >
         <FormSelect
-          label="Status"
+          label="Tipo de cliente"
           name="status"
           placeholder="Selecione o status do Cliente"
         >
@@ -88,9 +97,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           </>
         </FormSelect>
 
-        <Card title="Dados da empresa">
+        <div>
+          <h3 className="text-md font-bold">Representante</h3>
           <EmpresaForm namePrefix="empresa" />
-        </Card>
+        </div>
 
         <label className="block text-primary text-xl font-bold mb-2">
           Tipo de Serviço:
@@ -122,6 +132,12 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             : 'Cadastrar Cliente'}
         </PrimaryButton>
       </form>
+
+      <ModalSuccess
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        message={successMessage}
+      />
     </FormProvider>
   );
 };

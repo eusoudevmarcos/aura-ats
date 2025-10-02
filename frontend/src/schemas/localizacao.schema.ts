@@ -11,7 +11,7 @@ export const localizacaoSchema = z.object({
     .refine(val => UF_MODEL.some(({ value }) => value === val), {
       message: 'UF inválida',
     }),
-  complemento: z.string().optional(),
+  // complemento: z.string().optional(),
 
   // cep: z.string().length(9, 'CEP deve ter 9 caracteres').optional(),
   // bairro: z.string(),

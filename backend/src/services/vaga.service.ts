@@ -280,7 +280,13 @@ export class VagaService {
       beneficios: true,
       habilidades: true,
       anexos: true,
-      cliente: { include: { empresa: true } },
+      cliente: {
+        include: {
+          empresa: {
+            include: { localizacoes: true },
+          },
+        },
+      },
     };
 
     if (vagaData?.id) {

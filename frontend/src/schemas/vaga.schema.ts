@@ -1,6 +1,7 @@
 // src/schemas/vaga.schema.ts
 import { z } from 'zod';
 import { clienteWithEmpresaSchema } from './cliente.schema';
+import { localizacaoSchema } from './localizacao.schema';
 
 export const CategoriaVagaEnum = z.enum(
   [
@@ -79,6 +80,7 @@ export const vagaSchema = z.object({
   categoria: CategoriaVagaEnum.optional(),
   tipoSalario: z.string().optional(),
   descricao: z.string().min(20, 'minimo 20 caracteres'),
+  localizacao: localizacaoSchema.optional(),
 });
 export type VagaInput = z.infer<typeof vagaSchema>;
 
@@ -89,6 +91,7 @@ export const vagaWithClienteSchema = vagaSchema.extend({
     .nullable()
     .optional(),
   clienteId: z.string(),
+  tipoLocalTrabalho: z.string(),
 });
 export type VagaWithClienteInput = z.infer<typeof vagaWithClienteSchema>;
 

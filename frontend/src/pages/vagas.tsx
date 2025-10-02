@@ -27,7 +27,7 @@ export default function Vagas() {
           onClose={() => {
             setShowVagasForm(false);
           }}
-          title="Dados da vaga"
+          title="Cadastrar Vaga"
         >
           <VagaForm
             onSuccess={() => {

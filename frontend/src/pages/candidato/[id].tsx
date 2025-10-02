@@ -136,15 +136,22 @@ const CandidatoPage: React.FC = () => {
           {candidato.pessoa && (
             <Card title="Dados Pessoais">
               <div>
-                <span className="font-medium">CPF:</span> {candidato.pessoa.cpf}
+                <span className="font-medium">CPF:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.pessoa.cpf}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Data de Nascimento:</span>{' '}
-                {candidato.pessoa.dataNascimento ?? 'N/A'}
+                <span className="font-medium">Data de Nascimento:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.pessoa.dataNascimento ?? 'N/A'}
+                </span>
               </div>
               <div>
-                <span className="font-medium">Sexo:</span>{' '}
-                {candidato.pessoa.sexo || 'N/A'}
+                <span className="font-medium">Sexo:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.pessoa.sexo || 'N/A'}
+                </span>
               </div>
             </Card>
           )}
@@ -155,33 +162,43 @@ const CandidatoPage: React.FC = () => {
               <span className="font-medium">ID:</span> {candidato.id}
             </div> */}
             <div>
-              <span className="font-medium">Área de Atuação:</span>{' '}
-              {candidato.areaCandidato?.replace(/_/g, ' ')}
+              <span className="font-medium">Área de Atuação:</span>
+              <span className="text-secondary ml-2">
+                {candidato.areaCandidato?.replace(/_/g, ' ')}
+              </span>
             </div>
 
             {candidato.corem && (
               <div>
-                <span className="font-medium">CRM:</span>{' '}
-                {candidato.crm || 'N/A'}
+                <span className="font-medium">CRM:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.crm || 'N/A'}
+                </span>
               </div>
             )}
 
             {candidato.corem && (
               <div>
                 <span className="font-medium">COREM:</span>
-                {candidato.corem || 'N/A'}
+                <span className="text-secondary ml-2">
+                  {candidato.corem || 'N/A'}
+                </span>
               </div>
             )}
 
             {candidato.rqe && (
               <div>
-                <span className="font-medium">RQE:</span>{' '}
-                {candidato.rqe || 'N/A'}
+                <span className="font-medium">RQE:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.rqe || 'N/A'}
+                </span>
               </div>
             )}
             <div>
-              <span className="font-medium">Especialidade:</span>{' '}
-              {candidato.especialidade?.nome || 'N/A'}
+              <span className="font-medium">Especialidade:</span>
+              <span className="text-secondary ml-2">
+                {candidato.especialidade?.nome || 'N/A'}
+              </span>
             </div>
           </Card>
 
@@ -190,9 +207,30 @@ const CandidatoPage: React.FC = () => {
             <Card title="Contatos">
               {candidato.pessoa.contatos.map((contato: any) => (
                 <div key={contato.id} className="mb-2">
-                  {contato.email && <div>Email: {contato.email}</div>}
-                  {contato.telefone && <div>Telefone: {contato.telefone}</div>}
-                  {contato.whatsapp && <div>WhatsApp: {contato.whatsapp}</div>}
+                  {contato.email && (
+                    <div>
+                      <span className="font-medium">Email:</span>
+                      <span className="text-secondary ml-2">
+                        {contato.email}
+                      </span>
+                    </div>
+                  )}
+                  {contato.telefone && (
+                    <div>
+                      <span className="font-medium">Telefone:</span>
+                      <span className="text-secondary ml-2">
+                        {contato.telefone}
+                      </span>
+                    </div>
+                  )}
+                  {contato.whatsapp && (
+                    <div>
+                      <span className="font-medium">WhatsApp:</span>
+                      <span className="text-secondary ml-2">
+                        {contato.whatsapp}
+                      </span>
+                    </div>
+                  )}
                 </div>
               ))}
             </Card>
@@ -205,44 +243,54 @@ const CandidatoPage: React.FC = () => {
                 <ul key={loc.id} className="mb-2 list-inside">
                   {loc.cidade && (
                     <li>
-                      <span className="font-medium">Cidade:</span> {loc.cidade}
+                      <span className="font-medium">Cidade:</span>
+                      <span className="text-secondary ml-2">{loc.cidade}</span>
                     </li>
                   )}
                   {loc.estado && (
                     <li>
-                      <span className="font-medium">Estado:</span> {loc.estado}
+                      <span className="font-medium">Estado:</span>
+                      <span className="text-secondary ml-2">{loc.estado}</span>
                     </li>
                   )}
                   {loc.cep && (
                     <li>
-                      <span className="font-medium">CEP:</span> {loc.cep}
+                      <span className="font-medium">CEP:</span>
+                      <span className="text-secondary ml-2">{loc.cep}</span>
                     </li>
                   )}
                   {loc.bairro && (
                     <li>
-                      <span className="font-medium">Bairro:</span> {loc.bairro}
+                      <span className="font-medium">Bairro:</span>
+                      <span className="text-secondary ml-2">{loc.bairro}</span>
                     </li>
                   )}
                   {loc.uf && (
                     <li>
-                      <span className="font-medium">UF:</span> {loc.uf}
+                      <span className="font-medium">UF:</span>
+                      <span className="text-secondary ml-2">{loc.uf}</span>
                     </li>
                   )}
                   {loc.complemento && (
                     <li>
-                      <span className="font-medium">Complemento:</span>{' '}
-                      {loc.complemento}
+                      <span className="font-medium">Complemento:</span>
+                      <span className="text-secondary ml-2">
+                        {loc.complemento}
+                      </span>
                     </li>
                   )}
                   {loc.logradouro && (
                     <li>
-                      <span className="font-medium">Logradouro:</span>{' '}
-                      {loc.logradouro}
+                      <span className="font-medium">Logradouro:</span>
+                      <span className="text-secondary ml-2">
+                        {loc.logradouro}
+                      </span>
                     </li>
                   )}
                   {loc.regiao && (
                     <li>
-                      <span className="font-medium">Região:</span> {loc.regiao}
+                      <span className="font-medium">Região:</span>
+                      <span className="text-secondary ml-2">{loc.regiao}</span>
                     </li>
                   )}
                 </ul>
@@ -256,40 +304,53 @@ const CandidatoPage: React.FC = () => {
               {candidato.formacoes.map((formacao: any) => (
                 <div key={formacao.id} className="mb-2">
                   <div>
-                    <span className="font-medium">Instituição:</span>{' '}
-                    {formacao.instituicao}
+                    <span className="font-medium">Instituição:</span>
+                    <span className="text-secondary ml-2">
+                      {formacao.instituicao}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium">Curso:</span> {formacao.curso}
+                    <span className="font-medium">Curso:</span>
+                    <span className="text-secondary ml-2">
+                      {formacao.curso}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium">Data de Início:</span>{' '}
-                    {formacao.dataInicio
-                      ? new Date(formacao.dataInicio).toLocaleDateString(
-                          'pt-BR'
-                        )
-                      : 'N/A'}
+                    <span className="font-medium">Data de Início:</span>
+                    <span className="text-secondary ml-2">
+                      {formacao.dataInicio
+                        ? new Date(formacao.dataInicio).toLocaleDateString(
+                            'pt-BR'
+                          )
+                        : 'N/A'}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium">Data de Fim:</span>{' '}
-                    {formacao.dataFim
-                      ? new Date(formacao.dataFim).toLocaleDateString('pt-BR')
-                      : 'N/A'}
+                    <span className="font-medium">Data de Fim:</span>
+                    <span className="text-secondary ml-2">
+                      {formacao.dataFim
+                        ? new Date(formacao.dataFim).toLocaleDateString('pt-BR')
+                        : 'N/A'}
+                    </span>
                   </div>
                   {formacao.dataInicioResidencia && (
                     <div>
-                      <span className="font-medium">Início Residência:</span>{' '}
-                      {new Date(
-                        formacao.dataInicioResidencia
-                      ).toLocaleDateString('pt-BR')}
+                      <span className="font-medium">Início Residência:</span>
+                      <span className="text-secondary ml-2">
+                        {new Date(
+                          formacao.dataInicioResidencia
+                        ).toLocaleDateString('pt-BR')}
+                      </span>
                     </div>
                   )}
                   {formacao.dataFimResidencia && (
                     <div>
-                      <span className="font-medium">Fim Residência:</span>{' '}
-                      {new Date(formacao.dataFimResidencia).toLocaleDateString(
-                        'pt-BR'
-                      )}
+                      <span className="font-medium">Fim Residência:</span>
+                      <span className="text-secondary ml-2">
+                        {new Date(
+                          formacao.dataFimResidencia
+                        ).toLocaleDateString('pt-BR')}
+                      </span>
                     </div>
                   )}
                 </div>
@@ -303,16 +364,22 @@ const CandidatoPage: React.FC = () => {
               {candidato.habilidades.map((hab: any) => (
                 <div key={hab.habilidadeId} className="mb-2">
                   <div>
-                    <span className="font-medium">Habilidade:</span>{' '}
-                    {hab.habilidade?.nome}
+                    <span className="font-medium">Habilidade:</span>
+                    <span className="text-secondary ml-2">
+                      {hab.habilidade?.nome}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium">Nível:</span>{' '}
-                    {hab.nivel || 'N/A'}
+                    <span className="font-medium">Nível:</span>
+                    <span className="text-secondary ml-2">
+                      {hab.nivel || 'N/A'}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium">Anos de Experiência:</span>{' '}
-                    {hab.experienciaAnos || 'N/A'}
+                    <span className="font-medium">Anos de Experiência:</span>
+                    <span className="text-secondary ml-2">
+                      {hab.experienciaAnos || 'N/A'}
+                    </span>
                   </div>
                 </div>
               ))}
@@ -325,10 +392,12 @@ const CandidatoPage: React.FC = () => {
               {candidato.vagas.map((vaga: any) => (
                 <div key={vaga.id} className="mb-2">
                   <div>
-                    <span className="font-medium">Título:</span> {vaga.titulo}
+                    <span className="font-medium">Título:</span>
+                    <span className="text-secondary ml-2">{vaga.titulo}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Status:</span> {vaga.status}
+                    <span className="font-medium">Status:</span>
+                    <span className="text-secondary ml-2">{vaga.status}</span>
                   </div>
                   {/* Adicione mais campos relevantes da vaga se necessário */}
                 </div>
@@ -342,11 +411,14 @@ const CandidatoPage: React.FC = () => {
               {candidato.CandidaturaVaga.map((cand: any) => (
                 <div key={cand.id} className="mb-2">
                   <div>
-                    <span className="font-medium">Vaga:</span>{' '}
-                    {cand.vaga?.titulo || cand.vagaId}
+                    <span className="font-medium">Vaga:</span>
+                    <span className="text-secondary ml-2">
+                      {cand.vaga?.titulo || cand.vagaId}
+                    </span>
                   </div>
                   <div>
-                    <span className="font-medium">Status:</span> {cand.status}
+                    <span className="font-medium">Status:</span>
+                    <span className="text-secondary ml-2">{cand.status}</span>
                   </div>
                   {/* Adicione mais campos relevantes da candidatura se necessário */}
                 </div>

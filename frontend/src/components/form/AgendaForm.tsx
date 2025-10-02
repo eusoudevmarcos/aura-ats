@@ -6,6 +6,7 @@ import { FormProvider, useForm } from 'react-hook-form';
 import Card from '@/components/Card';
 import { FormInput } from '@/components/input/FormInput';
 import { FormSelect } from '@/components/input/FormSelect';
+import ModalSuccess from '@/components/modal/ModalSuccess';
 
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
@@ -22,6 +23,8 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     null
   );
   const [isEtapa, setIsEtapa] = useState<boolean>(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   // const { data: session } = useSession();
 
   const methods = useForm<AgendaInput>({
@@ -103,16 +106,21 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
     try {
       const isEdit = !!agendaData;
-      const url = isEdit
-        ? '/api/externalWithAuth/agenda'
-        : '/api/externalWithAuth/agenda';
 
       // monta dataHora string final para backend
       const { data: d, hora: h, ...rest } = result.data as any;
       const dataHora = `${d} ${h}:00`;
       const payload = { ...rest, dataHora };
 
-      await api.post(url, payload);
+      await api.post('/api/externalWithAuth/agenda', payload);
+
+      setSuccessMessage(
+        isEdit
+          ? 'Agenda editada com sucesso!'
+          : 'Agenda cadastrada com sucesso!'
+      );
+      setShowSuccessModal(true);
+
       onSuccess(true);
     } catch (error: any) {
       onSuccess(false);
@@ -233,6 +241,12 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda  no google'}
         </button> */}
       </form>
+
+      <ModalSuccess
+        isOpen={showSuccessModal}
+        onClose={() => setShowSuccessModal(false)}
+        message={successMessage}
+      />
     </FormProvider>
   );
 };
