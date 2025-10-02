@@ -182,21 +182,34 @@ export class CandidatoRepository {
     page: number,
     pageSize: number,
     tx: PrismaTransactionClient
-  ): Promise<{ data: Candidato[]; total: number }> {
+  ): Promise<{ data: any[]; total: number }> {
     const skip = (page - 1) * pageSize;
     const [data, total] = await Promise.all([
       tx.candidato.findMany({
         skip,
         take: pageSize,
-        include: {
+        select: {
+          id: true,
+          rqe: true,
+          areaCandidato: true,
+          corem: true,
+          crm: true,
           pessoa: {
-            include: {
-              contatos: true,
-              localizacoes: true,
+            select: {
+              nome: true,
+              localizacoes: {
+                select: {
+                  uf: true,
+                  cidade: true,
+                },
+              },
             },
           },
-          especialidade: true,
-          formacoes: true,
+          especialidade: {
+            select: {
+              nome: true,
+            },
+          },
         },
         orderBy: {
           pessoa: {
@@ -206,6 +219,7 @@ export class CandidatoRepository {
       }),
       tx.candidato.count(),
     ]);
+
     return { data, total };
   }
 
