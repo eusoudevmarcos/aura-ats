@@ -40,7 +40,7 @@ export class ClienteController {
       ? parseInt(req.query.pageSize as string, 10)
       : 10;
 
-    const search = req.query;
+    const search = req.query.search;
 
     try {
       const clientes = await this.service.getAll({ page, pageSize, search });

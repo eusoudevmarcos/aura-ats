@@ -1,7 +1,8 @@
-import { Cliente, StatusCliente } from "@prisma/client";
+import { Cliente, Prisma } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
 import { buildClienteData } from "../helper/buildNested/cliente.build";
+import { buildWhere } from "../helper/buildWhere";
 import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
 import { validateBasicFieldsCliente } from "../helper/validate/cliente.validate";
 import prisma from "../lib/prisma";
@@ -46,16 +47,20 @@ export class ClienteService extends BuildNestedOperation {
     });
   }
 
-  async getAll({
-    page = 1,
-    pageSize = 10,
-    search,
-  }: Pagination<{
-    status?: StatusCliente;
-    cpf?: string;
-    razaoSocial?: string;
-  }>) {
+  async getAll({ page = 1, pageSize = 10, search }: Pagination<any>) {
     const skip = (page - 1) * pageSize;
+
+    // const where = {
+    //   status: { equals: search?.status },
+    //   empresa: {
+    //     razaoSocial: { contains: search?.razaoSocial, mode: "insensitive" },
+    //   },
+    // };
+
+    let where = buildWhere<Prisma.ClienteWhereInput>({
+      search,
+      fields: ["empresa.razaoSocial"],
+    });
 
     const [vagas, total] = await prisma.$transaction([
       prisma.cliente.findMany({
@@ -66,17 +71,25 @@ export class ClienteService extends BuildNestedOperation {
             createdAt: "desc",
           },
         },
-        where: {
-          status: { equals: search?.status },
+        where: where,
+        select: {
+          tipoServico: true,
+          status: true,
           empresa: {
-            razaoSocial: { contains: search?.razaoSocial, mode: "insensitive" },
+            select: {
+              razaoSocial: true,
+              cnpj: true,
+              dataAbertura: true,
+            },
+          },
+          usuarioSistema: {
+            select: {
+              email: true,
+            },
           },
         },
-        include: {
-          empresa: true,
-        },
       }),
-      prisma.cliente.count(),
+      prisma.cliente.count({ where }),
     ]);
 
     return {

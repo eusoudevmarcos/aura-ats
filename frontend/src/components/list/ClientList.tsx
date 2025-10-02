@@ -14,7 +14,6 @@ import Table, { TableColumn } from '../Table';
 interface EmpresaContato {
   telefone?: string;
   whatsapp?: string;
-  email?: string;
 }
 interface EmpresaLocalizacao {
   cidade: string;
@@ -33,6 +32,9 @@ interface Cliente {
   tipoServico: string[];
   empresa: Empresa;
   status: string;
+  usuarioSistema: {
+    email: string;
+  };
 }
 
 interface Search {
@@ -45,7 +47,7 @@ function normalizarTable(clientes: Cliente[]) {
   return clientes.map(c => ({
     id: c.id,
     razaoSocial: c.empresa?.razaoSocial ?? '-',
-    email: c.empresa?.contatos?.[0]?.email ?? '-',
+    email: c.usuarioSistema?.email ?? '-',
     cnpj: c.empresa?.cnpj ?? '-',
     dataAbertura: c.empresa?.dataAbertura
       ? new Date(c.empresa.dataAbertura).toLocaleDateString('pt-BR')
