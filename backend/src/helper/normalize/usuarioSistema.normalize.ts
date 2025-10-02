@@ -25,7 +25,7 @@ export const normalizeData = (data: any) => {
   }
 
   // --- Normaliza empresa ---
-  if (data?.cliente.empresa || data?.cliente?.empresaId) {
+  if (data?.cliente?.empresa || data?.cliente?.empresaId) {
     newData.cliente = { ...newData.cliente };
 
     const empresa = newData.cliente.empresa || {};
