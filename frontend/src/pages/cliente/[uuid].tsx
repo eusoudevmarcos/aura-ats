@@ -178,7 +178,9 @@ const ClientePage: React.FC<{
           </div>
         )}
 
-        <ClienteInfo cliente={cliente} variant="full" />
+        <Card title="Dados do cliente">
+          <ClienteInfo cliente={cliente} variant="full" />
+        </Card>
       </section>
 
       <div className="flex justify-center mt-10 mb-4 relative">

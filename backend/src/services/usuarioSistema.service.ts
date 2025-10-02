@@ -128,7 +128,7 @@ export class UsuarioSistemaService extends BuildNestedOperation {
       const pessoaExistente = await this.pessoaRepository.findByCpf(
         data.funcionario.pessoa.cpf
       );
-      if (pessoaExistente && pessoaExistente.id !== data.pessoa.id) {
+      if (pessoaExistente && pessoaExistente.id !== data.funcionario.pessoa) {
         throw new Error(
           `CPF '${data.pessoa.cpf}' já cadastrado para outra pessoa.`
         );
