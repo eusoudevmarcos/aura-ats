@@ -1,4 +1,0 @@
--- AlterTable
-ALTER TABLE "public"."Localizacao" ALTER COLUMN "cep" DROP NOT NULL,
-ALTER COLUMN "cidade" DROP NOT NULL,
-ALTER COLUMN "bairro" DROP NOT NULL;

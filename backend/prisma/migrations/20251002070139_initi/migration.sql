@@ -1,3 +1,72 @@
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Agenda";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "AgendaCandidatura";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Anexo";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Beneficio";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Candidato";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "CandidaturaVaga";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Cliente";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Contato";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Empresa";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Especialidade";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Formacao";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Funcionario";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Habilidade";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Localizacao";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Pessoa";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "ProcessoSeletivoEtapa";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Socio";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "TriagemVaga";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "UsuarioSistema";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "Vaga";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "VagaAnexo";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "VagaBeneficio";
+
+-- CreateSchema
+CREATE SCHEMA IF NOT EXISTS "VagaHabilidade";
+
 -- CreateEnum
 CREATE TYPE "public"."CategoriaVaga" AS ENUM ('TECNOLOGIA', 'SAUDE', 'ADMINISTRATIVO', 'FINANCEIRO', 'RECURSOS_HUMANOS', 'MARKETING', 'VENDAS', 'OUTROS');
 
@@ -51,7 +120,7 @@ CREATE TABLE "Agenda"."Agenda" (
     "id" TEXT NOT NULL,
     "dataHora" TIMESTAMP(3) NOT NULL,
     "link" TEXT,
-    "tipoEvento" "public"."TipoEventoAgenda" NOT NULL,
+    "tipoEvento" "public"."TipoEventoAgenda" NOT NULL DEFAULT 'TRIAGEM_INICIAL',
     "etapaAtualId" TEXT,
     "localizacaoId" TEXT,
     "vagaId" TEXT,
