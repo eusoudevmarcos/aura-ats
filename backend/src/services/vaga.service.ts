@@ -125,12 +125,18 @@ export class VagaService {
       }
     }
 
-    const relations = {
-      beneficios: true,
-      habilidades: true,
-      anexos: true,
-      localizacao: true,
-      cliente: true,
+    const select = {
+      id: true,
+      titulo: true,
+      categoria: true,
+      status: true,
+      dataPublicacao: true,
+      localizacao: {
+        select: {
+          uf: true,
+          cidade: true,
+        },
+      },
     };
 
     const [vagas, total] = await prisma.$transaction([
@@ -141,7 +147,7 @@ export class VagaService {
           create_at: "desc",
         },
         where,
-        include: relations,
+        select,
       }),
       prisma.vaga.count({ where }),
     ]);
