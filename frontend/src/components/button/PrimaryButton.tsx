@@ -23,7 +23,7 @@ const PrimaryButton: React.FC<SimpleButtonProps> = ({
   return (
     <button
       type={type}
-      className={`bg-primary text-white py-2 px-3 rounded-[12px] text-sm flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`bg-primary text-white py-2 px-3 rounded-md text-sm flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
       disabled={loading || disabled}
       onClick={onClick}
       {...rest}

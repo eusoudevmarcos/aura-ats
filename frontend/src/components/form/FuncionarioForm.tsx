@@ -4,7 +4,6 @@ import { useEffect, useMemo, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 
 import api from '@/axios';
-import Card from '@/components/Card';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import PessoaForm from '@/components/form/PessoaForm';
 import Tabs from '@/components/utils/Tabs';
@@ -33,6 +32,9 @@ export const FuncionarioForm = ({
   const [currentTab, setCurrentTab] = useState<
     'Pesquisar Cliente' | 'Cadastrar Cliente'
   >('Pesquisar Cliente');
+
+  // Estado para mostrar ou ocultar a senha
+  const [showPassword, setShowPassword] = useState(false);
 
   // Ajuste dos valores iniciais para refletir a estrutura correta do Prisma
   const defaultValues = useMemo(() => {
@@ -245,13 +247,57 @@ export const FuncionarioForm = ({
         className="max-w-3xl mx-auto bg-white rounded-lg space-y-6"
         autoComplete="off"
       >
-        <Card
-          title="Dados de Acesso"
-          classNameContent="grid grid-cols-1 md:grid-cols-4 gap-2"
-        >
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 border-b-[1px] border-gray-400 py-4">
+          <h4 className="col-span-full">Dados de Acesso</h4>
+          <FormInput
+            name="email"
+            label="Email de login"
+            inputProps={{ type: 'email', classNameContainer: 'col-span-2' }}
+          />
+
+          {/* Campo de senha com funcionalidade de mostrar/ocultar */}
+          <div className="relative col-span-2">
+            <FormInput
+              name="password"
+              label="Senha"
+              inputProps={{
+                type: showPassword ? 'text' : 'password',
+                classNameContainer: `w-full`,
+              }}
+            />
+            <button
+              type="button"
+              tabIndex={-1}
+              className="absolute right-3 top-8 z-10 flex items-center"
+              onClick={() => setShowPassword(prev => !prev)}
+              aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
+            >
+              <span
+                className={`material-icons-outlined transition-all duration-300 ease-in-out text-primary
+                  ${
+                    showPassword
+                      ? 'scale-110 rotate-0 opacity-100'
+                      : 'scale-90 -rotate-12 opacity-70'
+                  }
+                `}
+                style={{
+                  transitionProperty: 'transform, opacity',
+                  willChange: 'transform, opacity',
+                  display: 'inline-block',
+                }}
+              >
+                {showPassword ? 'visibility' : 'visibility_off'}
+              </span>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <h3>Dados do funcionario</h3>
+
           <FormSelect
             name="tipoUsuario"
-            label="Tipo de funcionário"
+            label="Acessos e permissões do funcionario"
             selectProps={{
               classNameContainer: 'col-span-full',
             }}
@@ -287,46 +333,10 @@ export const FuncionarioForm = ({
             </>
           </FormSelect>
 
-          <FormInput
-            name="email"
-            label="Email de login"
-            inputProps={{ type: 'email', classNameContainer: 'col-span-2' }}
-          />
-
-          <FormInput
-            name="password"
-            label="Senha"
-            inputProps={{
-              type: 'password',
-              classNameContainer: `col-span-2`,
-            }}
-          />
-
-          {!isClienteUsuario ? (
-            <>
-              <FormInput
-                name={setor}
-                label="Setor"
-                inputProps={{ classNameContainer: 'col-span-2' }}
-              />
-              <FormInput
-                name={cargo}
-                label="Cargo"
-                inputProps={{ classNameContainer: 'col-span-2' }}
-              />
-            </>
-          ) : null}
-        </Card>
-
-        <Card
-          title={`Tipo de Funcionário ${
-            isClienteUsuario ? '(Cliente)' : '(Pessoa ou Empresa)'
-          }`}
-        >
           <FormSelect
             name="tipoPessoaOuEmpresa"
+            label="Tipo de funcionário"
             selectProps={{
-              classNameContainer: 'mb-4',
               disabled: !tipoUsuario || isClienteUsuario,
             }}
           >
@@ -340,7 +350,21 @@ export const FuncionarioForm = ({
             </>
           </FormSelect>
 
-          {/* Renderização condicional dos formulários de acordo com a estrutura correta */}
+          {!isClienteUsuario ? (
+            <div className="flex w-full gap-2">
+              <FormInput
+                name={setor}
+                label="Setor"
+                inputProps={{ classNameContainer: 'flex-1 w-full' }}
+              />
+              <FormInput
+                name={cargo}
+                label="Cargo"
+                inputProps={{ classNameContainer: 'flex-1 w-full' }}
+              />
+            </div>
+          ) : null}
+
           {tipoPessoaOuEmpresa === 'cliente.empresa' && isClienteUsuario ? (
             <Tabs
               tabs={['Pesquisar Cliente', 'Cadastrar Cliente']}
@@ -379,7 +403,7 @@ export const FuncionarioForm = ({
               <EmpresaForm namePrefix="cliente.empresa" />
             </>
           )}
-        </Card>
+        </div>
 
         <PrimaryButton
           type="submit"

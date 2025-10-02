@@ -10,5 +10,7 @@ model Contato {
     pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
     pessoaId String?
 
+    @@index([empresaId])
+    @@index([pessoaId])
     @@schema("Contato")
 }

@@ -8,7 +8,7 @@ enum CategoriaVaga {
     VENDAS
     OUTROS
 
-    @@schema("CategoriaVaga")
+    @@schema("public")
 }
 
 enum StatusVaga {
@@ -17,7 +17,7 @@ enum StatusVaga {
     ENCERRADA
     ARQUIVADA
 
-    @@schema("StatusVaga")
+    @@schema("public")
 }
 
 enum TipoContrato {
@@ -27,7 +27,7 @@ enum TipoContrato {
     FREELANCER
     TEMPORARIO
 
-    @@schema("TipoContrato")
+    @@schema("public")
 }
 
 enum NivelExperiencia {
@@ -38,7 +38,7 @@ enum NivelExperiencia {
     ESPECIALISTA
     GERENTE
 
-    @@schema("NivelExperiencia")
+    @@schema("public")
 }
 
 enum TipoEtapa {
@@ -49,7 +49,7 @@ enum TipoEtapa {
     OFERTA
     CONTRATACAO
 
-    @@schema("TipoEtapa")
+    @@schema("public")
 }
 
 enum StatusCandidatura {
@@ -63,7 +63,7 @@ enum StatusCandidatura {
     DESCLASSIFICADO
     CONTRATADO
 
-    @@schema("StatusCandidatura")
+    @@schema("public")
 }
 
 enum TipoServico {
@@ -72,7 +72,7 @@ enum TipoServico {
     RECRUTAMENTO_INFORMACAO
     PLATAFORMA
 
-    @@schema("TipoServico")
+    @@schema("public")
 }
 
 enum AreaCandidato {
@@ -80,7 +80,7 @@ enum AreaCandidato {
     ENFERMAGEM
     OUTRO
 
-    @@schema("AreaCandidato")
+    @@schema("public")
 }
 
 enum StatusCliente {
@@ -90,7 +90,7 @@ enum StatusCliente {
     INATIVO
     PENDENTE
 
-    @@schema("StatusCliente")
+    @@schema("public")
 }
 
 enum TipoEventoAgenda {
@@ -103,7 +103,7 @@ enum TipoEventoAgenda {
     PROPOSTA
     OUTRO
 
-    @@schema("TipoEventoAgenda")
+    @@schema("public")
 }
 
 // novos enums para vaga/salário
@@ -112,7 +112,7 @@ enum Moeda {
     USD
     EUR
 
-    @@schema("Moeda")
+    @@schema("public")
 }
 
 enum PeriodicidadeSalario {
@@ -121,7 +121,7 @@ enum PeriodicidadeSalario {
     MES
     ANO
 
-    @@schema("PeriodicidadeSalario")
+    @@schema("public")
 }
 
 enum TipoSocio {
@@ -129,7 +129,7 @@ enum TipoSocio {
     SOCIO
     ADMINISTRADOR
 
-    @@schema("TipoSocio")
+    @@schema("public")
 }
 
 enum EstadoCivil {
@@ -140,7 +140,7 @@ enum EstadoCivil {
     SEPARADO
     UNIAO_ESTAVEL
 
-    @@schema("EstadoCivil")
+    @@schema("public")
 }
 
 enum TipoUsuario {
@@ -153,12 +153,12 @@ enum TipoUsuario {
     CLIENTE_ATS_CRM
     CLIENTE_CRM
 
-    @@schema("TipoUsuario")
+    @@schema("public")
 }
 
 enum TipoPessoa {
     FISICA
     JURIDICA
 
-    @@schema("TipoPessoa")
+    @@schema("public")
 }

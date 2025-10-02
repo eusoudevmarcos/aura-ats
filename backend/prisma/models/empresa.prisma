@@ -27,6 +27,7 @@ model Socio {
     pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
     pessoaId String
 
-    @@unique([pessoaId, empresaId])
+    @@unique([pessoaId])
+    @@unique([empresaId])
     @@schema("Socio")
 }

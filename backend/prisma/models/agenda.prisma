@@ -20,6 +20,11 @@ model Agenda {
     triagemId         String?
 
     @@schema("Agenda")
+    @@index([etapaAtualId])
+    @@index([localizacaoId])
+    @@index([vagaId])
+    @@index([clienteId])
+    @@index([triagemId])
 }
 
 model ProcessoSeletivoEtapa {
@@ -70,4 +75,6 @@ model AgendaCandidatura {
     candidaturaId String
 
     @@schema("AgendaCandidatura")
+    @@index([agendaId])
+    @@index([candidaturaId])
 }
