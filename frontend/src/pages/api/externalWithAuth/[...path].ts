@@ -43,23 +43,20 @@ export default async function handler(
     const urlToExternalBackend = `/${externalPath}`;
     const reset = '\x1b[0m';
     const green = '\x1b[32m';
-    console.log(
-      `${green}${process.env.NEXT_PUBLIC_API_URL}/api${urlToExternalBackend}${reset}`
-    );
 
     const cacheKey = `proxy:${req.method}:${externalPath}:${JSON.stringify(
       req.query
     )}`;
 
-    if (process.env.NODE_ENV === 'production') {
-      if (req.method === 'GET') {
-        const data = await redis.get(cacheKey);
+    // if (process.env.NODE_ENV === 'production') {
+    //   if (req.method === 'GET') {
+    //     const data = await redis.get(cacheKey);
 
-        if (data) {
-          return res.status(200).json({ cached: true, ...data });
-        }
-      }
-    }
+    //     if (data) {
+    //       return res.status(200).json({ cached: true, ...data });
+    //     }
+    //   }
+    // }
 
     const headers = {
       'Content-Type': 'application/json',
@@ -80,7 +77,7 @@ export default async function handler(
           req.body,
           { headers }
         );
-        if (externalPath) await invalidateGetCache(externalPath);
+        // if (externalPath) await invalidateGetCache(externalPath);
         break;
       case 'PUT':
         externalResponse = await externalBackendApi.put(
@@ -88,14 +85,14 @@ export default async function handler(
           req.body,
           { headers }
         );
-        if (externalPath) await invalidateGetCache(externalPath);
+        // if (externalPath) await invalidateGetCache(externalPath);
         break;
       case 'DELETE':
         externalResponse = await externalBackendApi.delete(
           urlToExternalBackend,
           { headers, data: req.body }
         );
-        if (externalPath) await invalidateGetCache(externalPath);
+        // if (externalPath) await invalidateGetCache(externalPath);
         break;
       default:
         return res
@@ -103,11 +100,11 @@ export default async function handler(
           .json({ error: 'Método não permitido nesta rota de proxy.' });
     }
 
-    if (process.env.NODE_ENV === 'production') {
-      if (externalResponse?.data) {
-        await redis.set(cacheKey, externalResponse?.data, { ex: 300 });
-      }
-    }
+    // if (process.env.NODE_ENV === 'production') {
+    //   if (externalResponse?.data) {
+    //     await redis.set(cacheKey, externalResponse?.data, { ex: 300 });
+    //   }
+    // }
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {
