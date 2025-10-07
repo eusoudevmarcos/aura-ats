@@ -10,11 +10,13 @@ import ModalSuccess from '@/components/modal/ModalSuccess';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import { AgendaInput, agendaSchema } from '@/schemas/agenda.schema';
-// import { ConnectGoogleButton } from '../button/GoogleAuth';
 
 import api from '@/axios';
+import getAvailableTimes from '@/axios/getAvaliableTimes';
 import postCalendar from '@/axios/postCalendar';
 import Table, { TableColumn } from '@/components/Table';
+import { DayPicker } from 'react-day-picker';
+import 'react-day-picker/style.css';
 import { ConnectGoogleButton } from '../button/GoogleAuth';
 import { ErrorMessage } from '../input/ErrorMessage';
 
@@ -41,7 +43,7 @@ export default function ConvidadosTable() {
   };
 
   const handleAddConvidado = () => {
-    if (!email) return; // validação mínima
+    if (!email) return;
 
     const isConvidado = convidados.find(convidado => convidado.email === email);
     if (!!isConvidado) return;
@@ -49,7 +51,6 @@ export default function ConvidadosTable() {
     const novosConvidados = [...convidados, { email }];
     setConvidados(novosConvidados);
 
-    // Atualiza o array de emails no react-hook-form
     setValue(
       'convidados',
       novosConvidados.map(c => c.email)
@@ -115,12 +116,20 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
   const [isEtapa, setIsEtapa] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
-  // const { data: session } = useSession();
-  const MIN_LEAD_MS = 60 * 1000;
+
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
+  const [selectedTime, setSelectedTime] = useState<string | undefined>(
+    undefined
+  );
+  const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false);
 
   const methods = useForm<AgendaInput>({
     resolver: zodResolver(agendaSchema),
     mode: 'onTouched',
+    defaultValues: {
+      selectLocalizacao: 'REMOTO',
+    },
   });
 
   const {
@@ -136,69 +145,43 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     console.log('Erros do formulário:', errors);
   }, [errors]);
 
-  const data = watch('data');
-  const hora = watch('hora');
+  function handleFullDateTime(times: string, e: Event) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!selectedDate || !times) return;
 
-  useEffect(() => {
-    if (data && hora) {
-      console.log('Data recebida:', data); // Debug
-      console.log('Hora recebida:', hora); // Debug
+    setSelectedTime(times);
 
-      const dataStr = data.toString();
-      const horaStr = hora.toString();
+    console.log('Data recebida:', selectedDate);
+    console.log('Hora recebida:', times);
 
-      // Verifica se a data está no formato DD/MM/YYYY
-      const match = dataStr.match(/^(\d{2})\/(\d{2})\/(\d{4})$/);
+    const [hours, minutes] = times.split(':').map(Number);
 
-      if (match && horaStr.match(/^([01]\d|2[0-3]):[0-5]\d$/)) {
-        const [_, dia, mes, ano] = match;
+    const fullDate = new Date(selectedDate);
 
-        // Formato ISO 8601: YYYY-MM-DDTHH:mm:ss
-        const dataHora = `${ano}-${mes}-${dia}T${horaStr}:00`;
+    fullDate.setHours(hours, minutes, 0, 0);
 
-        // console.log('DataHora formatada:', dataHora); // Debug
-        setValue('dataHora', dataHora, { shouldValidate: true });
-      } else {
-        console.error('Formato inválido - Data:', dataStr, 'Hora:', horaStr);
-      }
-    }
-  }, [data, hora, setValue]);
+    const year = fullDate.getFullYear();
+    const month = String(fullDate.getMonth() + 1).padStart(2, '0');
+    const day = String(fullDate.getDate()).padStart(2, '0');
+    const hour = String(fullDate.getHours()).padStart(2, '0');
+    const minute = String(fullDate.getMinutes()).padStart(2, '0');
+
+    const dataHora = `${year}-${month}-${day}T${hour}:${minute}:00`;
+
+    console.log('DataHora formatada:', dataHora);
+
+    // Atualiza o campo do React Hook Form
+    setValue('dataHora', dataHora, { shouldValidate: true });
+  }
 
   async function onSubmit(data: AgendaInput) {
     const validationData: any = { ...data };
     const result = agendaSchema.safeParse(validationData);
 
-    // const dt = parseDateTime(data.data, data.hora);
-
-    // if (!dt) {
-    //   setError('data', { type: 'manual', message: 'Data ou hora inválida.' });
-    //   setError('hora', { type: 'manual', message: 'Data ou hora inválida.' });
-    //   return;
-    // }
-
-    // const now = Date.now();
-    // if (dt.getTime() < now + MIN_LEAD_MS) {
-    //   setError('data', {
-    //     type: 'manual',
-    //     message: 'A data/hora deve ser no mínimo 1 minuto à frente.',
-    //   });
-    //   setError('hora', {
-    //     type: 'manual',
-    //     message: 'A data/hora deve ser no mínimo 1 minuto à frente.',
-    //   });
-    //   return;
-    // }
-
-    // const dataHoraISO = dt.toISOString();
-
-    // console.log(dataHoraISO);
-
     if (!result.success) {
-      // console.log('Erros de validação:', result.error.format);
       throw new Error(result.error.format.toString());
     }
-
-    // return;
 
     try {
       const isEdit = !!agendaData;
@@ -210,13 +193,8 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
       const googleCalendar = await postCalendar(payload);
 
-      // console.log(googleCalendar);
-
       payload = { ...rest, link: googleCalendar.meetLink };
 
-      // console.log('Payload final:', payload);
-
-      // 1. Salva no backend
       await api.post('/api/externalWithAuth/agenda', payload);
 
       setSuccessMessage(
@@ -232,47 +210,53 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     }
   }
 
+  useEffect(() => {
+    if (!selectedDate) {
+      setAvailableTimes([]);
+      return;
+    }
+
+    // Formatar a data pro formato YYYY-MM-DD (ajuste de timezone se necessário)
+    const year = selectedDate.getFullYear();
+    const month = String(selectedDate.getMonth() + 1).padStart(2, '0');
+    const day = String(selectedDate.getDate()).padStart(2, '0');
+    const dateStr = `${year}-${month}-${day}`;
+
+    async function fetchTimes() {
+      setLoading(true);
+      // setError(null);
+      try {
+        const resp = await getAvailableTimes(dateStr);
+        setAvailableTimes(resp.available || []);
+      } catch (err: any) {
+        console.log('Erro ao buscar horários:', err);
+        setAvailableTimes([]);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    fetchTimes();
+  }, [selectedDate]);
+
   return (
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="max-w-3xl mx-auto bg-white rounded-lg space-y-3"
+        className="flex flex-col max-w-3xl mx-auto bg-white rounded-lg space-y-3"
       >
         <ConnectGoogleButton />
 
         <FormInput name="titulo" label="Titulo" />
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <input type="hidden" {...register('dataHora' as any)} />
 
-          <div className="flex gap-2 col-span-2 relative">
-            <FormInput
-              name={'data' as any}
-              label="Data da agenda"
-              placeholder="DD-MM-YYYY"
-              maskProps={{ mask: '00/00/0000' }}
-              errors={undefined}
-            />
-
-            <FormInput
-              name={'hora' as any}
-              label="Hora da agenda"
-              type="text"
-              placeholder="HH:mm"
-              maskProps={{ mask: '00:00' }}
-            />
-
-            <ErrorMessage
-              top="70px"
-              message={
-                !errors.data && !errors.hora && errors.dataHora?.message
-                  ? errors.dataHora?.message
-                  : null
-              }
-            ></ErrorMessage>
-          </div>
-
-          <FormSelect name="tipoEvento" label="Evento da agenda">
+          <FormSelect
+            name="tipoEvento"
+            label="Evento da agenda"
+            placeholder="Selecione o evento"
+          >
             <>
               <option value="TRIAGEM_INICIAL">Triagem Inicial</option>
               <option value="ENTREVISTA_RH">Entrevista RH</option>
@@ -299,14 +283,68 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           </FormSelect>
         </div>
 
-        {
-          selectLocalizacao === 'PRESENCIAL' && (
-            <LocalizacaoForm namePrefix="localizacao" />
-          )
-          // : (
-          //   <FormInput name="link" register={register} label="Link da Reunião" />
-          // )
-        }
+        <div className="flex w-full justify-around relative">
+          <DayPicker
+            animate
+            mode="single"
+            captionLayout="dropdown"
+            selected={selectedDate}
+            onSelect={setSelectedDate}
+            defaultMonth={new Date()}
+            startMonth={new Date()}
+            endMonth={
+              new Date(new Date().getFullYear() + 5, new Date().getMonth())
+            }
+            footer={
+              selectedDate
+                ? `Selecionado: ${selectedDate.toLocaleDateString()} ${
+                    selectedTime?.toString() ?? ''
+                  }`
+                : 'Data não selecionada'
+            }
+          />
+
+          <div className="flex flex-col gap-1 justify-center items-center">
+            <div
+              className="w-32 max-h-48 overflow-y-auto border border-cyan-200 rounded shadow-inner flex flex-col items-center p-2"
+              style={{ minWidth: '8rem' }}
+            >
+              <p className="text-primary">Horarios</p>
+              {loading && (
+                <div className="flex flex-col items-center justify-center my-2">
+                  <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
+                  <span className="mt-2 text-cyan-700 text-sm">
+                    Carregando horários...
+                  </span>
+                </div>
+              )}
+              {availableTimes &&
+                !loading &&
+                availableTimes.map(times => {
+                  return (
+                    <button
+                      key={times}
+                      className={`p-1 rounded cursor-pointer w-full mb-1 ${
+                        selectedTime === times ? 'bg-cyan-300' : 'bg-cyan-100'
+                      }`}
+                      onClick={e => handleFullDateTime(times, e)}
+                    >
+                      {times}
+                    </button>
+                  );
+                })}
+            </div>
+          </div>
+
+          <ErrorMessage
+            top="100%"
+            message={errors.dataHora?.message ? errors.dataHora?.message : null}
+          ></ErrorMessage>
+        </div>
+
+        {selectLocalizacao === 'PRESENCIAL' && (
+          <LocalizacaoForm namePrefix="localizacao" />
+        )}
 
         <Card title="Convidados">
           <ConvidadosTable />

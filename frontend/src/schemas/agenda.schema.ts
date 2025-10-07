@@ -33,18 +33,10 @@ export const agendaSchema = z.object({
     .min(3, 'O título é obrigatório e deve ter ao menos 3 caracteres'),
   descricao: z.string().optional(),
 
-  data: z
-    .string('Data Obrigatorio')
-    .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'formato invalido'),
-  hora: z
-    .string('Hora Obrigatorio')
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'formato invalido'),
   dataHora: z.string().refine(
     val => {
       if (!val) return false;
-      console.log(val);
       const d = new Date(val);
-      console.log(d);
       return !isNaN(d.getTime()) && d.getTime() >= Date.now() + MIN_LEAD_MS;
     },
     { message: 'Data e hora devem não podem ser marcados no passado' }
