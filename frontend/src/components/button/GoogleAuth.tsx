@@ -1,28 +1,42 @@
 'use client';
 
-import { useSession } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { signIn, signOut, useSession } from 'next-auth/react';
 import { PrimaryButton } from './PrimaryButton';
 
 export function ConnectGoogleButton() {
   const { data: session, status } = useSession();
-  const router = useRouter();
-
   if (status === 'loading') {
     return <button disabled>Carregando...</button>;
   }
 
   if (session?.user) {
-    return <p>Conta do Google conectada.</p>;
+    const handleDisaconnectGoogle = () => {
+      signOut();
+    };
+
+    return (
+      <div className="mb-6">
+        <p className="text-primary mb-0">Conta do Google conectada.</p>
+        <span className="text-secondary text-sm">
+          A agenda sera vinculada ao e-mail: {session.user.email}{' '}
+          <button
+            onClick={handleDisaconnectGoogle}
+            className="text-red-500 underline"
+          >
+            sair
+          </button>
+        </span>
+      </div>
+    );
   }
 
   const handleConnectGoogle = () => {
-    // signIn('google', { callbackUrl: window.location.href });
+    signIn('google', { callbackUrl: window.location.href });
   };
 
   return (
     <PrimaryButton onClick={handleConnectGoogle}>
-      Conectar Google Calendar
+      Conectar Google Agenda
     </PrimaryButton>
   );
 }

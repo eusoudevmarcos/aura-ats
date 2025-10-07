@@ -123,7 +123,7 @@ const columns: TableColumn<VagaWithRelations>[] = [
   {
     label: 'Data Publicação',
     key: 'dataPublicacao',
-    render: (value, row) =>
+    render: row =>
       row.dataPublicacao
         ? new Date(row.dataPublicacao).toLocaleDateString('pt-BR')
         : 'N/A',
@@ -133,7 +133,7 @@ const columns: TableColumn<VagaWithRelations>[] = [
   {
     label: 'Localização',
     key: 'localizacao.uf',
-    render: (_, row) =>
+    render: row =>
       row.localizacao
         ? `${row.localizacao.cidade} - ${row.localizacao.uf}`
         : 'N/A',

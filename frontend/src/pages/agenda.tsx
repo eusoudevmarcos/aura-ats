@@ -4,6 +4,7 @@ import { PlusIcon } from '@/components/icons';
 import AgendaList from '@/components/list/AgendaList';
 import Modal from '@/components/modal/Modal';
 import { useCliente } from '@/context/AuthContext';
+import { SessionProvider } from 'next-auth/react';
 import { useState } from 'react';
 
 export default function Agenda() {
@@ -11,7 +12,7 @@ export default function Agenda() {
   const [refreshKey, setRefreshKey] = useState(0);
   const isCliente = useCliente();
   return (
-    <>
+    <SessionProvider>
       <AgendaList key={refreshKey} />
 
       {isCliente && (
@@ -23,6 +24,8 @@ export default function Agenda() {
           Cadastrar Agendamento
         </PrimaryButton>
       )}
+
+      {/* <ConnectGoogleButton /> */}
 
       <Modal
         title="Cadastrar Agendamento"
@@ -36,6 +39,6 @@ export default function Agenda() {
           }}
         />
       </Modal>
-    </>
+    </SessionProvider>
   );
 }

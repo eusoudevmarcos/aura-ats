@@ -5,7 +5,7 @@ import { PrimaryButton } from './button/PrimaryButton';
 export interface TableColumn<T = any> {
   label: string;
   key: keyof T | string;
-  render?: (value: any, row: T, index: number) => React.ReactNode;
+  render?: (row: T, index: number) => React.ReactNode; // render completo por linha
 }
 
 interface PaginationProps {
@@ -32,7 +32,7 @@ function renderCellValue<T>(
   index: number
 ): React.ReactNode {
   if (col.render) {
-    return col.render(value, row, index);
+    return col.render(row, index);
   }
 
   if (Array.isArray(value)) {
@@ -92,6 +92,7 @@ function ButtonCopy({ valorCompleto }: any) {
 }
 
 // Componente Card para Mobile
+
 function MobileCard<T>({
   row,
   columns,
@@ -104,9 +105,7 @@ function MobileCard<T>({
   index: number;
 }) {
   const handleRowClick = () => {
-    if (onRowClick) {
-      onRowClick(row);
-    }
+    if (onRowClick) onRowClick(row);
   };
 
   return (
@@ -117,14 +116,9 @@ function MobileCard<T>({
       onClick={handleRowClick}
     >
       {columns.map((col, colIndex) => {
-        const valorCelula = renderCellValue(
-          (row as any)[col.key],
-          col,
-          row,
-          index
-        );
-        const valorCompleto = (row as any)[col.key] ?? valorCelula;
-
+        const content = col.render
+          ? col.render(row, index)
+          : (row as any)[col.key] ?? '-';
         return (
           <div
             key={String(col.key)}
@@ -136,11 +130,8 @@ function MobileCard<T>({
               <div className="text-xs font-medium text-gray-600 mb-1">
                 {col.label}
               </div>
-              <div className="text-sm text-gray-900 break-words">
-                {valorCelula}
-              </div>
+              <div className="text-sm text-gray-900 break-words">{content}</div>
             </div>
-            <ButtonCopy valorCompleto={valorCompleto} />
           </div>
         );
       })}
@@ -161,9 +152,7 @@ function TR<T>({
   index: number;
 }) {
   const handleRowClick = () => {
-    if (onRowClick) {
-      onRowClick(row);
-    }
+    if (onRowClick) onRowClick(row);
   };
 
   return (
@@ -172,48 +161,16 @@ function TR<T>({
       onClick={handleRowClick}
       style={{ cursor: onRowClick ? 'pointer' : 'default' }}
     >
-      {columns.map(col => {
-        const valorCelula = renderCellValue(
-          (row as any)[col.key],
-          col,
-          row,
-          index
-        );
-        const valorCompleto = (row as any)[col.key] ?? valorCelula;
-
+      {columns.map((col, colIndex) => {
+        const content = col.render
+          ? col.render(row, index)
+          : (row as any)[col.key] ?? '-';
         return (
           <td
             key={String(col.key)}
-            className={`relative group max-w-[160px] min-w-[80px] whitespace-nowrap overflow-hidden text-ellipsis align-middle px-4 py-3 ${
-              onRowClick ? 'cursor-pointer' : 'cursor-default'
-            }`}
+            className="relative group max-w-[160px] min-w-[80px] whitespace-nowrap overflow-hidden text-ellipsis align-middle px-4 py-3"
           >
-            <span className="cell-ellipsis block whitespace-nowrap overflow-hidden text-ellipsis w-full transition-colors duration-200 text-secondary">
-              {valorCelula}
-            </span>
-
-            <span
-              title={valorCompleto}
-              className="cell-full absolute left-0 top-0 z-20 bg-white shadow-lg px-2 py-2 min-w-full max-w-[400px] whitespace-pre-line overflow-x-auto text-secondary font-medium rounded-lg border border-gray-200 word-break-normal group-hover:block"
-            >
-              <div className="flex flex-row items-center justify-between gap-2">
-                <p className="fit m-0">{valorCompleto}</p>
-                <ButtonCopy valorCompleto={valorCompleto} />
-              </div>
-            </span>
-            <style jsx>{`
-              td.group:hover .cell-ellipsis {
-                visibility: hidden;
-              }
-              td.group:hover .cell-full {
-                display: block;
-                visibility: visible;
-              }
-              td.group .cell-full {
-                display: none;
-                visibility: hidden;
-              }
-            `}</style>
+            {content}
           </td>
         );
       })}
@@ -377,31 +334,22 @@ function Table<T>({
 }: TableProps<T>) {
   return (
     <>
-      {/* Desktop Table */}
       <div className="hidden md:block overflow-x-auto w-full">
-        <table
-          className="min-w-full border-separate border-spacing-0 bg-white rounded-lg"
-          style={{ borderCollapse: 'separate', borderSpacing: 0 }}
-        >
+        <table className="min-w-full border-separate border-spacing-0 bg-white rounded-lg">
           <thead>
             <tr>
               {columns.map(col => (
                 <th
                   key={String(col.key)}
                   className="px-4 py-3 text-left font-semibold bg-neutral text-primary"
-                  style={{
-                    position: 'sticky',
-                    top: 0,
-                    zIndex: 1,
-                    whiteSpace: 'nowrap',
-                  }}
+                  style={{ position: 'sticky', top: 0, zIndex: 1 }}
                 >
                   {col.label}
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="relative">
+          <tbody>
             {loading ? (
               <DesktopLoadingState columns={columns} />
             ) : !data || data.length === 0 ? (
@@ -412,10 +360,10 @@ function Table<T>({
             ) : (
               data.map((row, i) => (
                 <TR
+                  key={i}
                   row={row}
                   columns={columns}
                   onRowClick={onRowClick}
-                  key={i}
                   index={i}
                 />
               ))
@@ -424,7 +372,6 @@ function Table<T>({
         </table>
       </div>
 
-      {/* Mobile Cards */}
       <div className="md:hidden">
         {loading ? (
           <MobileLoadingState />
@@ -434,10 +381,10 @@ function Table<T>({
           <div className="space-y-0">
             {data.map((row, i) => (
               <MobileCard
+                key={i}
                 row={row}
                 columns={columns}
                 onRowClick={onRowClick}
-                key={i}
                 index={i}
               />
             ))}
@@ -454,21 +401,6 @@ function Table<T>({
           onPageChange={pagination.onPageChange}
         />
       )}
-
-      <style jsx>{`
-        .result-row:not(:last-child) td {
-          border-bottom: 1px solid rgba(72, 3, 138, 0.2);
-        }
-        .result-row td,
-        .result-row th {
-          vertical-align: middle;
-          padding: 12px 16px;
-        }
-        .result-row:hover {
-          background-color: #f3eafd;
-          transition: background 0.2s;
-        }
-      `}</style>
     </>
   );
 }

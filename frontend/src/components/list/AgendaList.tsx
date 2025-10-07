@@ -33,11 +33,11 @@ function normalizarTable(agendas: AgendaVaga[]) {
     dataHora: a.dataHora ? new Date(a.dataHora).toLocaleString('pt-BR') : '-',
     tipoEvento: a.tipoEvento,
     link: a.link ?? '-',
-    localizacao: a.localizacao
-      ? `${a.localizacao.logradouro ?? '-'}, ${a.localizacao.cidade ?? '-'} - ${
-          a.localizacao.uf ?? '-'
-        }`
-      : '-',
+    // localizacao: a.localizacao
+    //   ? `${a.localizacao.logradouro ?? '-'}, ${a.localizacao.cidade ?? '-'} - ${
+    //       a.localizacao.uf ?? '-'
+    //     }`
+    //   : '-',
     etapa: a.etapaAtual?.nome ?? '-',
     tipoEtapa: a.etapaAtual?.tipo ?? '-',
   }));
@@ -93,11 +93,10 @@ const AgendaList: React.FC = () => {
 
   const columns: TableColumn<any>[] = [
     { label: 'Data e Hora', key: 'dataHora' },
-    { label: 'Tipo de Evento', key: 'tipoEvento' },
+    { label: 'Evento', key: 'tipoEvento' },
     { label: 'Link', key: 'link' },
-    { label: 'Localização', key: 'localizacao' },
-    { label: 'Etapa', key: 'etapa' },
-    { label: 'Tipo Etapa', key: 'tipoEtapa' },
+    // { label: 'Localização', key: 'localizacao' },
+    // { label: 'Etapa', key: 'etapa' },
   ];
 
   const onRowClick = (row: any) => {

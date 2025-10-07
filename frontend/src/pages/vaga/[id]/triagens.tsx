@@ -71,9 +71,9 @@ const TriagensDaVagaPage: React.FC = () => {
           )}
           {triagens.map(t => (
             <Card key={t.id}>
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-3">
-                  <span className="px-2 py-1 rounded-full text-xs font-semibold bg-[#ede9fe] text-primary">
+                  <span className="px-2 py-1 rounded-full font-semibold bg-[#ede9fe] text-primary">
                     {t.tipoTriagem?.replaceAll('_', ' ')}
                   </span>
                   <span

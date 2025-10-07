@@ -3,6 +3,7 @@ import { FormSelectProps } from '@/type/formSelect.type';
 import { getError } from '@/utils/getError';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { Container } from '../input/Container';
+import { ErrorMessage } from './ErrorMessage';
 
 export function FormSelect<T extends FieldValues>({
   name,
@@ -35,59 +36,20 @@ export function FormSelect<T extends FieldValues>({
     .filter(Boolean)
     .join(' ');
 
-  // Se tem contexto do form, usa Controller
-  if (control) {
-    return (
-      <Container id={id} label={label} className={classNameContainer}>
-        <>
-          <Controller
-            name={name}
-            control={control}
-            render={({
-              field: {
-                onChange: fieldOnChange,
-                onBlur,
-                value: fieldValue,
-                ref,
-              },
-            }) => (
-              <select
-                ref={ref}
-                id={id}
-                className={selectClassName}
-                value={fieldValue ?? ''}
-                onChange={e => fieldOnChange(e.target.value)}
-                onBlur={onBlur}
-                required={required}
-                {...otherSelectProps}
-              >
-                {placeholder && (
-                  <option value="" disabled>
-                    {placeholder}
-                  </option>
-                )}
-                {children}
-              </select>
-            )}
-          />
-
-          {errorMessage && (
-            <p className="text-red-500 text-xs italic mt-1">{errorMessage}</p>
-          )}
-        </>
-      </Container>
-    );
-  }
-
-  // Fallback para uso sem react-hook-form (select controlado manualmente)
-  return (
-    <Container id={id} label={label} className={classNameContainer}>
-      <>
+  const ControlElement = (
+    <Controller
+      name={name}
+      control={control}
+      render={({
+        field: { onChange: fieldOnChange, onBlur, value: fieldValue, ref },
+      }) => (
         <select
+          ref={ref}
           id={id}
           className={selectClassName}
-          value={value ?? ''}
-          onChange={onChange}
+          value={fieldValue ?? ''}
+          onChange={e => fieldOnChange(e.target.value)}
+          onBlur={onBlur}
           required={required}
           {...otherSelectProps}
         >
@@ -98,11 +60,35 @@ export function FormSelect<T extends FieldValues>({
           )}
           {children}
         </select>
+      )}
+    />
+  );
 
-        {errorMessage && (
-          <p className="text-red-500 text-xs italic mt-1">{errorMessage}</p>
-        )}
-      </>
+  const SelectInput = (
+    <select
+      id={id}
+      className={selectClassName}
+      value={value ?? ''}
+      onChange={onChange}
+      required={required}
+      {...otherSelectProps}
+    >
+      {placeholder && (
+        <option value="" disabled>
+          {placeholder}
+        </option>
+      )}
+      {children}
+    </select>
+  );
+
+  // Fallback para uso sem react-hook-form (select controlado manualmente)
+  return (
+    <Container id={id} label={label} className={classNameContainer}>
+      <div className="relative">
+        {control ? ControlElement : SelectInput}
+        <ErrorMessage message={errorMessage ?? null} />
+      </div>
     </Container>
   );
 }

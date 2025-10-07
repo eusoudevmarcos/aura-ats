@@ -1,7 +1,8 @@
-import { localizacaoSchema } from '@/schemas/localizacao.schema';
 import { z } from 'zod';
+import { localizacaoSchema } from './localizacao.schema';
 
-// Enum de tipos de evento
+const MIN_LEAD_MS = 1 * 60 * 1000;
+
 const tipoEventoEnum = z.enum(
   [
     'TRIAGEM_INICIAL',
@@ -16,7 +17,6 @@ const tipoEventoEnum = z.enum(
   { error: 'Tipo de evento é obrigatorio' }
 );
 
-// Schema para a etapa do processo seletivo
 const etapaAtualSchema = z.object({
   nome: z.string().min(1, 'Nome da etapa é obrigatório'),
   tipo: z.string().min(1, 'Tipo da etapa é obrigatório'),
@@ -25,22 +25,45 @@ const etapaAtualSchema = z.object({
   ativa: z.boolean(),
 });
 
-// Schema principal da Agenda
 export const agendaSchema = z.object({
   vagaId: z.uuid().optional(),
-  data: z.union([
-    z
-      .string()
-      .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
-    z.date(),
-  ]),
+
+  titulo: z
+    .string('Titulo Obrigatorio')
+    .min(3, 'O título é obrigatório e deve ter ao menos 3 caracteres'),
+  descricao: z.string().optional(),
+
+  data: z
+    .string('Data Obrigatorio')
+    .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'formato invalido'),
   hora: z
-    .string()
-    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'Hora deve ser HH:mm (24h)'),
+    .string('Hora Obrigatorio')
+    .regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'formato invalido'),
+  dataHora: z.string().refine(
+    val => {
+      if (!val) return false;
+      console.log(val);
+      const d = new Date(val);
+      console.log(d);
+      return !isNaN(d.getTime()) && d.getTime() >= Date.now() + MIN_LEAD_MS;
+    },
+    { message: 'Data e hora devem não podem ser marcados no passado' }
+  ),
+
   tipoEvento: tipoEventoEnum,
+
   link: z.url('Link inválido').optional(),
   localizacao: localizacaoSchema.optional(),
+
+  convidados: z
+    .array(z.email('Convidado deve ser um e-mail válido'))
+    .min(1, 'Adicione pelo menos um convidado')
+    .optional(),
+
   etapaAtual: etapaAtualSchema.optional(),
+
+  selectLocalizacao: z.string().default('REMOTO').optional(),
+  // lembreteMinutos: z.number().min(5).max(1440).optional(),
 });
 // .refine(
 //   data => data.link || data.localizacao,
@@ -51,5 +74,4 @@ export const agendaSchema = z.object({
 //   'Você não deve fornecer link e localização ao mesmo tempo'
 // );
 
-// Tipo TypeScript baseado no schema
 export type AgendaInput = z.infer<typeof agendaSchema>;

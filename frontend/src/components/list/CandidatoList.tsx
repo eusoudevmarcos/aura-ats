@@ -21,21 +21,21 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
   {
     label: 'Nome',
     key: 'pessoa.nome',
-    render: (value, row) => row.pessoa?.nome || '-',
+    render: row => row.pessoa?.nome || '-',
   },
 
   { label: 'Área Candidato', key: 'areaCandidato' },
   {
     label: 'Especialidade',
     key: 'especialidade.nome',
-    render: (_, row) => row.especialidade?.nome || '-',
+    render: row => row.especialidade?.nome || '-',
   },
   { label: 'RQE', key: 'rqe' },
 
   {
     label: 'UF/Cidade',
     key: 'pessoa.localizacoes',
-    render: (_, row) => {
+    render: (row, i) => {
       if (
         row.pessoa?.localizacoes?.[0]?.cidade ||
         row.pessoa?.localizacoes?.[0]?.uf
