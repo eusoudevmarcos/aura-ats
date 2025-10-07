@@ -230,6 +230,7 @@ export class VagaService {
         anexos: true,
         localizacao: true,
         cliente: { include: { empresa: true } },
+        triagens: true,
         candidaturas: {
           include: {
             candidato: {

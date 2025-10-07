@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development ts-node-dev --respawn --transpile-only src/index.ts",
     "build": "npm run db:generate:safe && tsc && cpx \"src/public/**/*\" dist/public",
+    "build:dev": "npm run db:generate && tsc && cpx \"src/public/**/*\" dist/public",
     "start": "cross-env NODE_ENV=production node dist/src/index.js",
     "seed-script": "tsx prisma/seed.ts",
     "seed": "npm run seed-script",

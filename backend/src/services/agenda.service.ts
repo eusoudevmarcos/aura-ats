@@ -32,10 +32,9 @@ export class AgendaService {
 
   async create(agendaData: AgendaInput): Promise<Agenda> {
     agendaData = normalizeDataAgenda(agendaData);
-
     return await prisma.agenda.create({
       data: {
-        dataHora: new Date(agendaData.dataHora),
+        dataHora: agendaData.dataHora,
         link: agendaData.link,
         tipoEvento: agendaData.tipoEvento,
         localizacaoId: agendaData.localizacaoId,
