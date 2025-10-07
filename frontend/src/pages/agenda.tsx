@@ -1,3 +1,4 @@
+import { ConnectGoogleButton } from '@/components/button/GoogleAuth';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import { AgendaForm } from '@/components/form/AgendaForm';
 import { PlusIcon } from '@/components/icons';
@@ -10,22 +11,23 @@ import { useState } from 'react';
 export default function Agenda() {
   const [showAgendaForm, setShowAgendaForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const isCliente = useCliente();
+  const isNotCliente = useCliente();
   return (
     <SessionProvider>
       <AgendaList key={refreshKey} />
 
-      {isCliente && (
-        <PrimaryButton
-          className="float-right mt-4"
-          onClick={() => setShowAgendaForm(true)}
-        >
-          <PlusIcon />
-          Cadastrar Agendamento
-        </PrimaryButton>
+      {isNotCliente && (
+        <>
+          <PrimaryButton
+            className="float-right mt-4"
+            onClick={() => setShowAgendaForm(true)}
+          >
+            <PlusIcon />
+            Cadastrar Agendamento
+          </PrimaryButton>
+          <ConnectGoogleButton className="float-right mt-4 mr-2" />
+        </>
       )}
-
-      {/* <ConnectGoogleButton /> */}
 
       <Modal
         title="Cadastrar Agendamento"

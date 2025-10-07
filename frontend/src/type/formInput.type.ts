@@ -30,7 +30,7 @@ export type CommonProps<T extends FieldValues> = {
 
 // Permite: apenas control, apenas register, ou nenhum dos dois. Nunca ambos juntos.
 export type FormInputProps<T extends FieldValues> =
-  | (CommonProps<T> & { control: Control<T>; register?: never })
+  | (CommonProps<T> & { control?: Control<T>; register?: never })
   | (CommonProps<T> & { register: UseFormRegister<T>; control?: never })
   | (CommonProps<T> & { control?: never; register?: never });
 

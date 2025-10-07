@@ -20,8 +20,9 @@ export function FormInput<T extends FieldValues>({
   control: externalControl,
   register: externalRegister,
   errors: externalErrors,
+  noControl = false,
   clear = false,
-}: FormInputProps<T>) {
+}: FormInputProps<T> & { noControl?: boolean }) {
   const formContext = useFormContext<T>();
   const control = externalControl || formContext?.control;
   const errors = externalErrors || formContext?.formState?.errors;
@@ -82,7 +83,7 @@ export function FormInput<T extends FieldValues>({
   return (
     <Container id={id} label={label} className={classNameContainer}>
       <div className="relative">
-        {control ? (
+        {control && !noControl ? (
           <Controller
             name={name}
             control={control}

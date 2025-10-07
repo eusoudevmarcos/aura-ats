@@ -27,7 +27,7 @@ type Convidado = {
 export default function ConvidadosTable() {
   const [convidados, setConvidados] = useState<Convidado[]>([]);
   const [email, setEmail] = useState<string>('');
-  const [nome, setNome] = useState<string>('');
+  // const [nome, setNome] = useState<string>('');
 
   const { setValue, getValues } = useFormContext();
 
@@ -42,7 +42,9 @@ export default function ConvidadosTable() {
     });
   };
 
-  const handleAddConvidado = () => {
+  const handleAddConvidado = (e: any) => {
+    e.preventDefault();
+    e.stopPropagation();
     if (!email) return;
 
     const isConvidado = convidados.find(convidado => convidado.email === email);
@@ -56,7 +58,7 @@ export default function ConvidadosTable() {
       novosConvidados.map(c => c.email)
     );
     setEmail('');
-    setNome('');
+    // setNome('');
   };
 
   const columns: TableColumn<Convidado>[] = [
@@ -70,9 +72,9 @@ export default function ConvidadosTable() {
       render: (_: any, index: number) => (
         <PrimaryButton
           onClick={() => handleRemove(index)}
-          className="bg-red-500 hover:bg-red-600 text-white"
+          className="!bg-red-500 !hover:bg-red-800 text-white"
         >
-          Remover
+          <span className="material-icons-outlined">delete</span>
         </PrimaryButton>
       ),
     },
@@ -81,10 +83,11 @@ export default function ConvidadosTable() {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end mb-4">
-        <FormInput label="Nome do Convidado (opcional)" name="" value={nome} />
+        {/* <FormInput label="Nome do Convidado (opcional)" name="" value={nome} /> */}
         <FormInput
           label="Email do Convidado"
-          name=""
+          name="email"
+          noControl
           value={email}
           onChange={(e: any) => setEmail(e.target.value)}
           placeholder="email@exemplo.com"
@@ -122,7 +125,8 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     undefined
   );
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loadingTimes, setLoadingTimes] = useState(false);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const methods = useForm<AgendaInput>({
     resolver: zodResolver(agendaSchema),
@@ -145,7 +149,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     console.log('Erros do formulário:', errors);
   }, [errors]);
 
-  function handleFullDateTime(times: string, e: Event) {
+  function handleFullDateTime(times: string, e: any) {
     e.preventDefault();
     e.stopPropagation();
     if (!selectedDate || !times) return;
@@ -184,6 +188,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     }
 
     try {
+      setLoadingSubmit(true);
       const isEdit = !!agendaData;
 
       // Remove campos auxiliares antes de enviar
@@ -207,6 +212,8 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     } catch (error) {
       console.log('Erro ao salvar:', error);
       onSuccess(false);
+    } finally {
+      setLoadingSubmit(false);
     }
   }
 
@@ -223,7 +230,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     const dateStr = `${year}-${month}-${day}`;
 
     async function fetchTimes() {
-      setLoading(true);
+      setLoadingTimes(true);
       // setError(null);
       try {
         const resp = await getAvailableTimes(dateStr);
@@ -232,7 +239,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
         console.log('Erro ao buscar horários:', err);
         setAvailableTimes([]);
       } finally {
-        setLoading(false);
+        setLoadingTimes(false);
       }
     }
 
@@ -310,7 +317,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
               style={{ minWidth: '8rem' }}
             >
               <p className="text-primary">Horarios</p>
-              {loading && (
+              {loadingTimes && (
                 <div className="flex flex-col items-center justify-center my-2">
                   <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-cyan-500"></div>
                   <span className="mt-2 text-cyan-700 text-sm">
@@ -319,7 +326,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
                 </div>
               )}
               {availableTimes &&
-                !loading &&
+                !loadingTimes &&
                 availableTimes.map(times => {
                   return (
                     <button
@@ -385,6 +392,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
         <PrimaryButton
           type="submit"
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
+          disabled={loadingSubmit}
         >
           {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda'}
         </PrimaryButton>

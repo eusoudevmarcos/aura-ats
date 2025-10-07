@@ -3,7 +3,7 @@
 import { signIn, signOut, useSession } from 'next-auth/react';
 import { PrimaryButton } from './PrimaryButton';
 
-export function ConnectGoogleButton() {
+export function ConnectGoogleButton({ className }: { className?: string }) {
   const { data: session, status } = useSession();
   if (status === 'loading') {
     return <button disabled>Carregando...</button>;
@@ -23,7 +23,7 @@ export function ConnectGoogleButton() {
             onClick={handleDisaconnectGoogle}
             className="text-red-500 underline"
           >
-            sair
+            Sair
           </button>
         </span>
       </div>
@@ -35,7 +35,7 @@ export function ConnectGoogleButton() {
   };
 
   return (
-    <PrimaryButton onClick={handleConnectGoogle}>
+    <PrimaryButton onClick={handleConnectGoogle} className={className}>
       Conectar Google Agenda
     </PrimaryButton>
   );
