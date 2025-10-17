@@ -5,31 +5,40 @@ export function toUsuarioDTO(usuario: any): any {
   const data = nonEmptyAndConvertDataDTO(usuario);
 
   return {
+    id: data.id,
     email: data.email,
+    password: data.password,
     tipoUsuario: data.tipoUsuario,
-    pessoa: data.pessoa
-      ? {
-          nome: data.pessoa.nome,
-          cpf: data.pessoa.cpf,
-          dataNascimento: data.pessoa.dataNascimento,
-          rg: data.pessoa.rg,
-          createdAt: data.pessoa.createdAt,
-          updatedAt: data.pessoa.updatedAt,
-        }
-      : undefined,
     funcionario: data.funcionario
       ? {
+          id: data.funcionario.id,
           setor: data.funcionario.setor,
           cargo: data.funcionario.cargo,
+          pessoa: data.funcionario.pessoa
+            ? {
+                id: data.funcionario.pessoa.id,
+                nome: data.funcionario.pessoa.nome,
+                cpf: data.funcionario.pessoa.cpf,
+                dataNascimento: data.funcionario.pessoa.dataNascimento,
+                rg: data.funcionario.pessoa.rg,
+                createdAt: data.funcionario.pessoa.createdAt,
+                updatedAt: data.funcionario.pessoa.updatedAt,
+              }
+            : undefined,
         }
       : undefined,
-    empresa: data.empresa
+    cliente: data.cliente
       ? {
-          razaoSocial: data.empresa.razaoSocial,
-          cnpj: data.empresa.cnpj,
-          dataAbertura: data.empresa.dataAbertura,
-          createdAt: data.empresa.createdAt,
-          updatedAt: data.empresa.updatedAt,
+          empresa: data.cliente.empresa
+            ? {
+                id: data.cliente.empresa.id,
+                razaoSocial: data.cliente.empresa.razaoSocial,
+                cnpj: data.cliente.empresa.cnpj,
+                dataAbertura: data.cliente.empresa.dataAbertura,
+                createdAt: data.cliente.empresa.createdAt,
+                updatedAt: data.cliente.empresa.updatedAt,
+              }
+            : undefined,
         }
       : undefined,
   };

@@ -21,7 +21,9 @@ export const normalizeData = (data: any) => {
     }
 
     // Converte datas
-    newData.funcionario.pessoa = convertAnyDateToPostgres(pessoa);
+    newData.funcionario.pessoa.dataNascimento = convertAnyDateToPostgres(
+      pessoa.dataNascimento
+    );
   }
 
   // --- Normaliza empresa ---

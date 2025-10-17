@@ -51,6 +51,13 @@ export class UsuarioSistemaService extends BuildNestedOperation {
 
     try {
       const usuarios = await prisma.usuarioSistema.findMany({
+        orderBy: {
+          funcionario: {
+            pessoa: {
+              updatedAt: "desc",
+            },
+          },
+        },
         skip: skip,
         take: pageSize,
         include: {
@@ -95,7 +102,6 @@ export class UsuarioSistemaService extends BuildNestedOperation {
       funcionario: { include: { pessoa: true } },
       cliente: { include: { empresa: true } },
     };
-
     if (!data.id) {
       return await prisma.usuarioSistema.create({
         data: usuarioData,

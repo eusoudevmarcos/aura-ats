@@ -17,7 +17,14 @@ function filtrarValores(
 
   // Se for Date → converte
   if (obj instanceof Date) {
-    return obj.toLocaleDateString(locale, dateOptions);
+    return obj.toLocaleString(locale, {
+      ...{
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      },
+      ...dateOptions,
+    });
   }
 
   // Se for string parseável como data → converte
