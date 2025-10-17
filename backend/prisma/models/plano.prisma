@@ -1,0 +1,50 @@
+model Plano {
+  id           String    @id @default(uuid())
+  nome         String
+  descricao    String?
+  preco        Decimal   @db.Decimal(10, 2)
+  tipo         TipoPlano @default(MENSAL) // tipo do plano
+  diasGarantia Int?
+  limiteUso    Int? // se for por uso: ex. 100 pesquisas
+  ativo        Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  assinaturas PlanoAssinatura[]
+
+  @@schema("Plano")
+}
+
+model PlanoAssinatura {
+  id             String           @id @default(uuid())
+  clienteId      String
+  planoId        String
+  dataAssinatura DateTime         @default(now())
+  dataExpiracao  DateTime?
+  status         AssinaturaStatus @default(ATIVA)
+  valorPago      Decimal          @db.Decimal(10, 2)
+  detalhes       String?
+
+  // Para planos do tipo "por uso"
+  usosDisponiveis Int? // quantas ações ainda pode fazer
+  usosConsumidos  Int? @default(0)
+
+  plano    Plano      @relation(fields: [planoId], references: [id])
+  PlanoUso PlanoUso[]
+
+  @@index([clienteId])
+  @@index([planoId])
+  @@schema("PlanoAssinatura")
+}
+
+model PlanoUso {
+  id                String   @id @default(uuid())
+  planoAssinaturaId String
+  acao              String // Ex: "pesquisa_empresa"
+  dataUso           DateTime @default(now())
+
+  planoAssinatura PlanoAssinatura @relation(fields: [planoAssinaturaId], references: [id])
+
+  @@index([planoAssinaturaId])
+  @@schema("PlanoAssinatura")
+}
