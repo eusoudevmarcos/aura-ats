@@ -79,6 +79,9 @@ export const candidatoSchema = z.object({
     .optional()
     .nullable(),
 
+  email: z.string().optional(),
+  celular: z.string().optional(),
+
   // formacoes: z.array(formacaoSchema).optional(),
 });
 

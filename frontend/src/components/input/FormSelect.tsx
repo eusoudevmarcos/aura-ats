@@ -1,6 +1,7 @@
 // src/components/input/FormSelect.tsx
 import { FormSelectProps } from '@/type/formSelect.type';
 import { getError } from '@/utils/getError';
+import React from 'react';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { Container } from '../input/Container';
 import { ErrorMessage } from './ErrorMessage';
@@ -14,7 +15,10 @@ export function FormSelect<T extends FieldValues>({
   onChange,
   required,
   children,
-}: FormSelectProps<T>) {
+  onMenuScrollToBottom, // <- nova prop
+}: FormSelectProps<T> & {
+  onMenuScrollToBottom?: (e: React.UIEvent<HTMLDivElement>) => void;
+}) {
   const formContext = useFormContext<T>();
   const control = formContext?.control;
   const errors = formContext?.formState?.errors;
@@ -36,6 +40,22 @@ export function FormSelect<T extends FieldValues>({
     .filter(Boolean)
     .join(' ');
 
+  // Wrapper para adicionar onMenuScrollToBottom se fornecido
+  const SelectWrapper: React.FC<{ children: React.ReactNode }> = ({
+    children,
+  }) =>
+    onMenuScrollToBottom ? (
+      <div
+        style={{ maxHeight: 240, overflowY: 'auto' }}
+        onScroll={onMenuScrollToBottom}
+        tabIndex={-1}
+      >
+        {children}
+      </div>
+    ) : (
+      <>{children}</>
+    );
+
   const ControlElement = (
     <Controller
       name={name}
@@ -43,43 +63,47 @@ export function FormSelect<T extends FieldValues>({
       render={({
         field: { onChange: fieldOnChange, onBlur, value: fieldValue, ref },
       }) => (
-        <select
-          ref={ref}
-          id={id}
-          className={selectClassName}
-          value={fieldValue ?? ''}
-          onChange={e => fieldOnChange(e.target.value)}
-          onBlur={onBlur}
-          required={required}
-          {...otherSelectProps}
-        >
-          {placeholder && (
-            <option value="" disabled>
-              {placeholder}
-            </option>
-          )}
-          {children}
-        </select>
+        <SelectWrapper>
+          <select
+            ref={ref}
+            id={id}
+            className={selectClassName}
+            value={fieldValue ?? ''}
+            onChange={e => fieldOnChange(e.target.value)}
+            onBlur={onBlur}
+            required={required}
+            {...otherSelectProps}
+          >
+            {placeholder && (
+              <option value="" disabled>
+                {placeholder}
+              </option>
+            )}
+            {children}
+          </select>
+        </SelectWrapper>
       )}
     />
   );
 
   const SelectInput = (
-    <select
-      id={id}
-      className={selectClassName}
-      value={value ?? ''}
-      onChange={onChange}
-      required={required}
-      {...otherSelectProps}
-    >
-      {placeholder && (
-        <option value="" disabled>
-          {placeholder}
-        </option>
-      )}
-      {children}
-    </select>
+    <SelectWrapper>
+      <select
+        id={id}
+        className={selectClassName}
+        value={value ?? ''}
+        onChange={onChange}
+        required={required}
+        {...otherSelectProps}
+      >
+        {placeholder && (
+          <option value="" disabled>
+            {placeholder}
+          </option>
+        )}
+        {children}
+      </select>
+    </SelectWrapper>
   );
 
   // Fallback para uso sem react-hook-form (select controlado manualmente)

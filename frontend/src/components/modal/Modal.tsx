@@ -7,6 +7,7 @@ interface ModalProps {
   children: React.ReactNode;
   title?: string;
   backdropClose?: boolean;
+  fit?: boolean;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -15,6 +16,7 @@ const Modal: React.FC<ModalProps> = ({
   children,
   title,
   backdropClose = false,
+  fit = false,
 }) => {
   const [show, setShow] = useState(isOpen);
   const [visible, setVisible] = useState(isOpen);
@@ -59,11 +61,13 @@ const Modal: React.FC<ModalProps> = ({
       }`}
     >
       <div
-        className={`bg-white  shadow-md  relative w-full max-w-2xl max-h-[90vh] transition-transform duration-200 !rounded-xl overflow-scroll ${
+        className={`bg-white shadow-md relative ${
+          !fit && 'w-full max-w-2xl'
+        } transition-transform duration-200 !rounded-xl ${
           visible ? 'scale-100' : 'scale-95'
         }`}
       >
-        <div className="flex justify-between  items-center p-4 border-b border-gray-200 text-white bg-primary">
+        <div className="flex justify-between items-center p-4 border-b border-gray-200 text-white bg-primary gap-4">
           {title && <h3 className="text-xl font-semibold ">{title}</h3>}
           <button
             onClick={handleClose}
@@ -72,7 +76,9 @@ const Modal: React.FC<ModalProps> = ({
             &times;
           </button>
         </div>
-        <div className="px-6 py-4">{children}</div>
+        <div className={`px-6 py-4 overflow-auto h-full max-h-[90vh]`}>
+          {children}
+        </div>
       </div>
     </div>
   );

@@ -25,12 +25,14 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
           </span>
         </div>
 
-        <div className="flex gap-2 flex-wrap">
-          <span className="font-medium text-primary">Status:</span>
-          <span className="bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
-            {cliente.status}
-          </span>
-        </div>
+        {cliente.status && (
+          <div className="flex gap-2 flex-wrap">
+            <span className="font-medium text-primary">Status:</span>
+            <span className="bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+              {cliente.status}
+            </span>
+          </div>
+        )}
 
         {cliente.empresa && (
           <div className="flex flex-col gap-1">

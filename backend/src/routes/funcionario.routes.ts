@@ -16,6 +16,10 @@ router.get("/:uid", authMiddleware, (req, res) =>
 
 router.post("/save", (req, res) => funcionarioController.save(req, res));
 
+router.delete("/delete", authMiddleware, (req, res) =>
+  funcionarioController.delete(req, res)
+);
+
 router.post("/create/pessoa", (req, res) =>
   funcionarioController.createPessoa(req, res)
 );

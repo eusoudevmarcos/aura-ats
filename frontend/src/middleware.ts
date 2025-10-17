@@ -6,7 +6,7 @@ import { NextRequest, NextResponse } from 'next/server';
 const CLIENTE_TYPES = ['CLIENTE_ATS', 'CLIENTE_ATS_CRM', 'CLIENTE_CRM'];
 
 // A rota "/" deve ser sempre pública (landing page), independente do login
-const ALWAYS_PUBLIC_PATHS = ['/' /*, '/vaga'*/];
+const ALWAYS_PUBLIC_PATHS = ['/', '/planos/medicos' /*, '/vaga'*/];
 
 // Apenas rotas de login podem ser acessadas sem autenticação
 const LOGIN_PATHS = ['/login', '/api/login'];

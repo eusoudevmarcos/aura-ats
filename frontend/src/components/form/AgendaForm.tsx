@@ -24,20 +24,35 @@ type Convidado = {
   email: string;
 };
 
-export default function ConvidadosTable() {
-  const [convidados, setConvidados] = useState<Convidado[]>([]);
+ export default function ConvidadosTable({
+  initialValues,
+}: {
+  initialValues?: string[];
+}) {
+  const { setValue } = useFormContext();
+  const [convidados, setConvidados] = useState<Convidado[]>(
+    Array.isArray(initialValues) ? initialValues.map(email => ({ email })) : []
+  );
   const [email, setEmail] = useState<string>('');
-  // const [nome, setNome] = useState<string>('');
 
-  const { setValue, getValues } = useFormContext();
+  useEffect(() => {
+    if (Array.isArray(initialValues)) {
+      setConvidados(initialValues.map(email => ({ email })));
+      setValue('convidados', initialValues);
+    }
+  }, [initialValues, setValue]);
+
+  // Sempre que convidados mudar, atualiza o form (como array de string)
+  useEffect(() => {
+    setValue(
+      'convidados',
+      convidados.map(c => c.email)
+    );
+  }, [convidados, setValue]);
 
   const handleRemove = (index: number) => {
     setConvidados(prev => {
       const novosConvidados = prev.filter((_, i) => i !== index);
-      setValue(
-        'convidados',
-        novosConvidados.map(c => c.email)
-      );
       return novosConvidados;
     });
   };
@@ -52,13 +67,7 @@ export default function ConvidadosTable() {
 
     const novosConvidados = [...convidados, { email }];
     setConvidados(novosConvidados);
-
-    setValue(
-      'convidados',
-      novosConvidados.map(c => c.email)
-    );
     setEmail('');
-    // setNome('');
   };
 
   const columns: TableColumn<Convidado>[] = [
@@ -73,6 +82,7 @@ export default function ConvidadosTable() {
         <PrimaryButton
           onClick={() => handleRemove(index)}
           className="!bg-red-500 !hover:bg-red-800 text-white"
+          disabled={!!initialValues}
         >
           <span className="material-icons-outlined">delete</span>
         </PrimaryButton>
@@ -83,7 +93,6 @@ export default function ConvidadosTable() {
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-2 items-end mb-4">
-        {/* <FormInput label="Nome do Convidado (opcional)" name="" value={nome} /> */}
         <FormInput
           label="Email do Convidado"
           name="email"
@@ -111,11 +120,30 @@ export default function ConvidadosTable() {
 
 type AgendaFormProps = {
   onSuccess: (msg: boolean) => void;
-  agendaData?: Partial<AgendaInput>;
+  initialValues?: Partial<AgendaInput>;
 };
 
-export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
-  const [selectLocalizacao, setSelectLocalizacao] = useState<string>('REMOTO');
+export const AgendaForm = ({ onSuccess, initialValues }: AgendaFormProps) => {
+  const methods = useForm<AgendaInput>({
+    resolver: zodResolver(agendaSchema),
+    mode: 'onTouched',
+    defaultValues: {
+      ...initialValues,
+      localEvento: 'REMOTO',
+      vagaId: initialValues?.vagaId || '',
+      candidatoId: initialValues?.candidato?.id || '',
+    },
+  });
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    getValues,
+    formState: { errors },
+  } = methods;
+
+  const [localEvento, setLocalEvento] = useState<string>('REMOTO');
   const [isEtapa, setIsEtapa] = useState<boolean>(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
@@ -125,25 +153,83 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     undefined
   );
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+  const [errroAvailableTimes, setErrorAvailableTimes] = useState<string | null>(
+    null
+  );
   const [loadingTimes, setLoadingTimes] = useState(false);
   const [loadingSubmit, setLoadingSubmit] = useState(false);
 
-  const methods = useForm<AgendaInput>({
-    resolver: zodResolver(agendaSchema),
-    mode: 'onTouched',
-    defaultValues: {
-      selectLocalizacao: 'REMOTO',
-    },
-  });
+  // Estados para vagas com paginação infinita
+  const [vagasData, setVagasData] = useState<any[]>([]);
+  const [isLoadingVagas, setIsLoadingVagas] = useState(false);
+  const [vagasPage, setVagasPage] = useState(1);
+  const [vagasHasMore, setVagasHasMore] = useState(true);
+  const [vagasOpened, setVagasOpened] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    setError,
-    setValue,
-    watch,
-    formState: { errors },
-  } = methods;
+  // Função para buscar vagas paginadas
+  const fetchVagas = async (page = 1) => {
+    if (!initialValues?.candidatoId && !initialValues?.candidato?.id) return;
+    setIsLoadingVagas(true);
+    try {
+      const resp = await api.get(
+        `/api/externalWithAuth/vaga/candidato/${
+          initialValues?.candidatoId || initialValues?.candidato?.id
+        }`,
+        {
+          params: {
+            pageSize: 10,
+            page,
+          },
+        }
+      );
+      const newVagas = resp.data?.data || resp.data || [];
+      setVagasData(prev => (page === 1 ? newVagas : [...prev, ...newVagas]));
+      // Verifica se há mais páginas
+      if (resp.data?.totalPages) {
+        setVagasHasMore(page < resp.data.totalPages);
+      } else if (Array.isArray(newVagas)) {
+        setVagasHasMore(newVagas.length > 0);
+      } else {
+        setVagasHasMore(false);
+      }
+    } catch (_) {
+      setVagasHasMore(false);
+      setVagasData([]);
+    } finally {
+      setIsLoadingVagas(false);
+    }
+  };
+
+  // Handler para abrir o select e buscar as vagas
+  const handleVagasOpen = () => {
+    if (!vagasOpened) {
+      setVagasOpened(true);
+      setVagasPage(1);
+      fetchVagas(1);
+    }
+  };
+
+  // Handler para rolagem infinita no select de vagas
+  const handleVagasScroll = (e: React.UIEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLDivElement;
+    if (
+      vagasHasMore &&
+      !isLoadingVagas &&
+      target.scrollHeight - target.scrollTop - target.clientHeight < 40
+    ) {
+      const nextPage = vagasPage + 1;
+      setVagasPage(nextPage);
+      fetchVagas(nextPage);
+    }
+  };
+
+  // Resetar vagas quando o formulário for reaberto/outro candidato
+  useEffect(() => {
+    setVagasData([]);
+    setVagasPage(1);
+    setVagasHasMore(true);
+    setVagasOpened(false);
+  }, [initialValues?.candidatoId, initialValues?.candidato?.id]);
 
   useEffect(() => {
     console.log('Erros do formulário:', errors);
@@ -155,9 +241,6 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
     if (!selectedDate || !times) return;
 
     setSelectedTime(times);
-
-    console.log('Data recebida:', selectedDate);
-    console.log('Hora recebida:', times);
 
     const [hours, minutes] = times.split(':').map(Number);
 
@@ -173,9 +256,6 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
     const dataHora = `${year}-${month}-${day}T${hour}:${minute}:00`;
 
-    console.log('DataHora formatada:', dataHora);
-
-    // Atualiza o campo do React Hook Form
     setValue('dataHora', dataHora, { shouldValidate: true });
   }
 
@@ -189,12 +269,11 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
     try {
       setLoadingSubmit(true);
-      const isEdit = !!agendaData;
-
+      const isEdit = !!initialValues;
       // Remove campos auxiliares antes de enviar
       const { data: d, hora: h, ...rest } = result.data as any;
 
-      let payload = { ...rest, selectLocalizacao };
+      let payload = { ...rest, localEvento };
 
       const googleCalendar = await postCalendar(payload);
 
@@ -231,13 +310,12 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
     async function fetchTimes() {
       setLoadingTimes(true);
-      // setError(null);
       try {
         const resp = await getAvailableTimes(dateStr);
         setAvailableTimes(resp.available || []);
       } catch (err: any) {
-        console.log('Erro ao buscar horários:', err);
         setAvailableTimes([]);
+        if (err) setErrorAvailableTimes(err.message);
       } finally {
         setLoadingTimes(false);
       }
@@ -245,6 +323,71 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
 
     fetchTimes();
   }, [selectedDate]);
+
+  const CandidatoVagaComponent = () => {
+    return (
+      <>
+        <Card title="Candidato e Vaga">
+          <div>
+            <p className="text-primary text-sm">Informações do candidato</p>
+            <p>Nome: {initialValues?.candidato?.pessoa.nome}</p>
+            <p>CPF: {initialValues?.candidato?.pessoa.cpf}</p>
+          </div>
+
+          {/* Vagas do candidato */}
+          <div className="my-2">
+            <div
+              onFocus={handleVagasOpen}
+              tabIndex={-1}
+              style={{ outline: 'none' }}
+            >
+              <FormSelect
+                name="vagaId"
+                label={<span className="text-primary">Selecione a Vaga</span>}
+                placeholder="Selecione a vaga"
+                selectProps={{
+                  disabled: isLoadingVagas,
+                }}
+                onMenuScrollToBottom={handleVagasScroll}
+              >
+                <>
+                  {Array.isArray(vagasData) &&
+                    vagasData.map((vaga: any) => (
+                      <option
+                        key={vaga.id}
+                        value={vaga.id}
+                        className="flex justify-between"
+                      >
+                        {vaga.titulo}{' '}
+                        {vaga.dataPublicacao ? `- ${vaga.dataPublicacao}` : ''}
+                      </option>
+                    ))}
+                  {isLoadingVagas && (
+                    <option disabled value="">
+                      Carregando vagas...
+                    </option>
+                  )}
+                  {!isLoadingVagas && vagasData.length === 0 && (
+                    <option disabled value="">
+                      Nenhuma vaga encontrada
+                    </option>
+                  )}
+                </>
+              </FormSelect>
+            </div>
+            {isLoadingVagas && (
+              <span className="text-xs text-gray-500">Carregando vagas...</span>
+            )}
+            {errors.vagaId && (
+              <span className="text-xs text-red-500">
+                {errors.vagaId.message}
+              </span>
+            )}
+          </div>
+        </Card>
+      </>
+    );
+  };
 
   return (
     <FormProvider {...methods}>
@@ -277,10 +420,10 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           </FormSelect>
 
           <FormSelect
-            name="selectLocalizacao"
+            name="localEvento"
             label="Tipo de reunião"
             onChange={e => {
-              setSelectLocalizacao(e.target.value);
+              setLocalEvento(e.target.value);
             }}
           >
             <>
@@ -290,7 +433,10 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           </FormSelect>
         </div>
 
-        <div className="flex w-full justify-around relative">
+        <Card
+          title="Data e Hora"
+          classNameContent="flex w-full justify-around relative flex-wrap gap-4"
+        >
           <DayPicker
             animate
             mode="single"
@@ -299,6 +445,10 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
             onSelect={setSelectedDate}
             defaultMonth={new Date()}
             startMonth={new Date()}
+            classNames={{
+              today: `border-amber-500`, // Add a border to today's date
+              selected: `bg-primary border-amber-500 text-white`,
+            }}
             endMonth={
               new Date(new Date().getFullYear() + 5, new Date().getMonth())
             }
@@ -341,20 +491,26 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
                   );
                 })}
             </div>
+
+            {errroAvailableTimes && !loadingSubmit && (
+              <p className="text-red-500 text-sm">{errroAvailableTimes}</p>
+            )}
           </div>
 
           <ErrorMessage
             top="100%"
             message={errors.dataHora?.message ? errors.dataHora?.message : null}
           ></ErrorMessage>
-        </div>
+        </Card>
 
-        {selectLocalizacao === 'PRESENCIAL' && (
+        {localEvento === 'PRESENCIAL' && (
           <LocalizacaoForm namePrefix="localizacao" />
         )}
 
+        {getValues('candidatoId') && <CandidatoVagaComponent />}
+
         <Card title="Convidados">
-          <ConvidadosTable />
+          <ConvidadosTable initialValues={initialValues?.convidados} />
         </Card>
 
         {/* <PrimaryButton
@@ -394,7 +550,7 @@ export const AgendaForm = ({ onSuccess, agendaData }: AgendaFormProps) => {
           className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 rounded-md transition-colors"
           disabled={loadingSubmit}
         >
-          {agendaData ? 'Salvar Alterações' : 'Cadastrar Agenda'}
+          {initialValues ? 'Salvar Alterações' : 'Cadastrar Agenda'}
         </PrimaryButton>
       </form>
 

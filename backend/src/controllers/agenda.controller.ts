@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import prisma from "../lib/prisma";
 import { AgendaInput, AgendaService } from "../services/agenda.service";
 
@@ -26,17 +27,18 @@ export class AgendaController {
   async findById(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      const agenda = await prisma.agenda.findUnique({
-        where: { id },
-        include: {
-          vaga: true,
-          localizacao: true,
-          etapaAtual: true,
-        },
-      });
+
+      const agenda = await this.service.findById(id);
       if (!agenda)
         return res.status(404).json({ message: "Agenda não encontrada" });
-      return res.json(agenda);
+      return res.status(200).json(
+        nonEmptyAndConvertDataDTO(agenda, {
+          dateOptions: {
+            hour: "2-digit",
+            minute: "2-digit",
+          },
+        })
+      );
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao buscar agenda", error });
@@ -51,22 +53,9 @@ export class AgendaController {
       : 10;
 
     try {
-      const skip = (page - 1) * pageSize;
-      const [agendas, total] = await Promise.all([
-        prisma.agenda.findMany({
-          skip,
-          take: pageSize,
-          include: {
-            vaga: true,
-            localizacao: true,
-            etapaAtual: true,
-          },
-          orderBy: { dataHora: "asc" },
-        }),
-        prisma.agenda.count(),
-      ]);
+      const { data, total } = await this.service.getAll({ pageSize, page });
       return res.status(200).json({
-        data: agendas,
+        data,
         total,
         page,
         pageSize,

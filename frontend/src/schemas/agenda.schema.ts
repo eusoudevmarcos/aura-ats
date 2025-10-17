@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { candidatoSchema } from './candidato.schema';
 import { localizacaoSchema } from './localizacao.schema';
 
 const MIN_LEAD_MS = 1 * 60 * 1000;
@@ -25,45 +26,53 @@ const etapaAtualSchema = z.object({
   ativa: z.boolean(),
 });
 
-export const agendaSchema = z.object({
-  vagaId: z.uuid().optional(),
+export const agendaSchema = z
+  .object({
+    titulo: z
+      .string('Titulo Obrigatorio')
+      .min(3, 'O título é obrigatório e deve ter ao menos 3 caracteres'),
+    descricao: z.string().optional(),
 
-  titulo: z
-    .string('Titulo Obrigatorio')
-    .min(3, 'O título é obrigatório e deve ter ao menos 3 caracteres'),
-  descricao: z.string().optional(),
+    dataHora: z.string().refine(
+      val => {
+        if (!val) return false;
+        const d = new Date(val);
+        return !isNaN(d.getTime()) && d.getTime() >= Date.now() + MIN_LEAD_MS;
+      },
+      { message: 'Data e hora devem não podem ser marcados no passado' }
+    ),
 
-  dataHora: z.string().refine(
-    val => {
-      if (!val) return false;
-      const d = new Date(val);
-      return !isNaN(d.getTime()) && d.getTime() >= Date.now() + MIN_LEAD_MS;
+    tipoEvento: tipoEventoEnum,
+
+    link: z.url('Link inválido').optional(),
+    localizacao: localizacaoSchema.optional(),
+
+    convidados: z
+      .array(z.email('Convidado deve ser um e-mail válido'))
+      .min(1, 'Adicione pelo menos um convidado')
+      .optional(),
+
+    etapaAtual: etapaAtualSchema.optional(),
+
+    localEvento: z.string().default('REMOTO').optional(),
+    // lembreteMinutos: z.number().min(5).max(1440).optional(),
+
+    vagaId: z.uuid('Vaga é obrigatorio para o candidato').optional(),
+    candidatoId: z.uuid().optional(),
+    candidato: candidatoSchema.optional(),
+  })
+  .refine(
+    data => {
+      // Se candidatoId existe, vagaId deve existir
+      if (data.candidatoId) {
+        return !!data.vagaId;
+      }
+      return true;
     },
-    { message: 'Data e hora devem não podem ser marcados no passado' }
-  ),
-
-  tipoEvento: tipoEventoEnum,
-
-  link: z.url('Link inválido').optional(),
-  localizacao: localizacaoSchema.optional(),
-
-  convidados: z
-    .array(z.email('Convidado deve ser um e-mail válido'))
-    .min(1, 'Adicione pelo menos um convidado')
-    .optional(),
-
-  etapaAtual: etapaAtualSchema.optional(),
-
-  selectLocalizacao: z.string().default('REMOTO').optional(),
-  // lembreteMinutos: z.number().min(5).max(1440).optional(),
-});
-// .refine(
-//   data => data.link || data.localizacao,
-//   'Você deve fornecer link ou localização'
-// )
-// .refine(
-//   data => !(data.link && data.localizacao),
-//   'Você não deve fornecer link e localização ao mesmo tempo'
-// );
+    {
+      message: 'vagaId é obrigatório quando candidatoId está presente',
+      path: ['vagaId'],
+    }
+  );
 
 export type AgendaInput = z.infer<typeof agendaSchema>;

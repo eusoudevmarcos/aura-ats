@@ -6,6 +6,8 @@ import prisma from "../lib/prisma";
 // Tipos para entrada de dados da agenda
 
 export type AgendaInput = {
+  id?: string;
+  titulo: string;
   dataHora: Date | string;
   link?: string;
   tipoEvento: TipoEventoAgenda;
@@ -15,6 +17,8 @@ export type AgendaInput = {
   categoria: CategoriaVaga;
   triagem?: TriagemVaga;
   clienteId?: string;
+  convidados: string[];
+  agendaCandidatura: string[];
 };
 
 export type TriagemVaga = {
@@ -34,12 +38,22 @@ export class AgendaService {
     agendaData = normalizeDataAgenda(agendaData);
     return await prisma.agenda.create({
       data: {
+        titulo: agendaData.titulo,
         dataHora: agendaData.dataHora,
         link: agendaData.link,
         tipoEvento: agendaData.tipoEvento,
-        localizacaoId: agendaData.localizacaoId,
+        // localizacaoId: agendaData.localizacaoId,
         triagemId: agendaData.vagaId ?? undefined,
         clienteId: agendaData.clienteId ?? undefined,
+        convidados: agendaData.convidados ?? [],
+        ...(agendaData.agendaCandidatura &&
+        agendaData.agendaCandidatura.length > 0
+          ? {
+              agendaCandidatura: {
+                connect: agendaData.agendaCandidatura.map((id) => ({ id })),
+              },
+            }
+          : {}),
       },
     });
   }
@@ -48,12 +62,14 @@ export class AgendaService {
     return await prisma.agenda.update({
       where: { id: agendaId },
       data: {
+        titulo: agendaData.title,
         dataHora: agendaData.dataHora,
         link: agendaData.link,
         tipoEvento: agendaData.tipoEvento,
         localizacaoId: agendaData.localizacaoId,
         triagemId: agendaData.vagaId ?? undefined,
         clienteId: agendaData.clienteId ?? undefined,
+        convidados: agendaData.convidados ?? [],
       },
     });
   }
@@ -71,29 +87,23 @@ export class AgendaService {
         triagem: { include: { agenda: true } },
         localizacao: true,
         cliente: true,
+        vaga: true,
       },
     });
   }
 
-  async getAll(
-    page: number = 1,
-    pageSize: number = 10
-  ): Promise<{
-    data: Agenda[];
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-  }> {
+  async getAll({ page = 1, pageSize = 10 }) {
     const skip = (page - 1) * pageSize;
+
     const [data, total] = await Promise.all([
       prisma.agenda.findMany({
         skip,
         take: pageSize,
-        include: {
-          triagem: true,
-          localizacao: true,
-          cliente: true,
+        select: {
+          id: true,
+          dataHora: true,
+          tipoEvento: true,
+          link: true,
         },
         orderBy: { dataHora: "desc" },
       }),

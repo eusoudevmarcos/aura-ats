@@ -177,7 +177,7 @@ const PlatformSection: React.FC = () => {
 
       <Modal
         isOpen={isModalPlans}
-        title="Planos Médicos"
+        title="Planos Plataforma"
         onClose={closeModalPlans}
         classNameContent="max-w-[1200px] p-0"
       >

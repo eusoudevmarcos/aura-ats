@@ -1,80 +1,92 @@
 import { PrismaClient } from "@prisma/client";
 import * as dotenv from "dotenv";
+import { BeneficiosSeed } from "./seed/beneficios";
+import {
+  billingPlataformSeed,
+  billingRecrutamentoSemRQESeed,
+  planosComRQE,
+} from "./seed/billings";
+import { EspecialidadesSeed } from "./seed/especialidades";
 
 dotenv.config({ path: ".env" });
 
 const prisma = new PrismaClient();
 
-export const EspecialidadesEnum = [
-  { nome: "Alergia e Imunologia", sigla: "AI" },
-  { nome: "Anestesiologia", sigla: "ANE" },
-  { nome: "Angiologia", sigla: "ANG" },
-  { nome: "Cardiologia", sigla: "CAR" },
-  { nome: "Cirurgia Cardiovascular", sigla: "CCV" },
-  { nome: "Cirurgia da Mão", sigla: "CMA" },
-  { nome: "Cirurgia de Cabeça e Pescoço", sigla: "CCP" },
-  { nome: "Cirurgia do Aparelho Digestivo", sigla: "CAD" },
-  { nome: "Cirurgia Geral", sigla: "CIR" },
-  { nome: "Cirurgia Oncológica", sigla: "CO" },
-  { nome: "Cirurgia Pediátrica", sigla: "CPD" },
-  { nome: "Cirurgia Plástica", sigla: "CPL" },
-  { nome: "Cirurgia Torácica", sigla: "CTO" },
-  { nome: "Cirurgia Vascular", sigla: "CVS" },
-  { nome: "Clínica Médica", sigla: "CLI" },
-  { nome: "Dermatologia", sigla: "DER" },
-  { nome: "Endocrinologia e Metabologia", sigla: "END" },
-  { nome: "Endoscopia", sigla: "EDS" },
-  { nome: "Gastroenterologia", sigla: "GAS" },
-  { nome: "Genética Médica", sigla: "GEN" },
-  { nome: "Geriatria", sigla: "GER" },
-  { nome: "Ginecologia e Obstetrícia", sigla: "GO" },
-  { nome: "Hematologia e Hemoterapia", sigla: "HEM" },
-  { nome: "Homeopatia", sigla: "HOM" },
-  { nome: "Infectologia", sigla: "INF" },
-  { nome: "Mastologia", sigla: "MAS" },
-  { nome: "Medicina de Emergência", sigla: "EME" },
-  { nome: "Medicina de Família e Comunidade", sigla: "MFC" },
-  { nome: "Medicina do Trabalho", sigla: "TRB" },
-  { nome: "Medicina Esportiva", sigla: "ESP" },
-  { nome: "Medicina Física e Reabilitação", sigla: "REH" },
-  { nome: "Medicina Intensiva", sigla: "UTI" },
-  { nome: "Medicina Legal e Perícia Médica", sigla: "LEG" },
-  { nome: "Medicina Nuclear", sigla: "NUC" },
-  { nome: "Medicina Preventiva e Social", sigla: "PRE" },
-  { nome: "Nefrologia", sigla: "NEF" },
-  { nome: "Neurocirurgia", sigla: "NCR" },
-  { nome: "Neurologia", sigla: "NEU" },
-  { nome: "Nutrologia", sigla: "NUT" },
-  { nome: "Oftalmologia", sigla: "OFT" },
-  { nome: "Oncologia Clínica", sigla: "ONC" },
-  { nome: "Ortopedia e Traumatologia", sigla: "ORT" },
-  { nome: "Otorrinolaringologia", sigla: "OTR" },
-  { nome: "Patologia", sigla: "PAT" },
-  { nome: "Patologia Clínica/Medicina Laboratorial", sigla: "LAB" },
-  { nome: "Pediatria", sigla: "PED" },
-  { nome: "Pneumologia", sigla: "PNE" },
-  { nome: "Psiquiatria", sigla: "PSQ" },
-  { nome: "Radiologia e Diagnóstico por Imagem", sigla: "RAD" },
-  { nome: "Radioterapia", sigla: "RTP" },
-  { nome: "Reumatologia", sigla: "REU" },
-  { nome: "Urologia", sigla: "URO" },
-];
+async function upsertEspecialidades() {
+  for (const especialidade of EspecialidadesSeed) {
+    await prisma.especialidade.upsert({
+      where: { nome: especialidade.nome },
+      update: { ...especialidade },
+      create: { ...especialidade },
+    });
+  }
+  console.log(
+    `✅ ${EspecialidadesSeed.length} especialidades adicionadas/atualizadas.`
+  );
+}
 
-export const BeneficiosEnum = [
-  { nome: "Vale Transporte", descricao: "Auxílio deslocamento" },
-  { nome: "Vale Refeição", descricao: "Vale para refeições diárias" },
-  { nome: "Vale Alimentação", descricao: "Auxílio alimentação mensal" },
-  { nome: "Plano de Saúde", descricao: "Plano de saúde completo" },
-  { nome: "Plano Odontológico", descricao: "Plano odontológico" },
-  {
-    nome: "Auxílio Home Office",
-    descricao: "Ajuda de custo para trabalho remoto",
-  },
-  { nome: "Seguro de Vida", descricao: "Seguro de vida corporativo" },
-  { nome: "GymPass", descricao: "Acesso a academias parceiras" },
-  { nome: "Bolsa de Estudos", descricao: "Ajuda de custo para cursos" },
-  { nome: "Day Off", descricao: "Folga no dia do aniversário" },
-];
+async function upsertBeneficios() {
+  for (const beneficio of BeneficiosSeed) {
+    await prisma.beneficio.upsert({
+      where: { nome: beneficio.nome },
+      update: { ...beneficio },
+      create: { ...beneficio },
+    });
+  }
+  console.log(
+    `✅ ${BeneficiosSeed.length} benefícios adicionados/atualizados.`
+  );
+}
+
+// Função para upsert dos planos usando findUnique + updateOrCreate por causa do constraint.
+async function upsertPlanos(planoList: any[], tipoDesc: string) {
+  for (const plano of planoList) {
+    // O campo unique em Plano é 'id'; 'nome' não é unique
+    // Então precisamos buscar pelo nome, se existir faz update, senão cria.
+    const planoExistente = await prisma.plano.findFirst({
+      where: { nome: plano.nome },
+    });
+
+    if (planoExistente) {
+      await prisma.plano.update({
+        where: { id: planoExistente.id },
+        data: {
+          descricao: plano.descricao,
+          preco: plano.preco,
+          diasGarantia: plano.diasGarantia,
+          ativo: plano.ativo,
+          tipo: plano.tipo,
+          limiteUso:
+            plano.limitePesquisas !== undefined
+              ? plano.limitePesquisas
+              : plano.limiteUso !== undefined
+              ? plano.limiteUso
+              : undefined,
+        },
+      });
+    } else {
+      await prisma.plano.create({
+        data: {
+          nome: plano.nome,
+          descricao: plano.descricao,
+          preco: plano.preco,
+          diasGarantia: plano.diasGarantia,
+          ativo: plano.ativo,
+          tipo: plano.tipo,
+          limiteUso:
+            plano.limitePesquisas !== undefined
+              ? plano.limitePesquisas
+              : plano.limiteUso !== undefined
+              ? plano.limiteUso
+              : undefined,
+        },
+      });
+    }
+  }
+  console.log(
+    `✅ ${planoList.length} planos ${tipoDesc} adicionados/atualizados.`
+  );
+}
 
 async function main() {
   try {
@@ -83,23 +95,20 @@ async function main() {
       process.env.DATABASE_URL ? "Carregada" : "Não Carregada"
     );
 
-    // Especialidades
-    const resultsEspecialidades = await prisma.especialidade.createMany({
-      data: EspecialidadesEnum,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${resultsEspecialidades.count} especialidades adicionadas/atualizadas.`
+    await upsertEspecialidades();
+    await upsertBeneficios();
+
+    // Planos de plataforma (POR_USO)
+    await upsertPlanos(billingPlataformSeed, "de plataforma");
+
+    // Planos de recrutamento SEM RQE (MENSAL)
+    await upsertPlanos(
+      billingRecrutamentoSemRQESeed,
+      "de recrutamento SEM RQE"
     );
 
-    // Benefícios
-    const resultsBeneficios = await prisma.beneficio.createMany({
-      data: BeneficiosEnum,
-      skipDuplicates: true,
-    });
-    console.log(
-      `✅ ${resultsBeneficios.count} benefícios adicionados/atualizados.`
-    );
+    // Planos de recrutamento COM RQE (MENSAL)
+    await upsertPlanos(planosComRQE, "de recrutamento COM RQE");
 
     console.log("🎉 Seed concluído com sucesso!");
   } catch (error) {

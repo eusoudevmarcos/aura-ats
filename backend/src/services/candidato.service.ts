@@ -76,6 +76,8 @@ export class CandidatoService {
       crm: candidatoData.crm,
       corem: candidatoData.coren,
       areaCandidato: candidatoData.areaCandidato as AreaCandidato,
+      email: candidatoData?.email ?? undefined,
+      celular: candidatoData?.celular ?? undefined,
     } as any;
 
     const { id, rqe, areaCandidato, crm, corem, ...rest } = candidatoData;

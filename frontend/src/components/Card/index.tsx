@@ -15,7 +15,7 @@ const Card: React.FC<{
           {title.label}
         </h3>
       ))}
-    <div className={`text-primary ${classNameContent}`}>{children}</div>
+    <div className={`text-secondary ${classNameContent}`}>{children}</div>
   </div>
 );
 

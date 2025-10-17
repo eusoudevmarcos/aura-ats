@@ -1,11 +1,14 @@
 // pages/candidato/[id].tsx
 import api from '@/axios';
 import Card from '@/components/Card';
+import { AgendaForm } from '@/components/form/AgendaForm';
 import CandidatoForm from '@/components/form/CandidatoForm';
-import { EditPenIcon, TrashIcon } from '@/components/icons';
+import { EditPenIcon, TrashIcon, WhatsAppIcon } from '@/components/icons';
 import { VagaWithRelations } from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
+import { useCliente } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
+import { SessionProvider } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -18,6 +21,9 @@ const CandidatoPage: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
+  const [showModalAgendaEdit, setShowModalAgendaEdit] = useState(false);
+
+  const isNoCliente = useCliente();
 
   const {
     data: vagas,
@@ -113,6 +119,12 @@ const CandidatoPage: React.FC = () => {
           </h1>
           <div className="flex gap-2">
             <button
+              className="px-2 py-2 bg-green-500 text-white rounded shadow-md hover:scale-110 flex justify-center items-center"
+              onClick={() => setShowModalAgendaEdit(true)}
+            >
+              <span className="material-icons-outlined">date_range</span>
+            </button>
+            <button
               className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
               onClick={() => setShowModalEdit(true)}
             >
@@ -152,6 +164,34 @@ const CandidatoPage: React.FC = () => {
                 <span className="text-secondary ml-2">
                   {candidato.pessoa.sexo || 'N/A'}
                 </span>
+              </div>
+              {isNoCliente && candidato.email && (
+                <div>
+                  <span className="font-medium">Email:</span>
+                  <span className="text-secondary ml-2">
+                    {candidato.email || 'N/A'}
+                  </span>
+                </div>
+              )}
+              <div className="flex items-center">
+                <span className="font-medium">Celular/Whatsapp:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.celular || 'N/A'}
+                </span>
+                {isNoCliente && candidato.celular && (
+                  <a
+                    href={`https://wa.me/${candidato.celular.replace(
+                      /\D/g,
+                      ''
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="ml-2 inline-flex items-center bg-green-500 text-white rounded p-1 hover:bg-green-600"
+                    title="Conversar no WhatsApp"
+                  >
+                    <WhatsAppIcon />
+                  </a>
+                )}
               </div>
             </Card>
           )}
@@ -500,6 +540,25 @@ const CandidatoPage: React.FC = () => {
           initialValues={candidato}
         />
       </Modal>
+
+      <SessionProvider>
+        <Modal
+          isOpen={showModalAgendaEdit}
+          onClose={() => setShowModalAgendaEdit(false)}
+          title="Editar Candidato"
+        >
+          <AgendaForm
+            onSuccess={agenda => {
+              setShowModalAgendaEdit(false);
+            }}
+            initialValues={{
+              candidatoId: candidato.id,
+              candidato: candidato,
+              convidados: [candidato.email],
+            }}
+          />
+        </Modal>
+      </SessionProvider>
     </div>
   );
 };

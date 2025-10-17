@@ -22,12 +22,29 @@ export default class AuthenticationController {
 
       const usuarioSistema = await prisma.usuarioSistema.findUnique({
         where: { email: username },
-        include: {
+        select: {
+          id: true,
+          tipoUsuario: true,
+          password: true,
           funcionario: {
-            include: { pessoa: true },
+            select: {
+              pessoa: {
+                select: {
+                  cpf: true,
+                  nome: true,
+                },
+              },
+            },
           },
           cliente: {
-            include: { empresa: true },
+            select: {
+              empresa: {
+                select: {
+                  razaoSocial: true,
+                  cnpj: true,
+                },
+              },
+            },
           },
         },
       });
@@ -58,7 +75,7 @@ export default class AuthenticationController {
 
       const infoUser = {
         uid: usuarioSistema.id,
-        email: usuarioSistema.email,
+        email: username,
         tipo: usuarioSistema.tipoUsuario,
       };
 
@@ -98,7 +115,7 @@ export default class AuthenticationController {
         type: "login",
         status: "success",
         data: {
-          email: usuarioSistema.email,
+          email: username,
           uid: usuarioSistema.id,
           token,
         },

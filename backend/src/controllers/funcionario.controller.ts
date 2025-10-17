@@ -75,4 +75,17 @@ export class FuncionarioController {
       });
     }
   }
+
+  async delete(req: Request, res: Response) {
+    try {
+      const { id } = req.body;
+      await this.service.delete(id);
+      return res.status(200).json("Usuario do sistema deletado com sucesso");
+    } catch (error: any) {
+      return res.status(400).json({
+        error: "Erro ao criar funcionário",
+        message: error.message,
+      });
+    }
+  }
 }

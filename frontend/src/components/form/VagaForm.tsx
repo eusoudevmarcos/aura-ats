@@ -62,7 +62,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
       ...initialValues,
       tipoSalario: 'A COMBINAR',
       categoria: 'SAUDE',
-      status: 'ATIVA',
+      status: initialValues?.status ?? 'ATIVA',
       tipoLocalTrabalho: initialValues?.tipoLocalTrabalho || 'PRESENCIAL',
     },
   });
@@ -317,7 +317,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           </div>
         )}
 
-        <div className="w-full flex gap-2 items-center col-span-full justify-center">
+        {/* <div className="w-full flex gap-2 items-center col-span-full justify-center">
           <button
             className="flex items-center bg-primary text-white text-sm px-3 py-1 rounded-lg shadow-md text-nowrap"
             type="button"
@@ -336,7 +336,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           >
             Adicionar Beneficios?
           </button>
-        </div>
+        </div> */}
 
         {habilidadesAllow && (
           <div className="col-span-full">

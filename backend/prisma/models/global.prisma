@@ -175,3 +175,27 @@ enum TipoPessoa {
 
     @@schema("public")
 }
+
+enum LocalEvento {
+    REMOTO
+    PRESENCIAL
+    HIBRIDO
+
+    @@schema("public")
+}
+
+enum AssinaturaStatus {
+    ATIVA
+    EXPIRADA
+    CANCELADA
+    PENDENTE
+
+    @@schema("public")
+}
+
+enum TipoPlano {
+    MENSAL
+    POR_USO
+
+    @@schema("public")
+}

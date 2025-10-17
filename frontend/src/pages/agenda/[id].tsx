@@ -1,9 +1,11 @@
 // pages/agenda/[id].tsx
 import api from '@/axios';
 import Card from '@/components/Card';
+import { AgendaForm } from '@/components/form/AgendaForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
 import { useCliente } from '@/context/AuthContext';
+import { SessionProvider } from 'next-auth/react';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
@@ -103,17 +105,23 @@ const AgendaPage: React.FC = () => {
           {/* Sessão Dados da Agenda */}
           <Card title="Dados da Agenda">
             <div>
+              <span className="font-medium">Titulo:</span>
+              <span className="text-secondary ml-2">{agenda.titulo}</span>
+            </div>
+            <div>
               <span className="font-medium">Data e Hora:</span>
-              <span className="text-secondary ml-2">
-                {agenda.dataHora
-                  ? new Date(agenda.dataHora).toLocaleString('pt-BR')
-                  : 'N/A'}
-              </span>
+              <span className="text-secondary ml-2">{agenda.dataHora}</span>
             </div>
             <div>
               <span className="font-medium">Tipo do Evento:</span>
               <span className="text-secondary ml-2">
                 {agenda.tipoEvento?.replace(/_/g, ' ') || 'N/A'}
+              </span>
+            </div>
+            <div>
+              <span className="font-medium">local Evento:</span>
+              <span className="text-secondary ml-2">
+                {agenda.localEvento || 'N/A'}
               </span>
             </div>
             <div>
@@ -252,15 +260,15 @@ const AgendaPage: React.FC = () => {
       </section>
 
       {/* Modal de edição pode ser implementado futuramente */}
-      <Modal
-        isOpen={showModalEdit}
-        onClose={() => setShowModalEdit(false)}
-        title="Editar Agenda"
-      >
-        <div className="text-center text-gray-500 p-4">
-          Formulário de edição da agenda em breve.
-        </div>
-      </Modal>
+      <SessionProvider>
+        <Modal
+          isOpen={showModalEdit}
+          onClose={() => setShowModalEdit(false)}
+          title="Editar Agenda"
+        >
+          <AgendaForm onSuccess={() => {}} initialValues={agenda} />
+        </Modal>
+      </SessionProvider>
     </div>
   );
 };

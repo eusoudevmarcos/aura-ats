@@ -13,7 +13,7 @@ model Cliente {
     empresa   Empresa @relation(fields: [empresaId], references: [id])
     empresaId String  @unique
 
-    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id])
+    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id], onDelete: Cascade)
     usuarioSistemaId String?         @unique
 
     @@index([empresaId])

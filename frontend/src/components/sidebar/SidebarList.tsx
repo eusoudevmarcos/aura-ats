@@ -49,6 +49,16 @@ export const getNavItems = (user: any) => {
       label: 'Usuarios do sistema',
       href: `/funcionarios`,
     });
+
+    navItems.push({
+      icon: (
+        <span className="material-icons-outlined w-5 h-5 text-inherit">
+          credit_card
+        </span>
+      ),
+      label: 'Planos',
+      href: `/planos`,
+    });
   }
 
   if (

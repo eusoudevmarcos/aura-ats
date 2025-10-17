@@ -1,10 +1,12 @@
 model Agenda {
-    id         String           @id @default(uuid(7))
-    dataHora   DateTime
-    link       String?
-    tipoEvento TipoEventoAgenda @default(TRIAGEM_INICIAL)
+    id          String           @id @default(uuid())
+    titulo      String           @default("Titulo")
+    dataHora    DateTime
+    link        String?
+    tipoEvento  TipoEventoAgenda @default(TRIAGEM_INICIAL)
+    localEvento LocalEvento      @default(REMOTO)
 
-    etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id])
+    etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id], onDelete: Cascade)
     etapaAtualId String?
 
     localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
@@ -18,6 +20,8 @@ model Agenda {
     agendaCandidatura AgendaCandidatura[]
     triagem           TriagemVaga?        @relation(fields: [triagemId], references: [id])
     triagemId         String?
+
+    convidados String[]
 
     @@index([etapaAtualId])
     @@index([localizacaoId])

@@ -112,6 +112,21 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         <h3 className="text-md font-bold">Dados do Profissional</h3>
         <PessoaForm namePrefix="pessoa" />
 
+        <div className="flex gap-2">
+          <FormInput
+            name="email"
+            label="Email"
+            placeholder="exemplo@gmail.com"
+            inputProps={{ classNameContainer: 'flex-1/2', type: 'email' }}
+          />
+          <FormInput
+            name="celular"
+            label="Celular"
+            placeholder="(00) 0 0000-0000"
+            inputProps={{ classNameContainer: 'flex-1/2' }}
+          />
+        </div>
+
         <h3>Endereço</h3>
         <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
 

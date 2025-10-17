@@ -14,6 +14,7 @@ const FuncionarioPage: React.FC = () => {
   const [funcionario, setFuncionario] = useState<FuncionarioInput | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [showModalEdit, setShowModalEdit] = useState<boolean>(false);
+  const [modalDelete, setModalDelete] = useState<boolean>(false);
   const [erro, setErro] = useState<string | null>(null);
   const [openCount, setOpenCount] = useState<number>(1);
 
@@ -38,6 +39,21 @@ const FuncionarioPage: React.FC = () => {
 
     fetchFuncionario();
   }, [uuid]);
+
+  const handleDelete = async () => {
+    if (!uuid) return;
+
+    setLoading(true);
+    try {
+      await api.delete(`/api/externalWithAuth/funcionario/delete`, {
+        data: { id: uuid },
+      });
+      await router.back();
+    } catch (_: any) {
+    } finally {
+      setLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -66,7 +82,7 @@ const FuncionarioPage: React.FC = () => {
         <div className="flex mb-8">
           <button
             className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
-            onClick={() => router.back()}
+            onClick={async () => await router.back()}
           >
             Voltar
           </button>
@@ -81,7 +97,10 @@ const FuncionarioPage: React.FC = () => {
             >
               <EditPenIcon />
             </button>
-            <button className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer">
+            <button
+              className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
+              onClick={() => setModalDelete(true)}
+            >
               <TrashIcon />
             </button>
           </div>
@@ -186,6 +205,28 @@ const FuncionarioPage: React.FC = () => {
             initialValues={funcionario}
           />
         )}
+      </Modal>
+
+      <Modal
+        isOpen={modalDelete}
+        onClose={() => setModalDelete(false)}
+        title="Tem certeza que deseja deletar o Funcionario?"
+        fit
+      >
+        <div className="flex gap-2 justify-center">
+          <button
+            className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
+            onClick={() => handleDelete()}
+          >
+            SIM
+          </button>
+          <button
+            className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110 hover:duration-200 cursor-pointer"
+            onClick={() => setModalDelete(false)}
+          >
+            NÂO
+          </button>
+        </div>
       </Modal>
     </div>
   );

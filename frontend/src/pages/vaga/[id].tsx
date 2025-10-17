@@ -102,6 +102,12 @@ const VagaPage: React.FC = () => {
         </button>
 
         <div className="flex gap-2">
+          <Link
+            href={`/vaga/${vaga.id}/triagens`}
+            className="px-4 py-2 bg-primary text-white rounded shadow-md hover:scale-105 transition-transform"
+          >
+            Triagem <span className="material-icons-outlined"></span>
+          </Link>
           <button
             className="px-3 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 transition-transform"
             onClick={() => setShowModalEdit(true)}
@@ -123,8 +129,30 @@ const VagaPage: React.FC = () => {
           classNameContainer="col-span-full"
           classNameContent="gap-2 flex flex-col"
         >
-          <h1 className="font-black text-xl">{vaga.titulo}</h1>
+          <h1 className="font-black text-xl text-center">{vaga.titulo}</h1>
+
           <div className="flex items-center">
+            <span className="font-medium">Salário:</span>
+            <p className="ml-2 text-secondary inline-block">
+              {vaga.tipoSalario && vaga.tipoSalario}
+            </p>
+          </div>
+          <div className="flex items-center">
+            <span className="font-medium">Data Publicação:</span>
+            <p className="ml-2 text-secondary inline-block">
+              {vaga.dataPublicacao}
+            </p>
+          </div>
+          {vaga.dataFechamento && (
+            <div className="flex">
+              <span className="font-medium">Data Fechamento:</span>
+              <p className="ml-2 text-secondary inline-block">
+                {formatDate(vaga.dataFechamento)}
+              </p>
+            </div>
+          )}
+
+          <div className="flex">
             <span className="font-medium">Descrição:</span>
             <p className="ml-2 text-secondary inline-block">{vaga.descricao}</p>
           </div>
@@ -144,28 +172,7 @@ const VagaPage: React.FC = () => {
               </p>
             </div>
           )}
-          <div className="flex items-center">
-            <span className="font-medium">Salário:</span>
-            <p className="ml-2 text-secondary inline-block">
-              {formatCurrency(vaga.salario)}
-              {vaga.tipoSalario && `(${vaga.tipoSalario})`}
-            </p>
-          </div>
-          <div className="flex items-center">
-            <span className="font-medium">Data Publicação:</span>
-            <p className="ml-2 text-secondary inline-block">
-              {vaga.dataPublicacao}
-            </p>
-          </div>
-          {vaga.dataFechamento && (
-            <div className="flex items-center">
-              <span className="font-medium">Data Fechamento:</span>
-              <p className="ml-2 text-secondary inline-block">
-                {formatDate(vaga.dataFechamento)}
-              </p>
-            </div>
-          )}
-          <section className="flex gap-6 mt-4">
+          <section className="flex gap-2 md:gap-6 mt-4 flex-wrap">
             <div className="flex items-center">
               <span className="font-medium mr-2">Categoria:</span>
               <p className="bg-[#ede9fe] text-primary text-xs font-semibold px-3 py-1 rounded-full border border-secondary text-secondary inline-block m-0">
@@ -347,18 +354,6 @@ const VagaPage: React.FC = () => {
         )}
       </div>
 
-      <div className="flex mt-10"></div>
-
-      {/* Acesso às Triagens da Vaga */}
-      <div className="flex justify-center mt-6 mb-6">
-        <Link
-          href={`/vaga/${vaga.id}/triagens`}
-          className="px-4 py-2 bg-primary text-white rounded shadow-md hover:scale-105 transition-transform"
-        >
-          Ver Triagens da Vaga
-        </Link>
-      </div>
-
       <div className="flex justify-center mt-10 mb-4 relative">
         <h3 className="text-2xl font-bold text-center text-primary w-full ">
           PROFISSIONAIS CADASTRADOS
@@ -368,7 +363,7 @@ const VagaPage: React.FC = () => {
           className="float-right flex text-nowrap absolute right-0"
           onClick={() => setShowModalCandidato(true)}
         >
-          + Adicionar Candidato
+          +
         </PrimaryButton>
 
         <Modal
@@ -398,7 +393,7 @@ const VagaPage: React.FC = () => {
         </Modal>
       </div>
 
-      <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-start">
+      <section className="flex gap-2 w-full flex-wrap">
         {vaga.candidatos &&
           vaga.candidatos.map((candidato: any, idx: number) => {
             // Exclui o campo 'id' da listagem
@@ -406,14 +401,17 @@ const VagaPage: React.FC = () => {
             return (
               <Link
                 href={`/candidato/${candidato.id}`}
-                className="w-full lg:max-w-[320px]"
+                className="w-full md:max-w-[320px] transform hover:scale-105"
                 key={candidato.id}
               >
                 <Card key={idx}>
                   <div className="flex flex-col gap-1">
                     <div className="flex gap-2">
                       {/* <span className="font-semibold">Nome:</span> */}
-                      <span className="font-bold uppercase">
+                      <span
+                        className="font-bold uppercase truncate md:max-w-[280px] block"
+                        title={candidato.pessoa.nome}
+                      >
                         {candidato.pessoa.nome ?? '-'}
                       </span>
                     </div>

@@ -144,7 +144,7 @@ const PricingSection: React.FC = () => {
           <p className="text-sm text-text-color-secondary mb-4 min-h-[2em]">
             Solução completa para grandes demandas
           </p>
-          <p className="text-3xl font-bold text-accent mb-8">A Consultar</p>
+          <p className="text-3xl font-bold text-accent mb-8">Personalizado</p>
           <ul className="list-none p-0 text-left w-full mb-8 flex-grow">
             <li className="flex items-start gap-2 text-text-color-secondary text-base mb-2">
               <FaCheckCircle className="text-primary text-lg flex-shrink-0 mt-[3px]" />

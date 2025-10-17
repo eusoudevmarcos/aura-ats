@@ -61,7 +61,14 @@ const AgendaList: React.FC = () => {
       setLoading(true);
       try {
         const response = await api.get<Pagination<AgendaVaga[]>>(
-          '/api/externalWithAuth/agenda'
+          '/api/externalWithAuth/agenda',
+          {
+            params: {
+              page,
+              pageSize,
+              search,
+            },
+          }
         );
         const data = Array.isArray(response.data?.data)
           ? response.data.data
@@ -78,7 +85,7 @@ const AgendaList: React.FC = () => {
       }
     };
     fetchAgendas();
-  }, []);
+  }, [page, pageSize, search]);
 
   const dadosTabela = useMemo(() => normalizarTable(agendas), [agendas]);
 

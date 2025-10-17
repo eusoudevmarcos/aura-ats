@@ -17,7 +17,13 @@ export default async function postCalendar(rest: any) {
     credentials: 'same-origin',
     headers,
     body: JSON.stringify({
-      summary: rest.tipoEvento,
+      summary: `${String(rest.tipoEvento).replace(/[^a-zA-Z ]/g, '')} ${
+        rest.titulo
+      }`,
+      organizer: {
+        email: 'aurareslabs@gmail.com',
+        displayName: 'Equipe AURA R&L ATS',
+      },
       description: 'Reunião criada via AURA ATS',
       start: rest.dataHora,
       end: new Date(

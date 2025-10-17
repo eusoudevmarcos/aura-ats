@@ -116,6 +116,14 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     }
   }
 
+  async delete(id: string) {
+    try {
+      return await prisma.usuarioSistema.delete({ where: { id } });
+    } catch (err) {
+      return err;
+    }
+  }
+
   private async checkDuplicates(data: any): Promise<void> {
     // Verifica email duplicado
     const usuarioExistente = await prisma.usuarioSistema.findUnique({
