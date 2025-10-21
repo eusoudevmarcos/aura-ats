@@ -94,6 +94,21 @@ export default class AuthenticationController {
       // Gera token JWT
       const token = jwt.sign(infoUser, SECRET!, { expiresIn: "2h" });
 
+      const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 2);
+
+      await prisma.sessao.upsert({
+        where: { token }, // index ou PK para "token"
+        update: {
+          userId: usuarioSistema.id,
+          expiresAt,
+        },
+        create: {
+          token,
+          userId: usuarioSistema.id,
+          expiresAt,
+        },
+      });
+
       const isProduction = process.env.NODE_ENV === "production";
       // Define cookie httpOnly
       res.setHeader(
@@ -147,6 +162,24 @@ export default class AuthenticationController {
           maxAge: 0,
         })
       );
+
+      // Além de limpar o cookie, apagar a sessão do backend
+      // Se token estiver presente nos cookies ou headers, remover a sessão do banco
+      let token = "";
+
+      if (req.cookies?.token) {
+        token = req.cookies.token;
+      } else if (
+        typeof req.headers.authorization === "string" &&
+        req.headers.authorization.startsWith("Bearer ")
+      ) {
+        token = req.headers.authorization.substring(7);
+      }
+
+      if (token) {
+        // Delete session in DB
+        await prisma.sessao.deleteMany({ where: { token } });
+      }
 
       await saveLog({
         type: "logout",

@@ -12,6 +12,8 @@ import candidatoRoutes from "./routes/candidato.routes";
 import clienteRoutes from "./routes/cliente.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
+import sessaoRoutes from "./routes/sessao.routes";
+import tarefaRoutes from "./routes/tarefa.routes";
 import triagemRoutes from "./routes/triagem.routes";
 import userRoutes from "./routes/user.routes";
 import vagaRoutes from "./routes/vaga.routes";
@@ -85,6 +87,8 @@ app.use("/api/vaga", vagaRoutes);
 app.use("/api/agenda", agendaRoute);
 app.use("/api/triagem", triagemRoutes);
 app.use("/api/billing", billingRoutes);
+app.use("/api/tarefa", tarefaRoutes);
+app.use("/api/sessao", sessaoRoutes);
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

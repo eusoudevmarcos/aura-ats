@@ -1,0 +1,16 @@
+model Tarefa {
+    id               Int      @id @default(autoincrement())
+    idUsuarioSistema String
+    descricao        String
+    concluida        Boolean  @default(false)
+    orderBy          Int      @default(0)
+    createdAt        DateTime @default(now()) @map("created_at")
+    updatedAt        DateTime @updatedAt @map("updated_at")
+
+    // Relacionamento com UsuarioSistema
+    usuarioSistema UsuarioSistema @relation(fields: [idUsuarioSistema], references: [id], onDelete: Cascade)
+
+    @@index([idUsuarioSistema])
+    @@map("tarefas")
+    @@schema("Tarefa")
+}

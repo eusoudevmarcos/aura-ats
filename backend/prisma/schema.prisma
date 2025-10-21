@@ -7,5 +7,5 @@ datasource db {
   url          = env("DATABASE_URL")
   directUrl    = env("DIRECT_URL")
   relationMode = "prisma"
-  schemas      = ["Agenda", "ProcessoSeletivoEtapa", "AgendaCandidatura", "Localizacao", "Cliente", "Candidato", "Especialidade", "Formacao", "Contato", "Socio", "Empresa", "Habilidade", "Pessoa", "TriagemVaga", "UsuarioSistema", "Funcionario", "Vaga", "VagaHabilidade", "CandidaturaVaga", "Anexo", "VagaAnexo", "Beneficio", "VagaBeneficio", "Plano", "PlanoAssinatura", "public"]
+  schemas      = ["Agenda", "ProcessoSeletivoEtapa", "AgendaCandidatura", "Localizacao", "Cliente", "Candidato", "Especialidade", "Formacao", "Contato", "Socio", "Empresa", "Habilidade", "Pessoa", "TriagemVaga", "UsuarioSistema", "Funcionario", "Vaga", "VagaHabilidade", "CandidaturaVaga", "Anexo", "VagaAnexo", "Beneficio", "VagaBeneficio", "Plano", "PlanoAssinatura", "Tarefa", "Sessao", "public"]
 }

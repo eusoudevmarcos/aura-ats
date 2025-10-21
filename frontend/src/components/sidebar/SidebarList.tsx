@@ -91,7 +91,7 @@ export const getNavItems = (user: any) => {
       href: '/agenda',
     },
     {
-      icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+      icon: <span className="material-icons-outlined">task</span>,
       label: 'Taferas',
       href: '/tarefas',
     },

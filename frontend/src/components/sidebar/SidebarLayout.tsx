@@ -164,7 +164,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   const user = useUser();
   // Sempre colapsa o menu ao trocar de rota
   useEffect(() => {
-    setCollapsed(false);
+    setCollapsed(true);
   }, [router.pathname]);
 
   useEffect(() => {

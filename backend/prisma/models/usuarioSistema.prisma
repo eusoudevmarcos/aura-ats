@@ -6,6 +6,9 @@ model UsuarioSistema {
 
     funcionario Funcionario?
     cliente     Cliente?
+    tarefas     Tarefa[]
+
+    sessao Sessao?
 
     @@unique([email])
     @@schema("UsuarioSistema")
