@@ -22,11 +22,10 @@ const Footer: React.FC = () => {
           >
             {/* Use a versão do logo que se encaixe melhor no footer, talvez uma branca ou monocromática */}
             <Image
-              src="/images/auralogoh.svg" // Exemplo: se você tiver uma versão branca/clara do logo
+              src="/images/auralogoh.svg"
               alt="Aura logo"
               width={100}
               height={50}
-              priority
             />
           </Link>
           <p className={styles.description}>

@@ -412,7 +412,9 @@ const HeaderLadingPage: React.FC = () => {
                 alt="Logo"
                 width={150}
                 height={50}
-                style={{ objectFit: 'contain' }}
+                priority={true}
+                loading="eager"
+                style={{ objectFit: 'contain', width: 150, height: 'auto' }}
               />
             </Link>
           </div>

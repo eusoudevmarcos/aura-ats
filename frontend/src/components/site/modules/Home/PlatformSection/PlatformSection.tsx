@@ -32,7 +32,6 @@ const PlatformSection: React.FC = () => {
             alt="Visão geral da plataforma Aura"
             width={600}
             height={400}
-            layout="responsive"
             className="rounded-2xl shadow-md"
           />
         </div>
