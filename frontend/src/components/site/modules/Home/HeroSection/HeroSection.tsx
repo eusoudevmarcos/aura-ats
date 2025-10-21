@@ -15,7 +15,7 @@ interface SlideItem {
 const heroSlides: SlideItem[] = [
   {
     id: 'slide1',
-    imageSrc: '/images/hero-doctor.jpg',
+    imageSrc: '/landing-page/recrutamento-medico.png',
     altText: 'Médico sorrindo, representando a área da saúde',
     title: 'O Match Perfeito em Recrutamento Médico',
     description:
@@ -23,7 +23,7 @@ const heroSlides: SlideItem[] = [
   },
   {
     id: 'slide2',
-    imageSrc: '/images/hero-tech.jpg',
+    imageSrc: '/landing-page/world.png',
     altText: 'Desenvolvedores trabalhando, representando a área de TI',
     title: 'Inovação em Recrutamento de TI',
     description:
@@ -31,7 +31,7 @@ const heroSlides: SlideItem[] = [
   },
   {
     id: 'slide3',
-    imageSrc: '/images/hero-executive.png',
+    imageSrc: '/landing-page/vagas-executivas-2.png',
     altText:
       'Profissional executivo em reunião, representando vagas executivas',
     title: 'Liderança e Visão para Vagas Executivas',
@@ -50,65 +50,107 @@ const HeroSection: React.FC = () => {
   return (
     <section
       id="hero-section"
-      className="relative w-full h-[100vh] max-h-[800px] min-h-[500px] overflow-hidden mx-auto md:min-h-[900px] border-b-8 border-primary"
+      className="relative w-full h-[100vh] max-h-[800px] min-h-[500px] overflow-hidden mx-auto md:min-h-[900px]"
     >
       <Slider slides={heroSlides} autoPlay interval={10000}>
-        {(slide: SlideItem) => (
+        {(slide: SlideItem, isExiting: boolean) => (
           <div
             key={slide.id}
             className="relative w-full h-full flex items-center justify-center text-secondary"
           >
-            <div className="absolute inset-0 w-full h-full">
-              <div className="absolute inset-0 w-full h-full">
-                <Image
-                  src={slide.imageSrc}
-                  alt={slide.altText}
-                  fill
-                  priority
-                  sizes="100vw"
-                  className="object-cover w-full h-full blur-[4px] brightness-[0.5]"
-                  style={{
-                    boxShadow:
-                      '0 8px 32px 0 rgba(0,0,0,0.18), 0 2px 10px 0 rgba(0,0,0,0.50)',
-                  }}
-                />
-              </div>
-              <div
-                className="
-                  absolute top-0 left-0 w-full h-full
-                  bg-gradient-to-t from-black/60 to-black/20
-                  z-[1]
-                "
-              ></div>
-            </div>
             <div
               className="
-                relative z-[2] text-center max-w-[900px]
-                px-[var(--spacing-md)] py-[var(--spacing-lg)]
+                relative z-[2] flex flex-col md:flex-row items-center justify-between w-full h-full
+                max-w-[1200px] mx-auto px-[var(--spacing-md)] py-[var(--spacing-lg)]
               "
+              style={{ minHeight: '500px' }}
             >
-              <h1 className="text-[2.75rem] text-white font-black text-shadow-2xs">
-                {slide.title}
-              </h1>
-              <p
-                className="
-                  text-[1.25rem] mb-[var(--spacing-md)]
-                  text-[var(--bg-color-light)]
-                "
+              {/* Conteúdo do texto + botão, à esquerda */}
+              <div
+                className={`
+                  flex-1 flex flex-col justify-center items-start text-left max-w-xl
+                  transition-all duration-[400ms] ease-in-out
+                  ${
+                    isExiting
+                      ? 'opacity-0 -translate-x-full'
+                      : 'opacity-100 translate-x-0 scale-100'
+                  }
+                `}
+                style={
+                  !isExiting
+                    ? {
+                        animation: 'slideInFromCenter 400ms ease-out',
+                      }
+                    : undefined
+                }
               >
-                {slide.description}
-              </p>
-              <Button
-                onClick={handleContratarClick}
-                variant="primary"
-                size="large"
+                <h1 className="text-[2.25rem] md:text-[2.75rem] text-primary font-black text-shadow-2xs mb-4 leading-relaxed">
+                  {slide.title}
+                </h1>
+                <p
+                  className="
+                    text-[1.15rem] md:text-[1.25rem] mb-[var(--spacing-md)]
+                    text-secondary
+                  "
+                >
+                  {slide.description}
+                </p>
+                <Button
+                  onClick={handleContratarClick}
+                  variant="primary"
+                  size="large"
+                >
+                  Saiba Mais
+                </Button>
+              </div>
+
+              {/* Imagem destacada do slide, à direita */}
+              <div
+                className={`
+                  flex-1 flex justify-center items-center w-full h-full mt-10 md:mt-0 md:ml-10
+                  transition-all duration-[400ms] ease-in-out
+                  ${
+                    isExiting
+                      ? 'opacity-0 translate-x-full'
+                      : 'opacity-100 translate-x-0 scale-100'
+                  }
+                `}
+                style={
+                  !isExiting
+                    ? {
+                        animation: 'slideInFromCenter 400ms ease-out',
+                      }
+                    : undefined
+                }
               >
-                Quero Contratar a Plataforma
-              </Button>
+                <div className="relative w-[320px] md:w-[500px] h-full md:h-[600px] rounded-xl overflow-hidden shadowz-[3]">
+                  <Image
+                    src={slide.imageSrc}
+                    alt={slide.altText}
+                    fill
+                    sizes="(min-width: 768px) 400px, 320px"
+                    className="object-contain w-full h-full"
+                    priority={true}
+                  />
+                </div>
+              </div>
             </div>
           </div>
         )}
       </Slider>
+
+      <style>{`
+        @keyframes slideInFromCenter {
+          from {
+            opacity: 0;
+            transform: scale(0.4) translateZ(0);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1) translateZ(0);
+          }
+        }
+      `}</style>
     </section>
   );
 };

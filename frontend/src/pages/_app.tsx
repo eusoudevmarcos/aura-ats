@@ -6,17 +6,23 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
+import api from '@/axios';
 import { AuthProvider } from '@/context/AuthContext';
 import { isAlwaysPublicPath } from '@/middleware';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
+import { useEffect } from 'react';
 
 const PUBLIC_ROUTES = ['/login'];
 
 function App({ Component, pageProps }: AppProps) {
+  useEffect(() => {
+    api.get('/api/external/ping');
+  }, []);
+
   const router = useRouter();
   const isPublic = PUBLIC_ROUTES.includes(router.pathname);
-  console.log(router.pathname);
+
   if (router.pathname == '/dashboard/cliente') {
     return (
       <AuthProvider>

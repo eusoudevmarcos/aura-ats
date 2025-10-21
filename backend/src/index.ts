@@ -72,6 +72,8 @@ if (process.env.NODE_ENV === "development") {
   });
 }
 
+app.get("/api/ping", (req, res) => res.status(200).send("ok"));
+
 app.use("/api/auth", authenticationRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/candidates", candidatoRoutes);

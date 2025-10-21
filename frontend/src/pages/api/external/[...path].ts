@@ -1,6 +1,5 @@
 // pages/api/externalWithAuth/[...path].ts (Ajuste AQUI)
 import axios from 'axios';
-import { parse } from 'cookie';
 import { NextApiRequest, NextApiResponse } from 'next';
 
 const externalBackendApi = axios.create({
@@ -12,12 +11,12 @@ export default async function handler(
   res: NextApiResponse
 ) {
   try {
-    const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
-    const token = cookies.token;
+    // const cookies = req.headers.cookie ? parse(req.headers.cookie) : {};
+    // const token = cookies.token;
 
-    if (!token) {
-      return res.status(401).json({ error: 'Não autenticado.' });
-    }
+    // if (!token) {
+    //   return res.status(401).json({ error: 'Não autenticado.' });
+    // }
 
     const { path } = req.query;
     const externalPath = Array.isArray(path) ? path.join('/') : path;

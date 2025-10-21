@@ -1,4 +1,4 @@
-// src/components/Header/Header.tsx
+import { ModalVideoRM } from '@/components/modal/ModalVideoRM';
 import Button from '@/components/site/Button/Button';
 import { useSmoothScroll } from '@/hook/useSmoothScroll';
 import Image from 'next/image';
@@ -6,25 +6,322 @@ import Link from 'next/link';
 import React, { useEffect, useRef, useState } from 'react';
 import { FaBars, FaTimes } from 'react-icons/fa';
 
+// Botão Entrar isolado
+type EntrarButtonProps = {
+  onClick: () => void;
+  mode?: 'desktop' | 'mobile';
+  className?: string;
+};
+const EntrarButton: React.FC<EntrarButtonProps> = ({
+  onClick,
+  mode = 'desktop',
+  className = '',
+}) => {
+  if (mode === 'mobile') {
+    return (
+      <Button
+        variant="primary"
+        size="medium"
+        onClick={onClick}
+        className={
+          'flex items-center justify-center gap-2 px-4 py-2 border-2 border-[var(--whatsapp-green)] rounded-md bg-[var(--whatsapp-green)] text-[var(--secondary-color)] font-semibold text-base ' +
+          className
+        }
+      >
+        Entrar
+      </Button>
+    );
+  }
+
+  // desktop
+  return (
+    <Button
+      variant="outlined"
+      size="medium"
+      onClick={onClick}
+      className={
+        'bg-transparent border-2 border-[var(--primary-color)] text-[var(--primary-color)] font-semibold rounded px-3 py-1.5 ' +
+        'hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors ' +
+        className
+      }
+    >
+      Entrar
+    </Button>
+  );
+};
+
+// Componente isolado de navegação que adapta entre desktop e mobile
+type NavLinksProps = {
+  mode: 'desktop' | 'mobile';
+  onSectionClick: (
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
+    sectionId: string
+  ) => void;
+  openModalVideoRM: () => void;
+  // Desktop only (for hover de serviços)
+  isServicesHovered?: boolean;
+  setIsServicesHovered?: (value: boolean) => void;
+  // Mobile only (para abrir/fechar submenu)
+  isServicesMobileOpen?: boolean;
+  setIsServicesMobileOpen?: (
+    value: boolean | ((prev: boolean) => boolean)
+  ) => void;
+};
+
+const NavLinks: React.FC<NavLinksProps> = ({
+  mode,
+  onSectionClick,
+  openModalVideoRM,
+  isServicesHovered,
+  setIsServicesHovered,
+  isServicesMobileOpen,
+  setIsServicesMobileOpen,
+}) => {
+  if (mode === 'desktop') {
+    return (
+      <ul className="flex gap-8 list-none m-0 p-0">
+        <li>
+          <Link
+            href="#platform-section"
+            className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
+            onClick={e => onSectionClick(e, 'platform-section')}
+          >
+            A Plataforma
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="#about-section"
+            className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
+            onClick={e => onSectionClick(e, 'about-section')}
+          >
+            Sobre Nós
+          </Link>
+        </li>
+        <li
+          className="relative group"
+          onMouseEnter={() =>
+            setIsServicesHovered && setIsServicesHovered(true)
+          }
+          onMouseLeave={() =>
+            setIsServicesHovered && setIsServicesHovered(false)
+          }
+        >
+          <button
+            className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 hover:text-[var(--primary-color)] transition-colors flex items-center gap-1 bg-transparent border-none outline-none"
+            style={{ cursor: 'pointer' }}
+            onClick={e => onSectionClick(e, 'services-section')}
+            type="button"
+            aria-haspopup="true"
+            aria-expanded={isServicesHovered}
+          >
+            Serviços
+            <span
+              className="material-icons-outlined align-middle ml-1"
+              style={{ verticalAlign: 'middle' }}
+            >
+              {isServicesHovered ? 'arrow_drop_up' : 'arrow_drop_down'}
+            </span>
+          </button>
+          <ul
+            className="
+              absolute left-0 mt-2 bg-white rounded-lg shadow-lg py-2 opacity-0 group-hover:opacity-100 group-hover:visible transition duration-150 z-20 invisible
+            "
+          >
+            <li>
+              <Link
+                href="#service-plataforma"
+                className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+                onClick={e => onSectionClick(e, 'service-plataforma')}
+              >
+                Plataforma
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="#service-medico"
+                className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+                onClick={e => {
+                  onSectionClick(e, 'service-medico');
+                  openModalVideoRM();
+                }}
+              >
+                Recrutamento Médico
+              </Link>
+            </li>
+            <li>
+              <Link
+                href="#service-recrutamento"
+                className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition text-nowrap"
+                onClick={e => onSectionClick(e, 'service-recrutamento')}
+              >
+                Recrutamento Diversos
+              </Link>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <Link
+            href="#pricing-section"
+            className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
+            onClick={e => onSectionClick(e, 'pricing-section')}
+          >
+            Preços
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="#success-cases-section"
+            className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
+            onClick={e => onSectionClick(e, 'success-cases-section')}
+          >
+            Cases
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="#contact-section"
+            className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
+            onClick={e => onSectionClick(e, 'contact-section')}
+          >
+            Contato
+          </Link>
+        </li>
+      </ul>
+    );
+  }
+
+  // MOBILE
+  return (
+    <ul className="flex flex-col gap-3 text-right px-8">
+      <li>
+        <Link
+          href="#platform-section"
+          className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
+          onClick={e => onSectionClick(e, 'platform-section')}
+        >
+          A Plataforma
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="#about-section"
+          className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
+          onClick={e => onSectionClick(e, 'about-section')}
+        >
+          Sobre Nós
+        </Link>
+      </li>
+      <li className="relative flex flex-col text-right">
+        <button
+          className="flex items-center justify-end w-full text-[var(--text-color-primary)] font-semibold text-lg py-2 hover:text-[var(--primary-color)] transition-colors outline-none"
+          onClick={() =>
+            setIsServicesMobileOpen &&
+            setIsServicesMobileOpen((prev: boolean) => !prev)
+          }
+          type="button"
+          aria-expanded={isServicesMobileOpen}
+          aria-controls="mobile-services-submenu"
+          style={{ background: 'none', border: 'none', padding: 0 }}
+        >
+          Serviços
+          <span
+            className="material-icons-outlined align-middle ml-1"
+            style={{ verticalAlign: 'middle' }}
+          >
+            {isServicesMobileOpen ? 'arrow_drop_up' : 'arrow_drop_down'}
+          </span>
+        </button>
+        <ul
+          id="mobile-services-submenu"
+          className={`flex flex-col gap-1 mt-1 transition-[max-height,opacity] duration-200 overflow-hidden rounded-lg shadow bg-white text-[var(--text-color-primary)] ${
+            isServicesMobileOpen
+              ? 'max-h-60 opacity-100 py-2 px-2 pointer-events-auto'
+              : 'max-h-0 opacity-0 py-0 px-2 pointer-events-none'
+          }`}
+          style={{ zIndex: 100 }}
+        >
+          <li>
+            <Link
+              href="#service-medico"
+              className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+              onClick={e => onSectionClick(e, 'service-medico')}
+            >
+              Médico
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="#service-plataforma"
+              className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+              onClick={e => onSectionClick(e, 'service-plataforma')}
+            >
+              Plataforma
+            </Link>
+          </li>
+          <li>
+            <Link
+              href="#service-recrutamento"
+              className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+              onClick={e => onSectionClick(e, 'service-recrutamento')}
+            >
+              Recrutamento
+            </Link>
+          </li>
+        </ul>
+      </li>
+      <li>
+        <Link
+          href="#pricing-section"
+          className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
+          onClick={e => onSectionClick(e, 'pricing-section')}
+        >
+          Preços
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="#success-cases-section"
+          className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
+          onClick={e => onSectionClick(e, 'success-cases-section')}
+        >
+          Cases
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="#contact-section"
+          className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
+          onClick={e => onSectionClick(e, 'contact-section')}
+        >
+          Contato
+        </Link>
+      </li>
+    </ul>
+  );
+};
+
 const HeaderLadingPage: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showMobileHeader, setShowMobileHeader] = useState(true);
+  const [isServicesHovered, setIsServicesHovered] = useState(false);
+  const [isServicesMobileOpen, setIsServicesMobileOpen] = useState(false);
+  const [openModalVideoRM, setOpenModalVideoRM] = useState(false);
   const lastScrollY = useRef(0);
   const scrollTimeout = useRef<NodeJS.Timeout | null>(null);
   const { scrollToSection } = useSmoothScroll();
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+    if (!isMenuOpen) setIsServicesMobileOpen(false);
   };
 
-  // Lógica para mostrar/esconder header SOMENTE no mobile
   useEffect(() => {
     const handleScroll = () => {
       const isMobile = window.innerWidth < 768;
       const currentScrollY = window.scrollY;
 
-      // Sombra/cor para desktop e mobile
       if (currentScrollY > 50) {
         setIsScrolled(true);
       } else {
@@ -49,12 +346,6 @@ const HeaderLadingPage: React.FC = () => {
         }, 100);
       }
 
-      // Se parou de rolar (sem movimento), mostra o header mobile imediatamente
-      // if (scrollTimeout.current) clearTimeout(scrollTimeout.current);
-      // scrollTimeout.current = setTimeout(() => {
-      //   setShowMobileHeader(true);
-      // }, 1000);
-
       lastScrollY.current = currentScrollY;
     };
 
@@ -73,11 +364,12 @@ const HeaderLadingPage: React.FC = () => {
     e.preventDefault();
     scrollToSection(sectionId, { offset: 80, duration: 800 });
     setIsMenuOpen(false);
+    setIsServicesMobileOpen(false);
   };
 
   const handleLoginRedirect = () => {
     setIsMenuOpen(false);
-    // Redireciona para a URL correta dependendo do ambiente
+    setIsServicesMobileOpen(false);
     if (process.env.NODE_ENV === 'production') {
       window.location.href = 'https://aura-ats-frontend.vercel.app/login';
     } else {
@@ -86,8 +378,9 @@ const HeaderLadingPage: React.FC = () => {
   };
 
   return (
-    <header
-      className={`
+    <>
+      <header
+        className={`
         fixed top-0 left-0 w-full z-[1000] transition-colors duration-300
         ${
           isScrolled
@@ -98,157 +391,77 @@ const HeaderLadingPage: React.FC = () => {
         transition-transform duration-500
         
       `}
-      style={{
-        // Garante que a animação funcione no mobile
-        willChange: 'transform',
-      }}
-    >
-      <div className="max-w-[1420px] mx-auto w-full px-4 flex justify-between items-center">
-        {/* Logo */}
-        <div className="flex items-center cursor-pointer">
-          <Link
-            href="/"
-            onClick={e =>
-              handleSectionClick(
-                e as React.MouseEvent<HTMLAnchorElement>,
-                'hero-section'
-              )
-            }
-          >
-            <Image
-              src="/images/auralogoh.svg"
-              alt="Logo"
-              width={150}
-              height={50}
-              style={{ objectFit: 'contain' }}
-            />
-          </Link>
-        </div>
+        style={{
+          willChange: 'transform',
+        }}
+      >
+        <div className="max-w-[1420px] mx-auto w-full px-4 flex justify-between items-center">
+          {/* Logo */}
+          <div className="flex items-center cursor-pointer">
+            <Link
+              href="/"
+              onClick={e =>
+                handleSectionClick(
+                  e as React.MouseEvent<HTMLAnchorElement>,
+                  'hero-section'
+                )
+              }
+            >
+              <Image
+                src="/images/auralogoh.svg"
+                alt="Logo"
+                width={150}
+                height={50}
+                style={{ objectFit: 'contain' }}
+              />
+            </Link>
+          </div>
 
-        {/* Navegação Desktop */}
-        <nav
-          className={`
+          {/* Navegação Desktop */}
+          <nav
+            className={`
             hidden md:flex items-center
             ${isMenuOpen ? 'flex' : ''}
           `}
-        >
-          <ul className="flex gap-8 list-none m-0 p-0">
-            <li>
-              <Link
-                href="#platform-section"
-                className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
-                onClick={e =>
-                  handleSectionClick(
-                    e as React.MouseEvent<HTMLAnchorElement>,
-                    'platform-section'
-                  )
-                }
-              >
-                A Plataforma
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#about-section"
-                className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
-                onClick={e =>
-                  handleSectionClick(
-                    e as React.MouseEvent<HTMLAnchorElement>,
-                    'about-section'
-                  )
-                }
-              >
-                Sobre Nós
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#services-section"
-                className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
-                onClick={e =>
-                  handleSectionClick(
-                    e as React.MouseEvent<HTMLAnchorElement>,
-                    'services-section'
-                  )
-                }
-              >
-                Serviços
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#pricing-section"
-                className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
-                onClick={e =>
-                  handleSectionClick(
-                    e as React.MouseEvent<HTMLAnchorElement>,
-                    'pricing-section'
-                  )
-                }
-              >
-                Preços
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#success-cases-section"
-                className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
-                onClick={e =>
-                  handleSectionClick(
-                    e as React.MouseEvent<HTMLAnchorElement>,
-                    'success-cases-section'
-                  )
-                }
-              >
-                Cases
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#contact-section"
-                className="text-[var(--text-color-primary)] font-semibold text-base relative py-2 block hover:text-[var(--primary-color)] transition-colors"
-                onClick={e =>
-                  handleSectionClick(
-                    e as React.MouseEvent<HTMLAnchorElement>,
-                    'contact-section'
-                  )
-                }
-              >
-                Contato
-              </Link>
-            </li>
-          </ul>
-        </nav>
-
-        {/* Botão Entrar Desktop */}
-        <div className="hidden md:flex items-center gap-2">
-          <Button
-            variant="outlined"
-            size="medium"
-            onClick={handleLoginRedirect}
-            className={`
-              bg-transparent border-2 border-[var(--primary-color)] text-[var(--primary-color)] font-semibold rounded px-3 py-1.5
-              hover:bg-[var(--primary-color)] hover:text-[var(--secondary-color)] transition-colors
-              ${isScrolled ? '' : ''}
-            `}
           >
-            Entrar
-          </Button>
+            <NavLinks
+              mode="desktop"
+              isServicesHovered={isServicesHovered}
+              setIsServicesHovered={setIsServicesHovered}
+              onSectionClick={(e, sectionId) => {
+                if (sectionId === 'service-medico') {
+                  handleSectionClick(e, sectionId);
+                  setOpenModalVideoRM(true);
+                } else {
+                  handleSectionClick(e, sectionId);
+                }
+              }}
+              openModalVideoRM={() => setOpenModalVideoRM(true)}
+            />
+          </nav>
+
+          {/* Botão Entrar Desktop */}
+          <div className="hidden md:flex items-center gap-2">
+            <EntrarButton
+              onClick={handleLoginRedirect}
+              mode="desktop"
+              className={isScrolled ? '' : ''}
+            />
+          </div>
+
+          {/* Botão de menu mobile */}
+          <button
+            className="md:hidden flex items-center justify-center text-[var(--primary-color)] text-2xl bg-none border-none outline-none cursor-pointer"
+            onClick={toggleMenu}
+            aria-label="Abrir/Fechar Menu"
+          >
+            {isMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
         </div>
 
-        {/* Botão de menu mobile */}
-        <button
-          className="md:hidden flex items-center justify-center text-[var(--primary-color)] text-2xl bg-none border-none outline-none cursor-pointer"
-          onClick={toggleMenu}
-          aria-label="Abrir/Fechar Menu"
-        >
-          {isMenuOpen ? <FaTimes /> : <FaBars />}
-        </button>
-      </div>
-
-      {/* Navegação Mobile */}
-      <nav
-        className={`
+        {/* Navegação Mobile */}
+        <nav
+          className={`
           md:hidden fixed top-[70px] left-0 w-full bg-[var(--secondary-color)] shadow-md transition-all duration-300 
           ${
             isMenuOpen
@@ -257,106 +470,34 @@ const HeaderLadingPage: React.FC = () => {
           }
           rounded-b-2xl
         `}
-        style={{ zIndex: 999 }}
-      >
-        <ul className="flex flex-col gap-3 text-right px-8">
-          <li>
-            <Link
-              href="#platform-section"
-              className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
-              onClick={e =>
-                handleSectionClick(
-                  e as React.MouseEvent<HTMLAnchorElement>,
-                  'platform-section'
-                )
+          style={{ zIndex: 999 }}
+        >
+          <NavLinks
+            mode="mobile"
+            isServicesMobileOpen={isServicesMobileOpen}
+            setIsServicesMobileOpen={setIsServicesMobileOpen}
+            onSectionClick={(e, sectionId) => {
+              // Para mobile, abre modal apenas se for service-medico
+              if (sectionId === 'service-medico') {
+                handleSectionClick(e, sectionId);
+                setOpenModalVideoRM(true);
+              } else {
+                handleSectionClick(e, sectionId);
               }
-            >
-              A Plataforma
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#about-section"
-              className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
-              onClick={e =>
-                handleSectionClick(
-                  e as React.MouseEvent<HTMLAnchorElement>,
-                  'about-section'
-                )
-              }
-            >
-              Sobre Nós
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#services-section"
-              className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
-              onClick={e =>
-                handleSectionClick(
-                  e as React.MouseEvent<HTMLAnchorElement>,
-                  'services-section'
-                )
-              }
-            >
-              Serviços
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#pricing-section"
-              className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
-              onClick={e =>
-                handleSectionClick(
-                  e as React.MouseEvent<HTMLAnchorElement>,
-                  'pricing-section'
-                )
-              }
-            >
-              Preços
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#success-cases-section"
-              className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
-              onClick={e =>
-                handleSectionClick(
-                  e as React.MouseEvent<HTMLAnchorElement>,
-                  'success-cases-section'
-                )
-              }
-            >
-              Cases
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#contact-section"
-              className="text-[var(--text-color-primary)] font-semibold text-lg py-2 block hover:text-[var(--primary-color)] transition-colors"
-              onClick={e =>
-                handleSectionClick(
-                  e as React.MouseEvent<HTMLAnchorElement>,
-                  'contact-section'
-                )
-              }
-            >
-              Contato
-            </Link>
-          </li>
-        </ul>
-        <div className="flex flex-col gap-4 w-full pt-4 border-t border-[var(--border-color)] mt-4">
-          <Button
-            variant="primary"
-            size="medium"
-            onClick={handleLoginRedirect}
-            className="flex items-center justify-center gap-2 px-4 py-2 border-2 border-[var(--whatsapp-green)] rounded-md bg-[var(--whatsapp-green)] text-[var(--secondary-color)] font-semibold text-base"
-          >
-            Entrar
-          </Button>
-        </div>
-      </nav>
-    </header>
+            }}
+            openModalVideoRM={() => setOpenModalVideoRM(true)}
+          />
+          <div className="flex flex-col gap-4 w-full pt-4 border-t border-[var(--border-color)] mt-4">
+            <EntrarButton onClick={handleLoginRedirect} mode="mobile" />
+          </div>
+        </nav>
+      </header>
+
+      <ModalVideoRM
+        isOpen={openModalVideoRM}
+        onClose={() => setOpenModalVideoRM(false)}
+      />
+    </>
   );
 };
 

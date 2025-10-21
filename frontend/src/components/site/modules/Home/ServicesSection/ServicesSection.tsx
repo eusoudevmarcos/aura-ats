@@ -1,8 +1,9 @@
 // src/modules/Home/ServicesSection/ServicesSection.tsx
-import React from 'react';
+import React, { useState } from 'react';
 import { FaBriefcase, FaLaptopCode, FaUserMd } from 'react-icons/fa';
 
 const ServicesSection: React.FC = () => {
+  const [openModalVideoRM, setOpenModalVideoRM] = useState(false);
   return (
     <section
       id="services-section"
@@ -19,7 +20,7 @@ const ServicesSection: React.FC = () => {
 
       <div
         className="
-          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mt-8
+          grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mt-8
         "
       >
         {/* Card de Serviço: Recrutamento Médico */}
@@ -60,12 +61,14 @@ const ServicesSection: React.FC = () => {
             </li>
           </ul>
         </div>
+        {/* 
+        <ModalVideoRM
+          isOpen={openModalVideoRM}
+          onClose={() => setOpenModalVideoRM(false)}
+        /> */}
 
         {/* Card de Serviço: Recrutamento de TI */}
-        <div
-          className="
-            bg-white rounded-2xl p-8 shadow-sm flex flex-col items-center text-center border border-gray-200 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md"
-        >
+        <div className="bg-white rounded-2xl p-8 shadow-sm flex flex-col items-center text-center border border-gray-200 transition-transform duration-300 hover:-translate-y-1 hover:shadow-md">
           <div className="text-5xl text-accent mb-6  text-primary">
             <FaLaptopCode />
           </div>
@@ -78,7 +81,7 @@ const ServicesSection: React.FC = () => {
             unimos sua empresa aos talentos que impulsionarão sua transformação
             digital.
           </p>
-          <ul className="list-none p-0 text-left w-full mt-2 mb-4">
+          <ul className="list-none p-0 text-left w-full mt-2 mb-4 ml-8">
             <li className="flex items-center text-sm text-gray-500 mb-1">
               <span className="text-primary font-bold mr-2">✓</span>
               Validação de habilidades técnicas

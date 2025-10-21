@@ -8,6 +8,7 @@ interface ModalProps {
   title?: string;
   backdropClose?: boolean;
   fit?: boolean;
+  classNameBody?: string;
 }
 
 const Modal: React.FC<ModalProps> = ({
@@ -17,6 +18,7 @@ const Modal: React.FC<ModalProps> = ({
   title,
   backdropClose = false,
   fit = false,
+  classNameBody,
 }) => {
   const [show, setShow] = useState(isOpen);
   const [visible, setVisible] = useState(isOpen);
@@ -76,7 +78,9 @@ const Modal: React.FC<ModalProps> = ({
             &times;
           </button>
         </div>
-        <div className={`px-6 py-4 overflow-auto h-full max-h-[90vh]`}>
+        <div
+          className={`px-6 py-4 overflow-auto h-full max-h-[90vh] ${classNameBody}`}
+        >
           {children}
         </div>
       </div>
