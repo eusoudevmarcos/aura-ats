@@ -70,7 +70,7 @@ const SuccessCasesSection: React.FC = () => {
     <section
       id="success-cases-section"
       className="
-        max-w-[1420px] mx-auto text-center bg-[#f8fafc] text-[var(--text-color-primary)]
+        max-w-[1420px] mx-auto text-center text-[var(--text-color-primary)]
         px-4
       "
     >
