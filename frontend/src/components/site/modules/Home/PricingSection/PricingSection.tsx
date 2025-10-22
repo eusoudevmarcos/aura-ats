@@ -1,6 +1,6 @@
-import Button from '@/components/site/Button/Button';
 import type { Plan } from '@/data/PLANOS';
 import { PLANS_DATA } from '@/data/PLANOS';
+import Link from 'next/link';
 import React from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
 
@@ -29,7 +29,10 @@ const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => {
     priceContent = <>Personalizado</>;
   }
   return (
-    <div className="rounded-lg p-8 shadow-md flex flex-col items-center text-center border border-primary transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-lg bg-white">
+    <div
+      className="rounded-lg p-8 shadow-md flex flex-col items-center text-center border border-primary transition-transform duration-300 ease-in-out hover:-translate-y-2 hover:shadow-lg bg-white"
+      id={plan.name.toLowerCase().replace(/ /g, '_')}
+    >
       <h3 className="text-primary text-2xl font-bold mb-1">{plan.name}</h3>
       <p className="text-sm text-text-color-secondary mb-4 min-h-[2em]">
         {plan.subtitle}
@@ -46,14 +49,14 @@ const PlanCard: React.FC<{ plan: Plan }> = ({ plan }) => {
           </li>
         ))}
       </ul>
-      <Button
-        variant={plan.buttonVariant}
-        size="large"
-        fullWidth
-        onClick={() => handleContactClick(plan.planKey)}
+      <Link
+        href={`https://wa.me/5561992483665?text=${encodeURIComponent(
+          `Olá, gostaria de saber mais sobre o plano ${plan.name}`
+        )}`}
+        className="bg-primary p-4 rounded-lg text-white"
       >
         {plan.btnName}
-      </Button>
+      </Link>
     </div>
   );
 };
@@ -64,7 +67,7 @@ const PricingSection: React.FC = () => {
       id="pricing-section"
       className="max-w-[1420px] mx-auto text-center bg-bg-color-light text-text-color-primary md:px-4 py-16"
     >
-      <h2 className="font-black text-2xl md:text-4xl text-primary mb-4">
+      <h2 className="font-black text-4xl text-primary mb-4">
         Planos de Contratação
       </h2>
       <p className="text-lg text-text-color-secondary mb-10 max-w-[800px] mx-auto">
@@ -78,9 +81,10 @@ const PricingSection: React.FC = () => {
         <React.Fragment key={group.title}>
           {/* Título do grupo */}
           <h2
-            className={`text-4xl font-bold max-w-[800px] mx-auto text-primary${
+            className={`text-3xl font-bold max-w-[800px] mx-auto text-primary${
               idx === 0 ? ' mb-10' : ''
             }`}
+            id={group.title.toLowerCase().replace(/ /g, '_')}
           >
             {group.title}
           </h2>
