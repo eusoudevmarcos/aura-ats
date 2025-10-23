@@ -7,7 +7,6 @@ import api from '@/axios';
 import EmpresaForm from '@/components/form/EmpresaForm';
 import PessoaForm from '@/components/form/PessoaForm';
 import ModalSuccess from '@/components/modal/ModalSuccess';
-import Tabs from '@/components/utils/Tabs';
 import {
   FuncionarioInput,
   funcionarioSchema,
@@ -17,7 +16,6 @@ import { makeName } from '@/utils/makeName';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
-import ClienteSearch from '../search/ClienteSearch';
 
 type FuncionarioFormProps = {
   onSuccess: (msg: any) => void;
@@ -110,10 +108,7 @@ export const FuncionarioForm = ({
   const setor = makeName<FuncionarioInput>('funcionario', 'setor');
   const cargo = makeName<FuncionarioInput>('funcionario', 'cargo');
 
-  const isClienteUsuario =
-    tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS ||
-    tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
-    tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_CRM;
+  const isClienteUsuario = tipoUsuario === 'CLIENTE';
 
   useEffect(() => {
     if (initialValues) {
@@ -123,11 +118,7 @@ export const FuncionarioForm = ({
 
   // Quando o tipoUsuario for cliente, força o tipoPessoaOuEmpresa para 'cliente.empresa'
   useEffect(() => {
-    if (
-      tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS ||
-      tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
-      tipoUsuario === TipoUsuarioEnum.enum.CLIENTE_CRM
-    ) {
+    if (tipoUsuario === 'CLIENTE') {
       setValue('tipoPessoaOuEmpresa', 'cliente.empresa');
     }
   }, [tipoUsuario, setValue]);
@@ -136,7 +127,7 @@ export const FuncionarioForm = ({
   useEffect(() => {
     if (tipoPessoaOuEmpresa === 'funcionario.pessoa') {
       // Limpa empresa de dentro de cliente
-      setValue('cliente.empresa', undefined, {
+      setValue('cliente', undefined, {
         shouldValidate: true,
         shouldDirty: true,
       });
@@ -228,9 +219,7 @@ export const FuncionarioForm = ({
   }
 
   const onSuccessClienteSearch = (cliente: any) => {
-    // Seta o id da empresa dentro de cliente
-    // setValue('cliente.empresa.id', cliente.empresa.id);
-    setValue('cliente.empresaId', cliente.empresa.id);
+    setValue('clienteId', cliente.id);
     setDisabledFieldsEmpresa(true);
   };
 
@@ -305,7 +294,7 @@ export const FuncionarioForm = ({
         </div>
 
         <div className="flex flex-col gap-2">
-          <h3>Dados do funcionario</h3>
+          <h3>Dados do Sistema</h3>
 
           <FormSelect
             name="tipoUsuario"
@@ -330,12 +319,8 @@ export const FuncionarioForm = ({
                         return 'Recrutador';
                       case 'VENDEDOR':
                         return 'Vendedor';
-                      case 'CLIENTE_ATS':
-                        return 'Cliente ATS';
-                      case 'CLIENTE_CRM':
-                        return 'Cliente CRM';
-                      case 'CLIENTE_ATS_CRM':
-                        return 'Cliente ATS + CRM';
+                      case 'CLIENTE':
+                        return 'Cliente';
                       default:
                         return tipo;
                     }
@@ -377,38 +362,7 @@ export const FuncionarioForm = ({
             </div>
           ) : null}
 
-          {tipoPessoaOuEmpresa === 'cliente.empresa' && isClienteUsuario ? (
-            <Tabs
-              tabs={['Pesquisar Cliente', 'Cadastrar Cliente']}
-              currentTab={currentTab}
-              classNameContainer="mt-4"
-              classNameTabs="mb-2"
-              classNameContent="pt-2"
-              onTabChange={tab => setCurrentTab(tab as typeof currentTab)}
-            >
-              <>
-                <ClienteSearch
-                  onSuccess={onSuccessClienteSearch}
-                  initialValuesProps={
-                    initialValues?.cliente?.empresa
-                      ? {
-                          empresa: { ...initialValues?.cliente?.empresa },
-                          clienteId: initialValues?.id,
-                        }
-                      : null
-                  }
-                  onDelete={onDeleteClienteSearch}
-                />
-              </>
-
-              <>
-                <EmpresaForm
-                  namePrefix="cliente.empresa"
-                  disabledFields={disabledFieldsEmpresa}
-                />
-              </>
-            </Tabs>
-          ) : tipoPessoaOuEmpresa === 'funcionario.pessoa' ? (
+          {tipoPessoaOuEmpresa === 'funcionario.pessoa' ? (
             tipoUsuario && <PessoaForm namePrefix="funcionario.pessoa" />
           ) : (
             <>

@@ -2,6 +2,7 @@ import { Agenda, CategoriaVaga, TipoEventoAgenda } from "@prisma/client";
 import { injectable } from "tsyringe";
 import { normalizeDataAgenda } from "../helper/normalize/agenda.normalize";
 import prisma from "../lib/prisma";
+import { SessaoService } from "./sessao.service";
 
 // Tipos para entrada de dados da agenda
 
@@ -19,6 +20,7 @@ export type AgendaInput = {
   clienteId?: string;
   convidados: string[];
   agendaCandidatura: string[];
+  usuarioSistemaId: string;
 };
 
 export type TriagemVaga = {
@@ -32,12 +34,14 @@ export type TriagemVaga = {
 
 @injectable()
 export class AgendaService {
-  constructor() {}
+  constructor(private sessao: SessaoService) {}
 
   async create(agendaData: AgendaInput): Promise<Agenda> {
     agendaData = normalizeDataAgenda(agendaData);
+
     return await prisma.agenda.create({
       data: {
+        usuarioSistemaId: agendaData.usuarioSistemaId,
         titulo: agendaData.titulo,
         dataHora: agendaData.dataHora,
         link: agendaData.link,
@@ -92,13 +96,16 @@ export class AgendaService {
     });
   }
 
-  async getAll({ page = 1, pageSize = 10 }) {
+  async getAll({ page = 1, pageSize = 10, user = { uid: "" } }) {
     const skip = (page - 1) * pageSize;
 
     const [data, total] = await Promise.all([
       prisma.agenda.findMany({
         skip,
         take: pageSize,
+        where: {
+          usuarioSistemaId: user?.uid,
+        },
         select: {
           id: true,
           dataHora: true,

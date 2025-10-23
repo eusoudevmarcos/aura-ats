@@ -70,9 +70,7 @@ export const getNavItems = (user: any) => {
       href: '/profissionais',
     },
     user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
-      user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
-      user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS_CRM ||
-      user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM ||
+      user?.tipo === TipoUsuarioEnum.enum.CLIENTE ||
       user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
       ? {
           icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,

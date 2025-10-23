@@ -24,7 +24,7 @@ type Convidado = {
   email: string;
 };
 
- export default function ConvidadosTable({
+export default function ConvidadosTable({
   initialValues,
 }: {
   initialValues?: string[];
@@ -454,7 +454,7 @@ export const AgendaForm = ({ onSuccess, initialValues }: AgendaFormProps) => {
             }
             footer={
               selectedDate
-                ? `Selecionado: ${selectedDate.toLocaleDateString()} ${
+                ? `Selecionado: ${selectedDate.toLocaleDateString('pt-BR')} ${
                     selectedTime?.toString() ?? ''
                   }`
                 : 'Data não selecionada'

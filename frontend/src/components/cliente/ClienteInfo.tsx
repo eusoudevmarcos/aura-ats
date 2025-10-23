@@ -1,8 +1,8 @@
 import Card from '@/components/Card';
-import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
+import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
 
 interface ClienteInfoProps {
-  cliente: ClienteWithEmpresaAndVagaInput;
+  cliente: ClienteWithEmpresaAndPlanosSchema;
   variant?: 'mini' | 'full';
 }
 
@@ -40,6 +40,17 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
               <span className="font-medium text-primary">Razão Social:</span>
               <span className="text-secondary ml-2">
                 {cliente.empresa.razaoSocial}
+              </span>
+            </div>
+          </div>
+        )}
+
+        {cliente?.usuarioSistema?.email && (
+          <div className="flex flex-col gap-1">
+            <div>
+              <span className="font-medium text-primary">E-mail:</span>
+              <span className="text-secondary ml-2">
+                {cliente?.usuarioSistema?.email}
               </span>
             </div>
           </div>
@@ -88,28 +99,21 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
         </>
       )}
 
+      {cliente?.usuarioSistema?.email && (
+        <div>
+          <span className="font-medium text-primary">Email:</span>
+          <span className="ml-2  text-secondary font-semibold">
+            {cliente.usuarioSistema.email}
+          </span>
+        </div>
+      )}
+
       <div>
         <span className="font-medium text-primary">Status:</span>
         <span className="ml-2 bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
           {cliente.status}
         </span>
       </div>
-
-      {cliente?.tipoServico && (
-        <div className="flex gap-2 flex-wrap">
-          <span className="font-medium text-primary">Tipo de Serviço:</span>
-          {cliente.tipoServico.map((tipo: any, idx: number) => (
-            <div
-              key={idx}
-              className="bg-[#ede9fe] text-xs font-semibold px-3 py-1 rounded-full border border-secondary w-fit"
-            >
-              <span className="text-nowrap text-secondary">
-                {tipo.replace(/_/g, ' ')}
-              </span>
-            </div>
-          ))}
-        </div>
-      )}
 
       {cliente.empresa.representantes &&
         cliente.empresa.representantes.length > 0 && (

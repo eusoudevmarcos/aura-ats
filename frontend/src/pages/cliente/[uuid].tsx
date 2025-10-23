@@ -9,7 +9,7 @@ import { EditPenIcon, PlusIcon, TrashIcon } from '@/components/icons';
 import { VagaWithRelations } from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
-import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
+import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
@@ -17,7 +17,7 @@ import React, { useEffect, useState } from 'react';
 const ITENS_POR_PAGINA = 6;
 
 const ClientePage: React.FC<{
-  initialValues?: ClienteWithEmpresaAndVagaInput;
+  initialValues?: ClienteWithEmpresaAndPlanosSchema;
 }> = ({ initialValues }) => {
   const router = useRouter();
   const { uuid } = router.query;
@@ -26,9 +26,8 @@ const ClientePage: React.FC<{
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showVagasForm, setShowVagasForm] = useState(false);
-  const [cliente, setCliente] = useState<ClienteWithEmpresaAndVagaInput | null>(
-    initialValues ?? null
-  );
+  const [cliente, setCliente] =
+    useState<ClienteWithEmpresaAndPlanosSchema | null>(initialValues ?? null);
 
   const [clienteCarregado, setClienteCarregado] = useState<boolean>(
     !!initialValues
@@ -183,6 +182,102 @@ const ClientePage: React.FC<{
         </Card>
       </section>
 
+      {/* Seção de Planos */}
+      {cliente.planos && cliente.planos.length > 0 && (
+        <section className="mt-8">
+          <h2 className="text-2xl font-bold text-center text-primary w-full mb-6">
+            PLANOS DO CLIENTE
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {cliente.planos.map((planoAssinatura: any) => (
+              <Card
+                key={planoAssinatura.id}
+                title={{
+                  label: planoAssinatura.plano.nome,
+                  className: 'text-lg text-center',
+                }}
+                classNameContainer="shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
+              >
+                <div className="space-y-3">
+                  {/* <div className="flex justify-between items-center">
+                    <span className="font-medium">Preço:</span>
+                    <span className="text-secondary">
+                      R$ {planoAssinatura.plano.preco}
+                    </span>
+                  </div> */}
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Tipo:</span>
+                    <span className="text-secondary">
+                      {planoAssinatura.plano.tipo}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Status:</span>
+                    <span
+                      className={`px-2 py-1 rounded text-xs ${
+                        planoAssinatura.status === 'ATIVA'
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }`}
+                    >
+                      {planoAssinatura.status}
+                    </span>
+                  </div>
+
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">Assinatura:</span>
+                    <span className="text-secondary">
+                      {planoAssinatura.dataAssinatura}
+                    </span>
+                  </div>
+
+                  {planoAssinatura.dataExpiracao && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Expira:</span>
+                      <span className="text-secondary">
+                        {planoAssinatura.dataExpiracao}
+                      </span>
+                    </div>
+                  )}
+
+                  {planoAssinatura.plano.descricao && (
+                    <div className="mt-3">
+                      <span className="font-medium">Descrição:</span>
+                      <p className="text-sm text-gray-600 mt-1">
+                        {planoAssinatura.plano.descricao}
+                      </p>
+                    </div>
+                  )}
+
+                  {planoAssinatura.plano.limiteUso && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Limite de uso:</span>
+                      <span className="text-secondary">
+                        {planoAssinatura.usosDisponiveis ||
+                          planoAssinatura.plano.limiteUso}{' '}
+                        usos
+                      </span>
+                    </div>
+                  )}
+
+                  {planoAssinatura.plano.diasGarantia && (
+                    <div className="flex justify-between items-center">
+                      <span className="font-medium">Garantia:</span>
+                      <span className="text-secondary">
+                        {planoAssinatura.plano.diasGarantia} dias
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </Card>
+            ))}
+          </div>
+        </section>
+      )}
+
       <div className="flex justify-center mt-10 mb-4 relative">
         <h3 className="text-2xl font-bold text-center text-primary w-full ">
           VAGAS CADASTRADAS
@@ -195,27 +290,6 @@ const ClientePage: React.FC<{
           <PlusIcon />
           <p className="hidden md:block">Cadastrar Vaga</p>
         </PrimaryButton>
-
-        {showVagasForm && (
-          <Modal
-            isOpen={showVagasForm}
-            onClose={() => {
-              setShowVagasForm(false);
-            }}
-            title={`Vaga do cliente`}
-          >
-            <VagaForm
-              initialValues={{ cliente: cliente, clienteId: cliente.id }}
-              onSuccess={vaga => {
-                setShowVagasForm(false);
-                // Atualizar as vagas após cadastrar uma nova vaga
-                refetchVagas({ search: cliente.id });
-              }}
-              isBtnDelete={false}
-              isBtnView={false}
-            />
-          </Modal>
-        )}
       </div>
 
       <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-between">
@@ -322,23 +396,47 @@ const ClientePage: React.FC<{
         )}
       </section>
 
-      <Modal
-        isOpen={showModalEdit}
-        onClose={() => setShowModalEdit(false)}
-        title="Editar Cliente"
-      >
-        <ClienteForm
-          onSuccess={cliente => {
-            setShowModalEdit(false);
-            setCliente(cliente);
-            // Atualizar as vagas caso o cliente seja editado
-            if (cliente && cliente.id) {
-              refetchVagas({ search: cliente.id });
-            }
+      {showModalEdit && (
+        <Modal
+          isOpen={showModalEdit}
+          onClose={() => setShowModalEdit(false)}
+          title="Editar Cliente"
+        >
+          <ClienteForm
+            onSuccess={cliente => {
+              setShowModalEdit(false);
+              setCliente(cliente);
+              // Atualizar as vagas caso o cliente seja editado
+              if (cliente && cliente.id) {
+                refetchVagas({ search: cliente.id });
+              }
+            }}
+            initialValues={{
+              ...cliente,
+            }}
+          />
+        </Modal>
+      )}
+
+      {showVagasForm && (
+        <Modal
+          isOpen={showVagasForm}
+          onClose={() => {
+            setShowVagasForm(false);
           }}
-          initialValues={cliente}
-        />
-      </Modal>
+          title={`Vaga do cliente`}
+        >
+          <VagaForm
+            onSuccess={vaga => {
+              setShowVagasForm(false);
+              // Atualizar as vagas após cadastrar uma nova vaga
+              refetchVagas({ search: cliente.id });
+            }}
+            isBtnDelete={false}
+            isBtnView={false}
+          />
+        </Modal>
+      )}
     </div>
   );
 };

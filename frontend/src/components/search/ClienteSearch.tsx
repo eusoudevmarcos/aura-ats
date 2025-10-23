@@ -136,18 +136,29 @@ const ClienteSearch = ({
         <div className="flex flex-row gap-2 w-full mb-2">
           <div className="relative w-full" ref={autocompleteRef}>
             <p className="my-2 font-bold">Pesquisar cliente</p>
-            <FormInput
-              name="searchCliente"
-              inputProps={{
-                value: searchQuery,
-                classNameContainer: 'w-full',
-              }}
-              onChange={e => {
-                setSearchQuery(e.target.value);
-                setShowAutocomplete(true);
-              }}
-              placeholder={`Buscar por CNPJ`}
-            />
+            <div className="flex gap-2">
+              <FormInput
+                name="searchCliente"
+                inputProps={{
+                  value: searchQuery,
+                  classNameContainer: 'flex-1',
+                }}
+                onChange={e => {
+                  setSearchQuery(e.target.value);
+                  setShowAutocomplete(true);
+                }}
+                placeholder={`Buscar por CNPJ ou e-mail`}
+              />
+
+              <PrimaryButton
+                className=" w-10"
+                onClick={() => {
+                  setShowAutocomplete(true);
+                }}
+              >
+                <span className="material-icons-outlined">search</span>
+              </PrimaryButton>
+            </div>
 
             <AutocompletePopover
               anchorRef={autocompleteRef as any}
@@ -155,7 +166,6 @@ const ClienteSearch = ({
               onRequestClose={() => setShowAutocomplete(false)}
               searchMore={() => setPage(prev => prev + 1)}
               classNameContainer="rounded shadow-md border"
-              classNameContent="max-h-60"
             >
               {searchQueryList.map((e: any) => (
                 <div
@@ -163,17 +173,26 @@ const ClienteSearch = ({
                   className="px-3 py-2 cursor-pointer hover:bg-gray-200 border-b"
                   onClick={() => handleSelectCliente(e)}
                 >
-                  <div className="font-semibold">{e.empresa.razaoSocial}</div>
-                  <div className="text-xs text-gray-500">{e.empresa.cnpj}</div>
+                  <div className="font-semibold">
+                    Razão Social: {e.empresa.razaoSocial}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    CNPJ: {e.empresa.cnpj}
+                  </div>
+                  {e.usuarioSistema.email && (
+                    <div className="text-xs text-gray-500">
+                      E-mail: {e.usuarioSistema.email}
+                    </div>
+                  )}
                 </div>
               ))}
             </AutocompletePopover>
+            {loading && (
+              <span className="text-gray-500 text-sm flex items-center">
+                Buscando...
+              </span>
+            )}
           </div>
-          {loading && (
-            <span className="text-gray-500 text-sm flex items-center">
-              Buscando...
-            </span>
-          )}
         </div>
       )}
 

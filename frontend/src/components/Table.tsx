@@ -81,7 +81,7 @@ function ButtonCopy({ valorCompleto }: any) {
   return (
     <PrimaryButton
       title={copiado ? 'Copiado!' : 'Copiar'}
-      className="!p-2 !min-w-0 flex-shrink-0 !rounded-sm hover:scale-[1.1]"
+      className="!p-1 !min-w-0 flex-shrink-0 !rounded-sm hover:scale-[1.1]"
       onClick={handleCopy}
     >
       <span className="material-icons !text-sm">
@@ -161,16 +161,22 @@ function TR<T>({
       onClick={handleRowClick}
       style={{ cursor: onRowClick ? 'pointer' : 'default' }}
     >
-      {columns.map((col, colIndex) => {
-        const content = col.render
-          ? col.render(row, index)
-          : (row as any)[col.key] ?? '-';
+      {columns.map(col => {
+        const value = (row as any)[col.key];
+        const content = col.render ? col.render(row, index) : value ?? '-';
+
         return (
           <td
             key={String(col.key)}
-            className="relative group max-w-[160px] min-w-[80px] whitespace-nowrap overflow-hidden text-ellipsis align-middle px-4 py-3"
+            className="relative group max-w-[160px] min-w-[80px] align-middle px-4 py-3"
+            style={{ verticalAlign: 'middle' }}
           >
-            {content}
+            <div className="flex items-center gap-2 w-full">
+              <p className=" whitespace-nowrap overflow-hidden text-ellipsis flex-1 mb-0">
+                {content}
+              </p>
+              <ButtonCopy valorCompleto={content} />
+            </div>
           </td>
         );
       })}

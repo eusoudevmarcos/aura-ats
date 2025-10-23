@@ -9,16 +9,6 @@ export const validateBasicFieldsCliente = (data: any): void => {
     throw new Error("Status é obrigatório.");
   }
 
-  if (
-    !data.tipoServico ||
-    !Array.isArray(data.tipoServico) ||
-    data.tipoServico.length === 0
-  ) {
-    throw new Error(
-      "Tipo de serviço é obrigatório e deve ser um array não vazio."
-    );
-  }
-
   // Validação específica para criação de nova empresa
   if (!data.id && data.empresa && !data.empresaId) {
     if (

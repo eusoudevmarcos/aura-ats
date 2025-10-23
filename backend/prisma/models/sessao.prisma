@@ -3,10 +3,10 @@ model Sessao {
     token     String   @unique
     expiresAt DateTime
 
-    userId         String         @unique
-    usuarioSistema UsuarioSistema @relation(fields: [userId], references: [id])
+    usuarioSistemaId String         @unique
+    usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
 
-    @@index([userId])
+    @@index([usuarioSistemaId])
     @@map("sessao")
     @@schema("Sessao")
 }

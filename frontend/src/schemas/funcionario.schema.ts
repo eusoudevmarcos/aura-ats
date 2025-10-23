@@ -1,6 +1,6 @@
 // funcionario.schema.ts
 import { z } from 'zod';
-import { empresaSchema } from './empresa.schema';
+import { clienteWithEmpresaSchema } from './cliente.schema';
 import { pessoaSchema } from './pessoa.schema';
 
 export const TipoUsuarioEnum = z.enum(
@@ -10,9 +10,7 @@ export const TipoUsuarioEnum = z.enum(
     'MODERADOR',
     'RECRUTADOR',
     'VENDEDOR',
-    'CLIENTE_ATS',
-    'CLIENTE_CRM',
-    'CLIENTE_ATS_CRM',
+    'CLIENTE',
   ],
   { error: 'Selecione o tipo de Usuario' }
 );
@@ -34,12 +32,8 @@ export const funcionarioSchema = z.object({
       pessoaId: z.uuid().optional(),
     })
     .optional(),
-  cliente: z
-    .object({
-      empresa: empresaSchema.optional(),
-      empresaId: z.uuid().optional(),
-    })
-    .optional(),
+  cliente: clienteWithEmpresaSchema.optional(),
+  clienteId: z.uuid().optional(),
   tipoPessoaOuEmpresa: z.enum(['funcionario.pessoa', 'cliente.empresa']),
 });
 

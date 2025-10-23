@@ -55,7 +55,7 @@ export default class AuthenticationController {
           status: "error",
           data: { message: "Funcionário não encontrado" },
         });
-        return res.status(401).json({ error: "Credenciais inválidas" });
+        return res.status(404).json({ error: "Dados não encontrados" });
       }
 
       const senhaCorreta = await bcrypt.compare(
@@ -91,20 +91,67 @@ export default class AuthenticationController {
         });
       }
 
-      // Gera token JWT
+      // Antes de gerar novo token, verifica sessão existente ativa
+      const sessaoExistente = await prisma.sessao.findFirst({
+        where: {
+          usuarioSistemaId: usuarioSistema.id,
+        },
+        orderBy: { expiresAt: "desc" }, // pega a mais recente
+      });
+
+      const now = new Date();
+
+      if (sessaoExistente) {
+        if (sessaoExistente.expiresAt > now) {
+          // Sessão ainda está válida, loga direto com o mesmo token
+          const token = sessaoExistente.token;
+
+          const isProduction = process.env.NODE_ENV === "production";
+          res.setHeader(
+            "Set-Cookie",
+            serialize("token", token, {
+              httpOnly: true,
+              path: "/",
+              maxAge: 60 * 60 * 2,
+              secure: isProduction,
+              sameSite: isProduction
+                ? "none"
+                : ("lax" as "lax" | "none" | "strict" | undefined),
+            })
+          );
+
+          await saveLog({
+            type: "login",
+            status: "success",
+            data: {
+              email: username,
+              uid: usuarioSistema.id,
+              token,
+            },
+          });
+
+          return res.status(200).json({
+            message: "Login bem-sucedido",
+            uid: usuarioSistema.id,
+            token,
+          });
+        } else {
+          // Sessão expirada, apaga do banco antes de criar nova
+          await prisma.sessao.delete({
+            where: { token: sessaoExistente.token },
+          });
+        }
+      }
+
+      // Gera token JWT novo
       const token = jwt.sign(infoUser, SECRET!, { expiresIn: "2h" });
 
       const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 2);
 
-      await prisma.sessao.upsert({
-        where: { token }, // index ou PK para "token"
-        update: {
-          userId: usuarioSistema.id,
-          expiresAt,
-        },
-        create: {
+      await prisma.sessao.create({
+        data: {
           token,
-          userId: usuarioSistema.id,
+          usuarioSistemaId: usuarioSistema.id,
           expiresAt,
         },
       });
@@ -123,8 +170,6 @@ export default class AuthenticationController {
             : ("lax" as "lax" | "none" | "strict" | undefined),
         })
       );
-
-      // res.setHeader("Authorization", `Bearer ${token}`);
 
       await saveLog({
         type: "login",
@@ -147,7 +192,7 @@ export default class AuthenticationController {
       });
 
       console.error("Erro ao logar:", error);
-      return res.status(401).json({ error: "Credenciais inválidas" });
+      return res.status(401).json({ error: "Erro interno ao logar" });
     }
   }
 

@@ -130,16 +130,16 @@ export class VagaRepository {
               }
             }
 
-            await tx.agenda.create({
-              data: {
-                dataHora: eventoRaw.dataHora,
-                tipoEvento: eventoRaw.tipoEvento,
-                link: eventoRaw.link,
-                vaga: { connect: { id: vaga.id } },
-                localizacao: localizacaoConnectOrCreate,
-                etapaAtual: etapaAtualConnect,
-              },
-            });
+            // await tx.agenda.create({
+            //   data: {
+            //     dataHora: eventoRaw.dataHora,
+            //     tipoEvento: eventoRaw.tipoEvento,
+            //     link: eventoRaw.link,
+            //     vaga: { connect: { id: vaga.id } },
+            //     localizacao: localizacaoConnectOrCreate,
+            //     etapaAtual: etapaAtualConnect,
+            //   },
+            // });
           })
         );
       }

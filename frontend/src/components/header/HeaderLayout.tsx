@@ -1,5 +1,6 @@
 // frontend/components/Header/Header.tsx
 import logo from '@/assets/logo.svg';
+import { usePlano } from '@/context/AuthContext';
 import styles from '@/styles/header.module.css'; // Importa o módulo CSS
 import Image from 'next/image';
 import Link from 'next/link';
@@ -34,6 +35,7 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
 }) => {
   // const [uid, setUid] = React.useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
+  const { usosDisponiveis, temPlanoComUso } = usePlano();
 
   // React.useEffect(() => {
   //   if (typeof window !== 'undefined') {
@@ -69,6 +71,24 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
               className={styles.searchInput}
             />
           </div>
+
+          {/* Exibição de uso restante para clientes */}
+          {temPlanoComUso && (
+            <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+              <div className="flex items-center gap-1">
+                <span className="material-icons-outlined text-blue-600 text-sm">
+                  credit_card
+                </span>
+                <span className="text-sm font-medium text-blue-800">
+                  Usos restantes:
+                </span>
+              </div>
+              <span className="text-lg font-bold text-blue-600">
+                {usosDisponiveis}
+              </span>
+            </div>
+          )}
+
           <div className={styles.headerActions}>
             {showBtnTakeIt && (
               <Link href="/take-it" className="buttonPrimary">
@@ -136,6 +156,24 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
                     className={styles.searchInput}
                   />
                 </div>
+
+                {/* Exibição de uso restante para clientes - Mobile */}
+                {temPlanoComUso && (
+                  <div className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-center gap-1">
+                      <span className="material-icons-outlined text-blue-600 text-sm">
+                        credit_card
+                      </span>
+                      <span className="text-sm font-medium text-blue-800">
+                        Usos restantes:
+                      </span>
+                    </div>
+                    <span className="text-lg font-bold text-blue-600">
+                      {usosDisponiveis}
+                    </span>
+                  </div>
+                )}
+
                 {showBtnTakeIt && (
                   <Link href="/take-it" className="buttonPrimary">
                     <SearchIcon />

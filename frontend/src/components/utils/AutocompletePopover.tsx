@@ -208,7 +208,7 @@ export const AutocompletePopover = <TSelected,>({
         top: style.top,
         left: style.left,
         width: style.width,
-        height: style.height,
+        // height: style.height,
         position: 'absolute',
       }}
       role="listbox"

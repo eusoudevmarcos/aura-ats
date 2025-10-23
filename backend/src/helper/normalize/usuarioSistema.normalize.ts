@@ -1,6 +1,4 @@
-import { convertAnyDateToPostgres } from "../../utils/convertDateToPostgres";
-
-export const normalizeData = (data: any) => {
+export const normalizeDataUsuarioSistema = (data: any) => {
   const newData = { ...data };
 
   // --- Normaliza pessoa ---
@@ -12,38 +10,17 @@ export const normalizeData = (data: any) => {
 
     // Se tiver pessoaId, mantém o id
     if (data.funcionario.pessoaId) {
-      pessoa.id = data.funcionario.pessoaId;
+      pessoa.id = data?.funcionario?.pessoaId;
     }
-
-    // Normaliza CPF
-    if (pessoa.cpf) {
-      pessoa.cpf = pessoa.cpf.replace(/\D/g, "");
-    }
-
-    // Converte datas
-    newData.funcionario.pessoa.dataNascimento = convertAnyDateToPostgres(
-      pessoa.dataNascimento
-    );
   }
 
   // --- Normaliza empresa ---
-  if (data?.cliente?.empresa || data?.cliente?.empresaId) {
+  if (data?.cliente || data?.clienteId) {
     newData.cliente = { ...newData.cliente };
 
-    const empresa = newData.cliente.empresa || {};
-
-    // Se tiver empresaId, mantém o id
-    if (data.cliente.empresaId) {
-      empresa.id = data.cliente.empresaId;
+    if (data.clienteId) {
+      newData.cliente.id = data.clienteId;
     }
-
-    // Normaliza CNPJ
-    if (empresa.cnpj) {
-      empresa.cnpj = empresa.cnpj.replace(/\D/g, "");
-    }
-
-    // Converte datas
-    newData.cliente.empresa = convertAnyDateToPostgres(empresa);
   }
 
   return newData;

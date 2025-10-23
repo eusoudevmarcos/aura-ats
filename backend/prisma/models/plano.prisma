@@ -29,6 +29,7 @@ model PlanoAssinatura {
   usosDisponiveis Int? // quantas ações ainda pode fazer
   usosConsumidos  Int? @default(0)
 
+  cliente  Cliente    @relation(fields: [clienteId], references: [id])
   plano    Plano      @relation(fields: [planoId], references: [id])
   PlanoUso PlanoUso[]
 

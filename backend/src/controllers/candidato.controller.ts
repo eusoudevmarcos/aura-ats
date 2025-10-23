@@ -36,7 +36,11 @@ export class CandidatoController {
   async getCandidatoById(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;
-      const candidato = await this.candidatoService.getCandidatoById(id);
+      const clienteId = (req as any).user?.clienteId; // ID do cliente logado
+      const candidato = await this.candidatoService.getCandidatoById(
+        id,
+        clienteId
+      );
       if (!candidato) {
         return res.status(404).json({ message: "Candidato não encontrado." });
       }

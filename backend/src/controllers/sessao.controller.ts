@@ -26,7 +26,7 @@ export class SessaoController {
 
       return res.status(200).json({
         id: sessao.id,
-        userId: sessao.userId,
+        userId: sessao.usuarioSistemaId,
         expiresAt: sessao.expiresAt,
         usuarioSistema: (sessao as any).usuarioSistema,
       });
