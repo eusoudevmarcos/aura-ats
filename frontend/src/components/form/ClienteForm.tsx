@@ -4,8 +4,6 @@ import ModalSuccess from '@/components/modal/ModalSuccess';
 import {
   clienteWithEmpresaAndPlanosSchema,
   ClienteWithEmpresaAndPlanosSchema,
-  clienteWithEmpresaAndPlanosSchema,
-  ClienteWithEmpresaAndPlanosSchema,
   ClienteWithEmpresaInput,
 } from '@/schemas/cliente.schema';
 import { Plano, PlanoCategoriaEnum } from '@/schemas/plano.schema';
@@ -13,10 +11,8 @@ import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { getError } from '@/utils/getError';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useRef, useState } from 'react';
-import React, { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
-import { FormInput } from '../input/FormInput';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 
@@ -25,60 +21,8 @@ type ClienteFormProps = {
   onSubmit?: (data: ClienteWithEmpresaInput) => void;
   onSuccess?: (data: any) => void;
   initialValues?: Partial<ClienteWithEmpresaAndPlanosSchema>;
-  initialValues?: Partial<ClienteWithEmpresaAndPlanosSchema>;
   set?: { isProspect: boolean };
 };
-
-// Função auxiliar para extrair os ids dos planos
-function getPlanoIds(planos: any[] | undefined): string[] {
-  if (!Array.isArray(planos) || planos.length === 0) return [];
-  if (typeof planos[0] === 'string') {
-    return planos.map(id => id as string);
-  }
-  if (typeof planos[0] === 'object' && planos[0] !== null) {
-    if ('planoId' in planos[0]) {
-      return planos.map((p: any) => String(p.planoId));
-    }
-    if ('id' in planos[0]) {
-      return planos.map((p: any) => String(p.id));
-    }
-  }
-  return [];
-}
-
-// Corrige datas dos representantes no initialValues
-function normalizeEmpresaDataNascimento(
-  initialVals?: Partial<ClienteWithEmpresaAndPlanosSchema>
-): Partial<ClienteWithEmpresaAndPlanosSchema> {
-  if (
-    !initialVals?.empresa ||
-    !Array.isArray(initialVals.empresa.representantes)
-  ) {
-    return initialVals || {};
-  }
-
-  const empresa = {
-    ...initialVals.empresa,
-    representantes: initialVals.empresa.representantes.map((repr: any) => {
-      let { dataNascimento } = repr;
-      if (
-        typeof dataNascimento === 'string' &&
-        dataNascimento.length &&
-        !/^\d{2}\/\d{2}\/\d{4}$/.test(dataNascimento)
-      ) {
-        // Tenta converter de ISO para DD/MM/AAAA caso possível
-        // Aceita "yyyy-MM-dd" ou "yyyy-MM-ddTHH:mm:ss...", pega os 10 primeiros caracteres
-        const iso = dataNascimento.slice(0, 10);
-        const match = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-        if (match) {
-          dataNascimento = `${match[3]}/${match[2]}/${match[1]}`;
-        }
-      }
-      return { ...repr, dataNascimento };
-    }),
-  };
-  return { ...initialVals, empresa };
-}
 
 // Função auxiliar para extrair os ids dos planos
 function getPlanoIds(planos: any[] | undefined): string[] {
@@ -167,16 +111,12 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     resolver: zodResolver(clienteWithEmpresaAndPlanosSchema),
     mode: 'onBlur',
     defaultValues: normInitialValues,
-    defaultValues: normInitialValues,
   });
 
   const {
     register,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
-    reset,
     watch,
     setValue,
     reset,
@@ -281,8 +221,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
       alert(
         'Erro ao criar cliente: ' +
           (erro?.response?.data?.message || 'Erro não encontrado')
-        'Erro ao criar cliente: ' +
-          (erro?.response?.data?.message || 'Erro não encontrado')
       );
     } finally {
       setLoading(false);
@@ -292,7 +230,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   return (
     <FormProvider {...methods}>
       <form
-        onSubmit={handleSubmit(submitHandler)}
         onSubmit={handleSubmit(submitHandler)}
         className="space-y-6 flex flex-col"
       >
@@ -319,19 +256,8 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
                 {getError(errors, 'empresa')}
               </p>
             )}
-          {getError(errors, 'empresa') &&
-            typeof getError(errors, 'empresa') === 'string' && (
-              <p className="text-red-500 text-xs italic mt-2">
-                {getError(errors, 'empresa')}
-              </p>
-            )}
         </div>
 
-        {status === 'ATIVO' && (
-          <div>
-            <label className="block text-primary text-xl font-bold mb-2">
-              Planos do Cliente:
-            </label>
         {status === 'ATIVO' && (
           <div>
             <label className="block text-primary text-xl font-bold mb-2">
@@ -385,7 +311,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
                   </FormSelect>
                 )}
               </>
-
               // <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               //   {planos.map(plano => {
               //     // Garante comparação consistente dos ids
