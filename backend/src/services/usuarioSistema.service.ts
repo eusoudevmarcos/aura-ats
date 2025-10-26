@@ -5,6 +5,9 @@ import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation
 import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
 import { normalizeDataUsuarioSistema } from "../helper/normalize/usuarioSistema.normalize";
 import { validateBasicFieldsUsuarioSistema } from "../helper/validate/usuarioSistema.validate";
+import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
+import { normalizeDataUsuarioSistema } from "../helper/normalize/usuarioSistema.normalize";
+import { validateBasicFieldsUsuarioSistema } from "../helper/validate/usuarioSistema.validate";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
@@ -97,7 +100,17 @@ export class UsuarioSistemaService extends BuildNestedOperation {
         normalizedUsuarioData.cliente
       );
     }
+    validateBasicFieldsUsuarioSistema(data);
 
+    const normalizedUsuarioData = normalizeDataUsuarioSistema(data);
+    if (normalizedUsuarioData.cliente) {
+      normalizedUsuarioData.cliente = normalizeClienteData(
+        normalizedUsuarioData.cliente
+      );
+    }
+
+    if (!normalizedUsuarioData.id) {
+      await this.checkDuplicates(normalizedUsuarioData);
     if (!normalizedUsuarioData.id) {
       await this.checkDuplicates(normalizedUsuarioData);
     }
@@ -125,12 +138,15 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     };
 
     if (!normalizedUsuarioData.id) {
+
+    if (!normalizedUsuarioData.id) {
       return await prisma.usuarioSistema.create({
         data: usuarioData,
         include: relationsShip,
       });
     } else {
       return await prisma.usuarioSistema.update({
+        where: { id: normalizedUsuarioData.id },
         where: { id: normalizedUsuarioData.id },
         data: usuarioData,
         include: relationsShip,
@@ -166,7 +182,12 @@ export class UsuarioSistemaService extends BuildNestedOperation {
         pessoaExistente &&
         pessoaExistente.id !== data.funcionario.pessoa.id
       ) {
+      if (
+        pessoaExistente &&
+        pessoaExistente.id !== data.funcionario.pessoa.id
+      ) {
         throw new Error(
+          `CPF '${data.funcionario.pessoa.cpf}' já cadastrado para outra pessoa.`
           `CPF '${data.funcionario.pessoa.cpf}' já cadastrado para outra pessoa.`
         );
       }
@@ -185,6 +206,7 @@ export class UsuarioSistemaService extends BuildNestedOperation {
         empresaExistente.id !== data?.cliente?.empresa.id
       ) {
         throw new Error(
+          `CNPJ '${data.cliente.empresa.cnpj}' já cadastrado para outra empresa.`
           `CNPJ '${data.cliente.empresa.cnpj}' já cadastrado para outra empresa.`
         );
       }
