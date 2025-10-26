@@ -25,6 +25,8 @@ export const PLANS_DATA: Group[] = [
 
   {
     title: 'COM RQE',
+    description:
+      'Planos de recrutamento médico para profissionais com RQE, ideais para instituições que buscam especialistas. Personalizamos conforme o volume e perfil da sua necessidade para garantir o melhor match médico.',
     plans: [
       {
         name: 'BÁSICO CONTATOS',
@@ -80,6 +82,8 @@ export const PLANS_DATA: Group[] = [
   },
   {
     title: 'SEM RQE',
+    description:
+      'Recrutamento de profissionais de saúde sem exigência de RQE. Planos adaptáveis para diversas áreas e necessidades da sua empresa.',
     plans: [
       {
         name: 'BÁSICO CONTATOS',
@@ -134,9 +138,9 @@ export const PLANS_DATA: Group[] = [
     ],
   },
   {
-    title: 'Recrutamento & Seleção Tradicional',
+    title: 'Recrutamento Diversos',
     description:
-      'Planos tradicionais de recrutamento e seleção para vagas técnicas, administrativas e estratégicas, adaptados de acordo com o volume e o perfil das contratações desejadas pela sua empresa.',
+      'Planos de recrutamento e seleção diversos para vagas técnicas, administrativas e estratégicas, adaptados de acordo com o volume e o perfil das contratações desejadas pela sua empresa.',
     plans: [
       {
         name: 'Plano Essencial',

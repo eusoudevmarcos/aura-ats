@@ -165,6 +165,7 @@ enum TipoUsuario {
     CLIENTE_ATS
     CLIENTE_ATS_CRM
     CLIENTE_CRM
+    CLIENTE
 
     @@schema("public")
 }
@@ -196,6 +197,18 @@ enum AssinaturaStatus {
 enum TipoPlano {
     MENSAL
     POR_USO
+    PERSONALIZADO
+    POR_VAGA
+    PERCENTUAL
+
+    @@schema("public")
+}
+
+enum CategoriaPlano {
+    PLATAFORMA
+    RECRUTAMENTO_COM_RQE
+    RECRUTAMENTO_SEM_RQE
+    RECRUTAMENTO_DIVERSOS
 
     @@schema("public")
 }

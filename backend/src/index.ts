@@ -86,7 +86,7 @@ app.use("/api/candidato", candidatoRoutes);
 app.use("/api/vaga", vagaRoutes);
 app.use("/api/agenda", agendaRoute);
 app.use("/api/triagem", triagemRoutes);
-app.use("/api/billing", billingRoutes);
+app.use("/api/planos", billingRoutes);
 app.use("/api/tarefa", tarefaRoutes);
 app.use("/api/sessao", sessaoRoutes);
 

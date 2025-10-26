@@ -4,11 +4,15 @@ model UsuarioSistema {
     password    String
     tipoUsuario TipoUsuario
 
-    funcionario Funcionario?
-    cliente     Cliente?
-    tarefas     Tarefa[]
+    tarefas Tarefa[]
+    sessao  Sessao?
+    agenda  Agenda[]
 
-    sessao Sessao?
+    funcionario   Funcionario? @relation(fields: [funcionarioId], references: [id])
+    funcionarioId String?      @unique
+
+    clienteId String?  @unique
+    cliente   Cliente? @relation(fields: [clienteId], references: [id])
 
     @@unique([email])
     @@schema("UsuarioSistema")

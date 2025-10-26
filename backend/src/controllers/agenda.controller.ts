@@ -11,7 +11,11 @@ export class AgendaController {
   // Cria um novo evento de agenda para uma vaga
   async create(req: Request, res: Response) {
     try {
-      const data = req.body as AgendaInput;
+      let data = {
+        ...req.body,
+        usuarioSistemaId: req.user?.uid,
+      } as AgendaInput;
+
       const agenda = await this.service.create(data);
       return res.status(201).json(agenda);
     } catch (error: any) {
@@ -47,13 +51,18 @@ export class AgendaController {
 
   // Lista todos os eventos de agenda com paginação
   async getAll(req: Request, res: Response) {
+    console.log(req.user);
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
     const pageSize = req.query.pageSize
       ? parseInt(req.query.pageSize as string, 10)
       : 10;
 
     try {
-      const { data, total } = await this.service.getAll({ pageSize, page });
+      const { data, total } = await this.service.getAll({
+        pageSize,
+        page,
+        user: req.user,
+      });
       return res.status(200).json({
         data,
         total,

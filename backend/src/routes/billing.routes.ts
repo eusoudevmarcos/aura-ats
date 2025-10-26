@@ -21,7 +21,7 @@ router.get("/plano-assinatura/:id", (req, res) =>
 );
 
 // Lista todos os planos (com paginação opcional)
-router.get("/planos", (req, res) => billingController.getAllPlanos(req, res));
+router.get("/", (req, res) => billingController.getAllPlanos(req, res));
 
 // Atualiza um plano por ID
 router.put("/planos/:id", (req, res) =>
@@ -31,6 +31,16 @@ router.put("/planos/:id", (req, res) =>
 // Deleta um plano por ID
 router.delete("/planos/:id", (req, res) =>
   billingController.deletePlano(req, res)
+);
+
+// Debita um uso do plano do cliente logado
+router.post("/debitar-uso", (req, res) =>
+  billingController.debitarUsoCliente(req, res)
+);
+
+// Busca planos do cliente logado
+router.get("/planos-usuario", (req, res) =>
+  billingController.getPlanosUsuario(req, res)
 );
 
 export default router;

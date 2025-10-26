@@ -17,7 +17,6 @@ export class VagaService {
     { page = 1, pageSize = 10 }: Pagination
   ) {
     const skip = (page - 1) * pageSize;
-
     const [vagas, total] = await prisma.$transaction([
       prisma.vaga.findMany({
         where: { clienteId },

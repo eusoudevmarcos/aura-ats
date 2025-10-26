@@ -50,6 +50,111 @@ const EntrarButton: React.FC<EntrarButtonProps> = ({
   );
 };
 
+// Submenu isolado para Desktop e Mobile
+type ServicesSubMenuProps = {
+  mode: 'desktop' | 'mobile';
+  isOpen: boolean;
+  onSectionClick: (
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>,
+    sectionId: string
+  ) => void;
+  openModalVideoRM: () => void;
+  style?: React.CSSProperties;
+};
+
+const ServicesSubMenu: React.FC<ServicesSubMenuProps> = ({
+  mode,
+  isOpen,
+  onSectionClick,
+  openModalVideoRM,
+  style,
+}) => {
+  if (mode === 'desktop') {
+    return (
+      <ul
+        className={`
+          absolute left-0 mt-2 bg-white rounded-lg shadow-lg py-2 opacity-0 group-hover:opacity-100 group-hover:visible transition duration-150 z-20 invisible
+        `}
+        style={style}
+      >
+        <li>
+          <Link
+            href="#service-plataforma"
+            className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+            onClick={e => {
+              onSectionClick(e, 'service-plataforma');
+              openModalVideoRM();
+            }}
+          >
+            Plataforma
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="#pricing-section"
+            className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+            onClick={e => {
+              onSectionClick(e, 'pricing-section');
+            }}
+          >
+            Recrutamento Médico
+          </Link>
+        </li>
+        <li>
+          <Link
+            href="#recrutamento_diversos"
+            className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition text-nowrap"
+            onClick={e => onSectionClick(e, 'recrutamento_diversos')}
+          >
+            Recrutamento Diversos
+          </Link>
+        </li>
+      </ul>
+    );
+  }
+
+  // MOBILE
+  return (
+    <ul
+      id="mobile-services-submenu"
+      className={`flex flex-col gap-1 mt-1 transition-[max-height,opacity] duration-200 overflow-hidden rounded-lg shadow bg-white text-[var(--text-color-primary)] ${
+        isOpen
+          ? 'max-h-60 opacity-100 py-2 px-2 pointer-events-auto'
+          : 'max-h-0 opacity-0 py-0 px-2 pointer-events-none'
+      }`}
+      style={{ zIndex: 100, ...style }}
+    >
+      <li>
+        <Link
+          href="#service-medico"
+          className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+          onClick={e => onSectionClick(e, 'service-medico')}
+        >
+          Médico
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="#service-plataforma"
+          className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+          onClick={e => onSectionClick(e, 'service-plataforma')}
+        >
+          Plataforma
+        </Link>
+      </li>
+      <li>
+        <Link
+          href="#service-recrutamento"
+          className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
+          onClick={e => onSectionClick(e, 'service-recrutamento')}
+        >
+          Recrutamento
+        </Link>
+      </li>
+    </ul>
+  );
+};
+
 // Componente isolado de navegação que adapta entre desktop e mobile
 type NavLinksProps = {
   mode: 'desktop' | 'mobile';
@@ -123,42 +228,12 @@ const NavLinks: React.FC<NavLinksProps> = ({
               {isServicesHovered ? 'arrow_drop_up' : 'arrow_drop_down'}
             </span>
           </button>
-          <ul
-            className="
-              absolute left-0 mt-2 bg-white rounded-lg shadow-lg py-2 opacity-0 group-hover:opacity-100 group-hover:visible transition duration-150 z-20 invisible
-            "
-          >
-            <li>
-              <Link
-                href="#service-plataforma"
-                className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
-                onClick={e => onSectionClick(e, 'service-plataforma')}
-              >
-                Plataforma
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#service-medico"
-                className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
-                onClick={e => {
-                  onSectionClick(e, 'service-medico');
-                  openModalVideoRM();
-                }}
-              >
-                Recrutamento Médico
-              </Link>
-            </li>
-            <li>
-              <Link
-                href="#service-recrutamento"
-                className="block px-5 py-2 text-[var(--text-color-primary)] hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition text-nowrap"
-                onClick={e => onSectionClick(e, 'service-recrutamento')}
-              >
-                Recrutamento Diversos
-              </Link>
-            </li>
-          </ul>
+          <ServicesSubMenu
+            mode="desktop"
+            isOpen={!!isServicesHovered}
+            onSectionClick={onSectionClick}
+            openModalVideoRM={openModalVideoRM}
+          />
         </li>
         <li>
           <Link
@@ -232,43 +307,12 @@ const NavLinks: React.FC<NavLinksProps> = ({
             {isServicesMobileOpen ? 'arrow_drop_up' : 'arrow_drop_down'}
           </span>
         </button>
-        <ul
-          id="mobile-services-submenu"
-          className={`flex flex-col gap-1 mt-1 transition-[max-height,opacity] duration-200 overflow-hidden rounded-lg shadow bg-white text-[var(--text-color-primary)] ${
-            isServicesMobileOpen
-              ? 'max-h-60 opacity-100 py-2 px-2 pointer-events-auto'
-              : 'max-h-0 opacity-0 py-0 px-2 pointer-events-none'
-          }`}
-          style={{ zIndex: 100 }}
-        >
-          <li>
-            <Link
-              href="#service-medico"
-              className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
-              onClick={e => onSectionClick(e, 'service-medico')}
-            >
-              Médico
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#service-plataforma"
-              className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
-              onClick={e => onSectionClick(e, 'service-plataforma')}
-            >
-              Plataforma
-            </Link>
-          </li>
-          <li>
-            <Link
-              href="#service-recrutamento"
-              className="block text-right px-5 py-2 hover:bg-[var(--primary-color-light)] hover:text-[var(--primary-color)] transition"
-              onClick={e => onSectionClick(e, 'service-recrutamento')}
-            >
-              Recrutamento
-            </Link>
-          </li>
-        </ul>
+        <ServicesSubMenu
+          mode="mobile"
+          isOpen={!!isServicesMobileOpen}
+          onSectionClick={onSectionClick}
+          openModalVideoRM={openModalVideoRM}
+        />
       </li>
       <li>
         <Link
@@ -431,12 +475,7 @@ const HeaderLadingPage: React.FC = () => {
               isServicesHovered={isServicesHovered}
               setIsServicesHovered={setIsServicesHovered}
               onSectionClick={(e, sectionId) => {
-                if (sectionId === 'service-medico') {
-                  handleSectionClick(e, sectionId);
-                  setOpenModalVideoRM(true);
-                } else {
-                  handleSectionClick(e, sectionId);
-                }
+                handleSectionClick(e, sectionId);
               }}
               openModalVideoRM={() => setOpenModalVideoRM(true)}
             />

@@ -2,9 +2,9 @@
 import { UsuarioSistema } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
 import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
-import { buildUsuarioData } from "../helper/buildNested/usuarioSistema.build";
-import { normalizeData } from "../helper/normalize/usuarioSistema.normalize";
-import { validateBasicFields } from "../helper/validate/usuarioSistema.validate";
+import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
+import { normalizeDataUsuarioSistema } from "../helper/normalize/usuarioSistema.normalize";
+import { validateBasicFieldsUsuarioSistema } from "../helper/validate/usuarioSistema.validate";
 import prisma from "../lib/prisma";
 import { EmpresaRepository } from "../repository/empresa.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
@@ -89,27 +89,49 @@ export class UsuarioSistemaService extends BuildNestedOperation {
   }
 
   async save(data: any): Promise<UsuarioSistema> {
-    validateBasicFields(data);
-    const normalizedData = normalizeData(data);
+    validateBasicFieldsUsuarioSistema(data);
 
-    if (!data.id) {
-      await this.checkDuplicates(normalizedData);
+    const normalizedUsuarioData = normalizeDataUsuarioSistema(data);
+    if (normalizedUsuarioData.cliente) {
+      normalizedUsuarioData.cliente = normalizeClienteData(
+        normalizedUsuarioData.cliente
+      );
     }
 
-    const usuarioData = await buildUsuarioData(normalizedData);
+    if (!normalizedUsuarioData.id) {
+      await this.checkDuplicates(normalizedUsuarioData);
+    }
 
+    if (normalizedUsuarioData.cliente?.id) {
+      const clienteExistente = await prisma.usuarioSistema.findFirst({
+        where: {
+          clienteId: normalizedUsuarioData.cliente.id,
+        },
+      });
+
+      if (
+        clienteExistente &&
+        clienteExistente.id !== normalizedUsuarioData.id
+      ) {
+        throw new Error("CNPJ do cliente já vinculado a uma conta");
+      }
+    }
+
+    const usuarioData = this.build(normalizedUsuarioData);
+    console.log(JSON.stringify(usuarioData));
     const relationsShip = {
       funcionario: { include: { pessoa: true } },
       cliente: { include: { empresa: true } },
     };
-    if (!data.id) {
+
+    if (!normalizedUsuarioData.id) {
       return await prisma.usuarioSistema.create({
         data: usuarioData,
         include: relationsShip,
       });
     } else {
       return await prisma.usuarioSistema.update({
-        where: { id: data.id },
+        where: { id: normalizedUsuarioData.id },
         data: usuarioData,
         include: relationsShip,
       });
@@ -125,7 +147,6 @@ export class UsuarioSistemaService extends BuildNestedOperation {
   }
 
   private async checkDuplicates(data: any): Promise<void> {
-    // Verifica email duplicado
     const usuarioExistente = await prisma.usuarioSistema.findUnique({
       where: { email: data.email },
     });
@@ -133,7 +154,6 @@ export class UsuarioSistemaService extends BuildNestedOperation {
       throw new Error("E-mail já cadastrado.");
     }
 
-    // Verifica CPF duplicado se for pessoa
     if (data?.funcionario?.pessoa?.cpf) {
       if (!data.funcionario.pessoa.cpf) {
         throw new Error("CPF é obrigatório para usuário tipo Pessoa.");
@@ -142,14 +162,16 @@ export class UsuarioSistemaService extends BuildNestedOperation {
       const pessoaExistente = await this.pessoaRepository.findByCpf(
         data.funcionario.pessoa.cpf
       );
-      if (pessoaExistente && pessoaExistente.id !== data.funcionario.pessoa) {
+      if (
+        pessoaExistente &&
+        pessoaExistente.id !== data.funcionario.pessoa.id
+      ) {
         throw new Error(
-          `CPF '${data.pessoa.cpf}' já cadastrado para outra pessoa.`
+          `CPF '${data.funcionario.pessoa.cpf}' já cadastrado para outra pessoa.`
         );
       }
     }
 
-    // Verifica CNPJ duplicado se for empresa
     if (data?.cliente?.empresa?.cnpj) {
       if (!data?.cliente?.empresa.cnpj) {
         throw new Error("CNPJ é obrigatório para usuário tipo Empresa.");
@@ -163,7 +185,7 @@ export class UsuarioSistemaService extends BuildNestedOperation {
         empresaExistente.id !== data?.cliente?.empresa.id
       ) {
         throw new Error(
-          `CNPJ '${data.empresa.cnpj}' já cadastrado para outra empresa.`
+          `CNPJ '${data.cliente.empresa.cnpj}' já cadastrado para outra empresa.`
         );
       }
     }

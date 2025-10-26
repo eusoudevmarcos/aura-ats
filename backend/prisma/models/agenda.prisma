@@ -1,10 +1,12 @@
 model Agenda {
-    id          String           @id @default(uuid())
-    titulo      String           @default("Titulo")
-    dataHora    DateTime
-    link        String?
-    tipoEvento  TipoEventoAgenda @default(TRIAGEM_INICIAL)
-    localEvento LocalEvento      @default(REMOTO)
+    id                String              @id @default(uuid())
+    titulo            String              @default("Titulo")
+    dataHora          DateTime
+    link              String?
+    tipoEvento        TipoEventoAgenda    @default(TRIAGEM_INICIAL)
+    localEvento       LocalEvento         @default(REMOTO)
+    agendaCandidatura AgendaCandidatura[]
+    convidados        String[]
 
     etapaAtual   ProcessoSeletivoEtapa? @relation(fields: [etapaAtualId], references: [id], onDelete: Cascade)
     etapaAtualId String?
@@ -15,19 +17,21 @@ model Agenda {
     vaga   Vaga?   @relation(fields: [vagaId], references: [id])
     vagaId String?
 
-    cliente           Cliente?            @relation(fields: [clienteId], references: [id])
-    clienteId         String?
-    agendaCandidatura AgendaCandidatura[]
-    triagem           TriagemVaga?        @relation(fields: [triagemId], references: [id])
-    triagemId         String?
+    cliente   Cliente? @relation(fields: [clienteId], references: [id])
+    clienteId String?
 
-    convidados String[]
+    triagem   TriagemVaga? @relation(fields: [triagemId], references: [id])
+    triagemId String?
+
+    usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
+    usuarioSistemaId String
 
     @@index([etapaAtualId])
     @@index([localizacaoId])
     @@index([vagaId])
     @@index([clienteId])
     @@index([triagemId])
+    @@index([usuarioSistemaId])
     @@schema("Agenda")
 }
 

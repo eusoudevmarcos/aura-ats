@@ -8,13 +8,13 @@ export class SessaoService {
 
   async create(
     token: string,
-    userId: string,
+    usuarioSistemaId: string,
     expiresAt: Date
   ): Promise<Sessao> {
     return await prisma.sessao.create({
       data: {
         token,
-        userId,
+        usuarioSistemaId,
         expiresAt,
       },
     });
@@ -55,22 +55,22 @@ export class SessaoService {
     });
   }
 
-  async findByUserId(userId: string): Promise<Sessao | null> {
+  async findByUserId(usuarioSistemaId: string): Promise<Sessao | null> {
     return await prisma.sessao.findFirst({
-      where: { userId },
+      where: { usuarioSistemaId },
       orderBy: { expiresAt: "desc" },
     });
   }
 
   async update(
     token: string,
-    userId: string,
+    usuarioSistemaId: string,
     expiresAt: Date
   ): Promise<Sessao> {
     return await prisma.sessao.update({
       where: { token },
       data: {
-        userId,
+        usuarioSistemaId,
         expiresAt,
       },
     });
@@ -78,18 +78,18 @@ export class SessaoService {
 
   async upsert(
     token: string,
-    userId: string,
+    usuarioSistemaId: string,
     expiresAt: Date
   ): Promise<Sessao> {
     return await prisma.sessao.upsert({
       where: { token },
       update: {
-        userId,
+        usuarioSistemaId,
         expiresAt,
       },
       create: {
         token,
-        userId,
+        usuarioSistemaId,
         expiresAt,
       },
     });
@@ -101,9 +101,9 @@ export class SessaoService {
     });
   }
 
-  async deleteByUserId(userId: string): Promise<void> {
+  async deleteByUserId(usuarioSistemaId: string): Promise<void> {
     await prisma.sessao.deleteMany({
-      where: { userId },
+      where: { usuarioSistemaId },
     });
   }
 
@@ -124,11 +124,11 @@ export class SessaoService {
     return sessao.expiresAt > new Date();
   }
 
-  async getUserIdFromToken(token: string): Promise<string | null> {
+  async getUserIdFromToken(token: string): Promise<string | undefined> {
     const sessao = await this.findByToken(token);
     if (!sessao || sessao.expiresAt <= new Date()) {
-      return null;
+      return undefined;
     }
-    return sessao.userId;
+    return sessao.usuarioSistemaId;
   }
 }

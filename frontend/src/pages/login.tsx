@@ -30,7 +30,7 @@ const LoginPage: React.FC = () => {
 
       if (res.status === 200) {
         localStorage.setItem('uid', data.uid);
-        router.push('/atividades/agendas');
+        await router.push('/atividades/agendas');
       } else {
         setError(data.error || 'Erro ao fazer login.');
       }

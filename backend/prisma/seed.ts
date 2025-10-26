@@ -2,9 +2,10 @@ import { PrismaClient } from "@prisma/client";
 import * as dotenv from "dotenv";
 import { BeneficiosSeed } from "./seed/beneficios";
 import {
-  billingPlataformSeed,
-  billingRecrutamentoSemRQESeed,
-  planosComRQE,
+  plataformaSeed,
+  recrutamentoComRQESeed,
+  recrutamentoDiversosSeed,
+  recrutamentoSemRQESeed,
 } from "./seed/billings";
 import { EspecialidadesSeed } from "./seed/especialidades";
 
@@ -39,53 +40,28 @@ async function upsertBeneficios() {
 }
 
 // Função para upsert dos planos usando findUnique + updateOrCreate por causa do constraint.
-async function upsertPlanos(planoList: any[], tipoDesc: string) {
+async function createPlanos(planoList: any[], tipoDesc: string) {
+  await prisma.plano.deleteMany();
   for (const plano of planoList) {
-    // O campo unique em Plano é 'id'; 'nome' não é unique
-    // Então precisamos buscar pelo nome, se existir faz update, senão cria.
-    const planoExistente = await prisma.plano.findFirst({
-      where: { nome: plano.nome },
+    await prisma.plano.createMany({
+      data: {
+        nome: plano.nome,
+        descricao: plano.descricao,
+        preco: plano.preco,
+        diasGarantia: plano.diasGarantia,
+        ativo: plano.ativo,
+        tipo: plano.tipo,
+        categoria: plano.categoria,
+        limiteUso:
+          plano.limitePesquisas !== undefined
+            ? plano.limitePesquisas
+            : plano.limiteUso !== undefined
+            ? plano.limiteUso
+            : undefined,
+      },
     });
-
-    if (planoExistente) {
-      await prisma.plano.update({
-        where: { id: planoExistente.id },
-        data: {
-          descricao: plano.descricao,
-          preco: plano.preco,
-          diasGarantia: plano.diasGarantia,
-          ativo: plano.ativo,
-          tipo: plano.tipo,
-          limiteUso:
-            plano.limitePesquisas !== undefined
-              ? plano.limitePesquisas
-              : plano.limiteUso !== undefined
-              ? plano.limiteUso
-              : undefined,
-        },
-      });
-    } else {
-      await prisma.plano.create({
-        data: {
-          nome: plano.nome,
-          descricao: plano.descricao,
-          preco: plano.preco,
-          diasGarantia: plano.diasGarantia,
-          ativo: plano.ativo,
-          tipo: plano.tipo,
-          limiteUso:
-            plano.limitePesquisas !== undefined
-              ? plano.limitePesquisas
-              : plano.limiteUso !== undefined
-              ? plano.limiteUso
-              : undefined,
-        },
-      });
-    }
+    console.log(`✅ Planoo ${plano.nome} - ${plano.categoria} adicionado`);
   }
-  console.log(
-    `✅ ${planoList.length} planos ${tipoDesc} adicionados/atualizados.`
-  );
 }
 
 async function main() {
@@ -99,17 +75,15 @@ async function main() {
     await upsertBeneficios();
 
     // Planos de plataforma (POR_USO)
-    await upsertPlanos(billingPlataformSeed, "de plataforma");
-
-    // Planos de recrutamento SEM RQE (MENSAL)
-    await upsertPlanos(
-      billingRecrutamentoSemRQESeed,
-      "de recrutamento SEM RQE"
+    await createPlanos(
+      [
+        ...plataformaSeed,
+        ...recrutamentoSemRQESeed,
+        ...recrutamentoComRQESeed,
+        ...recrutamentoDiversosSeed,
+      ],
+      "de plataforma"
     );
-
-    // Planos de recrutamento COM RQE (MENSAL)
-    await upsertPlanos(planosComRQE, "de recrutamento COM RQE");
-
     console.log("🎉 Seed concluído com sucesso!");
   } catch (error) {
     console.error("❌ Erro durante a operação de seed:", error);

@@ -8,6 +8,7 @@ import prisma from "../lib/prisma";
 import { CandidatoRepository } from "../repository/candidato.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
 import { CandidatoUpdateInput } from "../types/prisma.types";
+import { BillingService } from "./billing.service";
 
 @injectable()
 export class CandidatoService {
@@ -15,15 +16,38 @@ export class CandidatoService {
     @inject(CandidatoRepository)
     private candidatoRepository: CandidatoRepository,
     @inject(PessoaRepository)
-    private pessoaRepository: PessoaRepository
+    private pessoaRepository: PessoaRepository,
+    @inject(BillingService)
+    private billingService: BillingService
   ) {}
 
   async getEspecialidades(): Promise<Especialidade[]> {
     return await prisma.especialidade.findMany();
   }
 
-  async getCandidatoById(id: string): Promise<Candidato | null> {
-    return await this.candidatoRepository.findById(id);
+  async getCandidatoById(
+    id: string,
+    clienteId?: string
+  ): Promise<Candidato | null> {
+    const candidato = await this.candidatoRepository.findById(id);
+
+    // Se um cliente está consultando, debita um uso do plano
+    if (candidato && clienteId) {
+      try {
+        await this.billingService.debitarUsoCliente(
+          clienteId,
+          "consulta_profissional"
+        );
+        console.log(
+          `Uso debitado para cliente ${clienteId} ao consultar candidato ${id}`
+        );
+      } catch (error) {
+        console.error("Erro ao debitar uso:", error);
+        // Não falha a consulta se não conseguir debitar o uso
+      }
+    }
+
+    return candidato;
   }
 
   async getAllCandidatos(

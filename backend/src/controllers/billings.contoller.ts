@@ -86,4 +86,47 @@ export class BillingController {
       return res.status(400).json({ message: error.message });
     }
   }
+
+  // Debita um uso do plano do cliente logado
+  async debitarUsoCliente(req: Request, res: Response): Promise<Response> {
+    try {
+      const clienteId = (req as any).user?.clienteId;
+      if (!clienteId) {
+        return res.status(401).json({ message: "Cliente não identificado" });
+      }
+
+      const { acao } = req.body;
+      const sucesso = await this.billingService.debitarUsoCliente(
+        clienteId,
+        acao
+      );
+
+      if (sucesso) {
+        return res.status(200).json({ message: "Uso debitado com sucesso" });
+      } else {
+        return res
+          .status(400)
+          .json({ message: "Não foi possível debitar o uso" });
+      }
+    } catch (error: any) {
+      console.error("Erro ao debitar uso:", error.message);
+      return res.status(500).json({ message: error.message });
+    }
+  }
+
+  // Busca planos do cliente logado
+  async getPlanosUsuario(req: Request, res: Response): Promise<Response> {
+    try {
+      const clienteId = (req as any).user?.clienteId;
+      if (!clienteId) {
+        return res.status(401).json({ message: "Cliente não identificado" });
+      }
+
+      const planos = await this.billingService.getPlanosUsuario(clienteId);
+      return res.status(200).json({ planos });
+    } catch (error: any) {
+      console.error("Erro ao buscar planos do usuário:", error.message);
+      return res.status(500).json({ message: error.message });
+    }
+  }
 }

@@ -40,7 +40,7 @@ const AboutSection: React.FC = () => {
         <h2 className="text-primary text-3xl md:text-4xl font-bold mb-2">
           Sobre a Aura: O Match Perfeito para o Seu Sucesso
         </h2>
-        <p className="md:text-lg text-gray-500 mx-auto leading-relaxed text-justify max-w-[900px]">
+        <p className="md:text-lg text-gray-500 mx-auto leading-relaxed max-w-[900px]">
           Na Aura, não apenas encontramos talentos, construímos o futuro do seu
           negócio. Com apenas 8 anos de mercado mas com profissionais que
           dominam o mercado com mais de 15 anos de experiência trabalhando com
@@ -129,11 +129,11 @@ const AboutSection: React.FC = () => {
         </div>
       </div>
 
-      <div className="flex flex-col justify-center items-center mb-10">
-        <h3 className="text-2xl md:text-3xl text-primary font-bold mb-4 text-center">
+      <div className="flex flex-col justify-center items-center mb-14">
+        <h3 className="text-2xl md:text-3xl text-primary font-bold mb-2 text-center">
           Nossa Missão
         </h3>
-        <p className="md:text-lg text-gray-500 leading-relaxed max-w-[900px] text-justify">
+        <p className="md:text-lg text-gray-500 leading-relaxed max-w-[920px]">
           Superar as expectativas de nossos clientes e candidatos, oferecendo
           soluções de recrutamento e seleção personalizadas, ágeis e eficazes.
           Queremos ser reconhecidos como o parceiro estratégico que entende e
@@ -143,12 +143,12 @@ const AboutSection: React.FC = () => {
       </div>
 
       <div className="mb-10">
-        <h3 className="text-2xl md:text-3xl text-primary font-bold mb-4">
+        <h3 className="text-2xl md:text-3xl text-primary font-bold mb-2">
           Nossos Valores: A Essência da Nossa Singularidade
         </h3>
 
         <div className="flex  justify-center items-center gap-10 flex-wrap">
-          <p className="md:text-lg max-w-[900px] text-justify text-[#545454]">
+          <p className="md:text-lg max-w-[920px] text-[#545454]">
             Na Aura R&S Labs Ltda, acreditamos que o sucesso de qualquer
             organizaqdo estå diretamente ligado aos valores que a sustentam. Sdo
             esses principios que orientam nossas decisöes, moldam nossa cultura
@@ -166,7 +166,7 @@ const AboutSection: React.FC = () => {
         {values.map((value, index) => (
           <div
             key={index}
-            className="bg-white border border-gray-200 rounded-2xl p-8 shadow-sm text-center flex flex-col items-center transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md text-gray-900"
+            className="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm text-center flex flex-col items-center transition-transform duration-300 ease-in-out hover:-translate-y-1 hover:shadow-md text-gray-900"
           >
             <div className="text-5xl text-accent bg-accent/10 w-[90px] h-[90px] flex items-center justify-center mb-4 rounded-full sm:text-4xl sm:w-[50px] sm:h-[50px]">
               {value.icon}

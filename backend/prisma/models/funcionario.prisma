@@ -4,13 +4,11 @@ model Funcionario {
     setor String? @db.VarChar(100)
     cargo String? @db.VarChar(100)
 
-    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id], onDelete: Cascade)
-    usuarioSistemaId String?         @unique
+    usuarioSistema UsuarioSistema?
 
     pessoa   Pessoa? @relation(fields: [pessoaId], references: [id], onDelete: Cascade)
     pessoaId String? @unique
 
     @@index([pessoaId])
-    @@index([usuarioSistemaId])
     @@schema("Funcionario")
 }

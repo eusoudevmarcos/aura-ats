@@ -1,16 +1,16 @@
 model Plano {
-  id           String    @id @default(uuid())
+  id           String            @id @default(uuid())
   nome         String
   descricao    String?
-  preco        Decimal   @db.Decimal(10, 2)
-  tipo         TipoPlano @default(MENSAL) // tipo do plano
+  preco        Decimal           @db.Decimal(10, 2)
+  tipo         TipoPlano         @default(MENSAL) // tipo do plano
   diasGarantia Int?
   limiteUso    Int? // se for por uso: ex. 100 pesquisas
-  ativo        Boolean   @default(true)
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @updatedAt
-
-  assinaturas PlanoAssinatura[]
+  ativo        Boolean           @default(true)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  categoria    CategoriaPlano?
+  assinaturas  PlanoAssinatura[]
 
   @@schema("Plano")
 }
@@ -29,6 +29,7 @@ model PlanoAssinatura {
   usosDisponiveis Int? // quantas ações ainda pode fazer
   usosConsumidos  Int? @default(0)
 
+  cliente  Cliente    @relation(fields: [clienteId], references: [id])
   plano    Plano      @relation(fields: [planoId], references: [id])
   PlanoUso PlanoUso[]
 

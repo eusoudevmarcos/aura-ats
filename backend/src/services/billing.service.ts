@@ -182,4 +182,88 @@ export class BillingService {
       where: { id },
     });
   }
+
+  /**
+   * Debita um uso do plano do cliente logado
+   */
+  async debitarUsoCliente(
+    clienteId: string,
+    acao: string = "consulta_profissional"
+  ): Promise<boolean> {
+    try {
+      // Busca planos ativos do cliente que têm limite de uso
+      const planosAtivos = await this.prisma.planoAssinatura.findMany({
+        where: {
+          clienteId,
+          status: "ATIVA",
+          usosDisponiveis: {
+            gt: 0,
+          },
+        },
+        include: {
+          plano: true,
+        },
+        orderBy: {
+          dataAssinatura: "asc", // Prioriza planos mais antigos
+        },
+      });
+
+      if (planosAtivos.length === 0) {
+        throw new Error("Nenhum plano ativo com usos disponíveis encontrado");
+      }
+
+      // Pega o primeiro plano com usos disponíveis
+      const planoParaDebitar = planosAtivos[0];
+
+      // Debita um uso
+      await this.prisma.planoAssinatura.update({
+        where: { id: planoParaDebitar.id },
+        data: {
+          usosDisponiveis: planoParaDebitar.usosDisponiveis! - 1,
+          usosConsumidos: (planoParaDebitar.usosConsumidos || 0) + 1,
+        },
+      });
+
+      // Registra o uso no PlanoUso
+      await this.prisma.planoUso.create({
+        data: {
+          planoAssinaturaId: planoParaDebitar.id,
+          acao,
+          dataUso: new Date(),
+        },
+      });
+
+      return true;
+    } catch (error) {
+      console.error("Erro ao debitar uso:", error);
+      return false;
+    }
+  }
+
+  /**
+   * Busca planos do cliente logado
+   */
+  async getPlanosUsuario(clienteId: string) {
+    const planos = await this.prisma.planoAssinatura.findMany({
+      where: { clienteId },
+      include: {
+        plano: true,
+      },
+      orderBy: {
+        dataAssinatura: "desc",
+      },
+    });
+
+    return planos.map((planoAssinatura) => ({
+      id: planoAssinatura.id,
+      nome: planoAssinatura.plano.nome,
+      tipo: planoAssinatura.plano.tipo,
+      limiteUso: planoAssinatura.plano.limiteUso,
+      usosDisponiveis: planoAssinatura.usosDisponiveis,
+      usosConsumidos: planoAssinatura.usosConsumidos,
+      status: planoAssinatura.status,
+      dataAssinatura: planoAssinatura.dataAssinatura,
+      dataExpiracao: planoAssinatura.dataExpiracao,
+    }));
+  }
 }

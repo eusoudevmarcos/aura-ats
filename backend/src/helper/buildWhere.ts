@@ -2,15 +2,15 @@ type FieldOperator = "some" | "every" | "none";
 type FieldSpec = string | { [key: string]: FieldOperator };
 
 interface SearchParam {
-  search: string | number | Date;
+  search: string | number | Date | Array<string | number | Date>;
   fields: Array<FieldSpec>;
 }
 
 /**
- * buildWhere flexível para Prisma:
- * - Aceita múltiplos parâmetros de pesquisa
- * - Suporta campos aninhados e arrays relacionais com some/every/none
- * - Mantém compatibilidade com padrão antigo (search:string, fields:string[])
+ * buildWhere aprimorado:
+ * - Suporta múltiplos parâmetros (SearchParam | [search, fields])
+ * - Detecta tipos de busca (array → in, texto → contains, número → equals, etc.)
+ * - Funciona com campos relacionais (some/every/none)
  */
 export function buildWhere<TWhereInput extends Record<string, any>>(
   ...params: Array<SearchParam | [string, string[]]>
@@ -18,10 +18,10 @@ export function buildWhere<TWhereInput extends Record<string, any>>(
   const orConditions: Record<string, any>[] = [];
 
   params.forEach((param) => {
-    let search: string | number | Date;
+    let search: any;
     let fields: FieldSpec[];
 
-    // Suporte ao padrão antigo: buildWhere(search:string, fields:string[])
+    // Compatibilidade com o formato antigo [search, fields]
     if (
       Array.isArray(param) &&
       typeof param[0] === "string" &&
@@ -34,7 +34,7 @@ export function buildWhere<TWhereInput extends Record<string, any>>(
       fields = (param as SearchParam).fields;
     }
 
-    if (!search || !fields || fields.length === 0) return;
+    if (!search || !fields?.length) return;
 
     fields.forEach((fieldSpec) => {
       let fieldPath: string;
@@ -43,28 +43,27 @@ export function buildWhere<TWhereInput extends Record<string, any>>(
       if (typeof fieldSpec === "string") {
         fieldPath = fieldSpec;
       } else {
-        // Se for objeto, pega a chave e operador
         fieldPath = Object.keys(fieldSpec)[0];
         arrayOp = Object.values(fieldSpec)[0];
       }
 
       const parts = fieldPath.split(".");
 
-      // Monta a condição base
+      // 💡 Detecta tipo do search
       let condition: any;
-      // const numeric = Number(search);
-      // if (!isNaN(numeric)) {
-      //   // Datas ou números
-      //   condition = {
-      //     gte: new Date(numeric, 0, 1),
-      //     lte: new Date(numeric, 11, 31, 23, 59, 59, 999),
-      //   };
-      // } else {
-      // Texto
-      condition = { contains: search, mode: "insensitive" };
-      // }
+      if (Array.isArray(search)) {
+        condition = { in: search }; // ex: [id1, id2, id3]
+      } else if (typeof search === "number") {
+        condition = { equals: search };
+      } else if (search instanceof Date) {
+        condition = { equals: search };
+      } else if (typeof search === "string") {
+        condition = { contains: search, mode: "insensitive" };
+      } else {
+        return;
+      }
 
-      // Monta objeto aninhado, aplicando operador para arrays relacionais
+      // Monta estrutura aninhada
       let nested = condition;
       for (let i = parts.length - 1; i >= 0; i--) {
         const key = parts[i];

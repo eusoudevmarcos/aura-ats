@@ -1,6 +1,6 @@
 // src/modules/Home/PlatformSection/PlatformSection.tsx
+import { PrimaryButton } from '@/components/button/PrimaryButton';
 import { ModalVideoRM } from '@/components/modal/ModalVideoRM';
-import Button from '@/components/site/Button/Button';
 import { useModal } from '@/hook/useModal';
 import Image from 'next/image';
 import React from 'react';
@@ -17,7 +17,7 @@ const PlatformSection: React.FC = () => {
       id="platform-section"
       className="max-w-[1420px] mx-auto text-center"
     >
-      <h2 className="text-primary text-[2.5rem] font-bold mb-6 md:text-[2rem]">
+      <h2 className="text-primary text-[2.5rem] font-bold mb-2 md:text-[2rem]">
         Nossa Plataforma de Médicos: A Revolução no Recrutamento!
       </h2>
       <p className="text-lg text-secondary mb-12 max-w-[800px] mx-auto md:text-lg">
@@ -25,7 +25,7 @@ const PlatformSection: React.FC = () => {
         eficiente e inteligente.
       </p>
 
-      <div className="flex flex-row gap-24 items-center mt-16 text-left max-lg:flex-col max-lg:text-center">
+      <div className="flex flex-row gap-24 items-center text-left max-lg:flex-col max-lg:text-center">
         <div className="flex-1 min-w-[300px] max-lg:order-[-1] max-lg:mb-8">
           <Image
             src="/images/platform-overview.png"
@@ -35,7 +35,7 @@ const PlatformSection: React.FC = () => {
             className="rounded-2xl shadow-md"
           />
         </div>
-        <div className="flex-1 w-full">
+        <div className="flex-1 flex flex-col w-full">
           <h3 className="text-[1.75rem] text-primary font-semibold mb-6 max-lg:text-center">
             Agilidade e Precisão na sua Busca por Médicos e Especialistas na
             área da Saúde
@@ -54,14 +54,12 @@ const PlatformSection: React.FC = () => {
             trabalha a seu favor, proporcionando acesso a um banco de dados
             qualificado e atualizado de médicos em todo o Brasil.
           </p>
-          <Button
+          <PrimaryButton
             onClick={openVideoModal}
-            variant="primary"
-            fullWidth
-            size="large"
+            className="!p-4 text-xl self-center"
           >
             *EM BREVE* Assista ao Vídeo Demonstrativo
-          </Button>
+          </PrimaryButton>
         </div>
       </div>
 
