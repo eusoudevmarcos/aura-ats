@@ -53,7 +53,7 @@ export class BillingController {
   async getAllPlanos(req: Request, res: Response): Promise<Response> {
     try {
       const page = parseInt(req.query.page as string) || 1;
-      const pageSize = parseInt(req.query.pageSize as string) || 10;
+      const pageSize = parseInt(req.query.pageSize as string) || 12;
       const result = await this.billingService.getAll(page, pageSize);
       return res.status(200).json(result);
     } catch (error: any) {

@@ -3,17 +3,21 @@ import { pessoaSchema } from './pessoa.schema';
 
 export const empresaSchema = z.object({
   id: z.uuid().optional(),
-  razaoSocial: z.string().min(1, 'Razão Social é obrigatória'),
-  nomeFantasia: z.string().min(1, 'Nome Fantasia é obrigatória'),
+  razaoSocial: z
+    .string('Razão social é obrigatório')
+    .min(1, 'Razão Social é obrigatória'),
+  nomeFantasia: z
+    .string('Nom fantasia é obrigatório')
+    .min(1, 'Nome Fantasia é obrigatória'),
   cnpj: z
-    .string()
+    .string('CNPJ é obrigatório')
     .min(14, 'CNPJ inválido')
     .regex(
       /^(\d{2}\.\d{3}\.\d{3}\/\d{4}-\d{2}|\d{14})$/,
       'Formato de CNPJ inválido'
     ),
   dataAbertura: z
-    .string()
+    .string('Data de abertura é obrigatória')
     .refine(
       val =>
         /^\d{2}\/\d{2}\/\d{4}$/.test(val) ||

@@ -18,7 +18,7 @@ const PlanosPage: React.FC = () => {
     let ignore = false;
     async function fetchPlanos() {
       try {
-        const resp = await fetch('/api/externalWithAuth/billing/planos');
+        const resp = await fetch('/api/externalWithAuth/planos');
         if (!resp.ok) throw new Error('Erro ao buscar planos');
         const data = await resp.json();
         if (!ignore) setPlanos(data.data);

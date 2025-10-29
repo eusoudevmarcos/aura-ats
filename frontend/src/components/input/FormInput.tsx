@@ -18,7 +18,6 @@ export function FormInput<T extends FieldValues>({
   onChange,
   onKeyDown,
   control: externalControl,
-  register: externalRegister,
   errors: externalErrors,
   noControl = false,
   clear = false,

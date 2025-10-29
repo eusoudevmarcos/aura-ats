@@ -72,7 +72,9 @@ const EmpresaForm = ({
       <div className="col-span-full flex flex-col gap-2">
         {include?.contatos && (
           <div title="contato da empresa">
-            <h3 className="text-md font-bold">Contato da empresa</h3>
+            <h3 className="block text-primary text-xl font-bold mb-2">
+              Contato da empresa
+            </h3>
             <section className="flex w-full gap-2">
               <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
             </section>
@@ -81,13 +83,17 @@ const EmpresaForm = ({
 
         {include?.localizacao && (
           <div title="Localizacao">
-            <h3 className="text-md font-bold">Localização da empresa</h3>
+            <h3 className="block text-primary text-xl font-bold mb-2">
+              Localização da empresa
+            </h3>
             <LocalizacaoForm namePrefix={`${namePrefix}.localizacoes[0]`} />
           </div>
         )}
 
         <div title="Representante">
-          <h3 className="text-md font-bold">Representante</h3>
+          <h3 className="block text-primary text-xl font-bold mb-2">
+            Representante
+          </h3>
           <PessoaForm namePrefix={`${namePrefix}.representantes[0]`} />
         </div>
       </div>

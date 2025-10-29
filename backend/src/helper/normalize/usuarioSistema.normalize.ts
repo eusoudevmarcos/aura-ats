@@ -1,3 +1,5 @@
+import { normalizeClienteData } from "./cliente.normalize";
+
 export const normalizeDataUsuarioSistema = (data: any) => {
   const newData = { ...data };
 
@@ -5,22 +7,19 @@ export const normalizeDataUsuarioSistema = (data: any) => {
   if (data?.funcionario?.pessoa || data?.funcionario?.pessoaId) {
     newData.funcionario = { ...newData.funcionario };
 
-    // Mantém o objeto existente ou cria um vazio
-    const pessoa = newData.funcionario.pessoa || {};
-
     // Se tiver pessoaId, mantém o id
     if (data.funcionario.pessoaId) {
-      pessoa.id = data?.funcionario?.pessoaId;
+      newData.funcionario.pessoa.id = data?.funcionario?.pessoaId;
+      delete newData.pessoaId;
     }
   }
 
-  // --- Normaliza empresa ---
   if (data?.cliente || data?.clienteId) {
-    newData.cliente = { ...newData.cliente };
-
-    if (data.clienteId) {
-      newData.cliente.id = data.clienteId;
-    }
+    newData.cliente = normalizeClienteData({
+      ...data.cliente,
+      clienteId: data.clienteId,
+    });
+    if (newData?.clienteId) delete newData.clienteId;
   }
 
   return newData;

@@ -1,83 +1,94 @@
 import { Cliente, Prisma } from "@prisma/client";
-import nodemailer from "nodemailer";
 import { inject, injectable } from "tsyringe";
-import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
+
 import { buildClienteData } from "../helper/buildNested/cliente.build";
 import { buildWhere } from "../helper/buildWhere";
 import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
 import { validateBasicFieldsCliente } from "../helper/validate/cliente.validate";
 import prisma from "../lib/prisma";
-import { EmpresaRepository } from "../repository/empresa.repository";
 import { Pagination } from "../types/pagination";
+import { generateRandomPassword } from "../utils/generateRandomPassword";
+import { EmailService } from "./email.service";
 import { UsuarioSistemaService } from "./usuarioSistema.service";
 
 @injectable()
-export class ClienteService extends BuildNestedOperation {
+export class ClienteService {
   constructor(
-    @inject(EmpresaRepository) private empresaRepository: EmpresaRepository,
+    // @inject(EmpresaRepository) private empresaRepository: EmpresaRepository,
     @inject(UsuarioSistemaService)
     private usuarioSistemaService: UsuarioSistemaService
-  ) {
-    super();
-  }
+  ) {}
 
   async getClienteById(id: string): Promise<any> {
     const cliente = await prisma.cliente.findUnique({
       where: { id },
-      include: {
+      select: {
+        id: true,
+        status: true,
+        planos: {
+          select: {
+            id: true,
+            dataAssinatura: true,
+            status: true,
+            usosConsumidos: true,
+            planoId: true,
+            plano: {
+              select: {
+                nome: true,
+                tipo: true,
+                categoria: true,
+                limiteUso: true,
+                preco: true,
+              },
+            },
+          },
+        },
         empresa: {
-          include: {
-            contatos: true,
-            localizacoes: true,
-            representantes: true,
+          select: {
+            cnpj: true,
+            dataAbertura: true,
+            id: true,
+            nomeFantasia: true,
+            razaoSocial: true,
+            // contatos: true,
+            // localizacoes: true,
+            representantes: {
+              select: {
+                id: true,
+                nome: true,
+                cpf: true,
+                rg: true,
+                dataNascimento: true,
+                empresaRepresentadaId: true,
+              },
+            },
             socios: true,
           },
         },
         usuarioSistema: true,
-        // vagas: {
-        //   select: {
-        //     id: true,
-        //     titulo: true,
-        //     categoria: true,
-        //     dataPublicacao: true,
-        //     status: true,
-        //     _count: {
-        //       select: {
-        //         candidaturas: true,
-        //       },
-        //     },
-        //   },
-        // },
       },
     });
 
     if (!cliente) return null;
 
     // Buscar planos separadamente
-    const planos = await prisma.planoAssinatura.findMany({
-      where: { clienteId: id },
-      include: {
-        plano: true,
-      },
-    });
+    // const planos = await prisma.planoAssinatura.findMany({
+    //   where: { clienteId: id },
+    //   include: {
+    //     plano: true,
+    //   },
+    // });
 
     return {
       ...cliente,
-      planos,
+      // planos,
     };
   }
 
   async getAll({ page = 1, pageSize = 10, search }: Pagination<any>) {
     const skip = (page - 1) * pageSize;
 
-    if (search && typeof search === "string") {
-      const onlyNumbers = search.replace(/[^0-9]/g, "");
-      if (onlyNumbers.length >= 10) {
-        search = onlyNumbers;
-      }
-    }
-
-    if (search && (search.includes(`@`) || typeof search == "string")) {
+    if (search && search.includes(`@`) && typeof search == "string") {
       const usuariosSistemas = await prisma.usuarioSistema.findMany({
         where: { email: { contains: search, mode: "insensitive" } },
       });
@@ -131,7 +142,7 @@ export class ClienteService extends BuildNestedOperation {
   }
 
   async save(clienteData: any): Promise<Cliente> {
-    validateBasicFieldsCliente(clienteData);
+    await validateBasicFieldsCliente(clienteData);
 
     const normalizedData = normalizeClienteData(clienteData);
 
@@ -150,11 +161,11 @@ export class ClienteService extends BuildNestedOperation {
           socios: true,
         },
       },
-      planos: {
-        include: {
-          plano: true,
-        },
-      },
+      // planos: {
+      //   include: {
+      //     plano: true,
+      //   },
+      // },
       usuarioSistema: true,
     };
 
@@ -173,31 +184,29 @@ export class ClienteService extends BuildNestedOperation {
       });
     }
 
-    // Gerenciar planos se fornecidos
     if (clienteData.planos && Array.isArray(clienteData.planos)) {
       await this.managePlanos(cliente.id, clienteData.planos);
     }
 
-    // Gerenciar usuarioSistema se fornecido
-    if (clienteData.usuarioSistema) {
+    if (clienteData.email) {
       const usuarioSistemaData = {
-        ...clienteData.usuarioSistema,
+        email: clienteData.email,
         clienteId: cliente.id,
-        tipoUsuario: "CLIENTE", // Sempre CLIENTE para clientes
+        tipoUsuario: "CLIENTE",
+        password: clienteData.password || "",
       };
 
-      // Se não tem senha, gera uma aleatória
-      if (!usuarioSistemaData.password) {
-        usuarioSistemaData.password = this.generateRandomPassword();
-      }
+      usuarioSistemaData.password =
+        `${clienteData.empresa.nomeFantasia?.split(" ")[0]}${123}` ||
+        generateRandomPassword();
 
       await this.usuarioSistemaService.save(usuarioSistemaData);
 
-      // Enviar email com informações de login
-      await this.sendLoginEmail(cliente, usuarioSistemaData);
+      const emaiLService = new EmailService();
+
+      await emaiLService.sendUsuarioSistemaEmail(cliente, usuarioSistemaData);
     }
 
-    // Buscar cliente atualizado com todas as relações
     const clienteAtualizado = await this.getClienteById(cliente.id);
     if (!clienteAtualizado) {
       throw new Error("Erro ao buscar cliente atualizado");
@@ -206,7 +215,6 @@ export class ClienteService extends BuildNestedOperation {
   }
 
   private async checkDuplicates(data: any): Promise<void> {
-    // Se tem empresaId, verificar se a empresa existe
     if (data.empresaId) {
       const empresaExistente = await prisma.empresa.findUnique({
         where: { id: data.empresaId },
@@ -216,7 +224,6 @@ export class ClienteService extends BuildNestedOperation {
         throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
       }
 
-      // Verificar se já existe cliente para essa empresa
       const clienteExistente = await prisma.cliente.findUnique({
         where: { empresaId: data.empresaId },
       });
@@ -228,14 +235,12 @@ export class ClienteService extends BuildNestedOperation {
       }
     }
 
-    // Se tem dados da empresa para criar/atualizar
     if (data.empresa?.cnpj) {
       const empresaExistentePorCnpj = await prisma.empresa.findUnique({
         where: { cnpj: data.empresa.cnpj },
       });
 
       if (empresaExistentePorCnpj) {
-        // Se a empresa existe, verificar se já tem cliente
         const clienteExistente = await prisma.cliente.findUnique({
           where: { empresaId: empresaExistentePorCnpj.id },
         });
@@ -247,19 +252,6 @@ export class ClienteService extends BuildNestedOperation {
         }
       }
     }
-  }
-
-  private generateRandomPassword(): string {
-    const length = 12;
-    const charset =
-      "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*";
-    let password = "";
-
-    for (let i = 0; i < length; i++) {
-      password += charset.charAt(Math.floor(Math.random() * charset.length));
-    }
-
-    return password;
   }
 
   private async managePlanos(
@@ -282,64 +274,6 @@ export class ClienteService extends BuildNestedOperation {
           valorPago: 0, // Pode ser ajustado conforme necessário
         },
       });
-    }
-  }
-
-  private async sendLoginEmail(
-    cliente: any,
-    usuarioSistemaData: any
-  ): Promise<void> {
-    try {
-      // Configurar transporter de email (ajuste conforme sua configuração)
-      const transporter = nodemailer.createTransport({
-        host: process.env.SMTP_HOST || "smtp.gmail.com",
-        port: parseInt(process.env.SMTP_PORT || "587"),
-        secure: false,
-        auth: {
-          user: process.env.SMTP_USER,
-          pass: process.env.SMTP_PASS,
-        },
-      });
-
-      const mailOptions = {
-        from: process.env.SMTP_FROM || "noreply@aura-ats.com",
-        to: usuarioSistemaData.email,
-        subject: "Bem-vindo ao Aura ATS - Suas credenciais de acesso",
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #333;">Bem-vindo ao Aura ATS!</h2>
-            <p>Olá,</p>
-            <p>Seu cadastro foi realizado com sucesso! Aqui estão suas credenciais de acesso:</p>
-            
-            <div style="background-color: #f5f5f5; padding: 20px; border-radius: 5px; margin: 20px 0;">
-              <p><strong>Email:</strong> ${usuarioSistemaData.email}</p>
-              <p><strong>Senha:</strong> ${usuarioSistemaData.password}</p>
-            </div>
-            
-            <p>Para acessar o sistema, clique no link abaixo:</p>
-            <a href="${
-              process.env.FRONTEND_URL || "http://localhost:3000"
-            }/login" 
-               style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;">
-              Acessar Sistema
-            </a>
-            
-            <p style="margin-top: 30px; color: #666; font-size: 14px;">
-              <strong>Importante:</strong> Por segurança, recomendamos que você altere sua senha no primeiro acesso.
-            </p>
-            
-            <p style="color: #666; font-size: 14px;">
-              Se você não solicitou este cadastro, ignore este email.
-            </p>
-          </div>
-        `,
-      };
-
-      await transporter.sendMail(mailOptions);
-      console.log("Email enviado com sucesso para:", usuarioSistemaData.email);
-    } catch (error) {
-      console.error("Erro ao enviar email:", error);
-      // Não falha o processo se o email não for enviado
     }
   }
 }

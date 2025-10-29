@@ -85,7 +85,7 @@ const Slider: React.FC<SliderProps> = ({
       <button
         aria-label="Slide anterior"
         onClick={goToPrev}
-        className="absolute left-2 z-10 flex items-center justify-center rounded-full w-12 h-12 text-2xl text-primary transition hover:bg-primary hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+        className="absolute left-0 z-10 flex items-center justify-center rounded-full w-12 h-12 text-2xl text-primary transition hover:bg-primary hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
         style={{
           top: '50%',
           transform: 'translateY(-50%)',
@@ -108,7 +108,7 @@ const Slider: React.FC<SliderProps> = ({
       <button
         aria-label="Próximo slide"
         onClick={goToNext}
-        className="absolute right-2 z-10 flex items-center justify-center rounded-full w-12 h-12 text-2xl text-primary transition hover:bg-primary hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
+        className="absolute right-0 z-10 flex items-center justify-center rounded-full w-12 h-12 text-2xl text-primary transition hover:bg-primary hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary cursor-pointer"
         style={{
           top: '50%',
           transform: 'translateY(-50%)',

@@ -8,6 +8,7 @@ export const buildClienteData = async (data: any): Promise<any> => {
   };
 
   const buildNestedOperation = new BuildNestedOperation();
+
   if (data.empresa) {
     // Usa o helper genérico
     clienteData.empresa = buildNestedOperation.build(data.empresa);

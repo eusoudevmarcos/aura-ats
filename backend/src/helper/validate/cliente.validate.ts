@@ -1,23 +1,56 @@
-export const validateBasicFieldsCliente = (data: any): void => {
+import prisma from "../../lib/prisma";
+
+export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
   if (!data.empresa && !data.empresaId) {
     throw new Error(
       "Dados da empresa (ID ou objeto) são obrigatórios para um cliente."
     );
   }
 
-  if (!data.status) {
-    throw new Error("Status é obrigatório.");
+  if (
+    !data?.empresa?.representantes &&
+    data.empresa.representantes.length === 0
+  ) {
+    throw new Error(
+      "Ao criar uma nova empresa, é obrigatório informar pelo menos um representante."
+    );
   }
 
-  // Validação específica para criação de nova empresa
-  if (!data.id && data.empresa && !data.empresaId) {
-    if (
-      !data.empresa.representantes ||
-      data.empresa.representantes.length === 0
-    ) {
+  if (data.empresaId) {
+    const empresaExistente = await prisma.empresa.findUnique({
+      where: { id: data.empresaId },
+    });
+
+    if (!empresaExistente) {
+      throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
+    }
+
+    const clienteExistente = await prisma.cliente.findUnique({
+      where: { empresaId: data.empresaId },
+    });
+
+    if (clienteExistente) {
       throw new Error(
-        "Ao criar uma nova empresa, é obrigatório informar pelo menos um representante."
+        `Já existe um cliente associado à empresa com ID: ${data.empresaId}`
       );
+    }
+  }
+
+  if (data.empresa?.cnpj) {
+    const empresaExistentePorCnpj = await prisma.empresa.findUnique({
+      where: { cnpj: data.empresa.cnpj },
+    });
+
+    if (empresaExistentePorCnpj) {
+      const clienteExistente = await prisma.cliente.findUnique({
+        where: { empresaId: empresaExistentePorCnpj.id },
+      });
+
+      if (clienteExistente) {
+        throw new Error(
+          `Já existe um cliente para a empresa com CNPJ: ${data.empresa.cnpj}`
+        );
+      }
     }
   }
 };

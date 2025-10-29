@@ -1,8 +1,7 @@
 // src/services/usuarioSistema.service.ts
 import { UsuarioSistema } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
-import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
-import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
+import { buildUsuarioSistema } from "../helper/buildNested/usuarioSistema.build";
 import { normalizeDataUsuarioSistema } from "../helper/normalize/usuarioSistema.normalize";
 import { validateBasicFieldsUsuarioSistema } from "../helper/validate/usuarioSistema.validate";
 import prisma from "../lib/prisma";
@@ -10,13 +9,11 @@ import { EmpresaRepository } from "../repository/empresa.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
 
 @injectable()
-export class UsuarioSistemaService extends BuildNestedOperation {
+export class UsuarioSistemaService {
   constructor(
     @inject(PessoaRepository) private pessoaRepository: PessoaRepository,
     @inject(EmpresaRepository) private empresaRepository: EmpresaRepository
-  ) {
-    super();
-  }
+  ) {}
 
   async getById(id: string) {
     return await prisma.usuarioSistema.findFirst({
@@ -91,33 +88,18 @@ export class UsuarioSistemaService extends BuildNestedOperation {
     validateBasicFieldsUsuarioSistema(data);
 
     const normalizedUsuarioData = normalizeDataUsuarioSistema(data);
-    if (normalizedUsuarioData.cliente) {
-      normalizedUsuarioData.cliente = normalizeClienteData(
-        normalizedUsuarioData.cliente
-      );
-    }
-
+    console.log("normalizedUsuarioData");
+    console.log(normalizedUsuarioData);
     if (!normalizedUsuarioData.id) {
       await this.checkDuplicates(normalizedUsuarioData);
     }
 
-    if (normalizedUsuarioData.cliente?.id) {
-      const clienteExistente = await prisma.usuarioSistema.findFirst({
-        where: {
-          clienteId: normalizedUsuarioData.cliente.id,
-        },
-      });
+    const payloadUsuarioSistema = await buildUsuarioSistema(
+      normalizedUsuarioData
+    );
 
-      if (
-        clienteExistente &&
-        clienteExistente.id !== normalizedUsuarioData.id
-      ) {
-        throw new Error("CNPJ do cliente já vinculado a uma conta");
-      }
-    }
-
-    const usuarioData = this.build(normalizedUsuarioData);
-    console.log(JSON.stringify(usuarioData));
+    console.log("payloadUsuarioSistema");
+    console.log(payloadUsuarioSistema);
     const relationsShip = {
       funcionario: { include: { pessoa: true } },
       cliente: { include: { empresa: true } },
@@ -125,13 +107,13 @@ export class UsuarioSistemaService extends BuildNestedOperation {
 
     if (!normalizedUsuarioData.id) {
       return await prisma.usuarioSistema.create({
-        data: usuarioData,
+        data: payloadUsuarioSistema,
         include: relationsShip,
       });
     } else {
       return await prisma.usuarioSistema.update({
         where: { id: normalizedUsuarioData.id },
-        data: usuarioData,
+        data: payloadUsuarioSistema,
         include: relationsShip,
       });
     }

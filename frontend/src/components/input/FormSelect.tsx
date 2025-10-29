@@ -30,11 +30,7 @@ export function FormSelect<T extends FieldValues>({
     'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90';
   const errorClass = errorMessage ? 'border-red-500' : '';
 
-  const {
-    classNameContainer,
-    children: selectChildren,
-    ...otherSelectProps
-  } = selectProps || {};
+  const { classNameContainer, ...otherSelectProps } = selectProps || {};
 
   const selectClassName = [baseClass, errorClass, otherSelectProps?.className]
     .filter(Boolean)

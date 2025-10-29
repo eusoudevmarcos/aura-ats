@@ -1,124 +1,27 @@
+import { getVagas } from '@/axios/vaga.axios';
 import Card from '@/components/Card';
-import useFetchWithPagination from '@/hook/useFetchWithPagination';
 import { useRouter } from 'next/router';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import Table, { TableColumn } from '../Table';
 import { FormInput } from '../input/FormInput';
 
-// ===================== ENUMS (Adaptadas para o Frontend) =====================
-export enum CategoriaVaga {
-  TECNOLOGIA = 'TECNOLOGIA',
-  SAUDE = 'SAUDE',
-  ADMINISTRATIVO = 'ADMINISTRATIVO',
-  FINANCEIRO = 'FINANCEIRO',
-  RECURSOS_HUMANOS = 'RECURSOS_HUMANOS',
-  MARKETING = 'MARKETING',
-  VENDAS = 'VENDAS',
-  OUTROS = 'OUTROS',
-}
-
-export enum StatusVaga {
-  ATIVA = 'ATIVA',
-  PAUSADA = 'PAUSADA',
-  ENCERRADA = 'ENCERRADA',
-  ARQUIVADA = 'ARQUIVADA',
-}
-
-export enum TipoContrato {
-  CLT = 'CLT',
-  PJ = 'PJ',
-  ESTAGIO = 'ESTAGIO',
-  FREELANCER = 'FREELANCER',
-  TEMPORARIO = 'TEMPORARIO',
-}
-
-export enum NivelExperiencia {
-  ESTAGIO = 'ESTAGIO',
-  JUNIOR = 'JUNIOR',
-  PLENO = 'PLENO',
-  SENIOR = 'SENIOR',
-  ESPECIALISTA = 'ESPECIALISTA',
-  GERENTE = 'GERENTE',
-}
-
-export enum AreaCandidato {
-  TI = 'TI',
-  ENGENHARIA = 'ENGENHARIA',
-  MEDICINA = 'MEDICINA',
-  ADMINISTRACAO = 'ADMINISTRACAO',
-  // ... outras áreas
-}
-
-// ===================== INTERFACES DE DADOS PARA O FRONTEND =====================
-export interface Cliente {
-  id: string;
-  nome: string;
-  // Adicione outros campos de Cliente que podem ser úteis no frontend
-}
-
 export interface Localizacao {
-  id: string;
-  cep: string;
   cidade: string;
-  bairro: string;
   uf: string;
-  estado?: string | null;
-  logradouro?: string | null;
-  // Adicione outros campos de Localizacao
 }
 
-export interface Beneficio {
-  id: string;
-  nome: string;
-  descricao?: string | null;
-}
-
-export interface Habilidade {
-  id: string;
-  nome: string;
-  tipoHabilidade?: string | null;
-  // Não incluímos `vagas` aqui para evitar dependência circular
-}
-
-export interface VagaHabilidade {
-  vagaId: string;
-  habilidadeId: string;
-  nivelExigido?: string | null;
-  habilidade: Habilidade; // Incluindo a habilidade relacionada
-}
-
-export interface VagaWithRelations {
+export interface Vaga {
   id: string;
   titulo: string;
   descricao: string;
-  requisitos?: string | null;
-  responsabilidades?: string | null;
-  salario?: number | null;
-  tipoSalario?: string | null;
-  dataPublicacao: string | Date;
-  dataFechamento?: string | Date | null;
-  create_at: string | Date;
-  update_at: string | Date;
-
-  categoria: CategoriaVaga;
-  status: StatusVaga;
-  tipoContrato: TipoContrato;
-  nivelExperiencia: NivelExperiencia;
-  areaCandidato?: AreaCandidato | null;
-
-  cliente?: Cliente | null;
-  clienteId?: string | null;
-
-  localizacao?: Localizacao | null;
-  localizacaoId?: string | null;
-
-  beneficios?: Beneficio[];
-  habilidades?: VagaHabilidade[];
-  // Candidatos, CandidaturaVaga, AgendaVaga, Anexos (se precisar, inclua também)
+  dataPublicacao: string;
+  status: string;
+  categoria: string;
+  localizacao?: Localizacao;
 }
 
-// ===================== COMPONENTE VagaList =====================
-const columns: TableColumn<VagaWithRelations>[] = [
+// Define columns for the table
+const columns: TableColumn<Vaga>[] = [
   { label: 'Título', key: 'titulo' },
   {
     label: 'Data Publicação',
@@ -140,45 +43,52 @@ const columns: TableColumn<VagaWithRelations>[] = [
   },
 ];
 
+const PAGE_SIZE = 5;
+
 const VagaList: React.FC = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [vagas, setVagas] = useState<Vaga[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(PAGE_SIZE);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
 
-  const {
-    data: vagas,
-    total: totalRecords,
-    totalPages,
-    loading: isLoading,
-    setPage,
-    setPageSize,
-    page,
-    pageSize,
-  } = useFetchWithPagination<VagaWithRelations>(
-    '/api/externalWithAuth/vaga',
-    { search: searchQuery },
-    {
-      pageSize: 5,
-      page: 1,
-      dependencies: [searchQuery],
-      requestOptions: {},
+  const fetchVagas = useCallback(async () => {
+    setLoading(true);
+    try {
+      const result = await getVagas({
+        search,
+        page,
+        pageSize,
+      });
+      setVagas(Array.isArray(result.data) ? result.data : []);
+      setTotal(result.total ?? 0);
+      setTotalPages(result.totalPages ?? 1);
+    } catch (err) {
+      setVagas([]);
+      setTotal(0);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
     }
-  );
+  }, [search, page, pageSize]);
 
-  // A filtragem local é mantida caso o backend não suporte 'search'
-  // mas o ideal é que o 'search' seja tratado pelo backend na API.
-  const filteredVagas = vagas.filter(
-    vaga =>
-      vaga.titulo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vaga.descricao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vaga.areaCandidato?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      vaga.localizacao?.cidade
-        ?.toLowerCase()
-        .includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    fetchVagas();
+  }, [fetchVagas]);
 
-  const handleRowClick = (row: VagaWithRelations) => {
-    router.push(`/vaga/${row.id}`);
-  };
+  const filtered = search
+    ? vagas.filter(
+        vaga =>
+          vaga.titulo?.toLowerCase().includes(search.toLowerCase()) ||
+          vaga.descricao?.toLowerCase().includes(search.toLowerCase()) ||
+          vaga.localizacao?.cidade?.toLowerCase().includes(search.toLowerCase())
+      )
+    : vagas;
+
+  const tableData = search ? filtered : vagas;
 
   return (
     <Card classNameContainer="mt-6 px-6 py-2">
@@ -186,9 +96,12 @@ const VagaList: React.FC = () => {
         <h2 className="text-xl font-bold mb-4">Lista de Vagas</h2>
         <FormInput
           name="search"
-          placeholder="Buscar por título, descrição, área ou cliente..."
-          value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Buscar por título, descrição ou cidade..."
+          value={search}
+          onChange={e => {
+            setSearch(e.target.value);
+            setPage(1); // When searching, always reset to first page
+          }}
           clear
           inputProps={{
             className:
@@ -197,16 +110,16 @@ const VagaList: React.FC = () => {
         />
       </div>
       <Table
-        data={searchQuery ? filteredVagas : vagas}
+        data={tableData}
         columns={columns}
-        loading={isLoading}
+        loading={loading}
         emptyMessage="Nenhuma vaga encontrada."
-        onRowClick={handleRowClick}
+        onRowClick={row => router.push(`/vaga/${row.id}`)}
         pagination={{
           page,
           pageSize,
-          total: totalRecords,
-          totalPages: totalPages,
+          total,
+          totalPages,
           onPageChange: (p: number) => setPage(p),
         }}
       />

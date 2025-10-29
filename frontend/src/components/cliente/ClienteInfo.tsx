@@ -45,13 +45,11 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
           </div>
         )}
 
-        {cliente?.usuarioSistema?.email && (
+        {cliente?.email && (
           <div className="flex flex-col gap-1">
             <div>
               <span className="font-medium text-primary">E-mail:</span>
-              <span className="text-secondary ml-2">
-                {cliente?.usuarioSistema?.email}
-              </span>
+              <span className="text-secondary ml-2">{cliente?.email}</span>
             </div>
           </div>
         )}
@@ -99,11 +97,11 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
         </>
       )}
 
-      {cliente?.usuarioSistema?.email && (
+      {cliente?.email && (
         <div>
           <span className="font-medium text-primary">Email:</span>
           <span className="ml-2  text-secondary font-semibold">
-            {cliente.usuarioSistema.email}
+            {cliente.email}
           </span>
         </div>
       )}

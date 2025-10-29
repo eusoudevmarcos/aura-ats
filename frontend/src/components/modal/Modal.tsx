@@ -24,6 +24,7 @@ const Modal: React.FC<ModalProps> = ({
   const [visible, setVisible] = useState(isOpen);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const modalRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setShow(isOpen);
@@ -33,17 +34,37 @@ const Modal: React.FC<ModalProps> = ({
   }, [isOpen]);
 
   const handleClose = () => {
+    console.log('close');
     if (onClose) onClose(false);
-    setVisible(false);
+    setShow(false);
     timeoutRef.current = setTimeout(() => setShow(false), 200);
   };
 
   const handleBackdropClick = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>
   ) => {
-    if (backdropClose && modalRef.current && e.target === e.currentTarget) {
-      handleClose();
-    }
+    // e.preventDefault();
+    // e.stopPropagation();
+    // console.log('clique no fundo');
+    // if (containerRef.current) {
+    //   containerRef.current.style.transition =
+    //     'transform 0.2s cubic-bezier(0.4,0,0.2,1)';
+    //   containerRef.current.style.transform = 'scale(1.02)';
+    //   setTimeout(() => {
+    //     if (containerRef.current) {
+    //       containerRef.current.style.transform = 'scale(1)';
+    //       // setTimeout(() => {
+    //       //   handleClose();
+    //       // }, 300);
+    //     }
+    //   }, 150);
+    // }
+    // if (backdropClose && modalRef.current && e.target === e.currentTarget) {
+    //   // Animação de scale no containerRef
+    //   if (containerRef.current) {
+    //     handleClose();
+    //   }
+    // }
   };
 
   useEffect(() => {
@@ -58,18 +79,19 @@ const Modal: React.FC<ModalProps> = ({
     <div
       ref={modalRef}
       onClick={handleBackdropClick}
-      className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-2 transition-opacity duration-200 ${
+      className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-2 transition-opacity duration-200 bg-[#00000020] ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
     >
       <div
+        ref={containerRef}
         className={`bg-white shadow-md relative ${
           !fit && 'w-full max-w-2xl'
-        } transition-transform duration-200 !rounded-xl ${
+        } transition-transform duration-200 ${
           visible ? 'scale-100' : 'scale-95'
         }`}
       >
-        <div className="flex justify-between items-center p-4 border-b border-gray-200 text-white bg-primary gap-4">
+        <div className="flex justify-between items-center px-6 py-3  text-white bg-primary gap-4">
           {title && <h3 className="text-xl font-semibold ">{title}</h3>}
           <button
             onClick={handleClose}

@@ -8,14 +8,9 @@ import { vagaSchema } from './vaga.schema';
 export const clienteSchema = z.object({
   id: z.uuid().optional(),
   status: StatusClienteEnum,
-  planos: z.array(z.string()).optional(), // IDs dos planos selecionados
+  planos: z.array(z.string()).optional(),
   criarUsuarioSistema: z.boolean().optional(),
-  usuarioSistema: z
-    .object({
-      email: z.email().optional(),
-      password: z.string().optional(),
-    })
-    .optional(),
+  email: z.email().optional(),
 });
 export type ClienteInput = z.infer<typeof clienteSchema>;
 

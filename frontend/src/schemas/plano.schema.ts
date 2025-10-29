@@ -32,6 +32,7 @@ export const planoAssinaturaSchema = z.object({
   clienteId: z.string(),
   planoId: z.string(),
   dataAssinatura: z.string(),
+  qtdVagas: z.number().optional(),
   dataExpiracao: z.string().optional(),
   status: z.enum(['ATIVA', 'INATIVA', 'EXPIRADA', 'CANCELADA']),
   valorPago: z.number(),

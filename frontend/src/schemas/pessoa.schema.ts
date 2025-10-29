@@ -4,9 +4,9 @@ import { localizacaoSchema } from './localizacao.schema';
 
 export const pessoaSchema = z.object({
   id: z.string().nullable().optional(),
-  nome: z.string().min(1, 'Nome é obrigatório'),
+  nome: z.string('Nome é obrigatória').min(1, 'Nome é obrigatório'),
   cpf: z
-    .string()
+    .string('CPF é obrigatório')
     .min(1, 'CPF é obrigatório')
     .refine(
       val => {
@@ -19,7 +19,6 @@ export const pessoaSchema = z.object({
     ),
   rg: z
     .string()
-    .optional()
     .refine(
       val => {
         if (val) {
@@ -30,13 +29,20 @@ export const pessoaSchema = z.object({
       {
         message: 'RG inválido',
       }
-    ),
-  dataNascimento: z.union([
-    z
-      .string()
-      .regex(/^\d{2}\/\d{2}\/\d{4}$/, 'Data deve estar no formato DD/MM/AAAA'),
-    z.date(),
-  ]),
+    )
+    .optional(),
+  dataNascimento: z
+    .union([
+      z
+        .string()
+        .regex(
+          /^\d{2}\/\d{2}\/\d{4}$/,
+          'Data deve estar no formato DD/MM/AAAA'
+        ),
+      z.date(),
+    ])
+    .optional(),
+
   // estadoCivil: z
   //   .enum([
   //     'SOLTEIRO',

@@ -145,7 +145,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           <ClienteSearch
             onSuccess={onSuccessClienteSearch}
             initialValuesProps={
-              initialValues?.cliente?.empresa
+              initialValues?.cliente
                 ? {
                     empresa: { ...initialValues?.cliente?.empresa },
                     clienteId: initialValues?.clienteId,

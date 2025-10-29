@@ -119,7 +119,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const refreshPlanos = async (): Promise<void> => {
     try {
       const response = await fetch(
-        '/api/externalWithAuth/billing/planos-usuario'
+        '/api/externalWithAuth/planos/planos-usuario'
       );
       if (response.ok) {
         const data = await response.json();

@@ -1,13 +1,16 @@
 // pages/cliente/[uuid].tsx
 import api from '@/axios';
+import { getClienteById } from '@/axios/cliente.axios';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card';
 import ClienteInfo from '@/components/cliente/ClienteInfo';
 import ClienteForm from '@/components/form/ClienteForm';
 import VagaForm from '@/components/form/VagaForm';
 import { EditPenIcon, PlusIcon, TrashIcon } from '@/components/icons';
-import { VagaWithRelations } from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
+import { ModalPlanoCliente } from '@/components/modal/ModalPlanoCliente';
+import { ModalVagasCliente } from '@/components/modal/ModalVagasCliente';
+import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
 import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
 import Link from 'next/link';
@@ -21,11 +24,14 @@ const ClientePage: React.FC<{
 }> = ({ initialValues }) => {
   const router = useRouter();
   const { uuid } = router.query;
+
   const [erro, setErro] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showVagasForm, setShowVagasForm] = useState(false);
+  const [modalPlanosCliente, setModalPlanosCliente] = useState(false);
+  const [modalVagasCliente, setModalVagasCliente] = useState(false);
   const [cliente, setCliente] =
     useState<ClienteWithEmpresaAndPlanosSchema | null>(initialValues ?? null);
 
@@ -33,17 +39,19 @@ const ClientePage: React.FC<{
     !!initialValues
   );
 
+  const isAdmin = useAdmin();
+
   const {
     data: vagas,
-    total: totalRecords,
-    totalPages,
+    // total: totalRecords,
+    // totalPages,
     loading: isLoadingVagas,
-    setPage,
-    setPageSize,
-    page,
-    pageSize,
+    // setPage,
+    // setPageSize,
+    // page,
+    // pageSize,
     refetch: refetchVagas,
-  } = useFetchWithPagination<VagaWithRelations>(
+  } = useFetchWithPagination(
     `/api/externalWithAuth/vaga/cliente/${cliente?.id}`,
     cliente && cliente.id ? { search: cliente.id } : {},
     {
@@ -66,8 +74,8 @@ const ClientePage: React.FC<{
       setLoading(true);
       setErro(null);
       try {
-        const res = await api.get(`/api/externalWithAuth/cliente/${uuid}`);
-        setCliente(res.data);
+        const cliente = await getClienteById(uuid as string);
+        setCliente(cliente);
         setClienteCarregado(true);
       } catch (_) {
         setErro('Cliente não encontrado ou erro ao buscar dados.');
@@ -80,13 +88,6 @@ const ClientePage: React.FC<{
 
     fetchCliente();
   }, [uuid, initialValues]);
-
-  // Quando o cliente for carregado, buscar as vagas
-  useEffect(() => {
-    if (clienteCarregado && cliente && cliente.id) {
-      refetchVagas({ search: cliente.id });
-    }
-  }, [clienteCarregado, cliente]);
 
   const handleTrash = async () => {
     if (!cliente) return;
@@ -160,20 +161,36 @@ const ClientePage: React.FC<{
               Voltar
             </button>
 
-            <div className="flex gap-2">
-              <button
-                className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
-                onClick={() => setShowModalEdit(true)}
-              >
-                <EditPenIcon />
-              </button>
-              <button
-                className="px-2 py-2 bg-red-500 text-white rounded shadow-md hover:scale-110"
-                onClick={handleTrash}
-              >
-                <TrashIcon />
-              </button>
-            </div>
+            {isAdmin && (
+              <div className="flex gap-2">
+                <button
+                  className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 flex items-center justify-center"
+                  onClick={() => setModalVagasCliente(true)}
+                >
+                  <span className="material-icons-outlined m-0 p-0">cases</span>
+                </button>
+                <button
+                  className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 flex items-center justify-center"
+                  onClick={() => setModalPlanosCliente(true)}
+                >
+                  <span className="material-icons-outlined m-0 p-0">
+                    wallet
+                  </span>
+                </button>
+                <button
+                  className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
+                  onClick={() => setShowModalEdit(true)}
+                >
+                  <EditPenIcon />
+                </button>
+                <button
+                  className="px-2 py-2 bg-red-500 text-white rounded shadow-md hover:scale-110"
+                  onClick={handleTrash}
+                >
+                  <TrashIcon />
+                </button>
+              </div>
+            )}
           </div>
         )}
 
@@ -181,102 +198,6 @@ const ClientePage: React.FC<{
           <ClienteInfo cliente={cliente} variant="full" />
         </Card>
       </section>
-
-      {/* Seção de Planos */}
-      {cliente.planos && cliente.planos.length > 0 && (
-        <section className="mt-8">
-          <h2 className="text-2xl font-bold text-center text-primary w-full mb-6">
-            PLANOS DO CLIENTE
-          </h2>
-
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {cliente.planos.map((planoAssinatura: any) => (
-              <Card
-                key={planoAssinatura.id}
-                title={{
-                  label: planoAssinatura.plano.nome,
-                  className: 'text-lg text-center',
-                }}
-                classNameContainer="shadow-sm border border-gray-200 hover:shadow-md transition-shadow"
-              >
-                <div className="space-y-3">
-                  {/* <div className="flex justify-between items-center">
-                    <span className="font-medium">Preço:</span>
-                    <span className="text-secondary">
-                      R$ {planoAssinatura.plano.preco}
-                    </span>
-                  </div> */}
-
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Tipo:</span>
-                    <span className="text-secondary">
-                      {planoAssinatura.plano.tipo}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Status:</span>
-                    <span
-                      className={`px-2 py-1 rounded text-xs ${
-                        planoAssinatura.status === 'ATIVA'
-                          ? 'bg-green-100 text-green-800'
-                          : 'bg-gray-100 text-gray-800'
-                      }`}
-                    >
-                      {planoAssinatura.status}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between items-center">
-                    <span className="font-medium">Assinatura:</span>
-                    <span className="text-secondary">
-                      {planoAssinatura.dataAssinatura}
-                    </span>
-                  </div>
-
-                  {planoAssinatura.dataExpiracao && (
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Expira:</span>
-                      <span className="text-secondary">
-                        {planoAssinatura.dataExpiracao}
-                      </span>
-                    </div>
-                  )}
-
-                  {planoAssinatura.plano.descricao && (
-                    <div className="mt-3">
-                      <span className="font-medium">Descrição:</span>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {planoAssinatura.plano.descricao}
-                      </p>
-                    </div>
-                  )}
-
-                  {planoAssinatura.plano.limiteUso && (
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Limite de uso:</span>
-                      <span className="text-secondary">
-                        {planoAssinatura.usosDisponiveis ||
-                          planoAssinatura.plano.limiteUso}{' '}
-                        usos
-                      </span>
-                    </div>
-                  )}
-
-                  {planoAssinatura.plano.diasGarantia && (
-                    <div className="flex justify-between items-center">
-                      <span className="font-medium">Garantia:</span>
-                      <span className="text-secondary">
-                        {planoAssinatura.plano.diasGarantia} dias
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
-          </div>
-        </section>
-      )}
 
       <div className="flex justify-center mt-10 mb-4 relative">
         <h3 className="text-2xl font-bold text-center text-primary w-full ">
@@ -396,6 +317,21 @@ const ClientePage: React.FC<{
         )}
       </section>
 
+      {/* Seção de Planos */}
+      {cliente.planos && cliente.planos.length > 0 && (
+        <ModalPlanoCliente
+          isOpen={modalPlanosCliente}
+          onClose={() => {
+            setModalPlanosCliente(false);
+          }}
+          planos={cliente.planos as any}
+        />
+      )}
+
+      {modalVagasCliente && (
+        <ModalVagasCliente open={modalVagasCliente} uuid={uuid as string} />
+      )}
+
       {showModalEdit && (
         <Modal
           isOpen={showModalEdit}
@@ -413,6 +349,7 @@ const ClientePage: React.FC<{
             }}
             initialValues={{
               ...cliente,
+              empresa: { ...cliente.empresa },
             }}
           />
         </Modal>
@@ -432,6 +369,7 @@ const ClientePage: React.FC<{
               // Atualizar as vagas após cadastrar uma nova vaga
               refetchVagas({ search: cliente.id });
             }}
+            initialValues={{ cliente } as any}
             isBtnDelete={false}
             isBtnView={false}
           />

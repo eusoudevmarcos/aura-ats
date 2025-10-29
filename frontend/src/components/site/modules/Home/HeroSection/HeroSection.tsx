@@ -50,7 +50,7 @@ const HeroSection: React.FC = () => {
   return (
     <section
       id="hero-section"
-      className="relative w-full max-h-[900px] min-h-[500px] mx-auto mt-10"
+      className="relative w-full min-h-[500px] mx-auto mt-10 max-w-[1620px]"
     >
       <Slider slides={heroSlides} autoPlay interval={10000}>
         {(slide: SlideItem, isExiting: boolean) => (

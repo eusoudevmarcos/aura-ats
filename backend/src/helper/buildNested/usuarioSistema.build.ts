@@ -1,15 +1,15 @@
 import bcrypt from "bcryptjs";
 import { BuildNestedOperation } from "./buildNestedOperation";
 
-export const buildUsuarioData = async (data: any): Promise<any> => {
+export const buildUsuarioSistema = async (data: any): Promise<any> => {
   const usuarioData: any = {
     id: data?.id,
     email: data.email,
     tipoUsuario: data.tipoUsuario,
-    password: await bcrypt.hash(data.password, 10),
+    password: data.password || (await bcrypt.hash(data.password, 10)),
   };
 
-  delete data.tipoPessoaOuEmpresa;
+  if (data.tipoPessoaOuEmpresa) delete data.tipoPessoaOuEmpresa;
 
   const buildNestedOperation = new BuildNestedOperation();
 

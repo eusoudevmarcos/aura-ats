@@ -17,20 +17,23 @@ model Plano {
 
 model PlanoAssinatura {
   id             String           @id @default(uuid())
-  clienteId      String
-  planoId        String
   dataAssinatura DateTime         @default(now())
   dataExpiracao  DateTime?
   status         AssinaturaStatus @default(ATIVA)
   valorPago      Decimal          @db.Decimal(10, 2)
   detalhes       String?
+  /// Número de selecionadas
+  qtdVagas       Int?
 
   // Para planos do tipo "por uso"
   usosDisponiveis Int? // quantas ações ainda pode fazer
   usosConsumidos  Int? @default(0)
 
-  cliente  Cliente    @relation(fields: [clienteId], references: [id])
-  plano    Plano      @relation(fields: [planoId], references: [id])
+  cliente   Cliente @relation(fields: [clienteId], references: [id])
+  clienteId String
+  plano     Plano   @relation(fields: [planoId], references: [id])
+  planoId   String
+
   PlanoUso PlanoUso[]
 
   @@index([clienteId])

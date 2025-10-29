@@ -3,6 +3,12 @@
     "dbaeumer.vscode-eslint",
     "esbenp.prettier-vscode",
     "christian-kohler.path-intellisense",
-    "bradlc.vscode-tailwindcss"
+    "bradlc.vscode-tailwindcss",
+    "formulahendry.auto-close-tag",
+    "formulahendry.auto-complete-tag",
+    "formulahendry.auto-rename-tag",
+    "ecmel.vscode-html-css",
+    "kisstkondoros.vscode-gutter-preview",
+    "prisma.prisma"
   ]
 }

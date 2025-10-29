@@ -4,7 +4,6 @@ import Card from '@/components/Card';
 import { AgendaForm } from '@/components/form/AgendaForm';
 import CandidatoForm from '@/components/form/CandidatoForm';
 import { EditPenIcon, TrashIcon, WhatsAppIcon } from '@/components/icons';
-import { VagaWithRelations } from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
 import { useCliente } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
@@ -35,7 +34,7 @@ const CandidatoPage: React.FC = () => {
     page,
     pageSize,
     refetch: refetchVagas,
-  } = useFetchWithPagination<VagaWithRelations>(
+  } = useFetchWithPagination(
     `/api/externalWithAuth/vaga/candidato/${candidato?.id}`,
     candidato && candidato.id ? { search: candidato.id } : {},
     {

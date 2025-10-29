@@ -1,7 +1,7 @@
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import ClienteForm from '@/components/form/ClienteForm';
 import { PlusIcon } from '@/components/icons';
-import ClientList from '@/components/list/ClientList';
+import ClienteList from '@/components/list/ClienteList';
 import Modal from '@/components/modal/Modal';
 import { useState } from 'react';
 
@@ -11,7 +11,7 @@ export default function Clientes() {
 
   return (
     <>
-      <ClientList key={refreshKey} />
+      <ClienteList key={refreshKey} />
 
       <PrimaryButton
         className="float-right mt-4"
