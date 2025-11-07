@@ -1,5 +1,5 @@
 // middleware.ts
-import { jwtVerify } from 'jsonwebtoken';
+import { verify } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Tipos de usuário que devem ir para /dashboard/cliente
@@ -52,17 +52,19 @@ function isClientType(userType: string) {
 async function getUserFromToken(token: string) {
   try {
     // Substitua 'your-secret-key' pela sua chave secreta
-    const secret = new TextEncoder().encode(
-      process.env.NUXT_PUBLIC_JWT_SECRET || 'your-secret-key'
-    );
-    const { payload } = await jwtVerify(token, secret);
-
-    return {
-      id: payload.id as string,
-      tipo: payload.tipo as string,
-      nome: payload.nome as string,
-      // Adicione outros campos que você tem no JWT
-    };
+    const secret = process.env.NUXT_PUBLIC_JWT_SECRET!;
+    // O método verify pode retornar string | JwtPayload
+    const decoded = verify(token, secret);
+    // O payload, pelo padrão da lib, é o próprio objeto retornado (JwtPayload)
+    if (typeof decoded === 'object' && decoded !== null) {
+      return {
+        id: decoded.id as string,
+        tipo: decoded.tipo as string,
+        nome: decoded.nome as string,
+        // Adicione outros campos que você tem no JWT
+      };
+    }
+    return null;
   } catch (error) {
     console.error('Erro ao verificar token:', error);
     return null;
