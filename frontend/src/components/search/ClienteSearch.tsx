@@ -142,7 +142,6 @@ const ClienteSearch = ({
                 inputProps={{
                   value: searchQuery,
                   classNameContainer: 'flex-1',
-                  disabled: !initialValuesProps?.cliente,
                 }}
                 onChange={e => {
                   setSearchQuery(e.target.value);
@@ -156,7 +155,6 @@ const ClienteSearch = ({
                 onClick={() => {
                   setShowAutocomplete(true);
                 }}
-                disabled={!initialValuesProps?.cliente}
               >
                 <span className="material-icons-outlined">search</span>
               </PrimaryButton>

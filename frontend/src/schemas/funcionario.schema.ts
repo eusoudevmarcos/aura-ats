@@ -11,6 +11,8 @@ export const TipoUsuarioEnum = z.enum(
     'RECRUTADOR',
     'VENDEDOR',
     'CLIENTE',
+    'CLIENTE_ATS',
+    'CLIENTE_CRM',
   ],
   { error: 'Selecione o tipo de Usuario' }
 );

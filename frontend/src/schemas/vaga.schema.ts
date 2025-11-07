@@ -99,6 +99,7 @@ export const vagaSchema = z.object({
   tipoContrato: TipoContratoEnum.optional(),
   categoria: CategoriaVagaEnum.optional(),
   tipoSalario: z.string().optional(),
+  salario: z.string().optional(),
   descricao: z.string().min(20, 'minimo 20 caracteres'),
   localizacao: localizacaoSchema.optional(),
   triagens: z.array(triagemSchema).max(4, 'Máximo de 4 triagens').optional(),

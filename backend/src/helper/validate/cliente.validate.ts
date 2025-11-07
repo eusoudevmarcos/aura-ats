@@ -16,27 +16,27 @@ export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
     );
   }
 
-  if (data.empresaId) {
-    const empresaExistente = await prisma.empresa.findUnique({
-      where: { id: data.empresaId },
-    });
+  // if (data.empresaId) {
+  //   const empresaExistente = await prisma.empresa.findUnique({
+  //     where: { id: data.empresaId },
+  //   });
 
-    if (!empresaExistente) {
-      throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
-    }
+  //   if (!empresaExistente) {
+  //     throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
+  //   }
 
-    const clienteExistente = await prisma.cliente.findUnique({
-      where: { empresaId: data.empresaId },
-    });
+  //   const clienteExistente = await prisma.cliente.findUnique({
+  //     where: { empresaId: data.empresaId },
+  //   });
 
-    if (clienteExistente) {
-      throw new Error(
-        `Já existe um cliente associado à empresa com ID: ${data.empresaId}`
-      );
-    }
-  }
+  //   if (clienteExistente) {
+  //     throw new Error(
+  //       `Já existe um cliente associado à empresa com ID: ${data.empresaId}`
+  //     );
+  //   }
+  // }
 
-  if (data.empresa?.cnpj) {
+  if (!data.empresa.id && data.empresa?.cnpj) {
     const empresaExistentePorCnpj = await prisma.empresa.findUnique({
       where: { cnpj: data.empresa.cnpj },
     });

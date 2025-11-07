@@ -64,13 +64,16 @@ export const getNavItems = (user: any) => {
           href: '/atividades/agendas',
         }
       : undefined,
-    {
-      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
-      label: 'Profissionais',
-      href: '/profissionais',
-    },
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA &&
+      user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS && {
+        icon: <UsersIcon className="w-5 h-5 text-inherit" />,
+        label: 'Profissionais',
+        href: '/profissionais',
+      },
     user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
       user?.tipo === TipoUsuarioEnum.enum.CLIENTE ||
+      user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM ||
+      user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
       user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
       ? {
           icon: <BriefcaseIcon className="w-5 h-5 text-inherit" />,
@@ -98,7 +101,7 @@ export const getNavItems = (user: any) => {
       label: 'Clientes',
       href: '/clientes',
     },
-    {
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA && {
       icon: <ClipboardCheckIcon className="w-5 h-5 text-inherit" />,
       label: 'Testes',
       href: '/testes',

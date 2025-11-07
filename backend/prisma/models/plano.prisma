@@ -1,54 +1,74 @@
 model Plano {
-  id           String            @id @default(uuid())
+  id           String          @id @default(uuid())
   nome         String
   descricao    String?
-  preco        Decimal           @db.Decimal(10, 2)
-  tipo         TipoPlano         @default(MENSAL) // tipo do plano
+  preco        Decimal         @db.Decimal(10, 2)
+  tipo         TipoPlano       @default(MENSAL) // tipo do plano
   diasGarantia Int?
   limiteUso    Int? // se for por uso: ex. 100 pesquisas
-  ativo        Boolean           @default(true)
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+  ativo        Boolean         @default(true)
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
   categoria    CategoriaPlano?
-  assinaturas  PlanoAssinatura[]
+  assinaturas  PlanoAssinado[]
 
   @@schema("Plano")
 }
 
-model PlanoAssinatura {
-  id             String           @id @default(uuid())
-  dataAssinatura DateTime         @default(now())
-  dataExpiracao  DateTime?
-  status         AssinaturaStatus @default(ATIVA)
-  valorPago      Decimal          @db.Decimal(10, 2)
-  detalhes       String?
-  /// Número de selecionadas
-  qtdVagas       Int?
+model PlanoAssinado {
+  id     String           @id @default(uuid())
+  status AssinaturaStatus @default(ATIVA)
 
-  // Para planos do tipo "por uso"
+  // Recrutamento (CRM)
+  dataAssinatura DateTime  @default(now())
+  dataExpiracao  DateTime?
+
+  qtdVagas           Int? // Número de selecionadas
+  precoPersonalizado Decimal? @db.Decimal(10, 2) // Quando for planos personalizado
+  porcentagemMinima  Decimal? @db.Decimal(10, 2) // Perccentual minimo da entrada do "precoTotalPersonalizado" * porcentagemMinima
+  observacoes        String?
+
+  // PLATAFORMA (ATS)
   usosDisponiveis Int? // quantas ações ainda pode fazer
-  usosConsumidos  Int? @default(0)
+  usosConsumidos  Int? // quantas ações foram feitas
 
   cliente   Cliente @relation(fields: [clienteId], references: [id])
   clienteId String
-  plano     Plano   @relation(fields: [planoId], references: [id])
-  planoId   String
+
+  plano   Plano  @relation(fields: [planoId], references: [id])
+  planoId String
 
   PlanoUso PlanoUso[]
 
   @@index([clienteId])
   @@index([planoId])
-  @@schema("PlanoAssinatura")
+  @@schema("Plano")
 }
 
 model PlanoUso {
-  id                String   @id @default(uuid())
-  planoAssinaturaId String
-  acao              String // Ex: "pesquisa_empresa"
-  dataUso           DateTime @default(now())
+  id      String   @id @default(uuid())
+  acao    String // Ex: "pesquisa_empresa"
+  dataUso DateTime @default(now())
 
-  planoAssinatura PlanoAssinatura @relation(fields: [planoAssinaturaId], references: [id])
+  planoAssinatura   PlanoAssinado @relation(fields: [planoAssinaturaId], references: [id])
+  planoAssinaturaId String
 
   @@index([planoAssinaturaId])
-  @@schema("PlanoAssinatura")
+  @@schema("Plano")
 }
+
+// model PlanoPlataforma {
+//   id                String   @id @default(uuid())
+//   planoAssinaturaId String
+//   acao              String // Ex: "pesquisa_empresa"
+//   dataUso           DateTime @default(now())
+
+//   cliente   Cliente @relation(fields: [clienteId], references: [id])
+//   clienteId String
+
+//   plano   Plano  @relation(fields: [planoId], references: [id])
+//   planoId String
+
+//   @@index([planoAssinaturaId])
+//   @@schema("PlanoAssinatura")
+// }

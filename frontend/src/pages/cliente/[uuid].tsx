@@ -101,12 +101,10 @@ const ClientePage: React.FC<{
     }
   };
 
-  // Resetar para página 1 se mudar o cliente
   React.useEffect(() => {
     setPaginaAtual(1);
   }, [cliente]);
 
-  // Funções de paginação
   const totalPaginas = Math.ceil(vagas.length / ITENS_POR_PAGINA);
 
   const vagasPaginadas = vagas.slice(
@@ -194,7 +192,8 @@ const ClientePage: React.FC<{
           </div>
         )}
 
-        <Card title="Dados do cliente">
+        <Card>
+          <h3 className="text-lg text-primary font-bold">Dados do cliente</h3>
           <ClienteInfo cliente={cliente} variant="full" />
         </Card>
       </section>
@@ -256,6 +255,7 @@ const ClientePage: React.FC<{
                       {vaga.categoria}
                     </span>
                   </div>
+
                   <div>
                     <span className="font-medium">Tipo de Salário:</span>
                     <span className="ml-1 text-secondary">
@@ -318,7 +318,7 @@ const ClientePage: React.FC<{
       </section>
 
       {/* Seção de Planos */}
-      {cliente.planos && cliente.planos.length > 0 && (
+      {cliente?.planos && (
         <ModalPlanoCliente
           isOpen={modalPlanosCliente}
           onClose={() => {
@@ -347,10 +347,7 @@ const ClientePage: React.FC<{
                 refetchVagas({ search: cliente.id });
               }
             }}
-            initialValues={{
-              ...cliente,
-              empresa: { ...cliente.empresa },
-            }}
+            initialValues={cliente}
           />
         </Modal>
       )}

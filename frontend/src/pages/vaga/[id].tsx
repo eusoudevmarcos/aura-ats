@@ -1,5 +1,6 @@
 // pages/vaga/[uuid].tsx
 import api from '@/axios'; // Certifique-se que o caminho está correto
+import { AdminGuard } from '@/components/auth/AdminGuard';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card'; // Certifique-se que o caminho está correto
 import CandidatoForm from '@/components/form/CandidatoForm';
@@ -108,18 +109,21 @@ const VagaPage: React.FC = () => {
           >
             Triagem <span className="material-icons-outlined"></span>
           </Link>
-          <button
-            className="px-3 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 transition-transform"
-            onClick={() => setShowModalEdit(true)}
-          >
-            <EditPenIcon />
-          </button>
-          <button
-            className="px-3 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 transition-transform"
-            onClick={handleDelete}
-          >
-            <TrashIcon />
-          </button>
+
+          <AdminGuard>
+            <button
+              className="px-3 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 transition-transform"
+              onClick={() => setShowModalEdit(true)}
+            >
+              <EditPenIcon />
+            </button>
+            <button
+              className="px-3 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 transition-transform"
+              onClick={handleDelete}
+            >
+              <TrashIcon />
+            </button>
+          </AdminGuard>
         </div>
       </div>
 
@@ -359,38 +363,41 @@ const VagaPage: React.FC = () => {
           PROFISSIONAIS CADASTRADOS
         </h3>
 
-        <PrimaryButton
-          className="float-right flex text-nowrap absolute right-0"
-          onClick={() => setShowModalCandidato(true)}
-        >
-          +
-        </PrimaryButton>
+        <AdminGuard>
+          <>
+            <PrimaryButton
+              className="float-right flex text-nowrap absolute right-0"
+              onClick={() => setShowModalCandidato(true)}
+            >
+              +
+            </PrimaryButton>
+            <Modal
+              title={`${currentTab} Profissional`}
+              isOpen={showModalCandidato}
+              onClose={() => setShowModalCandidato(false)}
+            >
+              <Tabs
+                tabs={['Consultar', 'Cadastrar']}
+                currentTab={currentTab}
+                classNameContainer="mt-4"
+                classNameTabs="mb-2"
+                classNameContent="pt-2"
+                onTabChange={tab => setCurrentTab(tab as typeof currentTab)}
+              >
+                <CandidatoSearch
+                  idVaga={vaga.id}
+                  onSuccess={async () => {
+                    setShowModalCandidato(false);
+                    await fetchVaga();
+                  }}
+                  onDelete={() => console.log('Removido')}
+                />
 
-        <Modal
-          title={`${currentTab} Profissional`}
-          isOpen={showModalCandidato}
-          onClose={() => setShowModalCandidato(false)}
-        >
-          <Tabs
-            tabs={['Consultar', 'Cadastrar']}
-            currentTab={currentTab}
-            classNameContainer="mt-4"
-            classNameTabs="mb-2"
-            classNameContent="pt-2"
-            onTabChange={tab => setCurrentTab(tab as typeof currentTab)}
-          >
-            <CandidatoSearch
-              idVaga={vaga.id}
-              onSuccess={async () => {
-                setShowModalCandidato(false);
-                await fetchVaga();
-              }}
-              onDelete={() => console.log('Removido')}
-            />
-
-            <CandidatoForm></CandidatoForm>
-          </Tabs>
-        </Modal>
+                <CandidatoForm></CandidatoForm>
+              </Tabs>
+            </Modal>
+          </>
+        </AdminGuard>
       </div>
 
       <section className="flex gap-2 w-full flex-wrap">
@@ -422,11 +429,14 @@ const VagaPage: React.FC = () => {
                     </div>
                     <div className="flex gap-2 text-sm">
                       <span className="font-semibold">CRM:</span>
-                      <span>{candidato.crm ?? '-'}</span>
+                      <span>
+                        <AdminGuard typeText>{candidato.crm ?? '-'}</AdminGuard>
+                      </span>
+                      {/* <span>{candidato.crm ?? '-'}</span> */}
                     </div>
                     <div className="flex gap-2 text-sm">
                       <span className="font-semibold">RQE:</span>
-                      <span>{candidato.rqe ?? '-'}</span>
+                      <AdminGuard typeText>{candidato.rqe ?? '-'}</AdminGuard>
                     </div>
                     <div className="flex gap-2 text-sm">
                       <span className="font-semibold">Especialidade:</span>

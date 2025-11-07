@@ -1,3 +1,4 @@
+import { AdminGuard } from '@/components/auth/AdminGuard';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import VagaForm from '@/components/form/VagaForm';
 import { PlusIcon } from '@/components/icons';
@@ -13,14 +14,16 @@ export default function Vagas() {
     <>
       <VagaList key={refreshKey} />
 
-      <PrimaryButton
-        className="float-right mt-4"
-        onClick={() => setShowVagasForm(true)}
-      >
-        <PlusIcon />
-        Cadastrar Vaga
-      </PrimaryButton>
-
+      <AdminGuard>
+        <PrimaryButton
+          className="float-right mt-4"
+          onClick={() => setShowVagasForm(true)}
+        >
+          <PlusIcon />
+          Cadastrar Vaga
+        </PrimaryButton>
+      </AdminGuard>
+      
       {showVagasForm && (
         <Modal
           isOpen={showVagasForm}

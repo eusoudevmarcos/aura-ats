@@ -20,26 +20,26 @@ export const planoSchema = z.object({
   diasGarantia: z.number().optional(),
   limiteUso: z.number().optional(),
   ativo: z.boolean(),
-  categoria: planoCategoriaEnum,
   createdAt: z.string(),
   updatedAt: z.string(),
+  categoria: planoCategoriaEnum,
 });
 
 export type Plano = z.infer<typeof planoSchema>;
 
-export const planoAssinaturaSchema = z.object({
-  id: z.string(),
-  clienteId: z.string(),
-  planoId: z.string(),
-  dataAssinatura: z.string(),
-  qtdVagas: z.number().optional(),
+export const planoAssinadoSchema = z.object({
+  id: z.string().optional(),
+  status: z.enum(['ATIVA', 'INATIVA', 'EXPIRADA', 'CANCELADA']).optional(),
+  dataAssinatura: z.string().optional(),
   dataExpiracao: z.string().optional(),
-  status: z.enum(['ATIVA', 'INATIVA', 'EXPIRADA', 'CANCELADA']),
-  valorPago: z.number(),
-  detalhes: z.string().optional(),
+  qtdVagas: z.number().optional(),
+  precoPersonalizado: z.number().optional(),
+  porcentagemMinima: z.number().optional(),
+  observacoes: z.string().optional(),
   usosDisponiveis: z.number().optional(),
   usosConsumidos: z.number().optional(),
-  plano: planoSchema,
+  clienteId: z.string().optional(),
+  planoId: z.string(),
 });
 
-export type PlanoAssinatura = z.infer<typeof planoAssinaturaSchema>;
+export type PlanoAssinado = z.infer<typeof planoAssinadoSchema>;

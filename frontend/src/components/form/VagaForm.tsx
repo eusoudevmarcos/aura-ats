@@ -180,14 +180,14 @@ const VagaForm: React.FC<VagaFormProps> = ({
           </>
         </FormSelect>
 
-        {/* {tipoSalario !== 'A COMBINAR' && (
+        {tipoSalario !== 'A COMBINAR' && (
           <FormInput
             name="salario"
             register={register}
             label="Salário"
             inputProps={{ type: 'number', step: '0.01' }}
           />
-        )} */}
+        )}
 
         <FormSelect
           name="categoria"

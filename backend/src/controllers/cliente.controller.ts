@@ -27,7 +27,16 @@ export class ClienteController {
         return res.status(404).json({ message: "Cliente não encontrado" });
       }
 
-      return res.status(200).json(nonEmptyAndConvertDataDTO(cliente));
+      const { planos, ...rest } = cliente;
+
+      const planosUpdate = planos.map((planoAssinado: any) => ({
+        ...planoAssinado,
+        porcentagemMinima: Number(planoAssinado.porcentagemMinima.toString()),
+      }));
+
+      return res
+        .status(200)
+        .json(nonEmptyAndConvertDataDTO({ ...rest, planos: planosUpdate }));
     } catch (error) {
       console.error(error);
       return res.status(500).json({ message: "Erro ao buscar cliente", error });

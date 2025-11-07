@@ -1,33 +1,31 @@
+import { AdminGuard } from '@/components/auth/AdminGuard';
 import { ConnectGoogleButton } from '@/components/button/GoogleAuth';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import { AgendaForm } from '@/components/form/AgendaForm';
 import { PlusIcon } from '@/components/icons';
 import AgendaList from '@/components/list/AgendaList';
 import Modal from '@/components/modal/Modal';
-import { useAdmin } from '@/context/AuthContext';
 import { SessionProvider } from 'next-auth/react';
 import { useState } from 'react';
 
 export default function Agenda() {
   const [showAgendaForm, setShowAgendaForm] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
-  const isAdmin = useAdmin();
+
   return (
     <SessionProvider>
       <AgendaList key={refreshKey} />
 
-      {isAdmin && (
-        <>
-          <PrimaryButton
-            className="float-right mt-4"
-            onClick={() => setShowAgendaForm(true)}
-          >
-            <PlusIcon />
-            Cadastrar Agendamento
-          </PrimaryButton>
-          <ConnectGoogleButton className="float-right mt-4 mr-2" />
-        </>
-      )}
+      <AdminGuard>
+        <PrimaryButton
+          className="float-right mt-4"
+          onClick={() => setShowAgendaForm(true)}
+        >
+          <PlusIcon />
+          Cadastrar Agendamento
+        </PrimaryButton>
+        <ConnectGoogleButton className="float-right mt-4 mr-2" />
+      </AdminGuard>
 
       <Modal
         title="Cadastrar Agendamento"

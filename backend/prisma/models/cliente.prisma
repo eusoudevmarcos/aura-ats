@@ -15,7 +15,7 @@ model Cliente {
     usuarioSistema UsuarioSistema?
 
     // Relacionamento com planos
-    planos PlanoAssinatura[]
+    planos PlanoAssinado[]
 
     @@index([empresaId])
     @@schema("Cliente")

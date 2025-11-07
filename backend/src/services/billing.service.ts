@@ -1,4 +1,4 @@
-import { Plano, PlanoAssinatura, Prisma, PrismaClient } from "@prisma/client";
+import { Plano, PlanoAssinado, Prisma, PrismaClient } from "@prisma/client";
 import { injectable } from "tsyringe";
 import { createPixPayment } from "../lib/mercadopago";
 
@@ -16,8 +16,8 @@ export class BillingService {
   async createAssinaturaMensal(data: {
     clienteId: string;
     planoId: string;
-    valorPago?: number | string;
-    detalhes?: string | null;
+    precoPersonalizado?: number | string;
+    observacoe?: string | null;
     dataExpiracao?: Date | null;
   }) {
     // Busca informações do Plano pelo ID
@@ -37,30 +37,30 @@ export class BillingService {
     const now = new Date();
     const dataExpiracao = new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
-    const planoAssinatura = await this.prisma.planoAssinatura.create({
+    const PlanoAssinado = await this.prisma.planoAssinado.create({
       data: {
         clienteId: data.clienteId,
         planoId: data.planoId,
-        valorPago:
-          data.valorPago !== undefined
-            ? new Prisma.Decimal(data.valorPago)
+        precoPersonalizado:
+          data.precoPersonalizado !== undefined
+            ? new Prisma.Decimal(data.precoPersonalizado)
             : plano.preco,
-        detalhes: data.detalhes ?? null,
+        observacoes: data.observacoe ?? null,
         dataExpiracao: dataExpiracao,
         usosDisponiveis: null,
         usosConsumidos: 0,
       },
     });
 
-    if (!planoAssinatura.id) {
+    if (!PlanoAssinado.id) {
       throw new Error("Pagamento não pode ser processado");
     }
 
     // Ajusta o valor para pagamento PIX
     const payment = await createPixPayment({
-      amount: Number(planoAssinatura.valorPago),
+      amount: Number(PlanoAssinado.precoPersonalizado),
       email: "cliente@example.com",
-      externalReference: planoAssinatura.id,
+      externalReference: PlanoAssinado.id,
       description: `Assinatura do plano mensal: ${plano.nome}`,
       firstName: "João",
       lastName: "Silva",
@@ -68,7 +68,7 @@ export class BillingService {
     });
 
     return {
-      planoAssinatura,
+      PlanoAssinado,
       payment,
     };
   }
@@ -79,8 +79,8 @@ export class BillingService {
   async createPlanoPorUso(data: {
     clienteId: string;
     planoId: string;
-    valorPago?: number | string;
-    detalhes?: string | null;
+    precoPersonalizado?: number | string;
+    observacoe?: string | null;
     usosDisponiveis?: number | null; // Quantidade de usos contratados
     dataExpiracao?: Date | null;
   }) {
@@ -100,30 +100,30 @@ export class BillingService {
     const usosDisponiveis = data.usosDisponiveis ?? plano.limiteUso ?? null;
 
     // Cria o registro de plano por uso (cada compra gera um novo registro)
-    const planoAssinatura = await this.prisma.planoAssinatura.create({
+    const PlanoAssinado = await this.prisma.planoAssinado.create({
       data: {
         clienteId: data.clienteId,
         planoId: data.planoId,
-        valorPago:
-          data.valorPago !== undefined
-            ? new Prisma.Decimal(data.valorPago)
+        precoPersonalizado:
+          data.precoPersonalizado !== undefined
+            ? new Prisma.Decimal(data.precoPersonalizado)
             : plano.preco,
-        detalhes: data.detalhes ?? null,
+        observacoes: data.observacoe ?? null,
         dataExpiracao: data.dataExpiracao ?? null,
         usosDisponiveis,
         usosConsumidos: 0,
       },
     });
 
-    if (!planoAssinatura.id) {
+    if (!PlanoAssinado.id) {
       throw new Error("Pagamento não pode ser processado");
     }
 
     // Ajusta o valor para pagamento PIX
     const payment = await createPixPayment({
-      amount: Number(planoAssinatura.valorPago),
+      amount: Number(PlanoAssinado.precoPersonalizado),
       email: "cliente@example.com",
-      externalReference: planoAssinatura.id,
+      externalReference: PlanoAssinado.id,
       description: `Compra de créditos de uso do plano: ${plano.nome}`,
       firstName: "João",
       lastName: "Silva",
@@ -131,14 +131,14 @@ export class BillingService {
     });
 
     return {
-      planoAssinatura,
+      PlanoAssinado,
       payment,
     };
   }
 
-  // Busca assinatura por ID (PlanoAssinatura)
-  async getByIdPlanoAssinatura(id: string): Promise<PlanoAssinatura | null> {
-    return await this.prisma.planoAssinatura.findUnique({
+  // Busca assinatura por ID (PlanoAssinado)
+  async getByIdPlanoAssinatura(id: string): Promise<PlanoAssinado | null> {
+    return await this.prisma.planoAssinado.findUnique({
       where: { id },
     });
   }
@@ -192,7 +192,7 @@ export class BillingService {
   ): Promise<boolean> {
     try {
       // Busca planos ativos do cliente que têm limite de uso
-      const planosAtivos = await this.prisma.planoAssinatura.findMany({
+      const planosAtivos = await this.prisma.planoAssinado.findMany({
         where: {
           clienteId,
           status: "ATIVA",
@@ -216,7 +216,7 @@ export class BillingService {
       const planoParaDebitar = planosAtivos[0];
 
       // Debita um uso
-      await this.prisma.planoAssinatura.update({
+      await this.prisma.planoAssinado.update({
         where: { id: planoParaDebitar.id },
         data: {
           usosDisponiveis: planoParaDebitar.usosDisponiveis! - 1,
@@ -244,7 +244,7 @@ export class BillingService {
    * Busca planos do cliente logado
    */
   async getPlanosUsuario(clienteId: string) {
-    const planos = await this.prisma.planoAssinatura.findMany({
+    const planos = await this.prisma.planoAssinado.findMany({
       where: { clienteId },
       include: {
         plano: true,
@@ -254,16 +254,16 @@ export class BillingService {
       },
     });
 
-    return planos.map((planoAssinatura) => ({
-      id: planoAssinatura.id,
-      nome: planoAssinatura.plano.nome,
-      tipo: planoAssinatura.plano.tipo,
-      limiteUso: planoAssinatura.plano.limiteUso,
-      usosDisponiveis: planoAssinatura.usosDisponiveis,
-      usosConsumidos: planoAssinatura.usosConsumidos,
-      status: planoAssinatura.status,
-      dataAssinatura: planoAssinatura.dataAssinatura,
-      dataExpiracao: planoAssinatura.dataExpiracao,
+    return planos.map((assinatura) => ({
+      id: assinatura.id,
+      nome: assinatura.plano.nome,
+      tipo: assinatura.plano.tipo,
+      limiteUso: assinatura.plano.limiteUso,
+      usosDisponiveis: assinatura.usosDisponiveis,
+      usosConsumidos: assinatura.usosConsumidos,
+      status: assinatura.status,
+      dataAssinatura: assinatura.dataAssinatura,
+      dataExpiracao: assinatura.dataExpiracao,
     }));
   }
 }

@@ -6,6 +6,7 @@ export interface TableColumn<T = any> {
   label: string;
   key: keyof T | string;
   render?: (row: T, index: number) => React.ReactNode; // render completo por linha
+  hiddeBtnCopy?: boolean;
 }
 
 interface PaginationProps {
@@ -151,6 +152,7 @@ function TR<T>({
   onRowClick?: (row: T) => void;
   index: number;
 }) {
+  const [textFull, setTextFull] = useState(false);
   const handleRowClick = () => {
     if (onRowClick) onRowClick(row);
   };
@@ -164,7 +166,7 @@ function TR<T>({
       {columns.map(col => {
         const value = (row as any)[col.key];
         const content = col.render ? col.render(row, index) : value ?? '-';
-
+        const hiddeBtnCopy = col.hiddeBtnCopy ?? false;
         return (
           <td
             key={String(col.key)}
@@ -172,10 +174,15 @@ function TR<T>({
             style={{ verticalAlign: 'middle' }}
           >
             <div className="flex items-center gap-2 w-full">
-              <p className=" whitespace-nowrap overflow-hidden text-ellipsis flex-1 mb-0">
+              <p
+                onMouseEnter={() => setTextFull(true)}
+                onMouseLeave={() => setTextFull(false)}
+                className={`${'whitespace-nowrap overflow-hidden text-ellipsis'} flex-1 mb-0`}
+                title={content}
+              >
                 {content}
               </p>
-              <ButtonCopy valorCompleto={content} />
+              {!hiddeBtnCopy && <ButtonCopy valorCompleto={content} />}
             </div>
           </td>
         );

@@ -1,6 +1,7 @@
 // frontend/components/Clients/ClientList.tsx
 import api from '@/axios';
 import Card from '@/components/Card';
+import { useAdmin } from '@/context/AuthContext';
 import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
 import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
@@ -32,12 +33,14 @@ interface Cliente {
   usuarioSistema: {
     email: string;
   };
-}
-
-interface Search {
-  cpf?: string;
-  status?: string;
-  razaoSocial?: string;
+  vagas: {
+    agendaVaga: number;
+    triagens: number;
+    beneficios: number;
+    anexos: number;
+    habilidades: number;
+    candidaturas: number;
+  }[];
 }
 
 function normalizarTable(clientes: Cliente[]) {
@@ -53,6 +56,7 @@ function normalizarTable(clientes: Cliente[]) {
       ? c.tipoServico.join(', ')
       : String(c.tipoServico ?? '-'),
     status: c.status,
+    vagasCount: c.vagas.length,
   }));
 }
 
@@ -70,8 +74,11 @@ const ClienteList: React.FC<{
   const [totalPages, setTotalPages] = useState<number>(1);
 
   const router = useRouter();
+  const isAdmin = useAdmin();
 
   useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+
     const fetchClientes = async () => {
       setLoading(true);
 
@@ -81,20 +88,6 @@ const ClienteList: React.FC<{
           pageSize,
           search,
         };
-
-        // if (onlyProspects) {
-        //   params.status = 'PROSPECT';
-        // } else if (search.status) {
-        //   params.status = search.status;
-        // }
-
-        // if (search.cpf) {
-        //   params.cpf = search.cpf;
-        // }
-
-        // if (search.razaoSocial) {
-        //   params.razaoSocial = search.razaoSocial;
-        // }
 
         const response = await api.get<Pagination<Cliente[]>>(
           '/api/externalWithAuth/cliente',
@@ -117,46 +110,38 @@ const ClienteList: React.FC<{
         setLoading(false);
       }
     };
-    fetchClientes();
+
+    // Debounce de 400ms na pesquisa/search
+    timeoutId = setTimeout(() => {
+      fetchClientes();
+    }, 600);
+
+    return () => {
+      clearTimeout(timeoutId);
+    };
   }, [search, onlyProspects, page, pageSize]);
 
   const dadosTabela = useMemo(() => normalizarTable(clientes), [clientes]);
 
-  // const dadosFiltrados = useMemo(() => {
-  //   if (!search || (!search.cpf && !search.status)) {
-  //     return dadosTabela;
-  //   }
-  //   return dadosTabela.filter((c: any) => {
-  //     let match = true;
-  //     if (search.cpf) {
-  //       match =
-  //         match &&
-  //         String(c.cnpj).toLowerCase().includes(search.cpf?.toLowerCase());
-  //     }
-  //     if (search.status) {
-  //       match =
-  //         match &&
-  //         String(c.status).toLowerCase().includes(search.status?.toLowerCase());
-  //     }
-  //     if (search.razaoSocial) {
-  //       match =
-  //         match &&
-  //         String(c.status)
-  //           .toLowerCase()
-  //           .includes(search.razaoSocial?.toLowerCase());
-  //     }
-  //     return match;
-  //   });
-  // }, [dadosTabela, search]);
-
   const columns: TableColumn<any>[] = [
     { label: 'razaoSocial', key: 'razaoSocial' },
-    { label: 'Email', key: 'email' },
+    { label: 'Email acesso', key: 'email' },
     { label: 'CNPJ', key: 'cnpj' },
     { label: 'Abertura', key: 'dataAbertura' },
-    { label: 'Serviços', key: 'servicos' },
-    { label: 'Status', key: 'status' },
+
+    { label: 'Status', key: 'status', hiddeBtnCopy: true },
   ];
+
+  if (isAdmin) {
+    columns.push(
+      // { label: 'Serviços', hiddeBtnCopy: true, key: 'servicos' },
+      {
+        label: 'Vagas',
+        key: 'vagasCount',
+        hiddeBtnCopy: true,
+      }
+    );
+  }
 
   const onRowClick = (row: any) => {
     router.push(`/cliente/${row.id}`);
@@ -167,23 +152,22 @@ const ClienteList: React.FC<{
       <div className="flex justify-between itesm-center flex-wrap p-2">
         <h3 className="text-xl font-bold">Lista de Clientes</h3>
 
-        <div className="flex gap-2">
-          <PrimaryButton onClick={() => setFilter(!filter)}>
-            FILTROS
-          </PrimaryButton>
-
+        <div className="flex gap-2 w-full  max-w-[500px]">
           <FormInput
             name="buscar"
             type="text"
-            placeholder="Buscar CNPJ"
+            placeholder="Buscar CNPJ, Razão social e Nome Fantasia"
             value={search || ''}
             inputProps={{
-              classNameContainer: 'w-full max-w-[300px]',
+              classNameContainer: 'w-full',
             }}
             onChange={(e: ChangeEvent<HTMLInputElement>) =>
               setSearch(e.target.value)
             }
           />
+          <PrimaryButton onClick={() => setFilter(!filter)} disabled={!search}>
+            <span className="material-icons-outlined">search</span>
+          </PrimaryButton>
         </div>
         {/* <Modal
           isOpen={filter}

@@ -1,11 +1,12 @@
 // pages/candidato/[id].tsx
 import api from '@/axios';
+import { AdminGuard } from '@/components/auth/AdminGuard';
 import Card from '@/components/Card';
 import { AgendaForm } from '@/components/form/AgendaForm';
 import CandidatoForm from '@/components/form/CandidatoForm';
 import { EditPenIcon, TrashIcon, WhatsAppIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
-import { useCliente } from '@/context/AuthContext';
+import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
 import { SessionProvider } from 'next-auth/react';
 import Link from 'next/link';
@@ -22,7 +23,7 @@ const CandidatoPage: React.FC = () => {
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalAgendaEdit, setShowModalAgendaEdit] = useState(false);
 
-  const isNoCliente = useCliente();
+  const isAdmin = useAdmin();
 
   const {
     data: vagas,
@@ -114,82 +115,93 @@ const CandidatoPage: React.FC = () => {
             Voltar
           </button>
           <h1 className="text-2xl font-bold text-center text-primary w-full">
-            CANDIDATO
+            PROFISSIONAL
           </h1>
-          <div className="flex gap-2">
-            <button
-              className="px-2 py-2 bg-green-500 text-white rounded shadow-md hover:scale-110 flex justify-center items-center"
-              onClick={() => setShowModalAgendaEdit(true)}
-            >
-              <span className="material-icons-outlined">date_range</span>
-            </button>
-            <button
-              className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
-              onClick={() => setShowModalEdit(true)}
-            >
-              <EditPenIcon />
-            </button>
-            <button
-              className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110"
-              onClick={handleTrash}
-            >
-              <TrashIcon />
-            </button>
-          </div>
+          <AdminGuard>
+            <div className="flex gap-2">
+              <button
+                className="px-2 py-2 bg-green-500 text-white rounded shadow-md hover:scale-110 flex justify-center items-center"
+                onClick={() => setShowModalAgendaEdit(true)}
+              >
+                <span className="material-icons-outlined">date_range</span>
+              </button>
+              <button
+                className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
+                onClick={() => setShowModalEdit(true)}
+              >
+                <EditPenIcon />
+              </button>
+              <button
+                className="px-2 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110"
+                onClick={handleTrash}
+              >
+                <TrashIcon />
+              </button>
+            </div>
+          </AdminGuard>
         </div>
-
-        <h1 className="font-bold text-primary text-xl">
-          {candidato.pessoa.nome}
-        </h1>
 
         <div className="flex flex-wrap gap-4">
           {/* Sessão Pessoa */}
           {candidato.pessoa && (
             <Card title="Dados Pessoais">
-              <div>
-                <span className="font-medium">CPF:</span>
-                <span className="text-secondary ml-2">
-                  {candidato.pessoa.cpf}
-                </span>
-              </div>
+              <span className="font-medium mr-2">NOME COMPLETO:</span>
+              <span className="font-bold text-primary text-xl">
+                {candidato.pessoa.nome}
+              </span>
               <div>
                 <span className="font-medium">Data de Nascimento:</span>
                 <span className="text-secondary ml-2">
                   {candidato.pessoa.dataNascimento ?? 'N/A'}
                 </span>
               </div>
+
+              <div>
+                <span className="font-medium">CPF:</span>
+                <span className="text-secondary ml-2">
+                  <AdminGuard typeText>
+                    {candidato.pessoa.cpf ?? '-'}
+                  </AdminGuard>
+                </span>
+              </div>
+
               <div>
                 <span className="font-medium">Sexo:</span>
                 <span className="text-secondary ml-2">
-                  {candidato.pessoa.sexo || 'N/A'}
+                  {candidato.pessoa.sexo || '-'}
                 </span>
               </div>
-              {isNoCliente && candidato.email && (
+              {candidato.email && (
                 <div>
                   <span className="font-medium">Email:</span>
                   <span className="text-secondary ml-2">
-                    {candidato.email || 'N/A'}
+                    <AdminGuard typeText>{candidato.email ?? '-'}</AdminGuard>
                   </span>
                 </div>
               )}
               <div className="flex items-center">
                 <span className="font-medium">Celular/Whatsapp:</span>
                 <span className="text-secondary ml-2">
-                  {candidato.celular || 'N/A'}
+                  <AdminGuard typeText>{candidato.celular ?? '-'}</AdminGuard>
                 </span>
-                {isNoCliente && candidato.celular && (
-                  <a
-                    href={`https://wa.me/${candidato.celular.replace(
-                      /\D/g,
-                      ''
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {candidato.celular && (
+                  <button
+                    onClick={() => {
+                      if (isAdmin) {
+                        const celularReplace = candidato.celular.replace(
+                          /\D/g,
+                          ''
+                        );
+                        const link = `https://wa.me/${celularReplace}`;
+                        location.href = link;
+                      }
+                    }}
+                    disabled={!isAdmin}
                     className="ml-2 inline-flex items-center bg-green-500 text-white rounded p-1 hover:bg-green-600"
                     title="Conversar no WhatsApp"
                   >
                     <WhatsAppIcon />
-                  </a>
+                  </button>
                 )}
               </div>
             </Card>
@@ -197,9 +209,6 @@ const CandidatoPage: React.FC = () => {
 
           {/* Sessão Dados do Candidato */}
           <Card title="Dados do Candidato">
-            {/* <div>
-              <span className="font-medium">ID:</span> {candidato.id}
-            </div> */}
             <div>
               <span className="font-medium">Área de Atuação:</span>
               <span className="text-secondary ml-2">
@@ -211,7 +220,7 @@ const CandidatoPage: React.FC = () => {
               <div>
                 <span className="font-medium">CRM:</span>
                 <span className="text-secondary ml-2">
-                  {candidato.crm || 'N/A'}
+                  <AdminGuard typeText>{candidato.crm ?? '-'}</AdminGuard>
                 </span>
               </div>
             )}
@@ -220,7 +229,7 @@ const CandidatoPage: React.FC = () => {
               <div>
                 <span className="font-medium">COREM:</span>
                 <span className="text-secondary ml-2">
-                  {candidato.corem || 'N/A'}
+                  <AdminGuard typeText>{candidato.corem ?? '-'}</AdminGuard>
                 </span>
               </div>
             )}
@@ -229,7 +238,7 @@ const CandidatoPage: React.FC = () => {
               <div>
                 <span className="font-medium">RQE:</span>
                 <span className="text-secondary ml-2">
-                  {candidato.rqe || 'N/A'}
+                  <AdminGuard typeText>{candidato.rqe ?? '-'}</AdminGuard>
                 </span>
               </div>
             )}

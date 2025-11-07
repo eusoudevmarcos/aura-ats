@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { empresaSchema } from './empresa.schema';
-import { planoAssinaturaSchema } from './plano.schema';
+import { planoAssinadoSchema } from './plano.schema';
 import { StatusClienteEnum } from './statusClienteEnum.schema';
 import { vagaSchema } from './vaga.schema';
 
@@ -8,9 +8,9 @@ import { vagaSchema } from './vaga.schema';
 export const clienteSchema = z.object({
   id: z.uuid().optional(),
   status: StatusClienteEnum,
-  planos: z.array(z.string()).optional(),
   criarUsuarioSistema: z.boolean().optional(),
   email: z.email().optional(),
+  usuarioSistema: z.object({ email: z.email('Email inválido') }).optional(),
 });
 export type ClienteInput = z.infer<typeof clienteSchema>;
 
@@ -35,7 +35,7 @@ export type ClienteWithEmpresaInput = z.infer<typeof clienteWithEmpresaSchema>;
 
 export const clienteWithEmpresaAndPlanosSchema =
   clienteWithEmpresaSchema.extend({
-    planos: z.union([z.array(planoAssinaturaSchema), z.array(z.string())]),
+    planos: z.array(planoAssinadoSchema),
   });
 
 export type ClienteWithEmpresaAndPlanosSchema = z.infer<
@@ -49,7 +49,7 @@ export const clienteWithEmpresaAndVagaSchema = clienteSchema.extend({
   vagas: z.array(z.lazy(() => vagaSchema)).optional(),
   vagaId: z.uuid(),
   usuarioSistema: z.object({ email: z.string() }).optional(),
-  planos: z.array(planoAssinaturaSchema).optional(), // Planos com detalhes
+  planos: z.array(planoAssinadoSchema).optional(), // Planos com detalhes
 });
 
 export type ClienteWithEmpresaAndVagaInput = z.infer<

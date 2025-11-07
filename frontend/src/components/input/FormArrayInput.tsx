@@ -1,4 +1,3 @@
-// src/components/form/FormArrayInput.tsx
 import React, { useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
@@ -6,25 +5,23 @@ import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 import { Container } from './Container';
 
-// Definição genérica para a configuração de cada campo do item
 interface FieldConfig {
-  name: string; // Nome interno para o campo do item (ex: 'nome', 'descricao', 'tipoHabilidade')
+  name: string;
   label?: string;
   placeholder?: string;
-  type?: string; // ex: 'text', 'number', 'date'
-  component?: 'input' | 'select'; // Para decidir qual componente usar
-  selectOptions?: { value: any; label: string }[]; // Para componentes select
-  required?: boolean; // Adicionar flag de obrigatoriedade
+  type?: string;
+  component?: 'input' | 'select';
+  selectOptions?: { value: any; label: string }[];
+  required?: boolean;
 }
 
 interface FormArrayInputProps {
-  name: any; // O nome do array no seu formulário (ex: "habilidades", "beneficios")
-  title: string; // Título da seção (ex: "Habilidades", "Benefícios")
-  addButtonText: string; // Texto do botão para adicionar
-  fieldConfigs: FieldConfig[]; // Configuração dos campos para cada item do array
-  renderChipContent: (item: any, index: any) => React.ReactNode; // Função para renderizar o conteúdo do chip
-  initialItemData?: any; // Dados iniciais para um novo item, se necessário
-  // REMOVIDO: register: any; // Este prop não é necessário aqui, pois FormArrayInput usa useFormContext e inputs internos são controlados pelo estado local
+  name: any; 
+  title: string; 
+  addButtonText: string;
+  fieldConfigs: FieldConfig[];
+  renderChipContent: (item: any, index: any) => React.ReactNode;
+  initialItemData?: any;
 }
 
 export function FormArrayInput({
@@ -33,7 +30,7 @@ export function FormArrayInput({
   addButtonText,
   fieldConfigs,
   renderChipContent,
-  initialItemData = {}, // Define um objeto vazio como padrão
+  initialItemData = {},
 }: FormArrayInputProps) {
   const {
     control,
@@ -68,8 +65,8 @@ export function FormArrayInput({
     }
 
     setItemError(null);
-    append(newItemValues); // Adiciona o novo item ao array do form
-    setNewItemValues(initialItemData); // Reseta os campos para o próximo item
+    append(newItemValues);
+    setNewItemValues(initialItemData);
   };
 
   return (
@@ -84,7 +81,7 @@ export function FormArrayInput({
           <React.Fragment key={config.name}>
             {config.component === 'select' ? (
               <FormSelect
-                name={`_temp_${name}.${config.name}`} // Nome fictício para controle de estado local
+                name={`_temp_${name}.${config.name}`}
                 label={config.label}
                 placeholder={config.placeholder}
                 value={newItemValues[config.name]}

@@ -15,14 +15,14 @@ const PessoaForm = ({ namePrefix = 'pessoa' }: PessoaFormProps) => {
 
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-2">
-      <FormInput name={nome} label="Nome Completo" />
-
       <FormInput
         name={cpf}
         maskProps={{ mask: '000.000.000-00' }}
         label="CPF"
         placeholder="000.000.000-00"
       />
+
+      <FormInput name={nome} label="Nome Completo" />
 
       <FormInput
         name={dataNascimento}

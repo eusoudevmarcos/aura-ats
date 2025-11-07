@@ -88,8 +88,7 @@ export class UsuarioSistemaService {
     validateBasicFieldsUsuarioSistema(data);
 
     const normalizedUsuarioData = normalizeDataUsuarioSistema(data);
-    console.log("normalizedUsuarioData");
-    console.log(normalizedUsuarioData);
+
     if (!normalizedUsuarioData.id) {
       await this.checkDuplicates(normalizedUsuarioData);
     }
@@ -98,8 +97,6 @@ export class UsuarioSistemaService {
       normalizedUsuarioData
     );
 
-    console.log("payloadUsuarioSistema");
-    console.log(payloadUsuarioSistema);
     const relationsShip = {
       funcionario: { include: { pessoa: true } },
       cliente: { include: { empresa: true } },

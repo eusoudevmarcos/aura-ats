@@ -130,7 +130,7 @@ const InputElement = React.forwardRef<HTMLInputElement, any>(
       return (
         <IMaskInput
           inputRef={ref}
-          onAccept={(val: string) => onChange(val)}
+          onChange={onChange}
           onKeyDown={onKeyDown}
           autoComplete="off"
           {...maskProps}
@@ -141,7 +141,7 @@ const InputElement = React.forwardRef<HTMLInputElement, any>(
     return (
       <input
         ref={ref}
-        onChange={e => onChange(e.target.value)}
+        onChange={e => onChange(e)}
         onKeyDown={onKeyDown}
         autoComplete="off"
         {...props}

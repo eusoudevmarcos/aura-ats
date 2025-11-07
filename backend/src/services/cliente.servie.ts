@@ -7,8 +7,6 @@ import { normalizeClienteData } from "../helper/normalize/cliente.normalize";
 import { validateBasicFieldsCliente } from "../helper/validate/cliente.validate";
 import prisma from "../lib/prisma";
 import { Pagination } from "../types/pagination";
-import { generateRandomPassword } from "../utils/generateRandomPassword";
-import { EmailService } from "./email.service";
 import { UsuarioSistemaService } from "./usuarioSistema.service";
 
 @injectable()
@@ -32,6 +30,10 @@ export class ClienteService {
             status: true,
             usosConsumidos: true,
             planoId: true,
+            qtdVagas: true,
+            precoPersonalizado: true,
+            porcentagemMinima: true,
+            observacoes: true,
             plano: {
               select: {
                 nome: true,
@@ -111,8 +113,14 @@ export class ClienteService {
         },
         where: where,
         select: {
+          _count: true,
           id: true,
           status: true,
+          vagas: {
+            select: {
+              _count: true,
+            },
+          },
           empresa: {
             select: {
               id: true,
@@ -127,6 +135,7 @@ export class ClienteService {
               email: true,
             },
           },
+          planos: true,
         },
       }),
       prisma.cliente.count({ where }),
@@ -146,11 +155,10 @@ export class ClienteService {
 
     const normalizedData = normalizeClienteData(clienteData);
 
-    if (!clienteData.id) {
-      await this.checkDuplicates(normalizedData);
-    }
-
     const clientePayload = await buildClienteData(normalizedData);
+
+    console.log("PAYLOAD");
+    console.log(JSON.stringify(clientePayload));
 
     const relations = {
       empresa: {
@@ -161,11 +169,7 @@ export class ClienteService {
           socios: true,
         },
       },
-      // planos: {
-      //   include: {
-      //     plano: true,
-      //   },
-      // },
+      planos: true,
       usuarioSistema: true,
     };
 
@@ -184,96 +188,33 @@ export class ClienteService {
       });
     }
 
-    if (clienteData.planos && Array.isArray(clienteData.planos)) {
-      await this.managePlanos(cliente.id, clienteData.planos);
-    }
+    // if (clienteData.planos && Array.isArray(clienteData.planos)) {
+    //   await this.managePlanos(cliente.id, clienteData.planos);
+    // }
 
-    if (clienteData.email) {
-      const usuarioSistemaData = {
-        email: clienteData.email,
-        clienteId: cliente.id,
-        tipoUsuario: "CLIENTE",
-        password: clienteData.password || "",
-      };
+    // if (clienteData.email) {
+    //   const usuarioSistemaData = {
+    //     email: clienteData.email,
+    //     clienteId: cliente.id,
+    //     tipoUsuario: "CLIENTE",
+    //     password: clienteData.password || "",
+    //   };
 
-      usuarioSistemaData.password =
-        `${clienteData.empresa.nomeFantasia?.split(" ")[0]}${123}` ||
-        generateRandomPassword();
+    //   usuarioSistemaData.password =
+    //     `${clienteData.empresa.nomeFantasia?.split(" ")[0]}${123}` ||
+    //     generateRandomPassword();
 
-      await this.usuarioSistemaService.save(usuarioSistemaData);
+    //   await this.usuarioSistemaService.save(usuarioSistemaData);
 
-      const emaiLService = new EmailService();
+    //   const emaiLService = new EmailService();
 
-      await emaiLService.sendUsuarioSistemaEmail(cliente, usuarioSistemaData);
-    }
+    //   await emaiLService.sendUsuarioSistemaEmail(cliente, usuarioSistemaData);
+    // }
 
     const clienteAtualizado = await this.getClienteById(cliente.id);
     if (!clienteAtualizado) {
       throw new Error("Erro ao buscar cliente atualizado");
     }
     return clienteAtualizado;
-  }
-
-  private async checkDuplicates(data: any): Promise<void> {
-    if (data.empresaId) {
-      const empresaExistente = await prisma.empresa.findUnique({
-        where: { id: data.empresaId },
-      });
-
-      if (!empresaExistente) {
-        throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
-      }
-
-      const clienteExistente = await prisma.cliente.findUnique({
-        where: { empresaId: data.empresaId },
-      });
-
-      if (clienteExistente) {
-        throw new Error(
-          `Já existe um cliente associado à empresa com ID: ${data.empresaId}`
-        );
-      }
-    }
-
-    if (data.empresa?.cnpj) {
-      const empresaExistentePorCnpj = await prisma.empresa.findUnique({
-        where: { cnpj: data.empresa.cnpj },
-      });
-
-      if (empresaExistentePorCnpj) {
-        const clienteExistente = await prisma.cliente.findUnique({
-          where: { empresaId: empresaExistentePorCnpj.id },
-        });
-
-        if (clienteExistente) {
-          throw new Error(
-            `Já existe um cliente para a empresa com CNPJ: ${data.empresa.cnpj}`
-          );
-        }
-      }
-    }
-  }
-
-  private async managePlanos(
-    clienteId: string,
-    planos: string[]
-  ): Promise<void> {
-    // Remove planos existentes
-    await prisma.planoAssinatura.deleteMany({
-      where: { clienteId },
-    });
-
-    // Adiciona novos planos
-    for (const planoId of planos) {
-      await prisma.planoAssinatura.create({
-        data: {
-          clienteId,
-          planoId,
-          dataAssinatura: new Date(),
-          status: "ATIVA",
-          valorPago: 0, // Pode ser ajustado conforme necessário
-        },
-      });
-    }
   }
 }

@@ -60,7 +60,7 @@ async function createPlanos(planoList: any[], tipoDesc: string) {
             : undefined,
       },
     });
-    console.log(`✅ Planoo ${plano.nome} - ${plano.categoria} adicionado`);
+    console.log(`✅ Plano ${plano.categoria} - ${plano.nome} adicionado`);
   }
 }
 

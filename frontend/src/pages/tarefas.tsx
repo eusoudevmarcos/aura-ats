@@ -1,4 +1,5 @@
 import { tarefaApi } from '@/axios/tarefaApi';
+import { AdminGuard } from '@/components/auth/AdminGuard';
 import Card from '@/components/Card';
 import { useEffect, useRef, useState } from 'react';
 
@@ -222,28 +223,30 @@ export default function Tarefas() {
 
   return (
     <Card title={{ label: 'Tarefas', className: 'text-2xl' }}>
-      <div className="flex gap-2 mb-4">
-        <textarea
-          className="w-full p-2 border rounded-lg focus:outline-primary resize-y min-h-[40px] max-h-40"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          placeholder="Adicione uma nova tarefa"
-          onKeyDown={e => handleTextareaKeyDown(e, handleAdd)}
-          rows={2}
-        />
-        <button
-          className="bg-primary text-white px-4 py-2 rounded-md shadow hover:scale-105 transition"
-          onClick={handleAdd}
-          title="Adicionar tarefa"
-        >
-          Adicionar
-        </button>
-      </div>
+      <AdminGuard>
+        <div className="flex gap-2 mb-4">
+          <textarea
+            className="w-full p-2 border rounded-lg focus:outline-primary resize-y min-h-[40px] max-h-40"
+            value={input}
+            onChange={e => setInput(e.target.value)}
+            placeholder="Adicione uma nova tarefa"
+            onKeyDown={e => handleTextareaKeyDown(e, handleAdd)}
+            rows={2}
+          />
+          <button
+            className="bg-primary text-white px-4 py-2 rounded-md shadow hover:scale-105 transition"
+            onClick={handleAdd}
+            title="Adicionar tarefa"
+          >
+            Adicionar
+          </button>
+        </div>
 
-      <div className="text-xs text-secondary mb-2">
-        <strong>Enter</strong>: Nova linha • <strong>Tab</strong>: Tabulação •{' '}
-        <strong>Ctrl+Enter</strong>: Adicionar/Salvar
-      </div>
+        <div className="text-xs text-secondary mb-2">
+          <strong>Enter</strong>: Nova linha • <strong>Tab</strong>: Tabulação •
+          <strong>Ctrl+Enter</strong>: Adicionar/Salvar
+        </div>
+      </AdminGuard>
 
       <ul className="space-y-2">
         {loading ? (

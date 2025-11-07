@@ -1,5 +1,5 @@
-import Card from '@/components/Card';
 import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
+import { AdminGuard } from '../auth/AdminGuard';
 
 interface ClienteInfoProps {
   cliente: ClienteWithEmpresaAndPlanosSchema;
@@ -45,11 +45,13 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
           </div>
         )}
 
-        {cliente?.email && (
+        {cliente.usuarioSistema?.email && (
           <div className="flex flex-col gap-1">
             <div>
               <span className="font-medium text-primary">E-mail:</span>
-              <span className="text-secondary ml-2">{cliente?.email}</span>
+              <span className="text-secondary ml-2">
+                {cliente?.usuarioSistema?.email}
+              </span>
             </div>
           </div>
         )}
@@ -61,6 +63,18 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
     <div className="flex flex-col flex-wrap gap-2">
       {cliente.empresa && (
         <>
+          {cliente.usuarioSistema?.email && (
+            <div className="flex flex-col gap-1">
+              <div>
+                <span className="font-medium text-primary">E-mail:</span>
+                <span className="text-secondary ml-2">
+                  <AdminGuard typeText>
+                    {cliente?.usuarioSistema?.email}
+                  </AdminGuard>
+                </span>
+              </div>
+            </div>
+          )}
           <div>
             <span className="font-medium text-primary">Razão Social:</span>
             <span className="text-secondary ml-2">
@@ -115,36 +129,33 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
 
       {cliente.empresa.representantes &&
         cliente.empresa.representantes.length > 0 && (
-          <Card title="Dados do representante">
-            <div>
-              {cliente.empresa.representantes.map((representante: any) => {
-                return (
-                  <div key={representante.nome}>
-                    <p>
-                      <span className="font-medium text-primary">CPF:</span>{' '}
-                      <span className="text-secondary">
-                        {representante.cpf}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="font-medium text-primary">
-                        Data Nascimento:
-                      </span>{' '}
-                      <span className="text-secondary">
-                        {representante.dataNascimento.toString()}
-                      </span>
-                    </p>
-                    <p>
-                      <span className="font-medium text-primary">Nome:</span>{' '}
-                      <span className="text-secondary">
-                        {representante.nome}
-                      </span>
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-          </Card>
+          <div title="Dados do representante">
+            <h3 className="text-lg text-primary font-bold">
+              Dados do representante
+            </h3>
+            {cliente.empresa.representantes.map((representante: any) => {
+              return (
+                <div key={representante.nome}>
+                  <p>
+                    <span className="font-medium text-primary">CPF:</span>{' '}
+                    <span className="text-secondary">{representante.cpf}</span>
+                  </p>
+                  <p>
+                    <span className="font-medium text-primary">
+                      Data Nascimento:
+                    </span>{' '}
+                    <span className="text-secondary">
+                      {representante.dataNascimento.toString()}
+                    </span>
+                  </p>
+                  <p>
+                    <span className="font-medium text-primary">Nome:</span>{' '}
+                    <span className="text-secondary">{representante.nome}</span>
+                  </p>
+                </div>
+              );
+            })}
+          </div>
         )}
     </div>
   );
