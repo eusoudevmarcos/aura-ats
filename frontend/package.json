@@ -23,7 +23,7 @@
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "material-icons": "^1.13.14",
-    "next": "15.4.1",
+    "next": "^16.0.1",
     "next-auth": "^4.24.12",
     "nookies": "^2.5.2",
     "react": "19.1.0",

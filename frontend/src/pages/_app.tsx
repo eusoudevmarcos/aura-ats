@@ -9,7 +9,7 @@ import { useRouter } from 'next/router';
 import api from '@/axios';
 import ScreenshotGuard from '@/components/auth/ScreenshotGuard';
 import { AuthProvider } from '@/context/AuthContext';
-import { isAlwaysPublicPath } from '@/middleware';
+import { isAlwaysPublicPath } from '@/proxy';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
 import { useEffect, useState } from 'react';
