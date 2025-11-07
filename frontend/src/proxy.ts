@@ -1,5 +1,5 @@
 // middleware.ts
-import { jwtVerify } from 'jose';
+import { jwtVerify } from 'jsonwebtoken';
 import { NextRequest, NextResponse } from 'next/server';
 
 // Tipos de usuário que devem ir para /dashboard/cliente

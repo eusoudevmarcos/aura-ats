@@ -19,7 +19,6 @@
     "firebase-admin": "^13.4.0",
     "googleapis": "^157.0.0",
     "html2canvas": "^1.4.1",
-    "jose": "^6.1.0",
     "jsonwebtoken": "^9.0.2",
     "jspdf": "^3.0.1",
     "material-icons": "^1.13.14",
