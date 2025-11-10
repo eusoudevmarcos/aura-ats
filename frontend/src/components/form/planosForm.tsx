@@ -241,7 +241,7 @@ export default function PlanosForm(props: PlanosFormProps) {
               <div>
                 <FormInput
                   name=""
-                  label="Valor mínimo a pagar (em %)"
+                  label="Valor de entrada a pagar (em %)"
                   maskProps={{ mask: '000', prefix: '%' }}
                   onChange={e => {
                     setPorcentagemMinima(e.target.value);
@@ -253,7 +253,7 @@ export default function PlanosForm(props: PlanosFormProps) {
                   }}
                 ></FormInput>
                 <label>
-                  Valor mínimo a pagar:{' '}
+                  Valor de entrada a pagar:{' '}
                   {porcentagemMinima
                     ? `R$ ${(
                         Number(calculoPlanoMaisQdtVagas) *

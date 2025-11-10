@@ -85,13 +85,11 @@ const Modal: React.FC<ModalProps> = ({
     >
       <div
         ref={containerRef}
-        className={`bg-white shadow-md relative ${
-          !fit && 'w-full max-w-2xl'
-        } transition-transform duration-200 ${
-          visible ? 'scale-100' : 'scale-95'
-        }`}
+        className={`bg-white shadow-md relative rounded-2xl transition-transform duration-200
+          ${!fit && 'w-full max-w-4xl'}
+          ${visible ? 'scale-100' : 'scale-95'}`}
       >
-        <div className="flex justify-between items-center px-6 py-3  text-white bg-primary gap-4">
+        <div className="flex justify-between items-center px-6 py-3  text-white bg-primary gap-4 rounded-t-2xl">
           {title && <h3 className="text-xl font-semibold ">{title}</h3>}
           <button
             onClick={handleClose}
@@ -100,6 +98,7 @@ const Modal: React.FC<ModalProps> = ({
             &times;
           </button>
         </div>
+
         <div
           className={`px-6 py-4 overflow-auto h-full max-h-[90vh] ${classNameBody}`}
         >

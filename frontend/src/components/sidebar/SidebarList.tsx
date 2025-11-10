@@ -24,7 +24,7 @@ export const getNavItems = (user: any) => {
   }
 
   if (
-    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA &&
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
     user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS
   ) {
     navItems.push({
