@@ -7,7 +7,6 @@ import Head from 'next/head';
 import { useRouter } from 'next/router';
 
 import api from '@/axios';
-import ScreenshotGuard from '@/components/auth/ScreenshotGuard';
 import { AuthProvider } from '@/context/AuthContext';
 import { isAlwaysPublicPath } from '@/proxy';
 import '@/styles/global.css';
@@ -120,7 +119,7 @@ function App({ Component, pageProps }: AppProps) {
         </>
       ) : (
         <AuthProvider>
-          <ScreenshotGuard forceDev={false} durationMs={0} />
+          {/* <ScreenshotGuard forceDev={false} durationMs={0} /> */}
           <SpeedInsights />
           <DashboardLayout>
             {dashboardProps => (
