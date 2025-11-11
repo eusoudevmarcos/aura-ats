@@ -47,6 +47,8 @@ app.use(
 
 app.use(express.json());
 
+// Criar um middleware que verifica se o ambiente e de desenvolvimento ou de produção e caso seja de produção exija uma senha
+
 if (process.env.NODE_ENV === "development") {
   app.use((req, res, next) => {
     // console.clear();
