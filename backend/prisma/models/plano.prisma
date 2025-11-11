@@ -56,19 +56,3 @@ model PlanoUso {
   @@index([planoAssinaturaId])
   @@schema("PlanoUso")
 }
-
-// model PlanoPlataforma {
-//   id                String   @id @default(uuid())
-//   planoAssinaturaId String
-//   acao              String // Ex: "pesquisa_empresa"
-//   dataUso           DateTime @default(now())
-
-//   cliente   Cliente @relation(fields: [clienteId], references: [id])
-//   clienteId String
-
-//   plano   Plano  @relation(fields: [planoId], references: [id])
-//   planoId String
-
-//   @@index([planoAssinaturaId])
-//   @@schema("PlanoAssinatura")
-// }

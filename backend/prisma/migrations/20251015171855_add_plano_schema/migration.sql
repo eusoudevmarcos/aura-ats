@@ -36,8 +36,5 @@ CREATE TABLE "PlanoAssinatura"."PlanoAssinatura" (
     CONSTRAINT "PlanoAssinatura_pkey" PRIMARY KEY ("id")
 );
 
--- CreateIndex
-CREATE INDEX "PlanoAssinatura_usuarioId_idx" ON "PlanoAssinatura"."PlanoAssinatura"("usuarioId");
-
--- CreateIndex
-CREATE INDEX "PlanoAssinatura_planoId_idx" ON "PlanoAssinatura"."PlanoAssinatura"("planoId");
+CREATE UNIQUE INDEX IF NOT EXISTS "PlanoAssinatura_usuarioId_idx" ON "PlanoAssinatura"."PlanoAssinatura"("usuarioId");
+CREATE UNIQUE INDEX IF NOT EXISTS "PlanoAssinatura_planoId_idx" ON "PlanoAssinatura"."PlanoAssinatura"("planoId");
