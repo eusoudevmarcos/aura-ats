@@ -63,7 +63,7 @@ export default class AuthenticationController {
         usuarioSistema.password
       );
 
-      if (!password === usuarioSistema.password) {
+      if (password !== usuarioSistema.password) {
         await saveLog({
           type: "login",
           status: "error",
