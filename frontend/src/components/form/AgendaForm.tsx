@@ -330,8 +330,8 @@ export const AgendaForm = ({ onSuccess, initialValues }: AgendaFormProps) => {
         <Card title="Candidato e Vaga">
           <div>
             <p className="text-primary text-sm">Informações do candidato</p>
-            <p>Nome: {initialValues?.candidato?.pessoa.nome}</p>
-            <p>CPF: {initialValues?.candidato?.pessoa.cpf}</p>
+            <p>Nome: {initialValues?.candidato?.pessoa?.nome}</p>
+            <p>CPF: {initialValues?.candidato?.pessoa?.cpf}</p>
           </div>
 
           {/* Vagas do candidato */}
