@@ -408,11 +408,6 @@ export type PessoaUpdateInputNested = Partial<
   Omit<Prisma.PessoaUpdateInput, "contatos" | "localizacoes" | "formacoes">
 > & {
   id?: string;
-  contatos?: {
-    create?: ContatoCreateOrConnect[];
-    update?: Prisma.ContatoUpdateWithWhereUniqueWithoutPessoaInput[];
-    delete?: Prisma.ContatoWhereUniqueInput[];
-  };
   localizacoes?: {
     create?: LocalizacaoCreateOrConnect[];
     update?: Prisma.LocalizacaoUpdateWithWhereUniqueWithoutPessoaInput[];
@@ -428,6 +423,10 @@ export type CandidatoCreateInput = Omit<
   Prisma.CandidatoCreateInput,
   "pessoa" | "especialidade" | "vagas"
 > & {
+  contatos?: {
+    create?: ContatoCreateOrConnect[];
+    delete?: Prisma.ContatoWhereUniqueInput[];
+  };
   pessoa: {
     create?: PessoaCreateInputNested;
     connect?: Prisma.PessoaWhereUniqueInput;
@@ -444,6 +443,10 @@ export type CandidatoUpdateInput = Partial<
   Omit<Prisma.CandidatoUpdateInput, "pessoa" | "especialidade" | "vagas">
 > & {
   id: string;
+  contatos?: {
+    update?: Prisma.ContatoUpdateWithWhereUniqueWithoutCandidatoInput[];
+    delete?: Prisma.ContatoWhereUniqueInput[];
+  };
   pessoa?: {
     update?: PessoaUpdateInputNested;
     connect?: Prisma.PessoaWhereUniqueInput;

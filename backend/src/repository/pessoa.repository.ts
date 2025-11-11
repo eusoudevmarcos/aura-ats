@@ -43,8 +43,6 @@ export class PessoaRepository {
     return await tx.pessoa.findUnique({
       where: { id },
       include: {
-        contatos: true,
-        localizacoes: true,
         funcionario: { include: { usuarioSistema: true } },
         socios: true,
         candidato: true,
@@ -62,8 +60,6 @@ export class PessoaRepository {
     return await tx.pessoa.findUnique({
       where: { cpf },
       include: {
-        contatos: true,
-        localizacoes: true,
         funcionario: { include: { usuarioSistema: true } },
         socios: true,
         candidato: true,

@@ -74,8 +74,6 @@ export class EmpresaRepository {
     return await prisma.empresa.findUnique({
       where: { id },
       include: {
-        contatos: true,
-        localizacoes: true,
         representantes: true,
         socios: {
           include: {

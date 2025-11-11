@@ -1,9 +1,9 @@
 import { Empresa, PrismaClient } from "@prisma/client";
-import { PessoaRepository } from "./pessoa.repository";
 import { inject, injectable } from "tsyringe";
-import { splitCreateConnect } from "../utils/splitCreateConnect";
 import prisma from "../lib/prisma";
 import { EmpresaCreateInput, EmpresaUpdateInput } from "../types/prisma.types";
+import { splitCreateConnect } from "../utils/splitCreateConnect";
+import { PessoaRepository } from "./pessoa.repository";
 
 @injectable()
 export class EmpresaRepository {
@@ -108,7 +108,6 @@ export class EmpresaRepository {
       // Use tx aqui
       where: { id },
       include: {
-        contatos: true,
         localizacoes: true,
         representantes: true,
         socios: {

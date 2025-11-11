@@ -21,22 +21,12 @@ export class UsuarioSistemaService {
       include: {
         funcionario: {
           include: {
-            pessoa: {
-              include: {
-                contatos: true,
-                localizacoes: true,
-              },
-            },
+            pessoa: true,
           },
         },
         cliente: {
           include: {
-            empresa: {
-              include: {
-                contatos: true,
-                localizacoes: true,
-              },
-            },
+            empresa: true,
           },
         },
       },
