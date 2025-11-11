@@ -15,7 +15,6 @@ router.post("/plano-por-uso", (req, res) =>
   billingController.createPlanoPorUso(req, res)
 );
 
-// Busca assinatura/plano por uso (PlanoAssinatura) por ID
 router.get("/plano-assinatura/:id", (req, res) =>
   billingController.getByIdPlanoAssinatura(req, res)
 );

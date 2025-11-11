@@ -30,7 +30,6 @@ export class BillingController {
     }
   }
 
-  // Busca assinatura/plano por uso (PlanoAssinatura) por ID
   async getByIdPlanoAssinatura(req: Request, res: Response): Promise<Response> {
     try {
       const { id } = req.params;

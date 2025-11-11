@@ -42,7 +42,7 @@ model PlanoAssinado {
 
   @@index([clienteId])
   @@index([planoId])
-  @@schema("PlanoAssinado")
+  @@schema("Plano")
 }
 
 model PlanoUso {
@@ -54,5 +54,5 @@ model PlanoUso {
   planoAssinaturaId String
 
   @@index([planoAssinaturaId])
-  @@schema("PlanoUso")
+  @@schema("Plano")
 }

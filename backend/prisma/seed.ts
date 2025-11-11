@@ -12,7 +12,6 @@ import { EspecialidadesSeed } from "./seed/especialidades";
 dotenv.config({ path: ".env" });
 
 const prisma = new PrismaClient();
-
 async function upsertEspecialidades() {
   for (const especialidade of EspecialidadesSeed) {
     await prisma.especialidade.upsert({
