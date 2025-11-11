@@ -4,13 +4,9 @@ model Contato {
     whatsapp String?
     email    String?
 
-    empresa   Empresa? @relation(fields: [empresaId], references: [id])
-    empresaId String?
+    candidatoId String?
+    candidato   Candidato? @relation(fields: [candidatoId], references: [id])
 
-    pessoa   Pessoa? @relation(fields: [pessoaId], references: [id])
-    pessoaId String?
-
-    @@index([empresaId])
-    @@index([pessoaId])
+    @@index([candidatoId])
     @@schema("Contato")
 }

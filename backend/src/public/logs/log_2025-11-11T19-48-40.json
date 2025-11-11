@@ -1,0 +1,83 @@
+{
+  "status": 200,
+  "data": [
+    {
+      "cnpj": 42314996000150,
+      "addresses": [
+        {
+          "type": "Setor",
+          "street": "Quadra 25",
+          "number": "15",
+          "complement": "Setor Leste",
+          "neighborhood": "Setor Leste  Gama",
+          "city": "Brasilia",
+          "district": "DF",
+          "postal_code": "72460250",
+          "priority": 1
+        }
+      ],
+      "age": "4 anos 5 meses",
+      "branch_offices": [],
+      "business_size": "ME",
+      "city_uf": "BRASILIA, DF",
+      "cnae_code": 9511800,
+      "cnae_description": "Reparação e manutenção de computadores e de equipamentos periféricos",
+      "company_name": "FLAVIO LEONARDO MACHADO DE PADUA 07438969126",
+      "creation_date": "2021-06-14",
+      "emails": [
+        {
+          "email": "flmp.leonardo@gmail.com",
+          "priority": 1
+        }
+      ],
+      "employee_count": "0",
+      "estimated_revenue": "DE R$ 50 MIL ATÉ R$ 100 MIL",
+      "headquarter_type": "MATRIZ",
+      "juridical_type": "Empresário (Individual)",
+      "juridical_type_id": 2135,
+      "land_lines": [],
+      "legal_representative": [],
+      "matriz_filial_count": 0,
+      "mobile_phones": [
+        {
+          "ddd": 61,
+          "number": "984847214",
+          "priority": 1,
+          "cdr_datetime": null,
+          "hot_datetime": null,
+          "whatsapp_datetime": null,
+          "cpc_datetime": null,
+          "devices_connected": null,
+          "active_nao_me_ligue": null
+        }
+      ],
+      "registry_situation": "ATIVA",
+      "related_companies": [],
+      "related_company_members": [],
+      "related_emails": [],
+      "related_persons": [
+        {
+          "cpf": 7438969126,
+          "name": "FLAVIO LEONARDO MACHADO DE PADUA",
+          "priority": 1,
+          "description": "Sócio-Administrador",
+          "ownership": 100,
+          "partner": "PF",
+          "share": "100.00",
+          "qualification": "Sócio-Administrador"
+        }
+      ],
+      "segment": "Reparação e Manutenção de Equipamentos de Informática e Comunicação e de Objetos Pessoais e Domésticos",
+      "share_capital": "1.00",
+      "simple_simei": {
+        "status_simei": "S",
+        "dt_option_simei": "2021-06-14",
+        "status_simple": "S",
+        "dt_option_simple": "2021-06-14"
+      },
+      "trading_name": "",
+      "ip": "2804:7f74:b1e:f400:55d0:20b5:12ee:cf2d"
+    }
+  ],
+  "URL": "https://api.datastone.com.br/v1/companies/?cnpj=42314996000150"
+}

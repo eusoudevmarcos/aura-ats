@@ -59,7 +59,7 @@ if (process.env.NODE_ENV === "development") {
     const cyan = "\x1b[36m";
     const red = "\x1b[31m";
 
-    console.log(`\[${timestamp}\] Request:`);
+    console.log(`\n\n\[${timestamp}\] Request:`);
     console.log(`${green}${method}${reset} - ${cyan}${url}${reset}`);
 
     if (headers.authorization || headers.cookie) {

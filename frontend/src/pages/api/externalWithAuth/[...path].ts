@@ -41,12 +41,6 @@ export default async function handler(
     const externalPath = Array.isArray(path) ? path.join('/') : path;
 
     const urlToExternalBackend = `/${externalPath}`;
-    const reset = '\x1b[0m';
-    const green = '\x1b[32m';
-
-    const cacheKey = `proxy:${req.method}:${externalPath}:${JSON.stringify(
-      req.query
-    )}`;
 
     // if (process.env.NODE_ENV === 'production') {
     //   if (req.method === 'GET') {

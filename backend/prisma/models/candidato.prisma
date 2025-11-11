@@ -5,6 +5,8 @@ model Candidato {
     rqe           String?
     areaCandidato AreaCandidato
 
+    contatos Contato[]
+
     especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
     especialidadeId Int?
 

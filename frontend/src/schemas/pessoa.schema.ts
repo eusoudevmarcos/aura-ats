@@ -16,7 +16,8 @@ export const pessoaSchema = z.object({
       {
         message: 'CPF inválido',
       }
-    ),
+    )
+    .optional(),
   rg: z
     .string()
     .refine(

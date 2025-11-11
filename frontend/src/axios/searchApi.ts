@@ -12,12 +12,12 @@ export async function searchApi(
 
   const inputUnmask = unmask(input);
 
-  const URL =
-    process.env.NEXT_PUBLIC_API_URL + '/api/externalWithAuth/take-it/search';
+  const URL = '/api/externalWithAuth/take-it/search';
 
   const params = {
     query: inputUnmask,
     tipo: typeColumns,
+    isDetail: true,
     ...options,
   };
 

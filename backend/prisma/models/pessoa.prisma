@@ -9,7 +9,6 @@ model Pessoa {
     estadoCivil    EstadoCivil?
     candidato      Candidato?
 
-    contatos     Contato[]
     localizacoes Localizacao[]
     socios       Socio[]
 

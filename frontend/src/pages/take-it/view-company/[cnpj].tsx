@@ -1,11 +1,10 @@
 import { searchApi } from '@/axios/searchApi';
 import Card from '@/components/takeit/Card';
-import { exportToCSV, exportToPDF } from '@/utils/exportCSV';
+import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 
 interface Company {
-  // ... interfaces iguais às que você já tem
   company_name?: string;
   cnpj?: string;
   trading_name?: string;
@@ -44,15 +43,18 @@ interface Address {
   city?: string;
   district?: string;
   postal_code?: string;
+  priority?: string;
 }
 
 interface Phone {
   ddd?: string;
   number?: string;
+  priority?: string;
 }
 
 interface Email {
   email?: string;
+  priority?: string;
 }
 
 interface RelatedPerson {
@@ -94,7 +96,8 @@ interface SimpleSimei {
 
 const ViewCompanyPage: React.FC = () => {
   const [company, setCompany] = useState<Company | null>(null);
-  const [loading, setLoading] = useState<boolean | null>(null);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
   const [showExportDropdown, setShowExportDropdown] = useState(false);
   const router = useRouter();
   const cnpj = router.query.cnpj as string;
@@ -102,13 +105,18 @@ const ViewCompanyPage: React.FC = () => {
 
   const handleSearch = async (): Promise<void> => {
     setLoading(true);
+    setError(null);
     setCompany(null);
 
     try {
       const data = await searchApi(cnpj || '', 'companies');
-      setCompany(data.data[0]);
-    } catch (error) {
-      console.log('error:' + error);
+      if (data?.data?.length && data?.data[0]) {
+        setCompany(data.data[0]);
+      } else {
+        setError('Empresa não encontrada.');
+      }
+    } catch (error: any) {
+      setError('Erro ao buscar dados.');
       setCompany(null);
     } finally {
       setLoading(false);
@@ -119,7 +127,8 @@ const ViewCompanyPage: React.FC = () => {
     if (cnpj) {
       handleSearch();
     }
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cnpj]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -138,7 +147,6 @@ const ViewCompanyPage: React.FC = () => {
   const handleExport = async (type: 'csv' | 'pdf') => {
     setShowExportDropdown(false);
     if (!company) return;
-
     if (type === 'csv') {
       exportToCSV(company);
     } else if (type === 'pdf') {
@@ -147,7 +155,11 @@ const ViewCompanyPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">Carregando</div>;
+    return <div className="p-8 text-center text-gray-500">Carregando...</div>;
+  }
+
+  if (error) {
+    return <div className="p-8 text-center text-red-500">{error}</div>;
   }
 
   if (!company) {
@@ -157,13 +169,18 @@ const ViewCompanyPage: React.FC = () => {
       </div>
     );
   }
+
   return (
-    <div className="max-w-6xl mx-auto p-6 bg-gray-50 rounded-xl shadow-lg">
-      <div className="flex justify-between items-center mb-4">
-        <button onClick={() => router.back()} className="buttonPrimary">
+    // <TakeitLayout fit>
+    //   {({}) => (
+    <div className="px-4 py-2">
+      <div className="flex justify-between mb-10 px-4 py-2">
+        <button
+          onClick={() => router.push('/take-it')}
+          className="buttonPrimary"
+        >
           Voltar
         </button>
-
         <div className="relative inline-block" id="export-dropdown">
           <button
             id="export-btn"
@@ -188,7 +205,7 @@ const ViewCompanyPage: React.FC = () => {
             </svg>
           </button>
           {showExportDropdown && (
-            <div className="absolute right-0 z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
+            <div className="absolute z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
               <button
                 className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                 onClick={() => handleExport('csv')}
@@ -205,63 +222,351 @@ const ViewCompanyPage: React.FC = () => {
           )}
         </div>
       </div>
-
-      <h1 className="text-2xl mb-4 font-black">{company.company_name}</h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6" ref={cardRef}>
+      <h1 className="text-2xl mb-4 font-black">
+        Razão Social: {mostrarValor(company.company_name)}
+      </h1>
+      <div
+        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        id="card"
+        ref={cardRef}
+      >
         {/* Dados da Empresa */}
-        <Card title="Dados da Empresa" className="col-start-1 col-end-3">
+        <Card title="Dados da Empresa" className={'col-start-1 col-end-3'}>
           <div className="flex flex-wrap space-y-4 space-x-9">
             <p className="font-medium">
-              <strong>CNPJ:</strong> {company.cnpj}
+              <strong>CNPJ:</strong> {mostrarValor(company.cnpj)}
             </p>
             <p className="font-medium">
-              <strong>Nome Fantasia:</strong> {company.trading_name}
+              <strong>Nome Fantasia:</strong>{' '}
+              {mostrarValor(company.trading_name)}
             </p>
             <p className="font-medium">
-              <strong>Data de Abertura:</strong> {company.creation_date}
+              <strong>Data de Abertura:</strong>{' '}
+              {mostrarValor(company.creation_date)}
             </p>
             <p className="font-medium">
-              <strong>Receita Estimada:</strong> {company.estimated_revenue}
+              <strong>Receita Estimada:</strong>{' '}
+              {mostrarValor(company.estimated_revenue)}
             </p>
             <p className="font-medium">
-              <strong>Capital Social:</strong> {company.share_capital}
+              <strong>Capital Social:</strong>{' '}
+              {mostrarValor(company.share_capital)}
             </p>
             <p className="font-medium">
-              <strong>Cidade/UF:</strong> {company.city_uf}
+              <strong>Cidade/UF:</strong> {mostrarValor(company.city_uf)}
             </p>
             <p className="font-medium">
-              <strong>Segmento:</strong> {company.segment}
+              <strong>Segmento:</strong> {mostrarValor(company.segment)}
             </p>
             <p className="font-medium">
-              <strong>Idade:</strong> {company.age}
+              <strong>Idade:</strong> {mostrarValor(company.age)}
             </p>
             <p className="font-medium">
-              <strong>Funcionários:</strong> {company.employee_count}
+              <strong>Funcionários:</strong>{' '}
+              {mostrarValor(company.employee_count)}
             </p>
             <p className="font-medium">
-              <strong>Tipo de Matriz:</strong> {company.headquarter_type}
+              <strong>Tipo de Matriz:</strong>{' '}
+              {mostrarValor(company.headquarter_type)}
             </p>
             <p className="font-medium">
-              <strong>Porte:</strong> {company.business_size}
+              <strong>Porte:</strong> {mostrarValor(company.business_size)}
             </p>
             <p className="font-medium">
-              <strong>Situação Cadastral:</strong> {company.registry_situation}
+              <strong>Situação Cadastral:</strong>{' '}
+              {mostrarValor(company.registry_situation)}
             </p>
             <p className="font-medium">
-              <strong>CNAE:</strong> {company.cnae_code} -{' '}
-              {company.cnae_description}
+              <strong>CNAE:</strong> {mostrarValor(company.cnae_code)}
+              {' - '}
+              {mostrarValor(company.cnae_description)}
             </p>
             <p className="font-medium">
-              <strong>Tipo Jurídico:</strong> {company.juridical_type}
+              <strong>Tipo Jurídico:</strong>{' '}
+              {mostrarValor(company.juridical_type)}
             </p>
           </div>
         </Card>
-
-        {/* Os outros cards continuam iguais, omitidos para brevidade */}
-        {/* ... */}
+        {/* Simples e SIMEI */}
+        <Card title="Simples Nacional / SIMEI">
+          <div className="flex flex-wrap space-y-4 space-x-9">
+            <p className="font-medium">
+              <strong>Status Simples:</strong>{' '}
+              {mostrarValor(company.simple_simei?.status_simple)}
+            </p>
+            <p className="font-medium">
+              <strong>Data Opção Simples:</strong>{' '}
+              {mostrarValor(company.simple_simei?.dt_option_simple)}
+            </p>
+            <p className="font-medium">
+              <strong>Status SIMEI:</strong>{' '}
+              {mostrarValor(company.simple_simei?.status_simei)}
+            </p>
+            <p className="font-medium">
+              <strong>Data Opção SIMEI:</strong>{' '}
+              {mostrarValor(company.simple_simei?.dt_option_simei)}
+            </p>
+          </div>
+        </Card>
+        {/* Endereços */}
+        <Card title="Endereços">
+          {company.addresses && company.addresses.length > 0 ? (
+            <div className="space-y-2">
+              {company.addresses.map((addr: Address, idx: number) => (
+                <div
+                  key={idx}
+                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                >
+                  <div className="flex flex-wrap space-y-4 space-x-9">
+                    <p className="font-medium">
+                      <strong>Tipo:</strong> {mostrarValor(addr.type)}
+                    </p>
+                    <p className="font-medium">
+                      <strong>Rua:</strong> {mostrarValor(addr.street)},
+                      {mostrarValor(addr.number)}
+                      {addr.complement && mostrarValor(`- ${addr.complement}`)}
+                    </p>
+                    <p className="font-medium">
+                      <strong>Bairro:</strong> {mostrarValor(addr.neighborhood)}
+                    </p>
+                    <p className="font-medium">
+                      <strong>Cidade:</strong> {mostrarValor(addr.city)} -{' '}
+                      {mostrarValor(addr.district)}
+                    </p>
+                    <p className="font-medium">
+                      <strong>CEP:</strong> {mostrarValor(addr.postal_code)}
+                    </p>
+                    {addr.priority && (
+                      <p className="font-medium">
+                        <strong>Prioridade:</strong>{' '}
+                        {mostrarValor(addr.priority)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>Nenhum endereço cadastrado.</div>
+          )}
+        </Card>
+        {/* Telefones Celulares */}
+        <Card title="Telefones Celulares">
+          {company.mobile_phones && company.mobile_phones.length > 0 ? (
+            <div className="space-y-2">
+              {company.mobile_phones.map((phone: Phone, idx: number) => (
+                <div
+                  key={idx}
+                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                >
+                  <div className="flex flex-wrap space-y-4 space-x-9">
+                    <p className="font-medium">
+                      <strong>Número:</strong> ({mostrarValor(phone.ddd)})
+                      {mostrarValor(phone.number)}
+                    </p>
+                    {phone.priority && (
+                      <p className="font-medium">
+                        <strong>Prioridade:</strong>{' '}
+                        {mostrarValor(phone.priority)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>Nenhum celular cadastrado.</div>
+          )}
+        </Card>
+        {/* Telefones Fixos */}
+        <Card title="Telefones Fixos">
+          {company.land_lines && company.land_lines.length > 0 ? (
+            <div className="space-y-2">
+              {company.land_lines.map((phone: Phone, idx: number) => (
+                <div
+                  key={idx}
+                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                >
+                  <div className="flex flex-wrap space-y-4 space-x-9">
+                    <p className="font-medium">
+                      <strong>Número:</strong> ({mostrarValor(phone.ddd)})
+                      {mostrarValor(phone.number)}
+                    </p>
+                    {phone.priority && (
+                      <p className="font-medium">
+                        <strong>Prioridade:</strong>{' '}
+                        {mostrarValor(phone.priority)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>Nenhum telefone fixo cadastrado.</div>
+          )}
+        </Card>
+        {/* E-mails da Empresa */}
+        <Card title="E-mails">
+          {company.emails && company.emails.length > 0 ? (
+            <div className="space-y-2">
+              {company.emails.map((email: Email, idx: number) => (
+                <div
+                  key={idx}
+                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                >
+                  <div className="flex flex-wrap space-y-4 space-x-9">
+                    <p className="font-medium">
+                      <strong>E-mail:</strong> {mostrarValor(email.email)}
+                    </p>
+                    {email.priority && (
+                      <p className="font-medium">
+                        <strong>Prioridade:</strong>{' '}
+                        {mostrarValor(email.priority)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div>Nenhum e-mail cadastrado.</div>
+          )}
+        </Card>
+        {/* Sócios/Representantes */}
+        <Card title="Sócios / Pessoas Relacionadas">
+          {company.related_persons && company.related_persons.length > 0 ? (
+            <div className="space-y-2">
+              {company.related_persons.map(
+                (person: RelatedPerson, idx: number) => (
+                  <div
+                    key={idx}
+                    className="border-b last:border-b-0 pb-2 last:pb-0"
+                  >
+                    <div className="flex flex-wrap space-y-4 space-x-9">
+                      <p className="font-medium">
+                        <strong>Nome:</strong> {mostrarValor(person.name)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>CPF:</strong> {mostrarValor(person.cpf)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Participação:</strong>{' '}
+                        {mostrarValor(person.ownership)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Descrição:</strong>{' '}
+                        {mostrarValor(person.description)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
+            <div>Nenhum sócio/pessoa relacionada cadastrada.</div>
+          )}
+        </Card>
+        {/* Procuradores/Representantes Legais */}
+        <Card title="Procuradores / Representantes Legais">
+          {company.legal_representative &&
+          company.legal_representative.length > 0 ? (
+            <div className="space-y-2">
+              {company.legal_representative.map(
+                (rep: LegalRepresentative, idx: number) => (
+                  <div
+                    key={idx}
+                    className="border-b last:border-b-0 pb-2 last:pb-0"
+                  >
+                    <div className="flex flex-wrap space-y-4 space-x-9">
+                      <p className="font-medium">
+                        <strong>Nome:</strong> {mostrarValor(rep.name)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>CPF:</strong> {mostrarValor(rep.cpf)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Qualificação:</strong>
+                        {mostrarValor(rep.qualification)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
+            <div>Nenhum procurador cadastrado.</div>
+          )}
+        </Card>
+        {/* Filiais */}
+        <Card title="Filiais">
+          {company.branch_offices && company.branch_offices.length > 0 ? (
+            <div className="space-y-2">
+              {company.branch_offices.map(
+                (branch: BranchOffice, idx: number) => (
+                  <div
+                    key={idx}
+                    className="border-b last:border-b-0 pb-2 last:pb-0"
+                  >
+                    <div className="flex flex-wrap space-y-4 space-x-9">
+                      <p className="font-medium">
+                        <strong>CNPJ:</strong> {mostrarValor(branch.cnpj)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Razão Social:</strong>{' '}
+                        {mostrarValor(branch.company_name)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Descrição:</strong>{' '}
+                        {mostrarValor(branch.ds_branch_office)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
+            <div>Nenhuma filial cadastrada.</div>
+          )}
+        </Card>
+        {/* Empresas Relacionadas */}
+        <Card title="Empresas Relacionadas">
+          {company.related_companies && company.related_companies.length > 0 ? (
+            <div className="space-y-2">
+              {company.related_companies.map(
+                (rel: RelatedCompany, idx: number) => (
+                  <div
+                    key={idx}
+                    className="border-b last:border-b-0 pb-2 last:pb-0"
+                  >
+                    <div className="flex flex-wrap space-y-4 space-x-9">
+                      <p className="font-medium">
+                        <strong>Razão Social:</strong> {mostrarValor(rel.name)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>CNPJ:</strong> {mostrarValor(rel.cnpj)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Participação:</strong>{' '}
+                        {mostrarValor(rel.ownership)}
+                      </p>
+                      <p className="font-medium">
+                        <strong>Descrição:</strong>{' '}
+                        {mostrarValor(rel.description)}
+                      </p>
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
+            <div>Nenhuma empresa relacionada cadastrada.</div>
+          )}
+        </Card>
       </div>
     </div>
+    //   )}
+    // </TakeitLayout>
   );
 };
 

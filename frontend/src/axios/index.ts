@@ -33,7 +33,7 @@ function showFloatingNotification(message: string, type: 'success' | 'error') {
 }
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_NEXT_URL || 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_NEXT_URL || 'http://localhost:3000',
   withCredentials: true,
 });
 
@@ -72,9 +72,7 @@ api.interceptors.response.use(
         mensagemErro = 'Erro ao realizar remoção!';
       }
       const msg =
-        error?.response?.data?.message ||
-        error?.message ||
-        mensagemErro;
+        error?.response?.data?.message || error?.message || mensagemErro;
       showFloatingNotification(msg, 'error');
     }
     return Promise.reject(error);
