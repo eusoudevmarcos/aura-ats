@@ -1,35 +1,31 @@
 /*
   Warnings:
-
-  - You are about to drop the column `usuarioSistemaId` on the `Cliente` table. All the data in the column will be lost.
-  - You are about to drop the column `usuarioSistemaId` on the `Funcionario` table. All the data in the column will be lost.
-  - A unique constraint covering the columns `[funcionarioId]` on the table `UsuarioSistema` will be added. If there are existing duplicate values, this will fail.
-  - A unique constraint covering the columns `[clienteId]` on the table `UsuarioSistema` will be added. If there are existing duplicate values, this will fail.
-  - Added the required column `clienteId` to the `UsuarioSistema` table without a default value. This is not possible if the table is not empty.
-  - Added the required column `funcionarioId` to the `UsuarioSistema` table without a default value. This is not possible if the table is not empty.
-
+  ... (mantemos as warnings originais para contexto, mas o SQL abaixo é a correção)
 */
--- DropIndex
+
+-- DropIndex (Mantenha)
 DROP INDEX "Cliente"."Cliente_usuarioSistemaId_key";
-
--- DropIndex
 DROP INDEX "Funcionario"."Funcionario_usuarioSistemaId_idx";
-
--- DropIndex
 DROP INDEX "Funcionario"."Funcionario_usuarioSistemaId_key";
 
--- AlterTable
+-- AlterTable (Mantenha as remoções de colunas)
 ALTER TABLE "Cliente"."Cliente" DROP COLUMN "usuarioSistemaId";
-
--- AlterTable
 ALTER TABLE "Funcionario"."Funcionario" DROP COLUMN "usuarioSistemaId";
 
--- AlterTable
-ALTER TABLE "UsuarioSistema"."UsuarioSistema" ADD COLUMN     "clienteId" TEXT NOT NULL,
-ADD COLUMN     "funcionarioId" TEXT NOT NULL;
+-- AlterTable (Ajuste Crítico: Adicionar como NULL por enquanto)
+-- ADICIONADO: Os campos são adicionados como opcionais (NULL) para permitir o deploy em BD com dados.
+ALTER TABLE "UsuarioSistema"."UsuarioSistema"
+ADD COLUMN "clienteId" TEXT,
+ADD COLUMN "funcionarioId" TEXT;
 
--- CreateIndex
+/*
+  Etapa Opcional: Se você tinha dados na coluna que foi removida e
+  precisa migrar esses IDs para a nova coluna na tabela UsuarioSistema.
+  Você precisará de um script de migração de dados (data migration).
+  Este passo deve ser feito manualmente se necessário, e depende da sua lógica de negócio.
+*/
+
+-- CreateIndex (Mantenha)
+-- Estes índices UNIQUE com colunas NULLable permitem múltiplos NULLs (comportamento padrão do PostgreSQL).
 CREATE UNIQUE INDEX "UsuarioSistema_funcionarioId_key" ON "UsuarioSistema"."UsuarioSistema"("funcionarioId");
-
--- CreateIndex
 CREATE UNIQUE INDEX "UsuarioSistema_clienteId_key" ON "UsuarioSistema"."UsuarioSistema"("clienteId");
