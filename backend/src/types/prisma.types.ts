@@ -443,10 +443,6 @@ export type CandidatoUpdateInput = Partial<
   Omit<Prisma.CandidatoUpdateInput, "pessoa" | "especialidade" | "vagas">
 > & {
   id: string;
-  contatos?: {
-    update?: Prisma.ContatoUpdateWithWhereUniqueWithoutCandidatoInput[];
-    delete?: Prisma.ContatoWhereUniqueInput[];
-  };
   pessoa?: {
     update?: PessoaUpdateInputNested;
     connect?: Prisma.PessoaWhereUniqueInput;
