@@ -16,19 +16,14 @@ import { FormSelect } from '../input/FormSelect';
 import { FormTextarea } from '../input/FormTextarea';
 
 import {
-  BeneficioInput,
   CategoriaVagaEnum,
-  HabilidadeInput,
-  NivelExigidoEnum,
   NivelExperienciaEnum,
   StatusVagaEnum,
   TipoContratoEnum,
-  TipoHabilidadeEnum,
   VagaInput,
   VagaWithClienteInput,
   vagaWithClienteSchema,
 } from '@/schemas/vaga.schema';
-import { FormArrayInput } from '../input/FormArrayInput';
 import ClienteSearch from '../search/ClienteSearch';
 import LocalizacaoForm from './LocalizacaoForm';
 import TriagemForm from './TriagemForm';
