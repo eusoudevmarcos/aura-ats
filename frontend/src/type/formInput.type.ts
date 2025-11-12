@@ -7,6 +7,11 @@ import {
 } from 'react-hook-form';
 import { IMaskInputProps } from 'react-imask';
 
+export type MaskProps = Omit<
+  IMaskInputProps<any>,
+  'name' | 'value' | 'onChange' | 'onAccept' | 'ref' | 'inputRef'
+>;
+
 export type CommonProps<T extends FieldValues> = {
   name: Path<T>;
   errors?: FieldErrors<T>;
@@ -14,10 +19,7 @@ export type CommonProps<T extends FieldValues> = {
     classNameContainer?: string;
   };
   // Tornar maskProps opcional e corrigir tipagem
-  maskProps?: Omit<
-    IMaskInputProps<any>,
-    'name' | 'value' | 'onChange' | 'onAccept' | 'ref' | 'inputRef'
-  >;
+  maskProps?: MaskProps;
   label?: React.ReactNode | string;
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;

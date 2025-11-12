@@ -6,12 +6,14 @@ export const pessoaSchema = z.object({
   id: z.string().nullable().optional(),
   nome: z.string('Nome é obrigatória').min(1, 'Nome é obrigatório'),
   cpf: z
-    .string('CPF é obrigatório')
-    .min(1, 'CPF é obrigatório')
+    .string()
     .refine(
       val => {
-        const unmaskedCpf = val.replace(/\D/g, '');
-        return isValidCPF(unmaskedCpf);
+        if (val.length > 0) {
+          const unmaskedCpf = val.replace(/\D/g, '');
+          return isValidCPF(unmaskedCpf);
+        }
+        return true;
       },
       {
         message: 'CPF inválido',
@@ -34,12 +36,15 @@ export const pessoaSchema = z.object({
     .optional(),
   dataNascimento: z
     .union([
-      z
-        .string()
-        .regex(
-          /^\d{2}\/\d{2}\/\d{4}$/,
-          'Data deve estar no formato DD/MM/AAAA'
-        ),
+      z.string().refine(
+        val => {
+          if (val.length > 0) {
+            return /^\d{2}\/\d{2}\/\d{4}$/.test(val);
+          }
+          return true;
+        },
+        { message: 'Data deve estar no formato DD/MM/AAAA' }
+      ),
       z.date(),
     ])
     .optional(),

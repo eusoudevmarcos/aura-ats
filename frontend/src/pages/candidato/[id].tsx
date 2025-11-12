@@ -4,7 +4,7 @@ import { AdminGuard } from '@/components/auth/AdminGuard';
 import Card from '@/components/Card';
 import { AgendaForm } from '@/components/form/AgendaForm';
 import CandidatoForm from '@/components/form/CandidatoForm';
-import { EditPenIcon, TrashIcon, WhatsAppIcon } from '@/components/icons';
+import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
 import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
@@ -145,14 +145,12 @@ const CandidatoPage: React.FC = () => {
           {/* Sessão Pessoa */}
           {candidato.pessoa && (
             <Card title="Dados Pessoais">
-              <span className="font-medium mr-2">NOME COMPLETO:</span>
-              <span className="font-bold text-primary text-xl">
-                {candidato.pessoa.nome}
-              </span>
+              <span className="font-medium mr-2">Nome:</span>
+              <span className="font-bold text-xl">{candidato.pessoa.nome}</span>
               <div>
                 <span className="font-medium">Data de Nascimento:</span>
                 <span className="text-secondary ml-2">
-                  {candidato.pessoa.dataNascimento ?? 'N/A'}
+                  {candidato.pessoa.dataNascimento || '-'}
                 </span>
               </div>
 
@@ -160,7 +158,7 @@ const CandidatoPage: React.FC = () => {
                 <span className="font-medium">CPF:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
-                    {candidato.pessoa.cpf ?? '-'}
+                    {candidato.pessoa.cpf || '-'}
                   </AdminGuard>
                 </span>
               </div>
@@ -171,39 +169,6 @@ const CandidatoPage: React.FC = () => {
                   {candidato.pessoa.sexo || '-'}
                 </span>
               </div>
-              {candidato.email && (
-                <div>
-                  <span className="font-medium">Email:</span>
-                  <span className="text-secondary ml-2">
-                    <AdminGuard typeText>{candidato.email ?? '-'}</AdminGuard>
-                  </span>
-                </div>
-              )}
-              <div className="flex items-center">
-                <span className="font-medium">Celular/Whatsapp:</span>
-                <span className="text-secondary ml-2">
-                  <AdminGuard typeText>{candidato.celular ?? '-'}</AdminGuard>
-                </span>
-                {candidato.celular && (
-                  <button
-                    onClick={() => {
-                      if (isAdmin) {
-                        const celularReplace = candidato.celular.replace(
-                          /\D/g,
-                          ''
-                        );
-                        const link = `https://wa.me/${celularReplace}`;
-                        location.href = link;
-                      }
-                    }}
-                    disabled={!isAdmin}
-                    className="ml-2 inline-flex items-center bg-green-500 text-white rounded p-1 hover:bg-green-600"
-                    title="Conversar no WhatsApp"
-                  >
-                    <WhatsAppIcon />
-                  </button>
-                )}
-              </div>
             </Card>
           )}
 
@@ -212,15 +177,15 @@ const CandidatoPage: React.FC = () => {
             <div>
               <span className="font-medium">Área de Atuação:</span>
               <span className="text-secondary ml-2">
-                {candidato.areaCandidato?.replace(/_/g, ' ')}
+                {candidato.areaCandidato?.replace(/_/g, ' ') || '-'}
               </span>
             </div>
 
-            {candidato.corem && (
+            {candidato.crm && (
               <div>
                 <span className="font-medium">CRM:</span>
                 <span className="text-secondary ml-2">
-                  <AdminGuard typeText>{candidato.crm ?? '-'}</AdminGuard>
+                  <AdminGuard typeText>{candidato.crm || '-'}</AdminGuard>
                 </span>
               </div>
             )}
@@ -229,7 +194,7 @@ const CandidatoPage: React.FC = () => {
               <div>
                 <span className="font-medium">COREM:</span>
                 <span className="text-secondary ml-2">
-                  <AdminGuard typeText>{candidato.corem ?? '-'}</AdminGuard>
+                  <AdminGuard typeText>{candidato.corem || '-'}</AdminGuard>
                 </span>
               </div>
             )}
@@ -238,7 +203,7 @@ const CandidatoPage: React.FC = () => {
               <div>
                 <span className="font-medium">RQE:</span>
                 <span className="text-secondary ml-2">
-                  <AdminGuard typeText>{candidato.rqe ?? '-'}</AdminGuard>
+                  <AdminGuard typeText>{candidato.rqe || '-'}</AdminGuard>
                 </span>
               </div>
             )}
@@ -251,38 +216,27 @@ const CandidatoPage: React.FC = () => {
           </Card>
 
           {/* Sessão Contatos */}
-          {candidato.pessoa?.contatos?.length > 0 && (
-            <Card title="Contatos">
-              {candidato.pessoa.contatos.map((contato: any) => (
-                <div key={contato.id} className="mb-2">
-                  {contato.email && (
-                    <div>
-                      <span className="font-medium">Email:</span>
-                      <span className="text-secondary ml-2">
-                        {contato.email}
-                      </span>
-                    </div>
-                  )}
-                  {contato.telefone && (
-                    <div>
-                      <span className="font-medium">Telefone:</span>
-                      <span className="text-secondary ml-2">
-                        {contato.telefone}
-                      </span>
-                    </div>
-                  )}
-                  {contato.whatsapp && (
-                    <div>
-                      <span className="font-medium">WhatsApp:</span>
-                      <span className="text-secondary ml-2">
-                        {contato.whatsapp}
-                      </span>
-                    </div>
-                  )}
+          <Card title="Contatos">
+            <>
+              {candidato.emails && candidato.emails.length > 0 && (
+                <div>
+                  <span className="font-medium">Emails:</span>
+                  <span className="text-secondary ml-2">
+                    {candidato.emails}
+                  </span>
                 </div>
-              ))}
-            </Card>
-          )}
+              )}
+
+              {candidato.contatos && candidato.contatos.length > 0 && (
+                <div>
+                  <span className="font-medium">Contatos:</span>
+                  <span className="text-secondary ml-2">
+                    {candidato.contatos || '-'}
+                  </span>
+                </div>
+              )}
+            </>
+          </Card>
 
           {/* Sessão Localizações */}
           {candidato.pessoa?.localizacoes?.length > 0 && (

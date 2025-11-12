@@ -1,23 +1,21 @@
 model Candidato {
-    id            String        @id @default(uuid(7))
-    crm           String?
-    corem         String?
-    rqe           String?
-    areaCandidato AreaCandidato
+    id       String   @id @default(uuid(7))
+    corem    String?
+    rqe      String?
+    crm      String[] // Sigla do estado na frente
+    contatos String[]
+    emails   String[]
 
-    contatos Contato[]
+    areaCandidato   AreaCandidato
+    candidaturaVaga CandidaturaVaga[]
+    formacoes       Formacao[]
 
+    // Especialidade para Médicos
     especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
     especialidadeId Int?
 
     pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
     pessoaId String @unique
-
-    candidaturaVaga CandidaturaVaga[]
-    formacoes       Formacao[]
-
-    email   String?
-    celular String?
 
     @@index([especialidadeId])
     @@schema("Candidato")

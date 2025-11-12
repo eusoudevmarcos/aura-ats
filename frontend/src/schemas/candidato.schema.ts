@@ -37,21 +37,17 @@ export const especialidadeSchema = z.object({
 // });
 export const candidatoSchema = z.object({
   id: z.uuid().optional(),
-
   pessoa: pessoaSchema.optional(),
-
   areaCandidato: AreaCandidatoEnum,
-
-  crm: z
-    .string()
-    .regex(/^\d{1,7}\/?[A-Z]{0,2}$/, {
-      message:
-        'CRM deve conter apenas números e opcionalmente a sigla do estado (ex: 123456/SP)',
-    })
-    .max(20)
-    .nullable()
-    .optional(),
-
+  crm: z.array(
+    z
+      .string()
+      .regex(/^\d{1,7}\/?[A-Z]{0,2}$/, {
+        message:
+          'CRM deve conter apenas números e opcionalmente a sigla do estado (ex: 123456/SP)',
+      })
+      .max(20)
+  ), // Sigla do estado na frente
   corem: z
     .string()
     .regex(/^([A-Z]{2}\s?\d{1,10}|\d{1,10}-[A-Z]{2})$/, {
@@ -61,7 +57,6 @@ export const candidatoSchema = z.object({
     .max(20)
     .nullable()
     .optional(),
-
   rqe: z
     .string()
     .regex(/^\d{1,6}$/, {
@@ -70,7 +65,6 @@ export const candidatoSchema = z.object({
     .max(20)
     .nullable()
     .optional(),
-
   especialidadeId: z
     .string()
     .refine(val => !isNaN(Number(val)) && Number(val) > 0, {
@@ -78,10 +72,8 @@ export const candidatoSchema = z.object({
     })
     .optional()
     .nullable(),
-
-  email: z.string().optional(),
-  celular: z.string().optional(),
-
+  emails: z.array(z.string()),
+  contatos: z.array(z.string()),
   // formacoes: z.array(formacaoSchema).optional(),
 });
 

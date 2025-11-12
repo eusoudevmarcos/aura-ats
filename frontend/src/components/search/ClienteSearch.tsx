@@ -36,6 +36,8 @@ const ClienteSearch = ({
       setShowAutocomplete(false);
       return;
     }
+
+    console.log(searchQuery);
     const delayDebounce = setTimeout(() => {
       if (searchQuery && searchQuery.trim() !== '') {
         // reinicia paginação ao novo termo

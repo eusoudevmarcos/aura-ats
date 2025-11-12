@@ -9,6 +9,7 @@ import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 
 import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
+import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 
@@ -37,6 +38,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         especialidadeId: String(initialValues?.especialidadeId),
       }
     : {
+        emails: [],
+        contatos: [],
+        crm: [],
         pessoa: {
           nome: '',
           cpf: '',
@@ -50,14 +54,38 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     defaultValues: defaultValues,
   });
 
-  const { handleSubmit, watch } = methods;
+  const {
+    handleSubmit,
+    watch,
+    formState: { errors },
+    setValue,
+  } = methods;
+
+  const contatos = watch('contatos');
+  const emails = watch('emails');
+  const crm = watch('crm');
+
+  const handleContatosChange = (newArray: string[]) => {
+    setValue('contatos', newArray, { shouldValidate: true });
+  };
+
+  const handleEmailsChange = (newArray: string[]) => {
+    setValue('emails', newArray, { shouldValidate: true });
+  };
+
+  const handleCRMsChange = (newArray: string[]) => {
+    setValue('crm', newArray, { shouldValidate: true });
+  };
+
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   const areaCandidato = watch('areaCandidato');
   const especialidadeId = watch('especialidadeId');
 
   const fetchEspecialidades = async () => {
     try {
-      // Suponha que você tenha um endpoint para buscar especialidades
       const response = await api.get<{ id: number; nome: string }[]>(
         '/api/externalWithAuth/candidato/especialidades'
       );
@@ -77,8 +105,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     const payload = {
       ...data,
       especialidadeId: Number(data.especialidadeId),
+      contatos: data.contatos.map(contato => contato),
     };
-
+    console.log(payload);
     setLoading(true);
 
     try {
@@ -109,34 +138,65 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-2">
-        <h3 className="text-md font-bold">Dados do Profissional</h3>
         <PessoaForm namePrefix="pessoa" />
 
-        <div className="flex gap-2">
-          <FormInput
-            name="email"
-            label="Email"
-            placeholder="exemplo@gmail.com"
-            inputProps={{ classNameContainer: 'flex-1/2', type: 'email' }}
-          />
-          <FormInput
-            name="celular"
-            label="Celular"
-            placeholder="(00) 0 0000-0000"
-            inputProps={{ classNameContainer: 'flex-1/2' }}
-          />
-        </div>
+        <div className="border-b border-gray-300"></div>
+
+        <FormArrayInput
+          name="emails"
+          title="E-mails"
+          addButtonText="+"
+          ValuesArrayString
+          value={emails}
+          onChange={handleEmailsChange}
+          fieldConfigs={[
+            {
+              name: 'email',
+              type: 'email',
+              placeholder: 'Adicione o e-mail',
+              inputProps: { minLength: 8 },
+            },
+          ]}
+          renderChipContent={emails => <span>{emails}</span>}
+        />
+
+        <div className="border-b border-gray-300"></div>
+
+        <FormArrayInput
+          name="contatos"
+          title="Contatos"
+          addButtonText="+"
+          ValuesArrayString
+          value={contatos}
+          onChange={handleContatosChange}
+          fieldConfigs={[
+            {
+              name: 'contato',
+              type: 'text',
+              placeholder: 'Adicione o contato',
+              maskProps: { mask: '(00) 000000000' },
+              inputProps: { minLength: 8 },
+            },
+          ]}
+          renderChipContent={contato => <span>{contato}</span>}
+        />
+
+        <div className="border-b border-gray-300 py-2"></div>
 
         <h3>Endereço</h3>
+
         <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
 
-        {/* <Card title="Formações Acadêmicas">
-          <FormacaoForm namePrefix="" />
-        </Card> */}
+        <div className="border-b border-gray-300 py-2"></div>
 
-        <h3 className="text-md font-bold">Dados Cadidato</h3>
+        <h3 className="text-md font-bold">Dados Profissionais do Cadidato</h3>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormSelect name="areaCandidato" placeholder="Área de atuação">
+          <FormSelect
+            name="areaCandidato"
+            label="Area de Atuação"
+            placeholder="Adicione a área de atuação"
+          >
             <>
               {AreaCandidatoEnum.options.map(area => (
                 <option key={area} value={area}>
@@ -150,30 +210,30 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             <FormSelect
               selectProps={{ disabled: !areaCandidato }}
               name="especialidadeId"
-              placeholder="Especialidade"
+              label="Especilidade"
+              placeholder="Selecione a especialidade"
             >
               <>
-                {especialidades.map(esp => (
-                  <option key={esp.id} value={esp.id}>
-                    {esp.nome}
+                {especialidades ? (
+                  especialidades.map(esp => (
+                    <option key={esp.id} value={esp.id}>
+                      {esp.nome}
+                    </option>
+                  ))
+                ) : (
+                  <option key={null} className="text-red-500">
+                    Não foi possivel buscar especialidades
                   </option>
-                ))}
+                )}
               </>
             </FormSelect>
-          )}
-
-          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
-            <FormInput
-              name="crm"
-              placeholder="CRM"
-              inputProps={{ disabled: !areaCandidato }}
-            />
           )}
 
           {areaCandidato === AreaCandidatoEnum.enum.ENFERMAGEM && (
             <FormInput
               name="corem"
-              placeholder="COREM"
+              label="COREM"
+              placeholder="Adicione o COREM"
               inputProps={{ disabled: !areaCandidato }}
             />
           )}
@@ -182,10 +242,55 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             especialidadeId && (
               <FormInput
                 name="rqe"
-                placeholder="RQE"
+                label="RQE"
+                placeholder="Adicione o RQE"
                 inputProps={{ disabled: !areaCandidato }}
               />
             )}
+
+          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+            // <FormInput
+            //   name="crm"
+            //   placeholder="CRM"
+            //   inputProps={{ disabled: !areaCandidato }}
+            // />
+
+            <FormArrayInput
+              name="crm"
+              title="CRMs"
+              addButtonText="+"
+              ValuesArrayString
+              value={crm}
+              onChange={handleCRMsChange}
+              containerClassName="col-span-full"
+              validateCustom={(value, fieldConfigs, setErrors) => {
+                console.log(value);
+                const cleanCrm = value.trim();
+                const crmRegex = /^\d{1,7}\/[A-Z]{2}$/;
+                if (!crmRegex.test(cleanCrm)) {
+                  setErrors(
+                    'CRM deve conter apenas números e a sigla do estado (ex: 123456/SP)'
+                  );
+                  return false;
+                }
+
+                if (cleanCrm.length > 20) {
+                  setErrors('CRM deve ter no máximo 20 caracteres.');
+                  return false;
+                }
+
+                return true;
+              }}
+              fieldConfigs={[
+                {
+                  name: 'crms',
+                  placeholder: 'Adicione o CRM',
+                  inputProps: { minLength: 4 },
+                },
+              ]}
+              renderChipContent={crms => <span>{crms}</span>}
+            />
+          )}
         </div>
 
         <div className="flex justify-end">

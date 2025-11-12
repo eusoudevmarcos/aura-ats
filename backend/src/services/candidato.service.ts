@@ -1,7 +1,7 @@
 // src/services/candidato.service.ts
-import { AreaCandidato, Candidato, Especialidade } from "@prisma/client";
+import { Candidato, Especialidade } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
-import { BuildNestedOperation } from "../helper/buildNested/buildNestedOperation";
+import candidatoBuild from "../helper/buildNested/candidato.build";
 import { normalizeCandidatoData } from "../helper/normalize/candidato.normalize";
 import { validateBasicFieldsCandidato } from "../helper/validate/candidato.validate";
 import prisma from "../lib/prisma";
@@ -92,55 +92,17 @@ export class CandidatoService {
 
     candidatoData = normalizeCandidatoData(candidatoData);
 
-    const buildNestedOperation = new BuildNestedOperation();
-
-    let CandidatoData = {
-      id: candidatoData?.id,
-      rqe: candidatoData.rqe,
-      crm: candidatoData.crm,
-      corem: candidatoData.coren,
-      areaCandidato: candidatoData.areaCandidato as AreaCandidato,
-      email: candidatoData?.email ?? undefined,
-      celular: candidatoData?.celular ?? undefined,
-    } as any;
-
-    const { id, rqe, areaCandidato, crm, corem, ...rest } = candidatoData;
-
-    if (rest.pessoa) {
-      CandidatoData.pessoa = buildNestedOperation.build(rest.pessoa);
-    }
-
-    if (rest.especialidade || rest.especialidadeId) {
-      if (rest.especialidadeId) {
-        rest.especialidade = {
-          ...(rest.especialidade ?? {}),
-          id: rest.especialidadeId,
-        };
-      }
-      CandidatoData.especialidade = buildNestedOperation.build(
-        rest.especialidade
-      );
-    }
-
-    if (rest.formacoes || rest.formacoes) {
-      CandidatoData.formacoes = buildNestedOperation.build(rest.formacoes);
-    }
-
-    // if (rest.localizacoes || rest.localizacoes) {
-    //   CandidatoData.localizacao = buildNestedOperation.build(rest.localizacoes);
-    // }
+    const candidatoPayload = candidatoBuild(candidatoData);
 
     const includeRelations = {
-      contatos: true,
       pessoa: true,
       especialidade: true,
-      formacoes: true,
     };
 
-    console.log(CandidatoData);
+    console.log(candidatoPayload);
 
-    if (CandidatoData.id) {
-      const { id, ...updateData } = CandidatoData as CandidatoUpdateInput;
+    if (candidatoData.id) {
+      const { id, ...updateData } = candidatoPayload as CandidatoUpdateInput;
       return await prisma.candidato.update({
         where: { id: id },
         data: updateData as any,
@@ -148,7 +110,7 @@ export class CandidatoService {
       });
     } else {
       return await prisma.candidato.create({
-        data: CandidatoData as any,
+        data: candidatoPayload as any,
         include: includeRelations,
       });
     }

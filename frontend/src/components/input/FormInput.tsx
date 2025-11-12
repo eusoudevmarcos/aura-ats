@@ -141,7 +141,7 @@ const InputElement = React.forwardRef<HTMLInputElement, any>(
     return (
       <input
         ref={ref}
-        onChange={e => onChange(e)}
+        onChange={e => onChange(e.target.value)}
         onKeyDown={onKeyDown}
         autoComplete="off"
         {...props}
