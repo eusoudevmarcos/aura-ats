@@ -55,7 +55,7 @@ model CandidaturaVaga {
     dataAplicacao DateTime          @default(now())
     observacoes   String?
 
-    candidato   Candidato @relation(fields: [candidatoId], references: [id])
+    candidato   Candidato @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
     candidatoId String
 
     vaga   Vaga   @relation(fields: [vagaId], references: [id])

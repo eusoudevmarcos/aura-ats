@@ -35,6 +35,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const defaultValues = !!initialValues
     ? {
         ...initialValues,
+        emails: initialValues.emails || [],
+        contatos: initialValues.contatos || [],
+        crm: initialValues.crm || [],
         especialidadeId: String(initialValues?.especialidadeId),
       }
     : {
@@ -43,8 +46,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         crm: [],
         pessoa: {
           nome: '',
-          cpf: '',
-          dataNascimento: '',
         },
       };
 
@@ -127,9 +128,19 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       }
     } catch (erro: any) {
       alert(
-        'Erro ao salvar profissional: ' +
-          (erro?.response?.data?.message || 'Erro desconhecido')
+        `Erro ao cadastrar candidato. \n Código do erro:${
+          erro?.response?.data?.message ??
+          erro.response.data ??
+          'Erro ao salvar o candidato'
+        } `
       );
+
+      setTimeout(() => {
+        const erroElem = document.getElementById('erro');
+        if (erroElem) {
+          erroElem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
     } finally {
       setLoading(false);
     }
@@ -138,48 +149,48 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-2">
-        <PessoaForm namePrefix="pessoa" />
+        <PessoaForm namePrefix="pessoa" isYear />
 
         <div className="border-b border-gray-300"></div>
 
-        <FormArrayInput
-          name="emails"
-          title="E-mails"
-          addButtonText="+"
-          ValuesArrayString
-          value={emails}
-          onChange={handleEmailsChange}
-          fieldConfigs={[
-            {
-              name: 'email',
-              type: 'email',
-              placeholder: 'Adicione o e-mail',
-              inputProps: { minLength: 8 },
-            },
-          ]}
-          renderChipContent={emails => <span>{emails}</span>}
-        />
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <FormArrayInput
+            name="emails"
+            title="E-mails"
+            addButtonText="+"
+            ValuesArrayString
+            value={emails}
+            onChange={handleEmailsChange}
+            fieldConfigs={[
+              {
+                name: 'email',
+                type: 'email',
+                placeholder: 'Adicione o e-mail',
+                inputProps: { minLength: 8, classNameContainer: 'w-full' },
+              },
+            ]}
+            renderChipContent={emails => <span>{emails}</span>}
+          />
 
-        <div className="border-b border-gray-300"></div>
-
-        <FormArrayInput
-          name="contatos"
-          title="Contatos"
-          addButtonText="+"
-          ValuesArrayString
-          value={contatos}
-          onChange={handleContatosChange}
-          fieldConfigs={[
-            {
-              name: 'contato',
-              type: 'text',
-              placeholder: 'Adicione o contato',
-              maskProps: { mask: '(00) 000000000' },
-              inputProps: { minLength: 8 },
-            },
-          ]}
-          renderChipContent={contato => <span>{contato}</span>}
-        />
+          <FormArrayInput
+            name="contatos"
+            title="Contatos"
+            addButtonText="+"
+            ValuesArrayString
+            value={contatos}
+            onChange={handleContatosChange}
+            fieldConfigs={[
+              {
+                name: 'contato',
+                type: 'text',
+                placeholder: 'Adicione o contato',
+                maskProps: { mask: '(00) 000000000' },
+                inputProps: { minLength: 8, classNameContainer: 'w-full' },
+              },
+            ]}
+            renderChipContent={contato => <span>{contato}</span>}
+          />
+        </div>
 
         <div className="border-b border-gray-300 py-2"></div>
 
@@ -238,58 +249,55 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             />
           )}
 
-          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA &&
-            especialidadeId && (
-              <FormInput
-                name="rqe"
-                label="RQE"
-                placeholder="Adicione o RQE"
-                inputProps={{ disabled: !areaCandidato }}
-              />
-            )}
-
           {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
-            // <FormInput
-            //   name="crm"
-            //   placeholder="CRM"
-            //   inputProps={{ disabled: !areaCandidato }}
-            // />
+            <>
+              <FormArrayInput
+                name="crm"
+                title="CRMs"
+                addButtonText="+"
+                ValuesArrayString
+                value={crm}
+                onChange={handleCRMsChange}
+                validateCustom={(value, fieldConfigs, setErrors) => {
+                  console.log(value);
+                  const cleanCrm = value.trim();
+                  const crmRegex = /^\d{1,7}\/[A-Z]{2}$/;
+                  if (!crmRegex.test(cleanCrm)) {
+                    setErrors(
+                      'CRM deve conter apenas números e a sigla do estado (ex: 123456/SP)'
+                    );
+                    return false;
+                  }
 
-            <FormArrayInput
-              name="crm"
-              title="CRMs"
-              addButtonText="+"
-              ValuesArrayString
-              value={crm}
-              onChange={handleCRMsChange}
-              containerClassName="col-span-full"
-              validateCustom={(value, fieldConfigs, setErrors) => {
-                console.log(value);
-                const cleanCrm = value.trim();
-                const crmRegex = /^\d{1,7}\/[A-Z]{2}$/;
-                if (!crmRegex.test(cleanCrm)) {
-                  setErrors(
-                    'CRM deve conter apenas números e a sigla do estado (ex: 123456/SP)'
-                  );
-                  return false;
-                }
+                  if (cleanCrm.length > 20) {
+                    setErrors('CRM deve ter no máximo 20 caracteres.');
+                    return false;
+                  }
 
-                if (cleanCrm.length > 20) {
-                  setErrors('CRM deve ter no máximo 20 caracteres.');
-                  return false;
-                }
+                  return true;
+                }}
+                fieldConfigs={[
+                  {
+                    name: 'crms',
+                    placeholder: 'Adicione o CRM',
+                    inputProps: {
+                      minLength: 4,
+                      classNameContainer: 'w-full',
+                    },
+                  },
+                ]}
+                renderChipContent={crms => <span>{crms}</span>}
+              />
 
-                return true;
-              }}
-              fieldConfigs={[
-                {
-                  name: 'crms',
-                  placeholder: 'Adicione o CRM',
-                  inputProps: { minLength: 4 },
-                },
-              ]}
-              renderChipContent={crms => <span>{crms}</span>}
-            />
+              {especialidadeId && (
+                <FormInput
+                  name="rqe"
+                  label="RQE"
+                  placeholder="Adicione o RQE"
+                  inputProps={{ disabled: !areaCandidato }}
+                />
+              )}
+            </>
           )}
         </div>
 

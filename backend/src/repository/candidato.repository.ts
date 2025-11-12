@@ -128,7 +128,7 @@ export class CandidatoRepository {
     const candidato = await tx.candidato.findUnique({
       where: { id },
       include: {
-        pessoa: true,
+        pessoa: { include: { localizacoes: true } },
         especialidade: true,
         formacoes: true,
       },

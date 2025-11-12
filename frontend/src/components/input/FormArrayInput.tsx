@@ -267,7 +267,7 @@ export function FormArrayInput({
                     noControl
                   />
                 )}
-                <div className="flex justify-end mt-2">
+                <div className="flex justify-end">
                   <PrimaryButton
                     className="h-10"
                     type="button"

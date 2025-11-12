@@ -37,7 +37,7 @@ export const especialidadeSchema = z.object({
 // });
 export const candidatoSchema = z.object({
   id: z.uuid().optional(),
-  pessoa: pessoaSchema.optional(),
+  pessoa: pessoaSchema,
   areaCandidato: AreaCandidatoEnum,
   crm: z.array(
     z

@@ -87,15 +87,18 @@ export class CandidatoService {
   }
 
   async save(candidatoData: any): Promise<Candidato> {
-    candidatoData.pessoa.cpf = candidatoData.pessoa.cpf.replace(/\D/g, "");
-    if (!candidatoData.id) validateBasicFieldsCandidato(candidatoData);
-
     candidatoData = normalizeCandidatoData(candidatoData);
+
+    validateBasicFieldsCandidato(candidatoData);
 
     const candidatoPayload = candidatoBuild(candidatoData);
 
     const includeRelations = {
-      pessoa: true,
+      pessoa: {
+        include: {
+          localizacoes: true,
+        },
+      },
       especialidade: true,
     };
 

@@ -41,9 +41,5 @@ export default function candidatoBuild(
     newCandidato.especialidade = buildNestedOperation.build(rest.especialidade);
   }
 
-  //   if (rest.formacoes || rest.formacoes) {
-  //     newCandidato.formacoes = buildNestedOperation.build(rest.formacoes);
-  //   }
-
   return newCandidato;
 }
