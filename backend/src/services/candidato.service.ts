@@ -131,12 +131,8 @@ export class CandidatoService {
     // }
 
     const includeRelations = {
-      pessoa: {
-        include: {
-          contatos: true,
-          localizacoes: true,
-        },
-      },
+      contatos: true,
+      pessoa: true,
       especialidade: true,
       formacoes: true,
     };
