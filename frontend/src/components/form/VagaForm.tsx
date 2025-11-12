@@ -338,12 +338,13 @@ const VagaForm: React.FC<VagaFormProps> = ({
           </button>
         </div> */}
 
-        {habilidadesAllow && (
+        {/* {habilidadesAllow && (
           <div className="col-span-full">
             <FormArrayInput
               name="habilidades"
               title="Habilidades Necessárias (Opcional)"
               addButtonText="Adicionar Habilidade"
+              value={ }
               fieldConfigs={[
                 {
                   name: 'nome',
@@ -425,7 +426,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
               initialItemData={{ nome: '', descricao: '' }}
             />
           </div>
-        )}
+        )} */}
 
         {/* Triagens da Vaga */}
         <TriagemForm />
