@@ -433,26 +433,27 @@ const CandidatoPage: React.FC = () => {
             </Card>
           )}
 
-          <Card title="Links" classNameContent="flex flex-col gap-2">
-            {candidato.links.map((link: string, idx: number) => (
-              <div
-                key={idx}
-                className="flex items-center justify-between gap-2 bg-gray-100 inset-shadow-2xs inset-shadow-black-200 rounded-full pl-5 pr-0.5 py-0.5 hover:bg-gray-200 transition-colors"
-              >
-                <span
-                  className="text-black break-all truncate max-w-sm sm:max-w-md md:max-w-lg block"
-                  title={link}
+          {candidato.links && candidato.links.length > 0 && (
+            <Card title="Links" classNameContent="flex flex-col gap-2">
+              {candidato.links.map((link: string, idx: number) => (
+                <div
+                  key={idx}
+                  className="flex items-center justify-between gap-2 bg-gray-100 inset-shadow-2xs inset-shadow-black-200 rounded-full pl-5 pr-0.5 py-0.5 hover:bg-gray-200 transition-colors"
                 >
-                  {link}
-                </span>
-                <ButtonCopy
-                  value={link}
-                  className="text-primary! px-3! rounded-full! bg-white!"
-                />
-              </div>
-            ))}
-          </Card>
-
+                  <span
+                    className="text-black break-all truncate max-w-sm sm:max-w-md md:max-w-lg block"
+                    title={link}
+                  >
+                    {link}
+                  </span>
+                  <ButtonCopy
+                    value={link}
+                    className="text-primary! px-3! rounded-full! bg-white!"
+                  />
+                </div>
+              ))}
+            </Card>
+          )}
           {/* Sessão Anexos */}
           {candidato.anexos && candidato.anexos.length > 0 && (
             <Card title="Anexos">
