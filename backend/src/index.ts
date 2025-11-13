@@ -1,6 +1,7 @@
 import cors from "cors";
 import dotenv from "dotenv";
 import express from "express";
+import path from "path";
 import "reflect-metadata";
 
 dotenv.config();
@@ -51,7 +52,9 @@ async function startServer() {
     })
   );
 
-  app.use(express.json());
+  // Aumentar limite do body parser para suportar uploads de arquivos (50MB)
+  app.use(express.json({ limit: '50mb' }));
+  app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
   // Criar um middleware que verifica se o ambiente e de desenvolvimento ou de produção e caso seja de produção exija uma senha
 
@@ -86,6 +89,9 @@ async function startServer() {
   }
 
   app.get("/api/ping", (req, res) => res.status(200).send("ok"));
+
+  // Servir arquivos estáticos
+  app.use("/files", express.static(path.join(__dirname, "../public/files")));
 
   app.use("/api/auth", authenticationRoutes);
   app.use("/api/users", userRoutes);

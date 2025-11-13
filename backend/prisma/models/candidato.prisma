@@ -10,6 +10,7 @@ model Candidato {
     areaCandidato   AreaCandidato
     candidaturaVaga CandidaturaVaga[]
     formacoes       Formacao[]
+    anexos          CandidatoAnexo[]
 
     // Especialidade para Médicos
     especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
@@ -45,6 +46,18 @@ model Formacao {
 
     @@index([candidatoId])
     @@schema("Formacao")
+}
+
+model CandidatoAnexo {
+    candidato   Candidato @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
+    candidatoId String
+
+    anexo   Anexo  @relation(fields: [anexoId], references: [id])
+    anexoId String
+
+    @@id([candidatoId, anexoId])
+    @@index([anexoId])
+    @@schema("Candidato")
 }
 
 // model CandidatoHabilidade {

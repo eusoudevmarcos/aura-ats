@@ -131,6 +131,11 @@ export class CandidatoRepository {
         pessoa: { include: { localizacoes: true } },
         especialidade: true,
         formacoes: true,
+        anexos: {
+          include: {
+            anexo: true,
+          },
+        },
       },
     });
 

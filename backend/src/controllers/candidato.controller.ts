@@ -86,4 +86,51 @@ export class CandidatoController {
       return res.status(400).json({ message: error.message });
     }
   }
+
+  async downloadAnexo(req: Request, res: Response): Promise<Response | void> {
+    try {
+      const { anexoId } = req.params;
+      const filePath = await this.candidatoService.getFilePathForDownload(
+        anexoId
+      );
+
+      const path = require("path");
+      const fs = require("fs");
+
+      const fileName = path.basename(filePath);
+      const fileStream = fs.createReadStream(filePath);
+
+      // Determina o content-type baseado na extensão
+      const ext = path.extname(fileName).toLowerCase();
+      const contentTypes: { [key: string]: string } = {
+        ".pdf": "application/pdf",
+        ".doc": "application/msword",
+        ".docx":
+          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+        ".xls": "application/vnd.ms-excel",
+        ".xlsx":
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        ".jpg": "image/jpeg",
+        ".jpeg": "image/jpeg",
+        ".png": "image/png",
+        ".txt": "text/plain",
+      };
+
+      const contentType = contentTypes[ext] || "application/octet-stream";
+
+      // Para PDFs, usar inline para visualização; para outros, attachment para download
+      const disposition =
+        ext === ".pdf"
+          ? `inline; filename="${encodeURIComponent(fileName)}"`
+          : `attachment; filename="${encodeURIComponent(fileName)}"`;
+
+      res.setHeader("Content-Type", contentType);
+      res.setHeader("Content-Disposition", disposition);
+
+      fileStream.pipe(res);
+    } catch (error: any) {
+      console.error("Erro ao fazer download do anexo:", error.message);
+      return res.status(404).json({ message: error.message });
+    }
+  }
 }

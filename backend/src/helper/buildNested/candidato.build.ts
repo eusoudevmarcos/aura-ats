@@ -6,6 +6,11 @@ import {
 } from "@prisma/client";
 import { BuildNestedOperation } from "./buildNestedOperation";
 
+// Este método extrai sub propriedades de objetos aninhados para transformar no padrão do prisma (create, update, connect).
+// connect: objetos aninhado que só tem id,
+// -- ex1: const pessoa = { id: "HASH" }
+// -- ex2: const pessoa = [ id: "HASH" ]
+// -- ex2: const pessoa = cliente.id
 export default function candidatoBuild(
   candidatoData: Candidato & {
     pessoa: Pessoa;
@@ -14,6 +19,7 @@ export default function candidatoBuild(
 ) {
   const buildNestedOperation = new BuildNestedOperation();
 
+  // Extraia os objetos da raiz para não dar erro
   let newCandidato = {
     id: candidatoData?.id,
     rqe: candidatoData.rqe,

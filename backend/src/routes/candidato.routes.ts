@@ -29,4 +29,8 @@ candidatoRouter.delete("/:id", authMiddleware, (req, res) =>
   candidatoController.deleteCandidato(req, res)
 );
 
+candidatoRouter.get("/anexo/:anexoId/download", authMiddleware, (req, res) =>
+  candidatoController.downloadAnexo(req, res)
+);
+
 export default candidatoRouter;

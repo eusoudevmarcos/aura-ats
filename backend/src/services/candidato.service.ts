@@ -8,7 +8,9 @@ import prisma from "../lib/prisma";
 import { CandidatoRepository } from "../repository/candidato.repository";
 import { PessoaRepository } from "../repository/pessoa.repository";
 import { CandidatoUpdateInput } from "../types/prisma.types";
+import { AnexoService } from "./anexo.service";
 import { BillingService } from "./billing.service";
+import { TypeFile, UploadedFile } from "./file.service";
 
 @injectable()
 export class CandidatoService {
@@ -18,7 +20,9 @@ export class CandidatoService {
     @inject(PessoaRepository)
     private pessoaRepository: PessoaRepository,
     @inject(BillingService)
-    private billingService: BillingService
+    private billingService: BillingService,
+    @inject(AnexoService)
+    private anexoService: AnexoService
   ) {}
 
   async getEspecialidades(): Promise<Especialidade[]> {
@@ -29,7 +33,20 @@ export class CandidatoService {
     id: string,
     clienteId?: string
   ): Promise<Candidato | null> {
-    const candidato = await this.candidatoRepository.findById(id);
+    // Buscar candidato com anexos
+    const candidato = await prisma.candidato.findUnique({
+      where: { id },
+      include: {
+        pessoa: { include: { localizacoes: true } },
+        especialidade: true,
+        formacoes: true,
+        anexos: {
+          include: {
+            anexo: true,
+          },
+        },
+      },
+    });
 
     // Se um cliente está consultando, debita um uso do plano
     if (candidato && clienteId) {
@@ -91,6 +108,10 @@ export class CandidatoService {
 
     validateBasicFieldsCandidato(candidatoData);
 
+    // Extrair arquivos antes de processar o payload
+    const files = candidatoData.files || [];
+    delete candidatoData.files;
+
     const candidatoPayload = candidatoBuild(candidatoData);
 
     const includeRelations = {
@@ -100,22 +121,59 @@ export class CandidatoService {
         },
       },
       especialidade: true,
+      anexos: {
+        include: {
+          anexo: true,
+        },
+      },
     };
 
     console.log(candidatoPayload);
 
+    let candidato: Candidato;
+
     if (candidatoData.id) {
       const { id, ...updateData } = candidatoPayload as CandidatoUpdateInput;
-      return await prisma.candidato.update({
+      candidato = await prisma.candidato.update({
         where: { id: id },
         data: updateData as any,
         include: includeRelations,
       });
     } else {
-      return await prisma.candidato.create({
+      candidato = await prisma.candidato.create({
         data: candidatoPayload as any,
         include: includeRelations,
       });
     }
+
+    // Processar arquivos se houver
+    if (files.length > 0) {
+      const uploadedFiles: UploadedFile[] = files.map((file: any) => {
+        // Converter base64 para Buffer
+        const buffer = Buffer.from(file.buffer, "base64");
+        return {
+          originalname: file.originalname,
+          path: "", // Será preenchido pelo FileService
+          buffer: buffer,
+          mimetype: file.mimetype,
+          size: file.size,
+          type: file.type as TypeFile,
+        };
+      });
+
+      await this.anexoService.createMultipleAnexos(uploadedFiles, candidato.id);
+
+      // Buscar candidato atualizado com anexos
+      candidato = (await prisma.candidato.findUnique({
+        where: { id: candidato.id },
+        include: includeRelations,
+      })) as Candidato;
+    }
+
+    return candidato;
+  }
+
+  async getFilePathForDownload(anexoId: string): Promise<string> {
+    return await this.anexoService.getFilePathForDownload(anexoId);
   }
 }

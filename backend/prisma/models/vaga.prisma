@@ -78,7 +78,8 @@ model Anexo {
     tipo        String?
     tamanhoKb   Int?
 
-    vagas VagaAnexo[]
+    vagas     VagaAnexo[]
+    candidatos CandidatoAnexo[]
 
     @@schema("Anexo")
 }

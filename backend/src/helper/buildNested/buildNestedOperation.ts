@@ -1,13 +1,14 @@
 type NestedData = Record<string, any>;
 
 /**
- * Helper para gerar os inputs nested que o Prisma espera:
- * - arrays de objetos => { create?, update?, connect? }
- * - objeto com id + outros campos => { update: { where:{id}, data: {...} } }
- * - objeto com id apenas => { connect: { id } }
- * - objeto sem id => { create: {...} }
+ * @summary
+ * Este helper gera os inputs aninhados que o Prisma espera ao criar/atualizar relacionamentos:
+ * - Arrays de objetos: transforma em { create?, update?, connect? } conforme o conteúdo de cada item.
+ * - Objeto com id + outros campos: gera { update: { where: { id }, data: {...} } }
+ * - Objeto somente com id: gera { connect: { id } }
+ * - Objeto sem id: gera { create: {...} }
  *
- * Trata recursivamente campos aninhados (arrays/objetos) até maxDepth.
+ * O processamento é feito de forma recursiva em campos aninhados (arrays ou objetos), limitado por maxDepth.
  */
 export class BuildNestedOperation {
   constructor(private maxDepth = 20, private debug = false) {}
