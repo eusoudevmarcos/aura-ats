@@ -13,19 +13,42 @@ export default function ButtonCopy({ value, className }: any) {
     }
   };
 
+  // Adiciona animação de scale + opacity ao span flutuante
   useEffect(() => {
     let span: HTMLSpanElement | null = null;
+    let animTimeout: NodeJS.Timeout | null = null;
+
     if (copiado) {
       span = document.createElement('span');
       span.className =
-        'fixed left-1/2 -translate-x-1/2 bottom-8 z-50 bg-[#8c53ff] text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium';
+        'fixed left-1/2 -translate-x-1/2 bottom-8 z-50 text-primary px-4 py-2 rounded-lg shadow text font-medium pointer-events-none transition-all duration-500 opacity-0 scale-90';
       span.innerText = 'Copiado para a área de transferência!';
+
       document.body.appendChild(span);
+
+      setTimeout(() => {
+        if (span) {
+          span.classList.remove('opacity-0', 'scale-90');
+          span.classList.add('opacity-100', 'scale-105');
+        }
+      }, 16);
+
+      animTimeout = setTimeout(() => {
+        if (span) {
+          span.classList.remove('opacity-100', 'scale-105');
+          span.classList.add('opacity-0', 'scale-90');
+        }
+      }, 3600);
     }
 
     return () => {
-      if (span && document.body.contains(span)) {
-        document.body.removeChild(span);
+      if (animTimeout) clearTimeout(animTimeout);
+      if (span) {
+        setTimeout(() => {
+          if (span && document.body.contains(span)) {
+            document.body.removeChild(span);
+          }
+        }, 500);
       }
     };
   }, [copiado]);
@@ -33,7 +56,7 @@ export default function ButtonCopy({ value, className }: any) {
   return (
     <PrimaryButton
       title={copiado ? 'Copiado!' : 'Copiar'}
-      className={`min-w-0 shrink-0 rounded-full! bg-white! hover:scale-[1.1] ${className}`}
+      className={`min-w-0 text-primary shrink-0 hover:scale-[1.04] p-1! md:p-2! ${className}`}
       onClick={handleCopy}
     >
       <span className="material-icons text-sm!">

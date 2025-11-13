@@ -7,6 +7,11 @@ import { IMaskInput } from 'react-imask';
 import { Container } from './Container';
 import { ErrorMessage } from './ErrorMessage';
 
+type FormInputOnChange = (
+  e: React.ChangeEvent<HTMLInputElement> | string
+) => void;
+type FormInputOnFocus = (e: React.FocusEvent<HTMLInputElement>) => void;
+
 export function FormInput<T extends FieldValues>({
   name,
   inputProps,
@@ -16,12 +21,13 @@ export function FormInput<T extends FieldValues>({
   type = 'text',
   value,
   onChange,
+  onFocus,
   onKeyDown,
   control: externalControl,
   errors: externalErrors,
   noControl = false,
   clear = false,
-}: FormInputProps<T> & { noControl?: boolean }) {
+}: FormInputProps<T>) {
   const formContext = useFormContext<T>();
   const control = externalControl || formContext?.control;
   const errors = externalErrors || formContext?.formState?.errors;
@@ -51,14 +57,21 @@ export function FormInput<T extends FieldValues>({
       // Chama o onChange customizado
       if (onChange) {
         if (maskProps?.mask) {
-          onChange(newValue);
+          // Chama direto com valor puro (IMask repassa value string)
+          (onChange as FormInputOnChange)(newValue);
         } else {
           const syntheticEvent = {
             target: { value: newValue, name: name.toString() },
             currentTarget: { value: newValue, name: name.toString() },
           } as React.ChangeEvent<HTMLInputElement>;
-          onChange(syntheticEvent);
+          (onChange as FormInputOnChange)(syntheticEvent);
         }
+      }
+    };
+
+    const handleFocus = (e: React.FocusEvent<HTMLInputElement>) => {
+      if (onFocus) {
+        onFocus(e);
       }
     };
 
@@ -69,9 +82,10 @@ export function FormInput<T extends FieldValues>({
         type={type}
         className={inputClassName}
         placeholder={placeholder}
-        value={field ? field.value || '' : value || ''}
+        value={field ? field.value ?? '' : value ?? ''}
         onChange={handleChange}
         onBlur={field?.onBlur}
+        onFocus={handleFocus}
         onKeyDown={onKeyDown}
         maskProps={maskProps}
         {...otherInputProps}
@@ -104,13 +118,13 @@ export function FormInput<T extends FieldValues>({
               }
               if (onChange) {
                 if (maskProps?.mask) {
-                  onChange('' as any);
+                  (onChange as FormInputOnChange)('' as any);
                 } else {
                   const syntheticEvent = {
                     target: { value: '', name: name.toString() },
                     currentTarget: { value: '', name: name.toString() },
                   } as React.ChangeEvent<HTMLInputElement>;
-                  onChange(syntheticEvent);
+                  (onChange as FormInputOnChange)(syntheticEvent);
                 }
               }
             }}
@@ -123,14 +137,21 @@ export function FormInput<T extends FieldValues>({
   );
 }
 
+type InputElementProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  maskProps?: any;
+  onChange: (value: any) => void;
+  onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+};
+
 // Input com/sem máscara
-const InputElement = React.forwardRef<HTMLInputElement, any>(
-  ({ maskProps, onChange, onKeyDown, ...props }, ref) => {
+const InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
+  ({ maskProps, onChange, onKeyDown, onFocus, ...props }, ref) => {
     if (maskProps?.mask) {
       return (
         <IMaskInput
           inputRef={ref}
           onChange={onChange}
+          onFocus={onFocus}
           onKeyDown={onKeyDown}
           autoComplete="off"
           {...maskProps}
@@ -142,6 +163,7 @@ const InputElement = React.forwardRef<HTMLInputElement, any>(
       <input
         ref={ref}
         onChange={e => onChange(e.target.value)}
+        onFocus={onFocus}
         onKeyDown={onKeyDown}
         autoComplete="off"
         {...props}
@@ -169,7 +191,7 @@ function buildInputClasses(
   customClassName?: string
 ) {
   const base =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90 focus:border-primary placeholder:text-md';
   const errorClass = errorMessage ? 'border-red-500' : '';
   return [base, errorClass, customClassName].filter(Boolean).join(' ');
 }

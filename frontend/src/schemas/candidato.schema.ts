@@ -78,6 +78,17 @@ export const candidatoSchema = z.object({
 
   contatos: z.array(z.string()),
   // formacoes: z.array(formacaoSchema).optional(),
+  files: z
+    .array(
+      z.object({
+        originalname: z.string(),
+        mimetype: z.string().optional(),
+        size: z.number().optional(),
+        type: z.string(),
+        fileObj: z.any().optional(), // File object do browser
+      })
+    )
+    .optional(),
 });
 
 export type CandidatoInput = z.infer<typeof candidatoSchema>;

@@ -12,6 +12,11 @@ export type MaskProps = Omit<
   'name' | 'value' | 'onChange' | 'onAccept' | 'ref' | 'inputRef'
 >;
 
+type FormInputOnChange = (
+  e: React.ChangeEvent<HTMLInputElement> | string
+) => void;
+type FormInputOnFocus = (e: React.FocusEvent<HTMLInputElement>) => void;
+
 export type CommonProps<T extends FieldValues> = {
   name: Path<T>;
   errors?: FieldErrors<T>;
@@ -28,6 +33,8 @@ export type CommonProps<T extends FieldValues> = {
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;
   clear?: boolean;
+  noControl?: boolean;
+  onFocus?: FormInputOnFocus;
 };
 
 // Permite: apenas control, apenas register, ou nenhum dos dois. Nunca ambos juntos.

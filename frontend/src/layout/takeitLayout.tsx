@@ -71,7 +71,7 @@ export default function TakeitLayout({ children, fit }: Props) {
         TAKE IT
       </h1>
 
-      <div className="transition-all duration-2000 bg-white rounded-xl w-full shadow-md mb-5 flex flex-col-reverse md:flex-col">
+      <div className="transition-all duration-2000 bg-white w-full shadow-md mb-5 flex flex-col-reverse md:flex-col">
         <div className="p-4">
           {typeColumns === 'persons' ? (
             <p>Pesquise CPF, Nome completo, CEP, Endereço completo, Email</p>

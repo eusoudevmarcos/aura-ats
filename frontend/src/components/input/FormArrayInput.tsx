@@ -1,5 +1,5 @@
 import { MaskProps } from '@/type/formInput.type';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
@@ -36,6 +36,7 @@ interface FormArrayInputProps {
     fieldConfigs: any,
     setItemError: React.Dispatch<React.SetStateAction<string | null>>
   ) => boolean;
+  pasteInput?: boolean; // nova prop: ativa leitura do clipboard ao focar input
 }
 
 export function FormArrayInput({
@@ -50,6 +51,7 @@ export function FormArrayInput({
   value,
   onChange,
   validateCustom,
+  pasteInput = false,
 }: FormArrayInputProps) {
   // Estados locais
   const [newItemValues, setNewItemValues] = useState<Record<string, any>>(
@@ -67,12 +69,100 @@ export function FormArrayInput({
 
   const [itemError, setItemError] = useState<string | null>(null);
 
+  // Estado para auxiliar o comportamento solicitado
+  const [lastPasted, setLastPasted] = useState<Record<string, boolean>>({});
+  const backspaceTimerRefs = useRef<Record<string, NodeJS.Timeout | null>>({});
+
   const handleInputChange = (fieldName: string, inputValue: any) => {
     setNewItemValues(prev => ({
       ...prev,
       [fieldName]: inputValue,
     }));
     if (itemError) setItemError(null);
+    setLastPasted(prev => ({
+      ...prev,
+      [fieldName]: false, // Reset pasted state on manual change
+    }));
+  };
+
+  // Handler para onFocus no input: lê clipboard se necessário
+  const handleFocusPaste = async (configName: string) => {
+    if (!pasteInput) return;
+    if (
+      navigator &&
+      navigator.clipboard &&
+      typeof navigator.clipboard.readText === 'function'
+    ) {
+      try {
+        const clipboardValue = await navigator.clipboard.readText();
+        setNewItemValues(prev => ({
+          ...prev,
+          [configName]: clipboardValue,
+        }));
+        setLastPasted(prev => ({
+          ...prev,
+          [configName]: true, // Marca que o último valor foi via paste
+        }));
+      } catch (err) {
+        // Ignore se usuário negar permissão, ou navegador não suportar
+      }
+    }
+  };
+
+  const handleBackspaceKey = (
+    e: React.KeyboardEvent,
+    configName: string,
+    fieldValue: any
+  ) => {
+    // Só ativa se pasteInput ativo e foi colado recentemente e campo não está vazio
+    if (!pasteInput) return;
+    if (e.key !== 'Backspace') return;
+    if (!lastPasted[configName]) return;
+
+    // Limpador se já existia timer para esse campo
+    if (backspaceTimerRefs.current[configName]) {
+      clearTimeout(backspaceTimerRefs.current[configName]!);
+      backspaceTimerRefs.current[configName] = null;
+    }
+
+    let firstBackspaceDown = true;
+
+    const clearInput = () => {
+      setNewItemValues(prev => ({
+        ...prev,
+        [configName]: '',
+      }));
+      setLastPasted(prev => ({
+        ...prev,
+        [configName]: false,
+      }));
+      if (backspaceTimerRefs.current[configName]) {
+        clearTimeout(backspaceTimerRefs.current[configName]!);
+        backspaceTimerRefs.current[configName] = null;
+      }
+    };
+
+    // Se segurar por 1s, limpa o campo
+    // No onKeyDown
+    backspaceTimerRefs.current[configName] = setTimeout(() => {
+      clearInput();
+    }, 1000);
+
+    // Função para tratar o onKeyUp (cancelar o clear pra clique rápido)
+    const handleKeyUp = (upEvent: KeyboardEvent) => {
+      if (
+        upEvent.key === 'Backspace' &&
+        backspaceTimerRefs.current[configName]
+      ) {
+        clearTimeout(backspaceTimerRefs.current[configName]!);
+        backspaceTimerRefs.current[configName] = null;
+      }
+      // Limpa o listener após sair
+      window.removeEventListener('keyup', handleKeyUp);
+    };
+
+    // Escuta o onKeyUp pra saber se foi só um clique rápido
+    window.addEventListener('keyup', handleKeyUp);
   };
 
   const validateItem = (): boolean => {
@@ -196,18 +286,12 @@ export function FormArrayInput({
           : '';
     });
     setNewItemValues(resetValues);
+    setLastPasted({});
   };
 
   const handleRemove = (index: number) => {
     const updated = value.filter((_, idx) => idx !== index);
     onChange(updated);
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      handleAddItem();
-    }
   };
 
   return (
@@ -227,7 +311,7 @@ export function FormArrayInput({
             const fieldValue = newItemValues[config.name];
 
             return (
-              <div className="flex items-end gap-2" key={config.name}>
+              <div className="flex items-end gap-2 relative" key={config.name}>
                 {config.component === 'select' ? (
                   <FormSelect
                     name={`${name || 'temp'}_${config.name}` as any}
@@ -249,23 +333,48 @@ export function FormArrayInput({
                     </>
                   </FormSelect>
                 ) : (
-                  <FormInput
-                    name={`${name || 'temp'}_${config.name}` as any}
-                    value={fieldValue}
-                    label={config.label}
-                    placeholder={config.placeholder}
-                    type={config.type || 'text'}
-                    onChange={(e: any) => {
-                      const val =
-                        typeof e === 'string' ? e : e?.target?.value || '';
-                      handleInputChange(config.name, val);
-                    }}
-                    onKeyDown={handleKeyDown}
-                    errors={{} as any}
-                    maskProps={config.maskProps}
-                    inputProps={config.inputProps}
-                    noControl
-                  />
+                  <>
+                    <FormInput
+                      name={`${name || 'temp'}_${config.name}` as any}
+                      value={fieldValue}
+                      label={config.label}
+                      placeholder={config.placeholder}
+                      type={config.type || 'text'}
+                      onChange={(e: any) => {
+                        const val =
+                          typeof e === 'string' ? e : e?.target?.value || '';
+                        handleInputChange(config.name, val);
+                      }}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddItem(config.name);
+                        } else if (
+                          pasteInput &&
+                          e.key === 'Backspace' &&
+                          lastPasted[config.name] &&
+                          fieldValue
+                        ) {
+                          handleBackspaceKey(e, config.name, fieldValue);
+                        }
+                      }}
+                      onFocus={
+                        pasteInput
+                          ? () => handleFocusPaste(config.name)
+                          : undefined
+                      }
+                      errors={{} as any}
+                      maskProps={config.maskProps}
+                      inputProps={{
+                        ...config.inputProps,
+                        classNameContainer: ` ${config.inputProps?.classNameContainer}`,
+                      }}
+                      noControl
+                    />
+                    <span className="absolute right-13 top-3 text-[12px] text-gray-300">
+                      Pressione ENTER
+                    </span>
+                  </>
                 )}
                 <div className="flex justify-end">
                   <PrimaryButton
@@ -372,6 +481,7 @@ export function FormArrayInput({
  *           }
  *         ]}
  *         renderChipContent={(contato) => <span>{contato}</span>}
+ *         pasteInput
  *       />
  *       <button type="submit">Enviar</button>
  *     </form>

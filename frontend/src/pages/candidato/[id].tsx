@@ -7,6 +7,7 @@ import { AgendaForm } from '@/components/form/AgendaForm';
 import CandidatoForm from '@/components/form/CandidatoForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
+import ModalPdfViewer from '@/components/modal/ModalPdfViewer';
 import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
 import { SessionProvider } from 'next-auth/react';
@@ -23,6 +24,9 @@ const CandidatoPage: React.FC = () => {
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalAgendaEdit, setShowModalAgendaEdit] = useState(false);
+  const [showModalPdf, setShowModalPdf] = useState(false);
+  const [selectedPdfUrl, setSelectedPdfUrl] = useState<string>('');
+  const [selectedPdfName, setSelectedPdfName] = useState<string>('');
 
   const isAdmin = useAdmin();
 
@@ -433,21 +437,91 @@ const CandidatoPage: React.FC = () => {
             {candidato.links.map((link: string, idx: number) => (
               <div
                 key={idx}
-                className="flex items-center justify-between gap-2 bg-secondary rounded-full pl-5 pr-1 py-1"
+                className="flex items-center justify-between gap-2 bg-gray-100 inset-shadow-2xs inset-shadow-black-200 rounded-full pl-5 pr-0.5 py-0.5 hover:bg-gray-200 transition-colors"
               >
                 <span
-                  className="text-white break-all truncate max-w-sm sm:max-w-md md:max-w-lg block"
+                  className="text-black break-all truncate max-w-sm sm:max-w-md md:max-w-lg block"
                   title={link}
                 >
                   {link}
                 </span>
                 <ButtonCopy
                   value={link}
-                  className="text-black! rounded-full! bg-white"
+                  className="text-primary! px-3! rounded-full! bg-white!"
                 />
               </div>
             ))}
           </Card>
+
+          {/* Sessão Anexos */}
+          {candidato.anexos && candidato.anexos.length > 0 && (
+            <Card title="Anexos">
+              <div className="flex flex-col gap-2">
+                {candidato.anexos.map((candidatoAnexo: any) => {
+                  const anexo = candidatoAnexo.anexo;
+                  const isPdf = anexo.tipo === 'pdf';
+                  const downloadUrl = `/api/externalWithAuth/candidato/anexo/${anexo.url}/download`;
+
+                  const handleDownload = async () => {
+                    if (isPdf) {
+                      // Abre modal para PDF
+                      setSelectedPdfUrl(
+                        process.env.NEXT_PUBLIC_API_URL + anexo.url
+                      );
+                      setSelectedPdfName(anexo.nomeArquivo);
+                      setShowModalPdf(true);
+                    } else {
+                      // Download direto para outros tipos
+                      try {
+                        const response = await api.get(downloadUrl, {
+                          responseType: 'blob',
+                        });
+                        const url = window.URL.createObjectURL(
+                          new Blob([response.data])
+                        );
+                        const link = document.createElement('a');
+                        link.href = url;
+                        link.setAttribute('download', anexo.nomeArquivo);
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        window.URL.revokeObjectURL(url);
+                      } catch (error) {
+                        console.error('Erro ao fazer download:', error);
+                        alert('Erro ao fazer download do arquivo');
+                      }
+                    }
+                  };
+
+                  return (
+                    <div
+                      key={anexo.id}
+                      className="flex items-center justify-between gap-2 bg-gray-100 rounded-lg p-3 hover:bg-gray-200 transition-colors"
+                    >
+                      <div className="flex flex-col flex-1">
+                        <span className="font-medium text-sm">
+                          {anexo.nomeArquivo}
+                        </span>
+                        {anexo.tamanhoKb && (
+                          <span className="text-xs text-gray-500">
+                            {(anexo.tamanhoKb / 1024).toFixed(2)} MB
+                          </span>
+                        )}
+                      </div>
+                      <button
+                        onClick={handleDownload}
+                        className=" bg-white text-primary rounded-lg hover:bg-primary-dark transition-colors text-sm font-medium shadow-md p-2 flex items-center justify-center cursor-pointer scale-105"
+                      >
+                        <span className="material-icons text-base">
+                          {isPdf ? 'visibility' : 'download'}
+                        </span>
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </Card>
+          )}
         </div>
       </section>
 
@@ -542,6 +616,17 @@ const CandidatoPage: React.FC = () => {
           />
         </Modal>
       </SessionProvider>
+
+      <ModalPdfViewer
+        isOpen={showModalPdf}
+        onClose={() => {
+          setShowModalPdf(false);
+          setSelectedPdfUrl('');
+          setSelectedPdfName('');
+        }}
+        fileUrl={selectedPdfUrl}
+        fileName={selectedPdfName}
+      />
     </div>
   );
 };

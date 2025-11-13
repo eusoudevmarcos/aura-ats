@@ -10,7 +10,7 @@ export const Container: React.FC<ContainerProps> = ({
     {label && (
       <label
         htmlFor={id}
-        className="block text-gray-700 mb-1 font-semibold text-sm"
+        className="block text-gray-700 mb-1 font-semibold text-md"
       >
         {label}
       </label>

@@ -63,14 +63,14 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
 
         {/* DESKTOP */}
         <div className="hidden md:flex items-center gap-4 flex-1 justify-end">
-          <div className={styles.searchBar}>
+          {/* <div className={styles.searchBar}>
             <SearchIcon className={styles.searchIcon} />
             <input
               type="text"
               placeholder="Pesquisar..."
               className={styles.searchInput}
             />
-          </div>
+          </div> */}
 
           {/* Exibição de uso restante para clientes */}
           {temPlanoComUso && (
@@ -148,14 +148,14 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
                 </svg>
               </button>
               <div className="flex flex-col gap-6 mt-8">
-                <div className={styles.searchBar}>
+                {/* <div className={styles.searchBar}>
                   <SearchIcon className={styles.searchIcon} />
                   <input
                     type="text"
                     placeholder="Pesquisar..."
                     className={styles.searchInput}
                   />
-                </div>
+                </div> */}
 
                 {/* Exibição de uso restante para clientes - Mobile */}
                 {temPlanoComUso && (

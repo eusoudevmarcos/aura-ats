@@ -111,33 +111,36 @@ const CandidatoList: React.FC = () => {
   };
 
   return (
-    <Card classNameContainer="px-6 py-2">
-      <div className="flex justify-between flex-wrap p-2 items-center mb-4">
-        <h2 className="text-xl font-bold">Lista de Profissionais</h2>
-
-        <input
-          type="text"
-          placeholder="Buscar por nome, email, área ou CPF..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="p-2 border border-gray-300 rounded w-full max-w-md"
+    <>
+      <h2 className="text-2xl font-bold text-primary mb-4">
+        Lista de Profissionais
+      </h2>
+      <Card classNameContainer="px-6 py-2">
+        <div className="flex justify-end flex-wrap p-2 items-center mb-4">
+          <input
+            type="text"
+            placeholder="Pesquise"
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="p-2 border border-gray-300 rounded w-full max-w-md"
+          />
+        </div>
+        <Table
+          data={search ? dadosFiltrados : dadosTabela}
+          columns={columns}
+          loading={loading}
+          emptyMessage="Nenhum candidato encontrado."
+          onRowClick={onRowClick}
+          pagination={{
+            page,
+            pageSize,
+            total,
+            totalPages,
+            onPageChange: (p: number) => setPage(p),
+          }}
         />
-      </div>
-      <Table
-        data={search ? dadosFiltrados : dadosTabela}
-        columns={columns}
-        loading={loading}
-        emptyMessage="Nenhum candidato encontrado."
-        onRowClick={onRowClick}
-        pagination={{
-          page,
-          pageSize,
-          total,
-          totalPages,
-          onPageChange: (p: number) => setPage(p),
-        }}
-      />
-    </Card>
+      </Card>
+    </>
   );
 };
 

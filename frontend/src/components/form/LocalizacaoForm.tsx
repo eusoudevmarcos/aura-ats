@@ -33,9 +33,8 @@ const LocalizacaoFormInner: React.FC<{
   return (
     <>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-2">
-        <FormSelect name={ufFieldName} label="UF">
+        <FormSelect name={ufFieldName} label="UF" placeholder="Selecione a UF">
           <>
-            <option value="">Selecione</option>
             {UF_MODEL.map(({ label }) => (
               <option key={label} value={label}>
                 {label}

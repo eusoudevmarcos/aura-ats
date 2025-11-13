@@ -141,7 +141,7 @@ function TR<T>({
                 {content}
               </p>
               {!hiddeBtnCopy && (
-                <ButtonCopy value={content} className="bg-white! text-black" />
+                <ButtonCopy value={content} className="bg-white!" />
               )}
             </div>
           </td>

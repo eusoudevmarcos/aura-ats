@@ -6,6 +6,8 @@ import { NextApiRequest, NextApiResponse } from 'next';
 
 const externalBackendApi = axios.create({
   baseURL: `${process.env.NEXT_PUBLIC_API_URL}/api`,
+  maxContentLength: 50 * 1024 * 1024, // 50MB
+  maxBodyLength: 50 * 1024 * 1024, // 50MB
 });
 
 async function invalidateGetCache(externalPath: string) {
@@ -24,6 +26,15 @@ async function invalidateGetCache(externalPath: string) {
     cursor = nextCursor;
   } while (cursor !== '0');
 }
+
+// Configurar para aceitar body grande (desabilitar body parser padrão)
+export const config = {
+  api: {
+    bodyParser: {
+      sizeLimit: '50mb',
+    },
+  },
+};
 
 export default async function handler(
   req: NextApiRequest,
