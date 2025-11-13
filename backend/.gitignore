@@ -1,6 +1,8 @@
 # Ignorar node_modules (NUNCA deve ser comitado)
 node_modules/
 
+src/public/
+
 # Ignorar arquivos de configuração do Firebase Admin SDK
 firebase-adminsdk.json
 
@@ -29,3 +31,4 @@ build/
 
 # Prisma
 # src/generator
+

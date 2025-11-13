@@ -19,7 +19,8 @@ export const pessoaSchema = z.object({
         message: 'CPF inválido',
       }
     )
-    .optional(),
+    .optional()
+    .nullable(),
   rg: z
     .string()
     .refine(
@@ -33,7 +34,8 @@ export const pessoaSchema = z.object({
         message: 'RG inválido',
       }
     )
-    .optional(),
+    .optional()
+    .nullable(),
   dataNascimento: z
     .union([
       z.string().refine(
@@ -47,7 +49,8 @@ export const pessoaSchema = z.object({
       ),
       z.date(),
     ])
-    .optional(),
+    .optional()
+    .nullable(),
 
   // estadoCivil: z
   //   .enum([

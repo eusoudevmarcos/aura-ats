@@ -9,9 +9,11 @@ import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 
 import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
+import toBase64 from '@/utils/files/toBase64';
 import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
+import FileUploadForm from './FileUploadForm';
 
 type CandidatoFormProps = {
   formContexto?: UseFormReturn<CandidatoInput>;
@@ -109,6 +111,29 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
+    console.log(data.anexos);
+    if (data.anexos && data.anexos.length > 0) {
+      const filesBase64 = await Promise.all(
+        data.anexos.map(async ({ anexo, ...rest }) => {
+          const obj = {
+            anexo: {
+              nomeArquivo: anexo.nomeArquivo,
+              tipo: anexo.tipo,
+              mimetype: anexo.mimetype,
+              tamanhoKb: anexo.tamanhoKb,
+              buffer: '',
+            },
+            ...rest,
+          };
+
+          if (anexo.fileObj) {
+            obj.anexo.buffer = await toBase64(anexo.fileObj);
+          }
+          return obj;
+        })
+      );
+      data.anexos = filesBase64;
+    }
 
     const payload = {
       ...data,
@@ -314,6 +339,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           addButtonText="+"
           ValuesArrayString
           value={links}
+          containerClassName="mb-10"
           onChange={handleLinkChange}
           validateCustom={(value, fieldConfigs, setErrors) => {
             const url = value.trim();
@@ -346,6 +372,8 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           ]}
           renderChipContent={link => <span>{link}</span>}
         />
+
+        <FileUploadForm />
 
         <div className="flex justify-end">
           <PrimaryButton type="submit" disabled={loading}>

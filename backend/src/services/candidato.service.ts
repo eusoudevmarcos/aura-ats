@@ -10,7 +10,6 @@ import { PessoaRepository } from "../repository/pessoa.repository";
 import { CandidatoUpdateInput } from "../types/prisma.types";
 import { AnexoService } from "./anexo.service";
 import { BillingService } from "./billing.service";
-import { TypeFile, UploadedFile } from "./file.service";
 
 @injectable()
 export class CandidatoService {
@@ -105,37 +104,26 @@ export class CandidatoService {
 
   async save(candidatoData: any): Promise<Candidato> {
     candidatoData = normalizeCandidatoData(candidatoData);
-
     validateBasicFieldsCandidato(candidatoData);
 
-    // Extrair arquivos antes de processar o payload
-    const files = candidatoData.files || [];
-    delete candidatoData.files;
+    const anexos = candidatoData.anexos || [];
+    delete candidatoData.anexos;
 
     const candidatoPayload = candidatoBuild(candidatoData);
 
     const includeRelations = {
-      pessoa: {
-        include: {
-          localizacoes: true,
-        },
-      },
+      pessoa: { include: { localizacoes: true } },
       especialidade: true,
-      anexos: {
-        include: {
-          anexo: true,
-        },
-      },
+      anexos: { include: { anexo: true } },
     };
-
-    console.log(candidatoPayload);
 
     let candidato: Candidato;
 
+    // Cria ou atualiza o candidato
     if (candidatoData.id) {
       const { id, ...updateData } = candidatoPayload as CandidatoUpdateInput;
       candidato = await prisma.candidato.update({
-        where: { id: id },
+        where: { id },
         data: updateData as any,
         include: includeRelations,
       });
@@ -146,29 +134,62 @@ export class CandidatoService {
       });
     }
 
-    // Processar arquivos se houver
-    if (files.length > 0) {
-      const uploadedFiles: UploadedFile[] = files.map((file: any) => {
-        // Converter base64 para Buffer
-        const buffer = Buffer.from(file.buffer, "base64");
-        return {
-          originalname: file.originalname,
-          path: "", // Será preenchido pelo FileService
-          buffer: buffer,
-          mimetype: file.mimetype,
-          size: file.size,
-          type: file.type as TypeFile,
-        };
-      });
+    // === 🧩 PROCESSAR ANEXOS ===
+    if (!Array.isArray(anexos)) return candidato;
 
-      await this.anexoService.createMultipleAnexos(uploadedFiles, candidato.id);
-
-      // Buscar candidato atualizado com anexos
-      candidato = (await prisma.candidato.findUnique({
+    // Nenhum anexo enviado → apaga todos
+    if (anexos.length === 0) {
+      await this.anexoService.deleteAllAnexosByCandidatoId(candidato.id);
+      return (await prisma.candidato.findUnique({
         where: { id: candidato.id },
         include: includeRelations,
       })) as Candidato;
     }
+
+    // 🔹 Anexos existentes no banco
+    const anexosExistentes = await this.anexoService.getAnexosByCandidatoId(
+      candidato.id
+    );
+
+    // 🔹 IDs dos anexos enviados na request
+    const idsRequest = anexos
+      .map((a) => a.anexoId || a.anexo?.id)
+      .filter(Boolean);
+
+    // 🔹 Anexos para remover (existem no banco, mas não vieram na request)
+    const anexosParaRemover = anexosExistentes.filter(
+      (existente) => !idsRequest.includes(existente.anexo.id)
+    );
+
+    // Remove do banco + disco
+    for (const remover of anexosParaRemover) {
+      await this.anexoService.deleteAnexo(remover.anexo.id, candidato.id);
+    }
+
+    // 🔹 Novos anexos (sem ID ainda)
+    const novosAnexos = anexos.filter((a) => !a.anexoId && !a.anexo?.id);
+
+    // 🔹 Evita duplicar (nome + tamanho já existente)
+    const arquivosParaAdicionar = novosAnexos.filter((novo) => {
+      return !anexosExistentes.some(
+        (existente) =>
+          existente.anexo.nomeArquivo === novo.anexo.nomeArquivo &&
+          existente.anexo.tamanhoKb === novo.anexo.tamanhoKb
+      );
+    });
+
+    if (arquivosParaAdicionar.length > 0) {
+      await this.anexoService.createMultipleAnexos(
+        arquivosParaAdicionar,
+        candidato.id
+      );
+    }
+
+    // 🔹 Retorna candidato atualizado
+    candidato = (await prisma.candidato.findUnique({
+      where: { id: candidato.id },
+      include: includeRelations,
+    })) as Candidato;
 
     return candidato;
   }

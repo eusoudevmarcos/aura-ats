@@ -78,14 +78,19 @@ export const candidatoSchema = z.object({
 
   contatos: z.array(z.string()),
   // formacoes: z.array(formacaoSchema).optional(),
-  files: z
+  anexos: z
     .array(
       z.object({
-        originalname: z.string(),
-        mimetype: z.string().optional(),
-        size: z.number().optional(),
-        type: z.string(),
-        fileObj: z.any().optional(), // File object do browser
+        anexo: z.object({
+          nomeArquivo: z.string(),
+          mimetype: z.string().optional(),
+          tamanhoKb: z.number().optional(),
+          tipo: z.string(),
+          url: z.string().optional().nullable(),
+          fileObj: z.any().optional(), // File object do browser
+        }),
+        anexoId: z.string().optional(),
+        candidatoId: z.string().optional(),
       })
     )
     .optional(),

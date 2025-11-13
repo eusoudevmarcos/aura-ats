@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
 
 // Por referência à definição:
@@ -16,12 +16,13 @@ export enum TypeFile {
 }
 
 export interface UploadedFile {
-  originalname: string;
+  id?: string;
+  nomeArquivo: string;
   path: string; // Note: Este campo você pode passar vazio no frontend
   buffer: any; // usaremos File ou Blob do browser, mas o backend espera Buffer
   mimetype?: string;
-  size?: number;
-  type: TypeFile;
+  tamanhoKb?: number;
+  tipo: TypeFile;
 }
 
 type UploadFilesInput = {
@@ -64,23 +65,57 @@ function getTypeFileFromExt(ext: string): TypeFile | undefined {
   }
 }
 
-export const FileUploadForm: React.FC<UploadProps> = ({ name = 'files' }) => {
+export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
+  const [error, setError] = useState('');
   const { control, setValue, watch } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name,
   });
 
-  // Toda vez que o array de files mudar, propague ao form apenas os campos relevantes para backend
-  const filesWatch = watch(name);
+  useEffect(() => {
+    // console.log(fields);
+  }, [fields]);
 
   // Lida com seleção de arquivos pelo usuário e adiciona ao form context
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
+
+    // Pega os arquivos já enviados pelo usuário
+    const alreadyUploaded = Array.isArray(fields) ? fields : [];
+
     for (const file of files) {
       const ext = getFileExtension(file.name);
       const typeFile = getTypeFileFromExt(ext) as TypeFile | undefined;
+
+      // Verifica se o nome do arquivo já foi enviado
+      const arquivoJaExiste = alreadyUploaded.some((item: any) => {
+        // Para novo upload, estrutura é { nomeArquivo, tipo, ... }
+        const nomeExistente =
+          item.nomeArquivo || (item.anexo && item.anexo.nomeArquivo);
+        return nomeExistente === file.name;
+      });
+
+      if (arquivoJaExiste) {
+        setError(`Já existe um arquivo com o nome "${file.name}" adicionado.`);
+        continue;
+      }
+
+      // Verifica se já existe arquivo com o mesmo formato (tipo)
+      const mesmoFormatoExiste = alreadyUploaded.some((item: any) => {
+        const tipoExistente =
+          item.anexo.tamanhoKb || (item.anexo && item.anexo.tamanhoKb);
+        return tipoExistente === typeFile;
+      });
+
+      if (mesmoFormatoExiste) {
+        setError(
+          `Já existe um arquivo do tipo "${ext}" (${typeFile}). Não é permitido enviar múltiplos arquivos do mesmo tipo/formato.`
+        );
+        continue;
+      }
+
       if (!typeFile) {
         alert(`Tipo de arquivo não suportado para: ${file.name}`);
         continue;
@@ -89,14 +124,13 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'files' }) => {
       const uploaded: Omit<UploadedFile, 'buffer' | 'path'> & {
         fileObj: File;
       } = {
-        originalname: file.name,
-        // path é preenchido no backend. Aqui não importa, passaremos vazio
+        nomeArquivo: file.name,
         mimetype: file.type,
-        size: file.size,
-        type: typeFile,
+        tamanhoKb: file.size,
+        tipo: typeFile,
         fileObj: file,
       };
-      append(uploaded);
+      append({ anexo: { ...uploaded } });
     }
     // limpar input para permitir novos uploads repetidos
     if (inputRef.current) inputRef.current.value = '';
@@ -108,27 +142,39 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'files' }) => {
 
   return (
     <section className="mb-4">
-      <label className="block font-semibold mb-2">Arquivos</label>
-      <input
-        type="file"
-        multiple
-        ref={inputRef}
-        className="block mb-2"
-        onChange={handleFilesChange}
-      />
-      <ul className="space-y-2">
+      <div className="border-2 border-primary h-32 rounded-lg bg-purple-100 border-dashed flex items-center justify-center relative mb-4 flex-col hover:scale-[1.01] hover:bg-purple-200 cursor-pointer">
+        <span className="material-icons-outlined text-primary text-5xl!">
+          upload_file
+        </span>
+        <p className="text-primary">Selecione o arquivo</p>
+        <input
+          type="file"
+          multiple
+          ref={inputRef}
+          placeholder=""
+          className="block mb-2 border w-full h-full z-10 absolute top-0 opacity-0"
+          onChange={handleFilesChange}
+        />
+        <p className="text-primary absolute bottom-2 left-2 text-sm opacity-70">
+          Total de Arquivos: {fields.length}
+        </p>
+      </div>
+      {error && <p className="text-red-400 text-sm">{error}</p>}
+
+      <ul className="space-y-2 mt-4">
         {fields.map((field: any, idx: number) => (
           <li
             key={field.id}
             className="flex items-center justify-between bg-gray-100 rounded px-3 py-2"
           >
             <div className="flex flex-col gap-1">
-              <span className="font-medium">{field.originalname}</span>
+              <span className="font-medium">{field.anexo.nomeArquivo}</span>
               <span className="text-xs text-gray-500">
-                {field.mimetype || ''} • {Math.round((field.size || 0) / 1024)}{' '}
-                KB
+                {field.anexo.mimetype || ''} • {field.anexo.tamanhoKb} KB
               </span>
-              <span className="text-xs text-blue-700">Tipo: {field.type}</span>
+              <span className="text-xs text-blue-700">
+                Tipo: {field.anexo.tipo}
+              </span>
             </div>
             <button
               className="ml-4 px-2 py-1 text-sm rounded text-white bg-red-500 hover:bg-red-600"

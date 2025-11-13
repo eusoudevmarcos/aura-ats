@@ -22,14 +22,17 @@ export class AnexoService {
     // Gera um nome único para o arquivo
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 9);
-    const fileExtension = path.extname(file.originalname);
-    const baseName = path.basename(file.originalname, fileExtension);
+    const fileExtension = path.extname(file.anexo.nomeArquivo);
+    const baseName = path.basename(file.anexo.nomeArquivo, fileExtension);
     const uniqueFileName = `${baseName}_${timestamp}_${randomStr}${fileExtension}`;
 
     // Cria uma cópia do arquivo com nome único
     const fileWithUniqueName: UploadedFile = {
       ...file,
-      originalname: uniqueFileName,
+      anexo: {
+        ...file.anexo,
+        nomeArquivo: uniqueFileName,
+      },
     };
 
     // Salva o arquivo fisicamente
@@ -46,10 +49,12 @@ export class AnexoService {
       // Cria o anexo
       const anexo = await tx.anexo.create({
         data: {
-          nomeArquivo: file.originalname,
+          nomeArquivo: file.anexo.nomeArquivo,
           url: fileUrl,
-          tipo: file.type,
-          tamanhoKb: file.size ? Math.round(file.size / 1024) : null,
+          tipo: file.anexo.tipo,
+          tamanhoKb: file.anexo.tamanhoKb
+            ? Math.round(file.anexo.tamanhoKb / 1024)
+            : null,
         },
       });
 
@@ -83,13 +88,28 @@ export class AnexoService {
   /**
    * Busca todos os anexos de um candidato
    */
-  async getAnexosByCandidatoId(candidatoId: string): Promise<Anexo[]> {
+  async getAnexosByCandidatoId(candidatoId: string): Promise<
+    Array<
+      {
+        anexo: {
+          id: string;
+          nomeArquivo: string;
+          url: string;
+          tipo: string | null;
+          tamanhoKb: number | null;
+        };
+      } & {
+        candidatoId: string;
+        anexoId: string;
+      }
+    >
+  > {
     const candidatoAnexos = await prisma.candidatoAnexo.findMany({
       where: { candidatoId },
       include: { anexo: true },
     });
 
-    return candidatoAnexos.map((ca) => ca.anexo);
+    return candidatoAnexos;
   }
 
   /**

@@ -23,12 +23,14 @@ export enum TypeFile {
 }
 
 export interface UploadedFile {
-  originalname: string;
-  path: string;
-  buffer: Buffer;
-  mimetype?: string;
-  size?: number;
-  type: TypeFile;
+  anexo: {
+    nomeArquivo: string;
+    path: string;
+    buffer: Buffer;
+    mimetype?: string;
+    tamanhoKb?: number;
+    tipo: TypeFile;
+  };
 }
 
 export class FileService {
@@ -65,9 +67,12 @@ export class FileService {
       fs.mkdirSync(targetDir, { recursive: true });
     }
 
-    const destPath = path.join(targetDir, path.basename(file.originalname));
-    await fs.promises.writeFile(destPath, file.buffer);
-    return { fileName: file.originalname };
+    const destPath = path.join(
+      targetDir,
+      path.basename(file.anexo.nomeArquivo)
+    );
+    await fs.promises.writeFile(destPath, file.anexo.buffer);
+    return { fileName: file.anexo.nomeArquivo };
   }
 
   static async updateFile(
@@ -86,7 +91,7 @@ export class FileService {
     if (!fs.existsSync(filePath)) {
       throw new Error("File not found.");
     }
-    await fs.promises.writeFile(filePath, file.buffer);
+    await fs.promises.writeFile(filePath, file.anexo.buffer);
     return { fileName };
   }
 
