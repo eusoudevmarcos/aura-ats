@@ -73,6 +73,9 @@ export const candidatoSchema = z.object({
     .optional()
     .nullable(),
   emails: z.array(z.string()),
+
+  links: z.array(z.url()),
+
   contatos: z.array(z.string()),
   // formacoes: z.array(formacaoSchema).optional(),
 });

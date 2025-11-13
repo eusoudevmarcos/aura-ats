@@ -1,6 +1,7 @@
 // pages/candidato/[id].tsx
 import api from '@/axios';
 import { AdminGuard } from '@/components/auth/AdminGuard';
+import ButtonCopy from '@/components/button/ButtonCopy';
 import Card from '@/components/Card';
 import { AgendaForm } from '@/components/form/AgendaForm';
 import CandidatoForm from '@/components/form/CandidatoForm';
@@ -427,11 +428,31 @@ const CandidatoPage: React.FC = () => {
               ))}
             </Card>
           )}
+
+          <Card title="Links" classNameContent="flex flex-col gap-2">
+            {candidato.links.map((link: string, idx: number) => (
+              <div
+                key={idx}
+                className="flex items-center justify-between gap-2 bg-secondary rounded-full pl-5 pr-1 py-1"
+              >
+                <span
+                  className="text-white break-all truncate max-w-sm sm:max-w-md md:max-w-lg block"
+                  title={link}
+                >
+                  {link}
+                </span>
+                <ButtonCopy
+                  value={link}
+                  className="text-black! rounded-full! bg-white"
+                />
+              </div>
+            ))}
+          </Card>
         </div>
       </section>
 
       <div className="flex justify-center mt-10 mb-4 relative">
-        <h3 className="text-2xl font-bold text-center text-primary w-full ">
+        <h3 className="text-2xl font-bold text-center text-primary w-full">
           VAGAS CANDIDATADAS
         </h3>
       </div>

@@ -38,12 +38,14 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         emails: initialValues.emails || [],
         contatos: initialValues.contatos || [],
         crm: initialValues.crm || [],
+        links: initialValues.links || [],
         especialidadeId: String(initialValues?.especialidadeId),
       }
     : {
         emails: [],
         contatos: [],
         crm: [],
+        links: [],
         pessoa: {
           nome: '',
         },
@@ -65,6 +67,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const contatos = watch('contatos');
   const emails = watch('emails');
   const crm = watch('crm');
+  const links = watch('links');
 
   const handleContatosChange = (newArray: string[]) => {
     setValue('contatos', newArray, { shouldValidate: true });
@@ -76,6 +79,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
   const handleCRMsChange = (newArray: string[]) => {
     setValue('crm', newArray, { shouldValidate: true });
+  };
+
+  const handleLinkChange = (newArray: string[]) => {
+    setValue('links', newArray, { shouldValidate: true });
   };
 
   useEffect(() => {
@@ -300,6 +307,45 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             </>
           )}
         </div>
+
+        <FormArrayInput
+          name="links"
+          title="Links"
+          addButtonText="+"
+          ValuesArrayString
+          value={links}
+          onChange={handleLinkChange}
+          validateCustom={(value, fieldConfigs, setErrors) => {
+            const url = value.trim();
+
+            // Expressão regular simples para validar URLs começando com http(s)
+            const urlRegex =
+              /^(https?:\/\/)(([\w-]+\.)+[\w-]{2,})(:[0-9]{1,5})?(\/.*)?$/i;
+            if (!urlRegex.test(url)) {
+              setErrors(
+                'Por favor, insira um link válido (ex: https://meusite.com)'
+              );
+              return false;
+            }
+
+            if (url.length > 2048) {
+              setErrors('O link deve ter no máximo 2048 caracteres.');
+              return false;
+            }
+            return true;
+          }}
+          fieldConfigs={[
+            {
+              name: 'links',
+              placeholder: 'Adicione o link',
+              inputProps: {
+                minLength: 4,
+                classNameContainer: 'w-full',
+              },
+            },
+          ]}
+          renderChipContent={link => <span>{link}</span>}
+        />
 
         <div className="flex justify-end">
           <PrimaryButton type="submit" disabled={loading}>

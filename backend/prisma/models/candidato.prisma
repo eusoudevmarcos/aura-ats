@@ -5,6 +5,7 @@ model Candidato {
     crm      String[] // Sigla do estado na frente
     contatos String[]
     emails   String[]
+    links    String[]
 
     areaCandidato   AreaCandidato
     candidaturaVaga CandidaturaVaga[]

@@ -22,6 +22,7 @@ export default function candidatoBuild(
     areaCandidato: candidatoData.areaCandidato as AreaCandidato,
     emails: candidatoData?.emails || [],
     contatos: candidatoData?.contatos || [],
+    links: candidatoData?.links || [],
   } as any;
 
   const { id, rqe, areaCandidato, crm, corem, emails, contatos, ...rest } =

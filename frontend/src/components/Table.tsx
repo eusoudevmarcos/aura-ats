@@ -1,6 +1,6 @@
 'use client';
 import React, { useState } from 'react';
-import { PrimaryButton } from './button/PrimaryButton';
+import ButtonCopy from './button/ButtonCopy';
 
 export interface TableColumn<T = any> {
   label: string;
@@ -48,48 +48,6 @@ function renderCellValue<T>(
   return value !== undefined && value !== null && value !== ''
     ? String(value)
     : '-';
-}
-
-function ButtonCopy({ valorCompleto }: any) {
-  const [copiado, setCopiado] = useState(false);
-
-  const handleCopy = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (navigator && navigator.clipboard) {
-      navigator.clipboard.writeText(valorCompleto);
-      setCopiado(true);
-      setTimeout(() => setCopiado(false), 4000);
-    }
-  };
-
-  React.useEffect(() => {
-    let span: HTMLSpanElement | null = null;
-    if (copiado) {
-      span = document.createElement('span');
-      span.className =
-        'fixed left-1/2 -translate-x-1/2 bottom-8 z-50 bg-[#8c53ff] text-white px-4 py-2 rounded-lg shadow-lg text-sm font-medium';
-      span.innerText = 'Copiado para a área de transferência!';
-      document.body.appendChild(span);
-    }
-
-    return () => {
-      if (span && document.body.contains(span)) {
-        document.body.removeChild(span);
-      }
-    };
-  }, [copiado]);
-
-  return (
-    <PrimaryButton
-      title={copiado ? 'Copiado!' : 'Copiar'}
-      className="!p-1 !min-w-0 flex-shrink-0 !rounded-sm hover:scale-[1.1]"
-      onClick={handleCopy}
-    >
-      <span className="material-icons !text-sm">
-        {copiado ? 'done' : 'content_copy'}
-      </span>
-    </PrimaryButton>
-  );
 }
 
 // Componente Card para Mobile
@@ -182,7 +140,9 @@ function TR<T>({
               >
                 {content}
               </p>
-              {!hiddeBtnCopy && <ButtonCopy valorCompleto={content} />}
+              {!hiddeBtnCopy && (
+                <ButtonCopy value={content} className="bg-white! text-black" />
+              )}
             </div>
           </td>
         );
