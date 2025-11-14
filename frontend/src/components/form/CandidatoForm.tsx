@@ -87,9 +87,8 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     setValue('links', newArray, { shouldValidate: true });
   };
 
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
+  // useEffect(() => {
+  // }, [errors]);
 
   const areaCandidato = watch('areaCandidato');
   const especialidadeId = watch('especialidadeId');
@@ -111,7 +110,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
-    console.log(data.anexos);
+
     if (data.anexos && data.anexos.length > 0) {
       const filesBase64 = await Promise.all(
         data.anexos.map(async ({ anexo, ...rest }) => {
@@ -140,7 +139,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       especialidadeId: Number(data.especialidadeId),
       contatos: data.contatos.map(contato => contato),
     };
-    console.log(payload);
     setLoading(true);
 
     try {

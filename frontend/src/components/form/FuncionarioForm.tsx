@@ -234,11 +234,10 @@ export const FuncionarioForm = ({
   };
 
   // UseEffect para depurar erros
-  useEffect(() => {
-    if (Object.keys(errors).length > 0) {
-      console.log('Erros do formulário:', errors);
-    }
-  }, [errors]);
+  // useEffect(() => {
+  //   if (Object.keys(errors).length > 0) {
+  //   }
+  // }, [errors]);
 
   return (
     <FormProvider {...methods}>

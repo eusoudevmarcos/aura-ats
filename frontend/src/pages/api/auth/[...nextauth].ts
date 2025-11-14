@@ -40,7 +40,6 @@ export const authOptions: NextAuthOptions = {
       return await refreshAccessToken(token);
     },
     async session({ session, token }) {
-      console.log(token);
       // Passar tokens para a session
       session.accessToken = token.accessToken as string;
       session.refreshToken = token.refreshToken as string;

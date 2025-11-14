@@ -231,9 +231,8 @@ export const AgendaForm = ({ onSuccess, initialValues }: AgendaFormProps) => {
     setVagasOpened(false);
   }, [initialValues?.candidatoId, initialValues?.candidato?.id]);
 
-  useEffect(() => {
-    console.log('Erros do formulário:', errors);
-  }, [errors]);
+  // useEffect(() => {
+  // }, [errors]);
 
   function handleFullDateTime(times: string, e: any) {
     e.preventDefault();

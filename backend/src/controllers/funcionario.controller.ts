@@ -44,7 +44,6 @@ export class FuncionarioController {
       const funcionario = await this.service.save(req.body);
       return res.status(201).json(nonEmptyAndConvertDataDTO(funcionario));
     } catch (error: any) {
-      console.log(error);
       return res.status(400).json({
         error: "Erro ao criar funcionário",
         message: error.message,

@@ -25,10 +25,8 @@ interface ViaCep {
 //       const response = await axios.get<ViaCep>(
 //         `https://viacep.com.br/ws/${normalizedCep}/json/`
 //       );
-//       console.log(response.data);
 
 //       if (response.data.erro) {
-//         console.log('Erro');
 //         throw new Error('CEP Invalido');
 //       }
 

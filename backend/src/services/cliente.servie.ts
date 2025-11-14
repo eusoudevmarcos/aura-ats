@@ -157,9 +157,6 @@ export class ClienteService {
 
     const clientePayload = await buildClienteData(normalizedData);
 
-    console.log("PAYLOAD");
-    console.log(JSON.stringify(clientePayload));
-
     const relations = {
       empresa: {
         include: {

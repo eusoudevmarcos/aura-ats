@@ -29,7 +29,8 @@ export default function TakeitLayout({ children, fit }: Props) {
   const handleSearch = async (
     input: string,
     uf: string,
-    options: SearchOptions
+    options: SearchOptions,
+    descriptionData: string
   ) => {
     setLoading(true);
     setError(null);
@@ -40,6 +41,7 @@ export default function TakeitLayout({ children, fit }: Props) {
         params: {
           query: input,
           tipo: typeColumns,
+          typeData: descriptionData,
           ...options,
           uf,
         },

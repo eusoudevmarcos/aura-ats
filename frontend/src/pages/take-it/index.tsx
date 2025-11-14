@@ -2,6 +2,7 @@ import Table, { TableColumn } from '@/components/Table';
 import PersonDetailsModal from '@/components/takeit/PersonDetailsModal';
 import TakeitLayout from '@/layout/takeitLayout';
 import styles from '@/styles/takeit.module.scss';
+import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
 // Tipos para os dados de resultado e item selecionado
@@ -31,9 +32,14 @@ type ResultItem = PersonResult | CompanyResult;
 // Definição das colunas para cada tipo de resultado
 const columnsPerson: TableColumn<PersonResult>[] = [
   {
+    label: 'Id',
+    key: 'order',
+    render: row => row.order ?? '-',
+  },
+  {
     label: 'Nome',
     key: 'nome',
-    render: row => row.nome ?? '-',
+    render: row => row.nome ?? row.name ?? '-',
   },
   {
     label: 'CPF',
@@ -43,12 +49,32 @@ const columnsPerson: TableColumn<PersonResult>[] = [
   {
     label: 'Email',
     key: 'email',
-    render: row => row.email ?? '-',
+    render: row => {
+      if (Array.isArray(row.emails) && row.emails.length > 0) {
+        return <span>{row.emails.map(email => email.email).join(', ')}</span>;
+      }
+      if (row.email) {
+        return row.email;
+      }
+      return '-';
+    },
   },
   {
     label: 'Endereço',
     key: 'endereco',
-    render: row => row.endereco ?? '-',
+    render: row => {
+      let result = '';
+
+      if (row.endereco) {
+        result = row.endereco;
+      }
+
+      if (row.city || row.city) {
+        result = `${row.city}/${row.district}`;
+      }
+
+      return result || '-';
+    },
   },
   {
     label: 'CEP',
@@ -78,6 +104,9 @@ const columnsCompany: TableColumn<CompanyResult>[] = [
 // Componente principal
 const TakeItPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<ResultItem | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const router = useRouter();
 
   const handleSelectItem = (item: ResultItem) => {
     setSelectedItem(item);
@@ -99,10 +128,24 @@ const TakeItPage: React.FC = () => {
         // Permite clicar em linhas para ver detalhes
         const onRowClick = (row: ResultItem) => {
           setSelectedItem(row);
+          let url = null;
+
+          if (row?.cpf) {
+            url = `/take-it/view-person/${row?.cpf}`;
+          } else if (row?.cnpj) {
+            url = `/take-it/view-company/${row?.cnpj}`;
+          }
+
+          if (!url) {
+            setError('Erro ao acessar a url');
+            return;
+          }
+          router.push(url);
         };
 
         return (
           <div className={`${styles.container} shadow-md`}>
+            {error && <p className="text-red-500 text-sm">{error}</p>}
             <Table
               data={Array.isArray(results) ? results : []}
               columns={columns}

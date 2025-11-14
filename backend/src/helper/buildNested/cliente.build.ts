@@ -4,8 +4,6 @@ import { BuildNestedOperation } from "./buildNestedOperation";
 
 export const buildClienteData = async (data: any): Promise<any> => {
   const { email, id, dataAssinatura, ...rest } = data;
-  console.log("Build");
-  console.log(JSON.stringify(data));
   const clienteData: any = {
     status: rest.status as StatusCliente,
   };

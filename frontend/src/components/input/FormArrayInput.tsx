@@ -458,7 +458,6 @@ export function FormArrayInput({
  *   };
  *
  *   const onSubmit = (data: any) => {
- *     console.log('Dados do formulário:', data);
  *   };
  *
  *   return (

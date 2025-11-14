@@ -59,8 +59,6 @@ export class DatastoneController {
         isDetail = "false",
       } = req.query;
 
-      console.log(req.query);
-
       if (!input || !tipo) {
         res.status(400).json({
           error: true,
@@ -81,11 +79,11 @@ export class DatastoneController {
         return;
       }
 
-      const cached = cache.getFromCacheFileByKey(tipo, result.tipo, input);
-      if (cached) {
-        res.status(200).json({ status: 200, cache: true, data: cached });
-        return;
-      }
+      // const cached = cache.getFromCacheFileByKey(tipo, result.tipo, input);
+      // if (cached) {
+      //   res.status(200).json({ status: 200, cache: true, data: cached });
+      //   return;
+      // }
 
       const URL = `${BASE_URL}/${result.pathname}?${result.query}`;
 

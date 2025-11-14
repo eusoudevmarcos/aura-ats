@@ -9,7 +9,7 @@ import { saveCliente } from '@/axios/cliente.axios';
 import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { getError } from '@/utils/getError';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
@@ -71,10 +71,9 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     setValue,
   } = methods;
 
-  useEffect(() => {
-    // Apenas para debug
-    console.log(errors);
-  }, [errors]);
+  // useEffect(() => {
+  //   // Apenas para debug
+  // }, [errors]);
 
   const status = watch('status') || '';
   // const planos = watch('planos') || '';
@@ -150,7 +149,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               errors={errors}
               initialValues={initialValues?.planos || []}
               onChange={planosSelecionados => {
-                console.log(planosSelecionados);
                 setValue('planos', planosSelecionados);
               }}
             />

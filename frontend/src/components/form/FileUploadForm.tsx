@@ -74,9 +74,7 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
     name,
   });
 
-  useEffect(() => {
-    // console.log(fields);
-  }, [fields]);
+  useEffect(() => {}, [fields]);
 
   // Lida com seleção de arquivos pelo usuário e adiciona ao form context
   const handleFilesChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

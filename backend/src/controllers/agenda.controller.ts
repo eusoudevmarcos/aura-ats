@@ -51,7 +51,6 @@ export class AgendaController {
 
   // Lista todos os eventos de agenda com paginação
   async getAll(req: Request, res: Response) {
-    console.log(req.user);
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
     const pageSize = req.query.pageSize
       ? parseInt(req.query.pageSize as string, 10)

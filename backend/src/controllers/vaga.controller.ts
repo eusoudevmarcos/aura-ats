@@ -121,7 +121,6 @@ export class VagaController {
   }
   async vincularCandidato(req: Request, res: Response): Promise<Response> {
     const { id } = req.params;
-    console.log(id);
     try {
       const vaga = await this.service.vincularCandidatos(
         id,

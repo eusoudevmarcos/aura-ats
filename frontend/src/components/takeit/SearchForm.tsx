@@ -16,7 +16,8 @@ interface SearchFormProps {
   handleSearch: (
     input: string,
     uf: string,
-    options: { filial: boolean }
+    options: { filial: boolean },
+    descriptionData: string
   ) => void;
   loading: boolean;
   typeColumns: TypeColumns;
@@ -76,7 +77,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
     const options = {
       filial: isFiliar,
     };
-    handleSearch(input, uf, options);
+    handleSearch(input, uf, options, descriptionData);
   };
 
   return (
@@ -145,6 +146,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
             value={uf}
             onChange={handleUfChange}
           >
+            <option value="" disabled selected>
+              Pesquisar UF
+            </option>
             {UF_MODEL.map(({ value, label }, index) => (
               <option key={index} value={value ?? ''}>
                 {label}
