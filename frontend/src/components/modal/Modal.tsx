@@ -99,7 +99,7 @@ const Modal: React.FC<ModalProps> = ({
         </div>
 
         <div
-          className={`px-6 py-4 overflow-auto h-full max-h-[90vh] ${classNameBody}`}
+          className={`px-6 py-4 mb-6 overflow-auto h-full max-h-[90vh] ${classNameBody}`}
         >
           {children}
         </div>
