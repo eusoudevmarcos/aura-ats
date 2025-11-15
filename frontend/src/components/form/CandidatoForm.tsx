@@ -309,7 +309,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
                 fieldConfigs={[
                   {
                     name: 'crms',
-                    placeholder: 'Adicione o CRM',
+                    placeholder: 'Exemplo: 0000/UF',
                     inputProps: {
                       minLength: 4,
                       classNameContainer: 'w-full',

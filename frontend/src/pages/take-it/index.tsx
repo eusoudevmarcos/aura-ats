@@ -2,6 +2,7 @@ import Table, { TableColumn } from '@/components/Table';
 import PersonDetailsModal from '@/components/takeit/PersonDetailsModal';
 import TakeitLayout from '@/layout/takeitLayout';
 import styles from '@/styles/takeit.module.scss';
+import { handleZeroLeft } from '@/utils/helper/helperCPF';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
@@ -44,7 +45,11 @@ const columnsPerson: TableColumn<PersonResult>[] = [
   {
     label: 'CPF',
     key: 'cpf',
-    render: row => row.cpf ?? '-',
+    render: row => {
+      if (!row.cpf) return '-';
+
+      return handleZeroLeft(row.cpf);
+    },
   },
   {
     label: 'Email',
@@ -131,15 +136,19 @@ const TakeItPage: React.FC = () => {
           let url = null;
 
           if (row?.cpf) {
-            url = `/take-it/view-person/${row?.cpf}`;
+            const cpf = handleZeroLeft(row.cpf);
+            url = `/take-it/view-person/${cpf}`;
           } else if (row?.cnpj) {
             url = `/take-it/view-company/${row?.cnpj}`;
+          } else {
+            setError('CPF ou CNPJ não encontrados, contato o Administrador');
           }
 
           if (!url) {
-            setError('Erro ao acessar a url');
+            setError('Erro ao acessar a url, contate o Administrador');
             return;
           }
+
           router.push(url);
         };
 

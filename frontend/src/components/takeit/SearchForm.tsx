@@ -6,7 +6,7 @@ import takeitStyles from '@/styles/takeit.module.scss';
 import { UF_MODEL } from '@/utils/UF';
 import { mask } from '@/utils/mask/mask';
 import { sanitize } from '@/utils/sanitize';
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useRef, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
 
 // Definindo os tipos para as props
@@ -34,38 +34,43 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const [uf, setUf] = useState<string>('');
   const [isFiliar, setIsFiliar] = useState<boolean>(false);
 
+  const debounceTimeout = useRef<NodeJS.Timeout | null>(null);
+
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value;
     const maskedValue = mask(rawValue);
+    setInput(maskedValue);
     setDisableBtn(true);
-    const textSanitize = sanitize(maskedValue, typeColumns);
 
-    // Se isFiliar for true, só aceita CNPJ
-    if (isFiliar) {
-      if (textSanitize?.tipo === 'cnpj') {
-        setDescriptionData('CNPJ');
+    if (debounceTimeout.current) {
+      clearTimeout(debounceTimeout.current);
+    }
+
+    debounceTimeout.current = setTimeout(() => {
+      const textSanitize = sanitize(maskedValue, typeColumns);
+
+      if (isFiliar) {
+        if (textSanitize?.tipo === 'cnpj') {
+          setDescriptionData('CNPJ');
+          setDisableBtn(false);
+        } else {
+          setDescriptionData('');
+          setDisableBtn(true);
+        }
+        return;
+      }
+
+      if (textSanitize?.tipo) {
+        if (textSanitize?.tipo.includes('name')) {
+          setDescriptionData('NOME');
+        } else {
+          setDescriptionData(textSanitize?.tipo.toUpperCase());
+        }
         setDisableBtn(false);
       } else {
         setDescriptionData('');
-        setDisableBtn(true);
       }
-      setInput(maskedValue);
-      return;
-    }
-
-    if (textSanitize?.tipo) {
-      setDescriptionData(textSanitize?.tipo.toUpperCase());
-
-      if (textSanitize?.tipo.includes('name')) {
-        setDescriptionData('NOME');
-      }
-
-      setDisableBtn(false);
-    } else {
-      setDescriptionData('');
-    }
-
-    setInput(maskedValue);
+    }, 600);
   };
 
   const handleUfChange = (e: ChangeEvent<HTMLSelectElement>) => {
