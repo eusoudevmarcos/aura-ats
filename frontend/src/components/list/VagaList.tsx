@@ -91,9 +91,9 @@ const VagaList: React.FC = () => {
   const tableData = search ? filtered : vagas;
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-2">
-      <div className="flex justify-between items-center flex-wrap p-2">
-        <h2 className="text-xl font-bold mb-4">Lista de Vagas</h2>
+    <Card noShadow>
+      <div className="flex justify-between items-center flex-wrap mb-2">
+        <h2 className="text-2xl font-bold text-primary">Lista de Vagas</h2>
         <FormInput
           name="search"
           placeholder="Buscar por título, descrição ou cidade..."

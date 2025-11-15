@@ -55,9 +55,5 @@ export const convertDateToPostgres = (
     return undefined;
   }
 
-  // Log para debug
-  console.log('Converted date:', inputDate);
-  console.log('Date ISO string:', inputDate.toISOString());
-
   return inputDate; // Retorna o objeto Date diretamente
 };

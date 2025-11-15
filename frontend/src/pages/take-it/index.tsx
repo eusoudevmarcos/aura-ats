@@ -3,6 +3,7 @@ import PersonDetailsModal from '@/components/takeit/PersonDetailsModal';
 import TakeitLayout from '@/layout/takeitLayout';
 import styles from '@/styles/takeit.module.scss';
 import { handleZeroLeft } from '@/utils/helper/helperCPF';
+import { mask } from '@/utils/mask/mask';
 import { useRouter } from 'next/navigation';
 import React, { useState } from 'react';
 
@@ -34,6 +35,7 @@ type ResultItem = PersonResult | CompanyResult;
 const columnsPerson: TableColumn<PersonResult>[] = [
   {
     label: 'Id',
+    hiddeBtnCopy: true,
     key: 'order',
     render: row => row.order ?? '-',
   },
@@ -48,7 +50,7 @@ const columnsPerson: TableColumn<PersonResult>[] = [
     render: row => {
       if (!row.cpf) return '-';
 
-      return handleZeroLeft(row.cpf);
+      return mask(handleZeroLeft(row.cpf), 'cpf');
     },
   },
   {
@@ -66,6 +68,7 @@ const columnsPerson: TableColumn<PersonResult>[] = [
   },
   {
     label: 'Endereço',
+    hiddeBtnCopy: true,
     key: 'endereco',
     render: row => {
       let result = '';
@@ -85,6 +88,7 @@ const columnsPerson: TableColumn<PersonResult>[] = [
     label: 'CEP',
     key: 'cep',
     render: row => row.cep ?? '-',
+    hiddeBtnCopy: true,
   },
 ];
 
@@ -153,7 +157,7 @@ const TakeItPage: React.FC = () => {
         };
 
         return (
-          <div className={`${styles.container} shadow-md`}>
+          <div className={`${styles.container} shadow-md p-4`}>
             {error && <p className="text-red-500 text-sm">{error}</p>}
             <Table
               data={Array.isArray(results) ? results : []}

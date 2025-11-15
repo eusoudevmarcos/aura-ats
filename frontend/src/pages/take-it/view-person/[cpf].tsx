@@ -1,6 +1,7 @@
 import api from '@/axios';
 import { SearchIcon, WhatsAppIcon } from '@/components/icons';
 import Card from '@/components/takeit/Card';
+import { convertDateFromPostgres } from '@/utils/date/convertDateFromPostgres';
 import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
 import { unmask } from '@/utils/mask/unmask';
 import Link from 'next/link';
@@ -121,7 +122,7 @@ export default function ViewPersonPage(): React.ReactElement {
   return (
     // <TakeitLayout fit>
     //   {({}) => (
-    <div className="px-4 py-2">
+    <div className="px-4 py-2 mb-30">
       <div className="flex justify-between mb-10 px-4 py-2">
         <button
           onClick={() => router.push('/take-it')}
@@ -156,13 +157,13 @@ export default function ViewPersonPage(): React.ReactElement {
           {showExportDropdown && (
             <div className="absolute z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
               <button
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100  p-2"
                 onClick={() => handleExport('csv')}
               >
                 Exportar CSV
               </button>
               <button
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100  p-2"
                 onClick={() => handleExport('pdf')}
               >
                 Exportar PDF
@@ -172,24 +173,26 @@ export default function ViewPersonPage(): React.ReactElement {
         </div>
       </div>
       <h1 className="text-2xl mb-4 font-black">
-        Nome: {mostrarValor(data.name)}
+        <span className="text-primary">Nome:</span> {mostrarValor(data.name)}
       </h1>
       <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-2"
         id="card"
         ref={cardRef}
       >
         {/* Dados Pessoais */}
-        <Card title="Dados Pessoais" className={'col-start-1 col-end-3'}>
-          <div className="flex flex-wrap space-y-4 space-x-9">
+        <Card title="Dados Pessoais" className={'md:col-start-1 md:col-end-3'}>
+          <div className="grid grid-cols-1 md:grid-cols-4 space-y-4 space-x-3">
             <p className="font-medium">
-              <strong>CPF:</strong> {mostrarValor(data.cpf)}
+              <strong className="text-primary">CPF:</strong>{' '}
+              {mostrarValor(data.cpf)}
             </p>
             <p className="font-medium">
-              <strong>RG:</strong> {mostrarValor(data.rg)}
+              <strong className="text-primary">RG:</strong>{' '}
+              {mostrarValor(data.rg)}
             </p>
             <p className="font-medium">
-              <strong>Sexo:</strong>
+              <strong className="text-primary">Sexo:</strong>
               {data.gender === 'F'
                 ? 'Feminino'
                 : data.gender === 'M'
@@ -197,14 +200,26 @@ export default function ViewPersonPage(): React.ReactElement {
                 : 'N/A'}
             </p>
             <p className="font-medium">
-              <strong>Data de Nascimento:</strong>
-              {mostrarValor(data.birthday)}
+              <strong className="text-primary">Data de Nascimento:</strong>
+              {data.birthday && typeof data.birthday === 'string'
+                ? (() => {
+                    const [year, month, day] = data.birthday.split('-');
+                    if (year && month && day) {
+                      return `${day.padStart(2, '0')}/${month.padStart(
+                        2,
+                        '0'
+                      )}/${year}`;
+                    }
+                    return data.birthday;
+                  })()
+                : 'N/A'}
             </p>
             <p className="font-medium">
-              <strong>Nome da Mãe:</strong> {mostrarValor(data.mother_name)}
+              <strong className="text-primary">Nome da Mãe:</strong>{' '}
+              {mostrarValor(data.mother_name)}
             </p>
             <p className="font-medium">
-              <strong>Falecido:</strong>
+              <strong className="text-primary">Falecido:</strong>
               {data.possibly_dead === null || data.possibly_dead === undefined
                 ? 'N/A'
                 : data.possibly_dead
@@ -212,7 +227,7 @@ export default function ViewPersonPage(): React.ReactElement {
                 : 'Não'}
             </p>
             <p className="font-medium">
-              <strong>Aposentado:</strong>
+              <strong className="text-primary">Aposentado:</strong>
               {data.retired === null || data.retired === undefined
                 ? 'N/A'
                 : data.retired
@@ -220,7 +235,7 @@ export default function ViewPersonPage(): React.ReactElement {
                 : 'Não'}
             </p>
             <p className="font-medium">
-              <strong>Bolsa Família:</strong>
+              <strong className="text-primary">Bolsa Família:</strong>
               {data.bolsa_familia === null || data.bolsa_familia === undefined
                 ? 'N/A'
                 : data.bolsa_familia
@@ -233,20 +248,21 @@ export default function ViewPersonPage(): React.ReactElement {
         <Card title="Profissão e Renda">
           <div className="flex flex-wrap space-y-4 space-x-9">
             <p className="font-medium">
-              <strong>CBO:</strong> {mostrarValor(data.cbo_code)} -
+              <strong className="text-primary">CBO:</strong>{' '}
+              {mostrarValor(data.cbo_code)} -
               {mostrarValor(data.cbo_description)}
             </p>
             <p className="font-medium">
-              <strong>Renda Estimada:</strong>
+              <strong className="text-primary">Renda Estimada:</strong>
               {mostrarValor(data.estimated_income)}
             </p>
           </div>
         </Card>
         {/* PEP */}
         <Card title="Pessoa Politicamente Exposta (PEP)">
-          <div className="flex flex-wrap space-y-4 space-x-9">
+          <div className="flex flex-wrap space-y-4 space-x-2">
             <p className="font-medium">
-              <strong>PEP:</strong>
+              <strong className="text-primary">PEP:</strong>
               {data.pep === null || data.pep === undefined
                 ? 'N/A'
                 : data.pep
@@ -255,7 +271,8 @@ export default function ViewPersonPage(): React.ReactElement {
             </p>
             {data.pep && (
               <p className="font-medium">
-                <strong>Tipo de PEP:</strong> {mostrarValor(data.pep_type)}
+                <strong className="text-primary">Tipo de PEP:</strong>{' '}
+                {mostrarValor(data.pep_type)}
               </p>
             )}
           </div>
@@ -263,34 +280,36 @@ export default function ViewPersonPage(): React.ReactElement {
         {/* Endereços */}
         <Card title="Endereços">
           {data.addresses && data.addresses.length > 0 ? (
-            <div className="space-y-2">
+            <div>
               {data.addresses.map((addr: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100 p-2 rounded-xl mb-2"
                 >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
+                  <div className="flex flex-wrap space-y-2 space-x-4 justify-between">
                     <p className="font-medium">
-                      <strong>Tipo:</strong> {mostrarValor(addr.type)}
+                      <strong className="text-primary">Tipo:</strong>{' '}
+                      {mostrarValor(addr.type)}
                     </p>
                     <p className="font-medium">
-                      <strong>Rua:</strong> {mostrarValor(addr.street)},
-                      {mostrarValor(addr.number)}
+                      <strong className="text-primary">Rua:</strong>{' '}
+                      {mostrarValor(addr.street)},{mostrarValor(addr.number)}
                       {addr.complement && mostrarValor(`- ${addr.complement}`)}
                     </p>
                     <p className="font-medium">
-                      <strong>Bairro:</strong>
+                      <strong className="text-primary">Bairro:</strong>
                       {mostrarValor(addr.neighborhood)}
                     </p>
                     <p className="font-medium">
-                      <strong>Cidade:</strong> {mostrarValor(addr.city)} -
-                      {mostrarValor(addr.district)}
+                      <strong className="text-primary">Cidade:</strong>{' '}
+                      {mostrarValor(addr.city)} -{mostrarValor(addr.district)}
                     </p>
                     <p className="font-medium">
-                      <strong>CEP:</strong> {mostrarValor(addr.postal_code)}
+                      <strong className="text-primary">CEP:</strong>{' '}
+                      {mostrarValor(addr.postal_code)}
                     </p>
                     <p className="font-medium">
-                      <strong>Prioridade:</strong>
+                      <strong className="text-primary">Prioridade:</strong>
                       {mostrarValor(addr.priority)}
                     </p>
                   </div>
@@ -304,16 +323,16 @@ export default function ViewPersonPage(): React.ReactElement {
         {/* Telefones Celulares */}
         <Card title="Telefones Celulares">
           {data.mobile_phones && data.mobile_phones.length > 0 ? (
-            <div className="space-y-2">
+            <div>
               {data.mobile_phones.map((phone: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2 justify-between"
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium flex gap-2 items-center">
-                      <strong>Número:</strong>({mostrarValor(phone.ddd)})
-                      {mostrarValor(phone.number)}
+                      <strong className="text-primary">Número:</strong>(
+                      {mostrarValor(phone.ddd)}){mostrarValor(phone.number)}
                       <Link
                         href={
                           phone.number
@@ -327,23 +346,23 @@ export default function ViewPersonPage(): React.ReactElement {
                       </Link>
                     </p>
                     <p className="font-medium">
-                      <strong>Prioridade:</strong>
+                      <strong className="text-primary">Prioridade:</strong>
                       {mostrarValor(phone.priority)}
                     </p>
                     <p className="font-medium">
-                      <strong>Data CDR:</strong>
+                      <strong className="text-primary">Data CDR:</strong>
                       {mostrarValor(phone.cdr_datetime)}
                     </p>
                     <p className="font-medium">
-                      <strong>Data Hot:</strong>
+                      <strong className="text-primary">Data Hot:</strong>
                       {mostrarValor(phone.hot_datetime)}
                     </p>
                     <p className="font-medium">
-                      <strong>WhatsApp:</strong>
+                      <strong className="text-primary">data:</strong>
                       {mostrarValor(phone.whatsapp_datetime)}
                     </p>
                     <p className="font-medium">
-                      <strong>CPC:</strong>
+                      <strong className="text-primary">CPC:</strong>
                       {mostrarValor(phone.cpc_datetime)}
                     </p>
                   </div>
@@ -357,31 +376,31 @@ export default function ViewPersonPage(): React.ReactElement {
         {/* Telefones Fixos */}
         <Card title="Telefones Fixos">
           {data.land_lines && data.land_lines.length > 0 ? (
-            <div className="space-y-2">
+            <div>
               {data.land_lines.map((phone: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2 justify-between"
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>Número:</strong>({mostrarValor(phone.ddd)})
-                      {mostrarValor(phone.number)}
+                      <strong className="text-primary">Número:</strong>(
+                      {mostrarValor(phone.ddd)}){mostrarValor(phone.number)}
                     </p>
                     <p className="font-medium">
-                      <strong>Prioridade:</strong>
+                      <strong className="text-primary">Prioridade:</strong>
                       {mostrarValor(phone.priority)}
                     </p>
                     <p className="font-medium">
-                      <strong>Data CDR:</strong>
+                      <strong className="text-primary">Data CDR:</strong>
                       {mostrarValor(phone.cdr_datetime)}
                     </p>
                     <p className="font-medium">
-                      <strong>Data Hot:</strong>
+                      <strong className="text-primary">Data Hot:</strong>
                       {mostrarValor(phone.hot_datetime)}
                     </p>
                     <p className="font-medium">
-                      <strong>WhatsApp:</strong>
+                      <strong className="text-primary">data:</strong>
                       <Link
                         href={
                           phone.whatsapp_datetime
@@ -389,11 +408,13 @@ export default function ViewPersonPage(): React.ReactElement {
                             : ''
                         }
                       >
-                        {mostrarValor(phone.whatsapp_datetime)}
+                        {convertDateFromPostgres(
+                          phone.whatsapp_datetime
+                        )?.toString()}
                       </Link>
                     </p>
                     <p className="font-medium">
-                      <strong>CPC:</strong>
+                      <strong className="text-primary">CPC:</strong>
                       {mostrarValor(phone.cpc_datetime)}
                     </p>
                   </div>
@@ -411,14 +432,15 @@ export default function ViewPersonPage(): React.ReactElement {
               {data.emails.map((email: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2"
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>E-mail:</strong> {mostrarValor(email.email)}
+                      <strong className="text-primary">E-mail:</strong>{' '}
+                      {mostrarValor(email.email)}
                     </p>
                     <p className="font-medium">
-                      <strong>Prioridade:</strong>
+                      <strong className="text-primary">Prioridade:</strong>
                       {mostrarValor(email.priority)}
                     </p>
                   </div>
@@ -436,17 +458,19 @@ export default function ViewPersonPage(): React.ReactElement {
               {data.family_datas.map((fam: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2"
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>Nome:</strong> {mostrarValor(fam.name)}
+                      <strong className="text-primary">Nome:</strong>{' '}
+                      {mostrarValor(fam.name)}
                     </p>
                     <p className="font-medium">
-                      <strong>CPF:</strong> {mostrarValor(fam.cpf)}
+                      <strong className="text-primary">CPF:</strong>{' '}
+                      {mostrarValor(fam.cpf)}
                     </p>
                     <p className="font-medium">
-                      <strong>Descrição:</strong>
+                      <strong className="text-primary">Descrição:</strong>
                       {mostrarValor(fam.description)}
                     </p>
                   </div>
@@ -464,12 +488,13 @@ export default function ViewPersonPage(): React.ReactElement {
               {data.related_companies.map((company: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b last:border-b-0 pb-2 last:pb-0"
+                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2"
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <div className="flex gap-2">
                       <p className="font-medium">
-                        <strong>CNPJ:</strong> {mostrarValor(company.cnpj)}
+                        <strong className="text-primary">CNPJ:</strong>{' '}
+                        {mostrarValor(company.cnpj)}
                       </p>
                       <Link
                         href={`/take-it/view-company/${company.cnpj}`}
@@ -480,15 +505,17 @@ export default function ViewPersonPage(): React.ReactElement {
                     </div>
 
                     <p className="font-medium">
-                      <strong>Razão Social:</strong>
+                      <strong className="text-primary">Razão Social:</strong>
                       {mostrarValor(company.company_name)}
                     </p>
                     <p className="font-medium">
-                      <strong>Nome Fantasia:</strong>
+                      <strong className="text-primary">Nome Fantasia:</strong>
                       {mostrarValor(company.trading_name)}
                     </p>
                     <p className="font-medium">
-                      <strong>Situação Cadastral:</strong>
+                      <strong className="text-primary">
+                        Situação Cadastral:
+                      </strong>
                       {mostrarValor(company.registry_situation)}
                     </p>
                   </div>

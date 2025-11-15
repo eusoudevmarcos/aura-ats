@@ -118,7 +118,7 @@ const FuncionariosList: React.FC = () => {
   };
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-2">
+    <Card noShadow>
       <div className="flex justify-between items-center flex-wrap p-2">
         <h2 className="text-xl font-bold mb-4">Lista de Funcionários</h2>
         <input
@@ -126,7 +126,7 @@ const FuncionariosList: React.FC = () => {
           placeholder="Buscar funcionário..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
+          className="grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
         />
       </div>
 

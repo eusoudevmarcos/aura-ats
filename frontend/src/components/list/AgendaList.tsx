@@ -43,7 +43,7 @@ function normalizarTable(agendas: AgendaVaga[]) {
   }));
 }
 
-const AgendaList: React.FC = () => {
+const AgendaList: React.FC<{ noTitle?: boolean }> = ({ noTitle = false }) => {
   const [search, setSearch] = useState('');
   const [agendas, setAgendas] = useState<AgendaVaga[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
@@ -111,15 +111,18 @@ const AgendaList: React.FC = () => {
   };
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-2">
-      <div className="flex justify-between items-center flex-wrap p-2">
-        <h3 className="text-xl font-bold mb-4">Lista de Agendas</h3>
+    <Card noShadow>
+      <div className="flex justify-between items-center flex-wrap mb-2">
+        {!noTitle && (
+          <h3 className="text-2xl font-bold text-primary">Lista de Agendas</h3>
+        )}
+
         <input
           type="text"
           placeholder="Buscar agenda..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="flex-grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
+          className="grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
         />
       </div>
       <Table

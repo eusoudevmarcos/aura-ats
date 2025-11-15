@@ -36,8 +36,8 @@ export default function Tarefas() {
 
   return (
     <AtividadeLayout>
-      <Card title={{ label: 'Tarefas', className: 'text-2xl' }}>
-        <div className="mb-4">
+      <Card noShadow>
+        <div className="">
           <p className="text-sm text-gray-600">
             Visualização das suas tarefas. Para gerenciar tarefas, acesse a
             página principal de Tarefas.

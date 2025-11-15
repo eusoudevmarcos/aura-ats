@@ -96,10 +96,10 @@ const Toolbar = ({ collapsed, user }: any) => {
           )}`}
           alt="User Avatar"
           unoptimized
-          className="rounded-full object-cover flex-shrink-0"
+          className="rounded-full object-cover shrink-0"
         />
         <div
-          className={`flex-grow whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
+          className={`grow whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
             collapsed ? 'opacity-0 w-0' : 'opacity-100 ml-2'
           }`}
         >
@@ -166,7 +166,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   // useEffect(() => {
   //   setCollapsed(true);
   // }, [router.pathname]);
-
+  console.log(router.pathname.split('/')[1]);
   useEffect(() => {
     onToggleSidebar(collapsed);
   }, [collapsed, onToggleSidebar]);
@@ -190,7 +190,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
           {collapsed ? <ListIcon /> : <ListClosedIcon />}
         </button>
         {/* Navegação */}
-        <nav className="flex-grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+        <nav className="grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
           <ul>
             {getNavItems(user).map(
               item =>
@@ -199,7 +199,9 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                     <Link
                       href={item?.href}
                       className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
-                        router.pathname === item?.href
+                        router.pathname === item.href ||
+                        router.pathname.split('/')[1] ===
+                          item.href.split('/')[1]
                           ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
                           : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                       } ${collapsed ? 'justify-center px-3' : ''}`}
@@ -234,14 +236,15 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
             collapsed ? 'w-0 p-0' : 'w-64 p-6'
           }`}
         >
-          <nav className="flex-grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+          <nav className="grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">
             <ul>
               {getNavItems(user).map(item => (
                 <li key={item?.label}>
                   <Link
                     href={item?.href ?? ''}
                     className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
-                      router.pathname === item?.href
+                      router.pathname === item.href ||
+                      router.pathname.split('/')[1] === item.href
                         ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
                         : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                     } ${collapsed ? 'justify-center px-0' : ''}`}
@@ -273,10 +276,10 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
               )}`}
               alt="User Avatar"
               unoptimized
-              className="rounded-full object-cover flex-shrink-0"
+              className="rounded-full object-cover shrink-0"
             />
             <div
-              className={`flex-grow whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
+              className={`grow whitespace-nowrap overflow-hidden transition-opacity duration-300 ${
                 collapsed ? 'opacity-0 w-0' : 'opacity-100 ml-2'
               }`}
             >

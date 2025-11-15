@@ -3,9 +3,12 @@ const Card: React.FC<{
   children: React.ReactNode;
   classNameContainer?: string;
   classNameContent?: string;
-}> = ({ title, children, classNameContent, classNameContainer }) => (
+  noShadow?: boolean;
+}> = ({ title, children, classNameContent, classNameContainer, noShadow }) => (
   <div
-    className={`bg-white rounded-lg shadow-md px-4 py-2 w-full ${classNameContainer}`}
+    className={`bg-white rounded-lg px-4 py-2 w-full ${classNameContainer} ${
+      !noShadow && 'shadow-md'
+    }`}
   >
     {title &&
       (typeof title === 'string' ? (

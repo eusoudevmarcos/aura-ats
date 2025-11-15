@@ -119,11 +119,6 @@ export default function TakeitLayout({ children, fit }: Props) {
           {error}
         </div>
       )}
-      {loading && (
-        <div className={`${styles.loadingMessage} message-box`}>
-          Carregando...
-        </div>
-      )}
 
       {children({ results, loading, error, handleSearch, typeColumns })}
     </section>

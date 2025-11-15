@@ -27,7 +27,7 @@ export default function AtividadeLayout({ children }: any) {
 
   return (
     <Card title="Atividades">
-      <nav className="flex gap-4 mb-6 border-b border-gray-200">
+      <nav className="flex gap-4 mb-2 border-b border-gray-200">
         {['Agendas', 'Tarefas', 'Vagas', 'Entrevistas'].map(item => (
           <button
             key={item}

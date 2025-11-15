@@ -117,7 +117,7 @@ function TR<T>({
 
   return (
     <tr
-      className="result-row"
+      className=""
       onClick={handleRowClick}
       style={{ cursor: onRowClick ? 'pointer' : 'default' }}
     >
@@ -128,7 +128,7 @@ function TR<T>({
         return (
           <td
             key={String(col.key)}
-            className="relative group max-w-[160px] min-w-[80px] align-middle px-4 py-3"
+            className="relative group max-w-[160px] min-w-[80px] align-middle px-4 py-3 border-b border-gray-300"
             style={{ verticalAlign: 'middle' }}
           >
             <div className="flex items-center gap-2 w-full">
@@ -178,22 +178,22 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex flex-col sm:flex-row justify-center items-center gap-2 mt-4">
+    <div className="flex flex-col-reverse justify-center items-center gap-2 mt-4">
       <div className="flex items-center gap-2">
         <button
-          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm cursor-pointer"
+          className="px-1 py-0.5 rounded border text-primary border-primary disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed text-sm cursor-pointe flex hover:scale-105"
           onClick={() => onPageChange && onPageChange(page - 1)}
           disabled={page === 1}
         >
-          {'<'}
+          <span className="material-icons-outlined">chevron_left</span>
         </button>
         {getPages().map(p => (
           <button
             key={p}
-            className={`px-3 py-1 rounded border text-sm ${
+            className={`px-3 py-1 rounded border text-sm hover:scale-105 disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed ${
               p === page
-                ? 'bg-primary text-white border-primary cursor-pointer'
-                : 'text-primary border-primary bg-white cursor-pointer'
+                ? 'text-primary text-white border-primary cursor-pointer'
+                : 'text-black border-gray-400 bg-white cursor-pointer'
             }`}
             onClick={() => onPageChange && onPageChange(p)}
             disabled={p === page}
@@ -202,11 +202,11 @@ const Pagination: React.FC<PaginationProps> = ({
           </button>
         ))}
         <button
-          className="px-2 py-1 rounded border text-primary border-primary disabled:opacity-50 text-sm cursor-pointer"
+          className="flex px-1 py-0.5 rounded border text-primary border-primary disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed text-sm cursor-pointer hover:scale-105"
           onClick={() => onPageChange && onPageChange(page + 1)}
           disabled={page === totalPages}
         >
-          {'>'}
+          <span className="material-icons-outlined">chevron_right</span>
         </button>
       </div>
       <span className="text-primary text-sm text-center">
@@ -308,7 +308,7 @@ function Table<T>({
   return (
     <>
       <div className="hidden md:block overflow-x-auto w-full">
-        <table className="min-w-full border-separate border-spacing-0 bg-white rounded-lg">
+        <table className="min-w-full border-separate border border-gray-300 border-spacing-0 bg-white rounded-lg">
           <thead>
             <tr>
               {columns.map(col => (

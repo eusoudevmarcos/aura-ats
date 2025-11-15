@@ -148,9 +148,9 @@ const ClienteList: React.FC<{
   };
 
   return (
-    <Card classNameContainer="mt-6 px-6 py-2">
-      <div className="flex justify-between itesm-center flex-wrap p-2">
-        <h3 className="text-xl font-bold">Lista de Clientes</h3>
+    <Card noShadow>
+      <div className="flex justify-between itesm-center flex-wrap mb-2">
+        <h3 className="text-2xl font-bold text-primary">Lista de Clientes</h3>
 
         <div className="flex gap-2 w-full  max-w-[500px]">
           <FormInput

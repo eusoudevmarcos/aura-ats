@@ -173,7 +173,7 @@ const ViewCompanyPage: React.FC = () => {
   return (
     // <TakeitLayout fit>
     //   {({}) => (
-    <div className="px-4 py-2">
+    <div className="px-4 py-2 mb-30">
       <div className="flex justify-between mb-10 px-4 py-2">
         <button
           onClick={() => router.push('/take-it')}
@@ -223,95 +223,107 @@ const ViewCompanyPage: React.FC = () => {
         </div>
       </div>
       <h1 className="text-2xl mb-4 font-black">
-        Razão Social: {mostrarValor(company.company_name)}
+        <span className="text-primary">Razão Social:</span>{' '}
+        {mostrarValor(company.company_name)}
       </h1>
       <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-6"
+        className="grid grid-cols-1 md:grid-cols-2 gap-2"
         id="card"
         ref={cardRef}
       >
         {/* Dados da Empresa */}
-        <Card title="Dados da Empresa" className={'col-start-1 col-end-3'}>
+        <Card
+          title={<span className="text-primary">Dados da Empresa</span>}
+          className={'md:col-start-1 md:col-end-3'}
+        >
           <div className="flex flex-wrap space-y-4 space-x-9">
             <p className="font-medium">
-              <strong>CNPJ:</strong> {mostrarValor(company.cnpj)}
+              <strong className="text-primary">CNPJ:</strong>{' '}
+              {mostrarValor(company.cnpj)}
             </p>
             <p className="font-medium">
-              <strong>Nome Fantasia:</strong>{' '}
+              <strong className="text-primary">Nome Fantasia:</strong>{' '}
               {mostrarValor(company.trading_name)}
             </p>
             <p className="font-medium">
-              <strong>Data de Abertura:</strong>{' '}
+              <strong className="text-primary">Data de Abertura:</strong>{' '}
               {mostrarValor(company.creation_date)}
             </p>
             <p className="font-medium">
-              <strong>Receita Estimada:</strong>{' '}
+              <strong className="text-primary">Receita Estimada:</strong>{' '}
               {mostrarValor(company.estimated_revenue)}
             </p>
             <p className="font-medium">
-              <strong>Capital Social:</strong>{' '}
+              <strong className="text-primary">Capital Social:</strong>{' '}
               {mostrarValor(company.share_capital)}
             </p>
             <p className="font-medium">
-              <strong>Cidade/UF:</strong> {mostrarValor(company.city_uf)}
+              <strong className="text-primary">Cidade/UF:</strong>{' '}
+              {mostrarValor(company.city_uf)}
             </p>
             <p className="font-medium">
-              <strong>Segmento:</strong> {mostrarValor(company.segment)}
+              <strong className="text-primary">Segmento:</strong>{' '}
+              {mostrarValor(company.segment)}
             </p>
             <p className="font-medium">
-              <strong>Idade:</strong> {mostrarValor(company.age)}
+              <strong className="text-primary">Idade:</strong>{' '}
+              {mostrarValor(company.age)}
             </p>
             <p className="font-medium">
-              <strong>Funcionários:</strong>{' '}
+              <strong className="text-primary">Funcionários:</strong>{' '}
               {mostrarValor(company.employee_count)}
             </p>
             <p className="font-medium">
-              <strong>Tipo de Matriz:</strong>{' '}
+              <strong className="text-primary">Tipo de Matriz:</strong>{' '}
               {mostrarValor(company.headquarter_type)}
             </p>
             <p className="font-medium">
-              <strong>Porte:</strong> {mostrarValor(company.business_size)}
+              <strong className="text-primary">Porte:</strong>{' '}
+              {mostrarValor(company.business_size)}
             </p>
             <p className="font-medium">
-              <strong>Situação Cadastral:</strong>{' '}
+              <strong className="text-primary">Situação Cadastral:</strong>{' '}
               {mostrarValor(company.registry_situation)}
             </p>
             <p className="font-medium">
-              <strong>CNAE:</strong> {mostrarValor(company.cnae_code)}
+              <strong className="text-primary">CNAE:</strong>{' '}
+              {mostrarValor(company.cnae_code)}
               {' - '}
               {mostrarValor(company.cnae_description)}
             </p>
             <p className="font-medium">
-              <strong>Tipo Jurídico:</strong>{' '}
+              <strong className="text-primary">Tipo Jurídico:</strong>{' '}
               {mostrarValor(company.juridical_type)}
             </p>
           </div>
         </Card>
         {/* Simples e SIMEI */}
-        <Card title="Simples Nacional / SIMEI">
+        <Card
+          title={<span className="text-primary">Simples Nacional / SIMEI</span>}
+        >
           <div className="flex flex-wrap space-y-4 space-x-9">
             <p className="font-medium">
-              <strong>Status Simples:</strong>{' '}
+              <strong className="text-primary">Status Simples:</strong>{' '}
               {mostrarValor(company.simple_simei?.status_simple)}
             </p>
             <p className="font-medium">
-              <strong>Data Opção Simples:</strong>{' '}
+              <strong className="text-primary">Data Opção Simples:</strong>{' '}
               {mostrarValor(company.simple_simei?.dt_option_simple)}
             </p>
             <p className="font-medium">
-              <strong>Status SIMEI:</strong>{' '}
+              <strong className="text-primary">Status SIMEI:</strong>{' '}
               {mostrarValor(company.simple_simei?.status_simei)}
             </p>
             <p className="font-medium">
-              <strong>Data Opção SIMEI:</strong>{' '}
+              <strong className="text-primary">Data Opção SIMEI:</strong>{' '}
               {mostrarValor(company.simple_simei?.dt_option_simei)}
             </p>
           </div>
         </Card>
         {/* Endereços */}
-        <Card title="Endereços">
+        <Card title={<span className="text-primary">Endereços</span>}>
           {company.addresses && company.addresses.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.addresses.map((addr: Address, idx: number) => (
                 <div
                   key={idx}
@@ -319,26 +331,29 @@ const ViewCompanyPage: React.FC = () => {
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>Tipo:</strong> {mostrarValor(addr.type)}
+                      <strong className="text-primary">Tipo:</strong>{' '}
+                      {mostrarValor(addr.type)}
                     </p>
                     <p className="font-medium">
-                      <strong>Rua:</strong> {mostrarValor(addr.street)},
-                      {mostrarValor(addr.number)}
+                      <strong className="text-primary">Rua:</strong>{' '}
+                      {mostrarValor(addr.street)},{mostrarValor(addr.number)}
                       {addr.complement && mostrarValor(`- ${addr.complement}`)}
                     </p>
                     <p className="font-medium">
-                      <strong>Bairro:</strong> {mostrarValor(addr.neighborhood)}
+                      <strong className="text-primary">Bairro:</strong>{' '}
+                      {mostrarValor(addr.neighborhood)}
                     </p>
                     <p className="font-medium">
-                      <strong>Cidade:</strong> {mostrarValor(addr.city)} -{' '}
-                      {mostrarValor(addr.district)}
+                      <strong className="text-primary">Cidade:</strong>{' '}
+                      {mostrarValor(addr.city)} - {mostrarValor(addr.district)}
                     </p>
                     <p className="font-medium">
-                      <strong>CEP:</strong> {mostrarValor(addr.postal_code)}
+                      <strong className="text-primary">CEP:</strong>{' '}
+                      {mostrarValor(addr.postal_code)}
                     </p>
                     {addr.priority && (
                       <p className="font-medium">
-                        <strong>Prioridade:</strong>{' '}
+                        <strong className="text-primary">Prioridade:</strong>{' '}
                         {mostrarValor(addr.priority)}
                       </p>
                     )}
@@ -347,13 +362,13 @@ const ViewCompanyPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div>Nenhum endereço cadastrado.</div>
+            <div className="text-primary">Nenhum endereço cadastrado.</div>
           )}
         </Card>
         {/* Telefones Celulares */}
-        <Card title="Telefones Celulares">
+        <Card title={<span className="text-primary">Telefones Celulares</span>}>
           {company.mobile_phones && company.mobile_phones.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.mobile_phones.map((phone: Phone, idx: number) => (
                 <div
                   key={idx}
@@ -361,12 +376,12 @@ const ViewCompanyPage: React.FC = () => {
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>Número:</strong> ({mostrarValor(phone.ddd)})
-                      {mostrarValor(phone.number)}
+                      <strong className="text-primary">Número:</strong> (
+                      {mostrarValor(phone.ddd)}){mostrarValor(phone.number)}
                     </p>
                     {phone.priority && (
                       <p className="font-medium">
-                        <strong>Prioridade:</strong>{' '}
+                        <strong className="text-primary">Prioridade:</strong>{' '}
                         {mostrarValor(phone.priority)}
                       </p>
                     )}
@@ -375,13 +390,13 @@ const ViewCompanyPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div>Nenhum celular cadastrado.</div>
+            <div className="text-primary">Nenhum celular cadastrado.</div>
           )}
         </Card>
         {/* Telefones Fixos */}
-        <Card title="Telefones Fixos">
+        <Card title={<span className="text-primary">Telefones Fixos</span>}>
           {company.land_lines && company.land_lines.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.land_lines.map((phone: Phone, idx: number) => (
                 <div
                   key={idx}
@@ -389,12 +404,12 @@ const ViewCompanyPage: React.FC = () => {
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>Número:</strong> ({mostrarValor(phone.ddd)})
-                      {mostrarValor(phone.number)}
+                      <strong className="text-primary">Número:</strong> (
+                      {mostrarValor(phone.ddd)}){mostrarValor(phone.number)}
                     </p>
                     {phone.priority && (
                       <p className="font-medium">
-                        <strong>Prioridade:</strong>{' '}
+                        <strong className="text-primary">Prioridade:</strong>{' '}
                         {mostrarValor(phone.priority)}
                       </p>
                     )}
@@ -403,13 +418,13 @@ const ViewCompanyPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div>Nenhum telefone fixo cadastrado.</div>
+            <div className="text-primary">Nenhum telefone fixo cadastrado.</div>
           )}
         </Card>
         {/* E-mails da Empresa */}
-        <Card title="E-mails">
+        <Card title={<span className="text-primary">E-mails</span>}>
           {company.emails && company.emails.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.emails.map((email: Email, idx: number) => (
                 <div
                   key={idx}
@@ -417,11 +432,12 @@ const ViewCompanyPage: React.FC = () => {
                 >
                   <div className="flex flex-wrap space-y-4 space-x-9">
                     <p className="font-medium">
-                      <strong>E-mail:</strong> {mostrarValor(email.email)}
+                      <strong className="text-primary">E-mail:</strong>{' '}
+                      {mostrarValor(email.email)}
                     </p>
                     {email.priority && (
                       <p className="font-medium">
-                        <strong>Prioridade:</strong>{' '}
+                        <strong className="text-primary">Prioridade:</strong>{' '}
                         {mostrarValor(email.priority)}
                       </p>
                     )}
@@ -430,13 +446,17 @@ const ViewCompanyPage: React.FC = () => {
               ))}
             </div>
           ) : (
-            <div>Nenhum e-mail cadastrado.</div>
+            <div className="text-primary">Nenhum e-mail cadastrado.</div>
           )}
         </Card>
         {/* Sócios/Representantes */}
-        <Card title="Sócios / Pessoas Relacionadas">
+        <Card
+          title={
+            <span className="text-primary">Sócios / Pessoas Relacionadas</span>
+          }
+        >
           {company.related_persons && company.related_persons.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.related_persons.map(
                 (person: RelatedPerson, idx: number) => (
                   <div
@@ -445,17 +465,19 @@ const ViewCompanyPage: React.FC = () => {
                   >
                     <div className="flex flex-wrap space-y-4 space-x-9">
                       <p className="font-medium">
-                        <strong>Nome:</strong> {mostrarValor(person.name)}
+                        <strong className="text-primary">Nome:</strong>{' '}
+                        {mostrarValor(person.name)}
                       </p>
                       <p className="font-medium">
-                        <strong>CPF:</strong> {mostrarValor(person.cpf)}
+                        <strong className="text-primary">CPF:</strong>{' '}
+                        {mostrarValor(person.cpf)}
                       </p>
                       <p className="font-medium">
-                        <strong>Participação:</strong>{' '}
+                        <strong className="text-primary">Participação:</strong>{' '}
                         {mostrarValor(person.ownership)}
                       </p>
                       <p className="font-medium">
-                        <strong>Descrição:</strong>{' '}
+                        <strong className="text-primary">Descrição:</strong>{' '}
                         {mostrarValor(person.description)}
                       </p>
                     </div>
@@ -464,14 +486,22 @@ const ViewCompanyPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div>Nenhum sócio/pessoa relacionada cadastrada.</div>
+            <div className="text-primary">
+              Nenhum sócio/pessoa relacionada cadastrada.
+            </div>
           )}
         </Card>
         {/* Procuradores/Representantes Legais */}
-        <Card title="Procuradores / Representantes Legais">
+        <Card
+          title={
+            <span className="text-primary">
+              Procuradores / Representantes Legais
+            </span>
+          }
+        >
           {company.legal_representative &&
           company.legal_representative.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.legal_representative.map(
                 (rep: LegalRepresentative, idx: number) => (
                   <div
@@ -480,13 +510,15 @@ const ViewCompanyPage: React.FC = () => {
                   >
                     <div className="flex flex-wrap space-y-4 space-x-9">
                       <p className="font-medium">
-                        <strong>Nome:</strong> {mostrarValor(rep.name)}
+                        <strong className="text-primary">Nome:</strong>{' '}
+                        {mostrarValor(rep.name)}
                       </p>
                       <p className="font-medium">
-                        <strong>CPF:</strong> {mostrarValor(rep.cpf)}
+                        <strong className="text-primary">CPF:</strong>{' '}
+                        {mostrarValor(rep.cpf)}
                       </p>
                       <p className="font-medium">
-                        <strong>Qualificação:</strong>
+                        <strong className="text-primary">Qualificação:</strong>
                         {mostrarValor(rep.qualification)}
                       </p>
                     </div>
@@ -495,13 +527,13 @@ const ViewCompanyPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div>Nenhum procurador cadastrado.</div>
+            <div className="text-primary">Nenhum procurador cadastrado.</div>
           )}
         </Card>
         {/* Filiais */}
-        <Card title="Filiais">
+        <Card title={<span className="text-primary">Filiais</span>}>
           {company.branch_offices && company.branch_offices.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.branch_offices.map(
                 (branch: BranchOffice, idx: number) => (
                   <div
@@ -510,14 +542,15 @@ const ViewCompanyPage: React.FC = () => {
                   >
                     <div className="flex flex-wrap space-y-4 space-x-9">
                       <p className="font-medium">
-                        <strong>CNPJ:</strong> {mostrarValor(branch.cnpj)}
+                        <strong className="text-primary">CNPJ:</strong>{' '}
+                        {mostrarValor(branch.cnpj)}
                       </p>
                       <p className="font-medium">
-                        <strong>Razão Social:</strong>{' '}
+                        <strong className="text-primary">Razão Social:</strong>{' '}
                         {mostrarValor(branch.company_name)}
                       </p>
                       <p className="font-medium">
-                        <strong>Descrição:</strong>{' '}
+                        <strong className="text-primary">Descrição:</strong>{' '}
                         {mostrarValor(branch.ds_branch_office)}
                       </p>
                     </div>
@@ -526,13 +559,15 @@ const ViewCompanyPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div>Nenhuma filial cadastrada.</div>
+            <div className="text-primary">Nenhuma filial cadastrada.</div>
           )}
         </Card>
         {/* Empresas Relacionadas */}
-        <Card title="Empresas Relacionadas">
+        <Card
+          title={<span className="text-primary">Empresas Relacionadas</span>}
+        >
           {company.related_companies && company.related_companies.length > 0 ? (
-            <div className="space-y-2">
+            <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.related_companies.map(
                 (rel: RelatedCompany, idx: number) => (
                   <div
@@ -541,17 +576,19 @@ const ViewCompanyPage: React.FC = () => {
                   >
                     <div className="flex flex-wrap space-y-4 space-x-9">
                       <p className="font-medium">
-                        <strong>Razão Social:</strong> {mostrarValor(rel.name)}
+                        <strong className="text-primary">Razão Social:</strong>{' '}
+                        {mostrarValor(rel.name)}
                       </p>
                       <p className="font-medium">
-                        <strong>CNPJ:</strong> {mostrarValor(rel.cnpj)}
+                        <strong className="text-primary">CNPJ:</strong>{' '}
+                        {mostrarValor(rel.cnpj)}
                       </p>
                       <p className="font-medium">
-                        <strong>Participação:</strong>{' '}
+                        <strong className="text-primary">Participação:</strong>{' '}
                         {mostrarValor(rel.ownership)}
                       </p>
                       <p className="font-medium">
-                        <strong>Descrição:</strong>{' '}
+                        <strong className="text-primary">Descrição:</strong>{' '}
                         {mostrarValor(rel.description)}
                       </p>
                     </div>
@@ -560,7 +597,9 @@ const ViewCompanyPage: React.FC = () => {
               )}
             </div>
           ) : (
-            <div>Nenhuma empresa relacionada cadastrada.</div>
+            <div className="text-primary">
+              Nenhuma empresa relacionada cadastrada.
+            </div>
           )}
         </Card>
       </div>
