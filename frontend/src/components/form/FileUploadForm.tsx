@@ -68,7 +68,12 @@ function getTypeFileFromExt(ext: string): TypeFile | undefined {
 export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
   const inputRef = useRef<HTMLInputElement | null>(null);
   const [error, setError] = useState('');
-  const { control, setValue, watch } = useFormContext();
+  const {
+    control,
+    setValue,
+    watch,
+    formState: { errors },
+  } = useFormContext();
   const { fields, append, remove } = useFieldArray({
     control,
     name,
@@ -87,9 +92,7 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
       const ext = getFileExtension(file.name);
       const typeFile = getTypeFileFromExt(ext) as TypeFile | undefined;
 
-      // Verifica se o nome do arquivo já foi enviado
       const arquivoJaExiste = alreadyUploaded.some((item: any) => {
-        // Para novo upload, estrutura é { nomeArquivo, tipo, ... }
         const nomeExistente =
           item.nomeArquivo || (item.anexo && item.anexo.nomeArquivo);
         return nomeExistente === file.name;
@@ -100,7 +103,6 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
         continue;
       }
 
-      // Verifica se já existe arquivo com o mesmo formato (tipo)
       const mesmoFormatoExiste = alreadyUploaded.some((item: any) => {
         const tipoExistente =
           item.anexo.tamanhoKb || (item.anexo && item.anexo.tamanhoKb);
@@ -118,7 +120,7 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
         alert(`Tipo de arquivo não suportado para: ${file.name}`);
         continue;
       }
-      // Popular o objeto conforme a interface usada pelo backend
+
       const uploaded: Omit<UploadedFile, 'buffer' | 'path'> & {
         fileObj: File;
       } = {
@@ -130,7 +132,7 @@ export const FileUploadForm: React.FC<UploadProps> = ({ name = 'anexos' }) => {
       };
       append({ anexo: { ...uploaded } });
     }
-    // limpar input para permitir novos uploads repetidos
+
     if (inputRef.current) inputRef.current.value = '';
   };
 

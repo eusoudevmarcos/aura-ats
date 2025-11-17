@@ -6,16 +6,20 @@ export const normalizeCandidatoData = (data: any) => {
       ? convertAnyDateToPostgres(data.pessoa.dataNascimento)
       : null;
 
-  if (data.medico.crm.length > 0) {
-    data.medico.crm = data.medico.crm.map((crm: any) => ({
-      ...crm,
-      numero: Number(crm.numero) || null,
-      dataInscricao: convertAnyDateToPostgres(crm.dataInscricao),
-    }));
+  if (data?.medico) {
+    if (Array.isArray(data.medico?.crm) && data.medico?.crm?.length > 0) {
+      data.medico.crm = data.medico.crm.map((crm: any) => ({
+        ...crm,
+        numero: Number(crm.numero) || null,
+        dataInscricao: convertAnyDateToPostgres(crm.dataInscricao),
+      }));
+    } else {
+      delete data.medico.crm;
+    }
 
     if (
-      data.medico.quadroSocietario !== null &&
-      data.medico.quadroSocietario !== undefined
+      data.medico?.quadroSocietario !== null &&
+      data.medico?.quadroSocietario !== undefined
     ) {
       data.medico.quadroSocietario =
         data.medico.quadroSocietario === "true" ? true : false;

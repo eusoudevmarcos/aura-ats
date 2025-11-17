@@ -66,8 +66,8 @@ export const medicoSchema = z.object({
     .max(20)
     .nullable()
     .optional(),
-  crm: z.array(crmSchema),
-  quadroSocietario: z.union([z.string(), z.boolean()]),
+  crm: z.array(crmSchema).optional(),
+  quadroSocietario: z.union([z.string(), z.boolean()]).optional().nullable(),
   quadroDeObservações: z.string().optional().nullable(),
   exames: z.string().optional().nullable(),
   especialidadesEnfermidades: z.string().optional().nullable(),

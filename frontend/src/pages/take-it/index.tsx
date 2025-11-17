@@ -85,9 +85,9 @@ const columnsPerson: TableColumn<PersonResult>[] = [
     },
   },
   {
-    label: 'CEP',
-    key: 'cep',
-    render: row => row.cep ?? '-',
+    label: 'Idade',
+    key: 'age',
+    render: row => row.age ?? '-',
     hiddeBtnCopy: true,
   },
 ];

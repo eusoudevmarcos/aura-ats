@@ -40,19 +40,20 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         ...initialValues,
         emails: initialValues.emails || [],
         contatos: initialValues.contatos || [],
-        // crm: initialValues.crm || [],
         links: initialValues.links || [],
         especialidadeId: String(initialValues?.especialidadeId),
         medico: initialValues.medico
           ? {
               ...initialValues.medico,
-              quadroSocietario: initialValues.medico.quadroSocietario
-                ? 'true'
-                : 'false', // converte boolean para string na edição
-              crm: initialValues.medico.crm.map(crm => ({
-                ...crm,
-                numero: String(crm.numero),
-              })),
+              quadroSocietario:
+                initialValues.medico.quadroSocietario == 'true'
+                  ? 'true'
+                  : 'false', // converte boolean para string na edição
+              crm:
+                initialValues.medico?.crm?.map(crm => ({
+                  ...crm,
+                  numero: String(crm.numero),
+                })) || [],
             }
           : {
               crm: [],
@@ -61,13 +62,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     : {
         emails: [],
         contatos: [],
-        // crm: [],
         links: [],
         pessoa: {
           nome: '',
-        },
-        medico: {
-          crm: [],
         },
       };
 
@@ -293,81 +290,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             />
           )}
 
-          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
-            <>
-              {/* {especialidadeId && (
-                <FormInput
-                  name="medico.rqe"
-                  label="RQE"
-                  placeholder="Adicione o RQE"
-                  inputProps={{ disabled: !areaCandidato }}
-                />
-              )}
-              <FormArrayInput
-                name="medico.crm"
-                title="CRMs"
-                addButtonText="+"
-                value={crm}
-                onChange={handleCRMsChange}
-                containerClassName="col-span-full"
-                validateCustom={(value, fieldConfigs, setErrors) => {
-                  const cleanCrm = value.trim();
-                  // const crmRegex = /^\d{1,7}\/[A-Z]{2}$/;
-                  // if (!crmRegex.test(cleanCrm)) {
-                  //   setErrors(
-                  //     'CRM deve conter apenas números e a sigla do estado (ex: 123456/SP)'
-                  //   );
-                  //   return false;
-                  // }
-
-                  if (cleanCrm.length > 20) {
-                    setErrors('CRM deve ter no máximo 20 caracteres.');
-                    return false;
-                  }
-
-                  return true;
-                }}
-                fieldConfigs={[
-                  {
-                    name: 'numero',
-                    placeholder: 'Exemplo: 0000',
-                    inputProps: {
-                      minLength: 4,
-                      classNameContainer: 'w-full',
-                    },
-                  },
-                  {
-                    name: 'ufCrm',
-                    placeholder: 'UF',
-                    inputProps: {
-                      minLength: 4,
-                      classNameContainer: 'w-full',
-                    },
-                  },
-                  {
-                    name: 'dataInscricao',
-                    placeholder: 'data de inscrição',
-                    maskProps: { mask: '00/00/0000' },
-                    inputProps: {
-                      minLength: 4,
-                      classNameContainer: 'w-full',
-                    },
-                  },
-                ]}
-                renderChipContent={({ dataInscricao, ufCrm, numero }) => (
-                  <>
-                    <span>
-                      Nº {numero}/{ufCrm}
-                    </span>
-                    {', '}
-                    <span>{dataInscricao}</span>
-                  </>
-                )}
-              /> */}
-
-              <MedicoForm />
-            </>
-          )}
+          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && <MedicoForm />}
         </div>
 
         <FormArrayInput

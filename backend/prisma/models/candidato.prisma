@@ -43,7 +43,7 @@ model Medico {
     crm Crm[] // Sigla do estado na frente
     rqe String?
 
-    quadroSocietario      Boolean // se faz parte de alguma sociedade
+    quadroSocietario      Boolean? // se faz parte de alguma sociedade
     quadroDeObservações String?
 
     exames                     String?

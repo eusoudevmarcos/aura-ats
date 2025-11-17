@@ -215,6 +215,10 @@ export default function ViewPersonPage(): React.ReactElement {
                 : 'N/A'}
             </p>
             <p className="font-medium">
+              <strong className="text-primary">Idade:</strong>{' '}
+              {mostrarValor(data.age)}
+            </p>
+            <p className="font-medium">
               <strong className="text-primary">Nome da Mãe:</strong>{' '}
               {mostrarValor(data.mother_name)}
             </p>
@@ -241,6 +245,11 @@ export default function ViewPersonPage(): React.ReactElement {
                 : data.bolsa_familia
                 ? 'Sim'
                 : 'Não'}
+            </p>
+
+            <p className="font-medium">
+              <strong className="text-primary">Signo:</strong>
+              {data.sign || '-'}
             </p>
           </div>
         </Card>

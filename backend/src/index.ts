@@ -31,7 +31,6 @@ const allowedOrigins = [
 ];
 
 async function startServer() {
-  // Aguarda a aprovação/validação do ambiente antes de prosseguir.
   await ambienteMiddleware();
 
   const app = express();

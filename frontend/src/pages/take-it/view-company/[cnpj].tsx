@@ -1,6 +1,8 @@
 import { searchApi } from '@/axios/searchApi';
+import { SearchIcon } from '@/components/icons';
 import Card from '@/components/takeit/Card';
 import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
 
@@ -468,10 +470,21 @@ const ViewCompanyPage: React.FC = () => {
                         <strong className="text-primary">Nome:</strong>{' '}
                         {mostrarValor(person.name)}
                       </p>
-                      <p className="font-medium">
-                        <strong className="text-primary">CPF:</strong>{' '}
-                        {mostrarValor(person.cpf)}
-                      </p>
+                      <div className="flex gap-2">
+                        <p className="font-medium">
+                          <strong className="text-primary">CPF:</strong>{' '}
+                          {mostrarValor(person.cpf)}
+                        </p>
+                        <Link
+                          href={`/take-it/view-person/${person.cpf}`}
+                          className="bg-primary rounded"
+                        >
+                          <SearchIcon
+                            color="white"
+                            style={{ padding: '2px' }}
+                          />
+                        </Link>
+                      </div>
                       <p className="font-medium">
                         <strong className="text-primary">Participação:</strong>{' '}
                         {mostrarValor(person.ownership)}
@@ -513,10 +526,22 @@ const ViewCompanyPage: React.FC = () => {
                         <strong className="text-primary">Nome:</strong>{' '}
                         {mostrarValor(rep.name)}
                       </p>
-                      <p className="font-medium">
-                        <strong className="text-primary">CPF:</strong>{' '}
-                        {mostrarValor(rep.cpf)}
-                      </p>
+                      <div className="flex gap-2">
+                        <p className="font-medium">
+                          <strong className="text-primary">CPF:</strong>{' '}
+                          {mostrarValor(rep.cpf)}
+                        </p>
+
+                        <Link
+                          href={`/take-it/view-person/${rep.cpf}`}
+                          className="bg-primary rounded"
+                        >
+                          <SearchIcon
+                            color="white"
+                            style={{ padding: '2px' }}
+                          />
+                        </Link>
+                      </div>
                       <p className="font-medium">
                         <strong className="text-primary">Qualificação:</strong>
                         {mostrarValor(rep.qualification)}
@@ -544,6 +569,15 @@ const ViewCompanyPage: React.FC = () => {
                       <p className="font-medium">
                         <strong className="text-primary">CNPJ:</strong>{' '}
                         {mostrarValor(branch.cnpj)}
+                        <Link
+                          href={`/take-it/view-company/${branch.cnpj}`}
+                          className="bg-primary rounded"
+                        >
+                          <SearchIcon
+                            color="white"
+                            style={{ padding: '2px' }}
+                          />
+                        </Link>
                       </p>
                       <p className="font-medium">
                         <strong className="text-primary">Razão Social:</strong>{' '}
@@ -579,10 +613,21 @@ const ViewCompanyPage: React.FC = () => {
                         <strong className="text-primary">Razão Social:</strong>{' '}
                         {mostrarValor(rel.name)}
                       </p>
-                      <p className="font-medium">
-                        <strong className="text-primary">CNPJ:</strong>{' '}
-                        {mostrarValor(rel.cnpj)}
-                      </p>
+                      <div className="flex gap-2">
+                        <p className="font-medium">
+                          <strong className="text-primary">CNPJ:</strong>{' '}
+                          {mostrarValor(rel.cnpj)}
+                        </p>
+                        <Link
+                          href={`/take-it/view-company/${rel.cnpj}`}
+                          className="bg-primary rounded"
+                        >
+                          <SearchIcon
+                            color="white"
+                            style={{ padding: '2px' }}
+                          />
+                        </Link>
+                      </div>
                       <p className="font-medium">
                         <strong className="text-primary">Participação:</strong>{' '}
                         {mostrarValor(rel.ownership)}
