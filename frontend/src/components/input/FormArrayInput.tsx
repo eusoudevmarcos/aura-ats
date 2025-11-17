@@ -322,77 +322,79 @@ export function FormArrayInput({
                 className="flex items-end flex-wrap md:flex-nowrap gap-2 relative"
                 key={config.name}
               >
-                {config.component === 'select' ? (
-                  <FormSelect
-                    name={`${name || 'temp'}_${config.name}` as any}
-                    value={fieldValue}
-                    label={config.label}
-                    placeholder={config.placeholder}
-                    onChange={(e: any) =>
-                      handleInputChange(config.name, e.target.value)
-                    }
-                    errors={{} as any}
-                    selectProps={config.inputProps as any}
-                  >
-                    <>
-                      {config.selectOptions?.map(opt => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
-                    </>
-                  </FormSelect>
-                ) : (
-                  <FormInput
-                    name={`${name || 'temp'}_${config.name}` as any}
-                    value={fieldValue}
-                    label={config.label}
-                    placeholder={config.placeholder}
-                    type={config.type || 'text'}
-                    onChange={(e: any) => {
-                      const val =
-                        typeof e === 'string' ? e : e?.target?.value || '';
-                      handleInputChange(config.name, val);
-                    }}
-                    onKeyDown={(e: React.KeyboardEvent) => {
-                      if (e.key === 'Enter') {
-                        e.preventDefault();
-                        handleAddItem(config.name);
-                      } else if (
-                        pasteInput &&
-                        e.key === 'Backspace' &&
-                        lastPasted[config.name] &&
-                        fieldValue
-                      ) {
-                        handleBackspaceKey(e, config.name, fieldValue);
+                <div className="relative w-full">
+                  {config.component === 'select' ? (
+                    <FormSelect
+                      name={`${name || 'temp'}_${config.name}` as any}
+                      value={fieldValue}
+                      label={config.label}
+                      placeholder={config.placeholder}
+                      onChange={(e: any) =>
+                        handleInputChange(config.name, e.target.value)
                       }
-                    }}
-                    onFocus={
-                      pasteInput
-                        ? () => handleFocusPaste(config.name)
-                        : undefined
-                    }
-                    errors={{} as any}
-                    maskProps={config.maskProps}
-                    inputProps={{
-                      ...config.inputProps,
-                      classNameContainer: ` ${config.inputProps?.classNameContainer}`,
-                    }}
-                    noControl
-                  />
-                )}
+                      errors={{} as any}
+                      selectProps={config.inputProps as any}
+                    >
+                      <>
+                        {config.selectOptions?.map(opt => (
+                          <option key={opt.value} value={opt.value}>
+                            {opt.label}
+                          </option>
+                        ))}
+                      </>
+                    </FormSelect>
+                  ) : (
+                    <FormInput
+                      name={`${name || 'temp'}_${config.name}` as any}
+                      value={fieldValue}
+                      label={config.label}
+                      placeholder={config.placeholder}
+                      type={config.type || 'text'}
+                      onChange={(e: any) => {
+                        const val =
+                          typeof e === 'string' ? e : e?.target?.value || '';
+                        handleInputChange(config.name, val);
+                      }}
+                      onKeyDown={(e: React.KeyboardEvent) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault();
+                          handleAddItem(config.name);
+                        } else if (
+                          pasteInput &&
+                          e.key === 'Backspace' &&
+                          lastPasted[config.name] &&
+                          fieldValue
+                        ) {
+                          handleBackspaceKey(e, config.name, fieldValue);
+                        }
+                      }}
+                      onFocus={
+                        pasteInput
+                          ? () => handleFocusPaste(config.name)
+                          : undefined
+                      }
+                      errors={{} as any}
+                      maskProps={config.maskProps}
+                      inputProps={{
+                        ...config.inputProps,
+                        classNameContainer: ` ${config.inputProps?.classNameContainer}`,
+                      }}
+                      noControl
+                    />
+                  )}
 
-                <span
-                  className={`absolute ${
-                    index === fieldConfigs.length - 1
-                      ? 'right-2 md:right-12'
-                      : 'right-2'
-                  } top-3 text-[10px] text-gray-300 pointer-events-none select-none`}
-                  tabIndex={-1}
-                  aria-hidden="true"
-                >
-                  Pressione ENTER
-                </span>
+                  {/* <span
+                    className={`absolute ${
+                      index === fieldConfigs.length - 1
+                        ? 'right-2 md:right-12'
+                        : 'right-2'
+                    } top-10 text-[10px] text-gray-300 pointer-events-none select-none`}
+                    tabIndex={-1}
+                    aria-hidden="true"
+                  >
+                    Pressione ENTER
+                  </span> */}
+                </div>
 
                 {index === fieldConfigs.length - 1 && (
                   <div className="flex justify-end w-full md:w-auto">

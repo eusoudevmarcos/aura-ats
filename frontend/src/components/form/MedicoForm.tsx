@@ -1,3 +1,4 @@
+import { UF_MODEL } from '@/utils/UF';
 import { useFormContext } from 'react-hook-form';
 import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
@@ -62,6 +63,9 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           inputProps={{ disabled: !areaCandidato }}
         />
       )}
+
+      <div className="border-b border-gray-300 col-span-full"></div>
+
       <FormArrayInput
         name={crmName}
         title="CRMs"
@@ -81,6 +85,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
         fieldConfigs={[
           {
             name: 'numero',
+            label: 'Número',
             placeholder: 'Exemplo: 0000',
             inputProps: {
               minLength: 4,
@@ -89,11 +94,10 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           },
           {
             name: 'ufCrm',
+            label: 'UF',
             placeholder: 'UF',
-            inputProps: {
-              minLength: 4,
-              classNameContainer: 'w-full',
-            },
+            component: 'select',
+            selectOptions: UF_MODEL,
           },
           {
             name: 'dataInscricao',
@@ -115,6 +119,9 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           </>
         )}
       />
+
+      <div className="border-b border-gray-300 col-span-full"></div>
+
       <section className="grid grid-cols-1 md:grid-cols-3 gap-2 col-span-full">
         <FormInput
           name={porcentagemRepasseMedicoName}
@@ -133,6 +140,8 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           label="Porcentagem de Exames"
           inputProps={{ type: 'text', placeholder: '%' }}
         />
+
+        <div className="border-b border-gray-300 col-span-full my-2"></div>
 
         <FormTextarea
           name={quadroDeObservacoesName}
@@ -160,6 +169,8 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           }}
         />
 
+        <div className="border-b border-gray-300 col-span-full"></div>
+
         <div className="flex items-center gap-4 col-span-full">
           <span className="font-medium text-sm">
             Faz parte de quadro societário?
@@ -184,6 +195,8 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           </label>
         </div>
       </section>
+
+      <div className="border-b border-gray-300 col-span-full"></div>
     </>
   );
 };
