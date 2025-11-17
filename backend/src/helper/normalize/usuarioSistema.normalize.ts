@@ -13,6 +13,12 @@ export const normalizeDataUsuarioSistema = (data: any) => {
       newData.funcionario.pessoa.id = data?.funcionario?.pessoaId;
       delete newData.pessoaId;
     }
+
+    if (newData?.funcionario?.pessoa?.dataNascimento) {
+      newData.funcionario.pessoa.dataNascimento = convertAnyDateToPostgres(
+        data.funcionario.pessoa.dataNascimento
+      );
+    }
   }
 
   if (data?.cliente || data?.clienteId) {
@@ -23,8 +29,7 @@ export const normalizeDataUsuarioSistema = (data: any) => {
     if (newData?.clienteId) delete newData.clienteId;
   }
 
-  if (data.pessoa) {
-    newData.pessoa = convertAnyDateToPostgres(data.pessoa);
+  if (data.funcionario.pessoa) {
   }
 
   return newData;
