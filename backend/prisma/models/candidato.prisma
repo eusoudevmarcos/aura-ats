@@ -17,8 +17,9 @@ model Candidato {
     pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
     pessoaId String @unique
 
-    medico   Medico? @relation(fields: [medicoId], references: [id])
-    medicoId String? @unique
+    medico Medico?
+
+    deletedAt DateTime?
 
     @@index([especialidadeId])
     @@schema("Candidato")
@@ -30,7 +31,7 @@ model Crm {
     ufCrm         String
     dataInscricao DateTime
 
-    medico   Medico? @relation(fields: [medicoId], references: [id])
+    medico   Medico? @relation(fields: [medicoId], references: [id], onDelete: Cascade)
     medicoId String?
 
     @@index([medicoId])
@@ -50,8 +51,11 @@ model Medico {
     porcentagemRepasseMedico   String?
     porcentagemConsultas       String?
     porcentagemExames          String?
-    candidato                  Candidato?
 
+    candidato   Candidato? @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
+    candidatoId String?    @unique
+
+    @@index([candidatoId])
     @@schema("Candidato")
 }
 

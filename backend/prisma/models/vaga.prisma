@@ -65,6 +65,8 @@ model CandidaturaVaga {
     processoSeletivoEtapa   ProcessoSeletivoEtapa? @relation(fields: [processoSeletivoEtapaId], references: [id])
     processoSeletivoEtapaId String?
 
+    deletedAt DateTime?
+
     @@unique([candidatoId, vagaId])
     @@index([vagaId])
     @@index([processoSeletivoEtapaId])
@@ -78,7 +80,7 @@ model Anexo {
     tipo        String?
     tamanhoKb   Int?
 
-    vagas     VagaAnexo[]
+    vagas      VagaAnexo[]
     candidatos CandidatoAnexo[]
 
     @@schema("Anexo")

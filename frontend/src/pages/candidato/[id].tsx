@@ -82,8 +82,10 @@ const CandidatoPage: React.FC = () => {
     if (!candidato) return;
     if (confirm('Tem certeza que deseja excluir este candidato?')) {
       try {
-        await api.delete(`/api/candidato/${candidato.id}`);
-        router.push('/candidatos');
+        await api.delete(`/api/externalWithAuth/candidato`, {
+          data: { id: candidato.id },
+        });
+        router.push('/profissionais');
       } catch {
         alert('Erro ao excluir candidato.');
       }

@@ -16,6 +16,8 @@ model Cliente {
 
     planos PlanoAssinado[]
 
+    deletedAt DateTime?
+
     @@index([empresaId])
     @@schema("Cliente")
 }

@@ -68,7 +68,7 @@ export class CandidatoController {
 
   async deleteCandidato(req: Request, res: Response): Promise<Response> {
     try {
-      const { id } = req.params;
+      const { id } = req.body;
       await this.candidatoService.deleteCandidato(id);
       return res.status(204).send();
     } catch (error: any) {

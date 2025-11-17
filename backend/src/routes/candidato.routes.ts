@@ -25,7 +25,7 @@ candidatoRouter.get("/", authMiddleware, (req, res) =>
   candidatoController.getAllCandidatos(req, res)
 );
 
-candidatoRouter.delete("/:id", authMiddleware, (req, res) =>
+candidatoRouter.delete("/", authMiddleware, (req, res) =>
   candidatoController.deleteCandidato(req, res)
 );
 

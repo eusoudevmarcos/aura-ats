@@ -26,6 +26,8 @@ model Agenda {
     usuarioSistema   UsuarioSistema @relation(fields: [usuarioSistemaId], references: [id])
     usuarioSistemaId String
 
+    deletedAt DateTime?
+
     @@index([etapaAtualId])
     @@index([localizacaoId])
     @@index([vagaId])
