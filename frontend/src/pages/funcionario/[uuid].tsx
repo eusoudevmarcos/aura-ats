@@ -105,7 +105,7 @@ const FuncionarioPage: React.FC = () => {
             </button>
           </div>
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-4 flex-wrap md:flex-nowrap">
           <Card title="Informações Gerais">
             <p>
               <span className="font-medium">Email:</span>{' '}
