@@ -174,7 +174,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       alert(
         `Erro ao cadastrar candidato. \n Código do erro:${
           erro?.response?.data?.message ??
-          erro.response.data ??
+          erro?.response?.data ??
           'Erro ao salvar o candidato'
         } `
       );
