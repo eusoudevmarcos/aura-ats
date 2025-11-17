@@ -1,7 +1,8 @@
-import { PessoaInput } from '@/schemas/pessoa.schema';
+import { PessoaInput, SexoEnum, SignoEnum } from '@/schemas/pessoa.schema';
 import { makeName } from '@/utils/makeName';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
 
 type PessoaFormProps = {
   namePrefix?: string;
@@ -46,6 +47,8 @@ const PessoaForm = ({
   const cpf = makeName<PessoaInput>(namePrefix, 'cpf');
   const rg = makeName<PessoaInput>(namePrefix, 'rg');
   const dataNascimento = makeName<PessoaInput>(namePrefix, 'dataNascimento');
+  const sexo = makeName<PessoaInput>(namePrefix, 'sexo');
+  const signo = makeName<PessoaInput>(namePrefix, 'signo');
 
   const { control } = useFormContext();
   const dataNascimentoValue = useWatch({ control, name: dataNascimento });
@@ -85,14 +88,21 @@ const PessoaForm = ({
         placeholder="000000000"
       />
 
-      {/* {contatoPessoa && (
-        <div className="col-span-full" title={contatoPessoa.title}>
-          <h3 className="text-xl font-bold">{contatoPessoa.title}</h3>
-          <section className="flex w-full gap-2">
-            <ContatoForm namePrefix={`${namePrefix}.contatos[0]`} />
-          </section>
-        </div>
-      )} */}
+      <FormSelect name={sexo} label="Sexo" placeholder="Selecione o sexo">
+        {SexoEnum.options.map(sexo => (
+          <>
+            <option value={sexo}>{sexo}</option>
+          </>
+        ))}
+      </FormSelect>
+
+      <FormSelect name={signo} label="Signo" placeholder="Selecione o signo">
+        {SignoEnum.options.map(signo => (
+          <>
+            <option value={signo}>{signo}</option>
+          </>
+        ))}
+      </FormSelect>
     </section>
   );
 };

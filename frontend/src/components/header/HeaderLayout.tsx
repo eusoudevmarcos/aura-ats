@@ -1,7 +1,8 @@
 // frontend/components/Header/Header.tsx
 import logo from '@/assets/logo.svg';
-import { usePlano } from '@/context/AuthContext';
+import { usePlano, useUser } from '@/context/AuthContext';
 import styles from '@/styles/header.module.css'; // Importa o módulo CSS
+import { getFirstLetter } from '@/utils/getFirstLetter';
 import Image from 'next/image';
 import Link from 'next/link';
 import React from 'react';
@@ -33,17 +34,10 @@ interface HeaderLayoutProps {
 const HeaderLayout: React.FC<HeaderLayoutProps> = ({
   showBtnTakeIt = true,
 }) => {
-  // const [uid, setUid] = React.useState<string | null>(null);
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
   const { usosDisponiveis, temPlanoComUso } = usePlano();
+  const user = useUser();
 
-  // React.useEffect(() => {
-  //   if (typeof window !== 'undefined') {
-  //     setUid(localStorage.getItem('uid'));
-  //   }
-  // }, []);
-
-  // Fecha o menu ao redimensionar para desktop
   React.useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) {
@@ -101,7 +95,9 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
             </button>
             <Link href={`/profile`}>
               <Image
-                src="https://placehold.co/40x40/FFD700/000000?text=JD"
+                src={`https://placehold.co/40x40/8c53ff/ffffff?text=${getFirstLetter(
+                  user?.nome || user?.razaoSocial || user?.email
+                )}`}
                 width={30}
                 height={30}
                 alt="User Avatar"
@@ -187,7 +183,9 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
                   onClick={() => setIsMenuOpen(false)}
                 >
                   <Image
-                    src="https://placehold.co/40x40/FFD700/000000?text=JD"
+                    src={`https://placehold.co/40x40/8c53ff/ffffff?text=${getFirstLetter(
+                      user?.nome || user?.razaoSocial || user?.email
+                    )}`}
                     width={30}
                     height={30}
                     alt="User Avatar"

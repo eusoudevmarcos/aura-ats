@@ -9,6 +9,9 @@ model Pessoa {
     estadoCivil    EstadoCivil?
     candidato      Candidato?
 
+    sexo  Sexo?
+    signo Signo?
+
     localizacoes Localizacao[]
     socios       Socio[]
 

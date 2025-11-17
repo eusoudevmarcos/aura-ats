@@ -1,4 +1,3 @@
-import { AdminGuard } from '@/components/auth/AdminGuard';
 import { ConnectGoogleButton } from '@/components/button/GoogleAuth';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import { AgendaForm } from '@/components/form/AgendaForm';
@@ -16,16 +15,16 @@ export default function Agenda() {
     <SessionProvider>
       <AgendaList key={refreshKey} />
 
-      <AdminGuard>
-        <PrimaryButton
-          className="float-right mt-4"
-          onClick={() => setShowAgendaForm(true)}
-        >
-          <PlusIcon />
-          Cadastrar Agendamento
-        </PrimaryButton>
-        <ConnectGoogleButton className="float-right mt-4 mr-2" />
-      </AdminGuard>
+      {/* <AdminGuard> */}
+      <PrimaryButton
+        className="float-right mt-4"
+        onClick={() => setShowAgendaForm(true)}
+      >
+        <PlusIcon />
+        Cadastrar Agendamento
+      </PrimaryButton>
+      <ConnectGoogleButton className="float-right mt-4 mr-2" />
+      {/* </AdminGuard> */}
 
       <Modal
         title="Cadastrar Agendamento"

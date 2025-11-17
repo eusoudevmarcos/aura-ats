@@ -25,7 +25,7 @@ export const getNavItems = (user: any) => {
 
   if (
     user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
-    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS
+    user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
   ) {
     navItems.push({
       icon: <UsersIcon className="w-5 h-5 text-inherit" />,
@@ -36,9 +36,10 @@ export const getNavItems = (user: any) => {
 
   if (
     user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
-    user?.tipo === TipoUsuarioEnum.enum.CLIENTE ||
-    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM ||
-    user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
+    // ||
+    // user?.tipo === TipoUsuarioEnum.enum.CLIENTE ||
+    // user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM ||
+    // user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
     user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
   ) {
     navItems.push({
@@ -48,29 +49,47 @@ export const getNavItems = (user: any) => {
     });
   }
 
-  navItems.push({
-    icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-    label: 'Entrevistas',
-    href: '/entrevistas',
-  });
+  // navItems.push({
+  //   icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
+  //   label: 'Entrevistas',
+  //   href: '/entrevistas',
+  // });
 
-  navItems.push({
-    icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
-    label: 'Agenda',
-    href: '/agenda',
-  });
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
+    // ||
+    // user?.tipo === TipoUsuarioEnum.enum.CLIENTE ||
+    // user?.tipo === TipoUsuarioEnum.enum.CLIENTE_CRM ||
+    // user?.tipo === TipoUsuarioEnum.enum.CLIENTE_ATS ||
+    user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR ||
+    user?.tipo === TipoUsuarioEnum.enum.CLIENTE
+  ) {
+    navItems.push({
+      icon: <CalendarIcon className="w-5 h-5 text-inherit" />,
+      label: 'Agenda',
+      href: '/agenda',
+    });
+  }
 
-  navItems.push({
-    icon: <span className="material-icons-outlined">task</span>,
-    label: 'Taferas',
-    href: '/tarefas',
-  });
+  if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
+    navItems.push({
+      icon: <span className="material-icons-outlined">task</span>,
+      label: 'Taferas',
+      href: '/tarefas',
+    });
+  }
 
-  navItems.push({
-    icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
-    label: 'Clientes',
-    href: '/clientes',
-  });
+  if (
+    user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA ||
+    user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR ||
+    user?.tipo === TipoUsuarioEnum.enum.VENDEDOR
+  ) {
+    navItems.push({
+      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
+      label: 'Clientes',
+      href: '/clientes',
+    });
+  }
 
   if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
     navItems.push({

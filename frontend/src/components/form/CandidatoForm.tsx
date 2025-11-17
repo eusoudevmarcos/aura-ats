@@ -14,6 +14,7 @@ import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 import FileUploadForm from './FileUploadForm';
+import MedicoForm from './MedicoForm';
 
 type CandidatoFormProps = {
   formContexto?: UseFormReturn<CandidatoInput>;
@@ -39,17 +40,34 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         ...initialValues,
         emails: initialValues.emails || [],
         contatos: initialValues.contatos || [],
-        crm: initialValues.crm || [],
+        // crm: initialValues.crm || [],
         links: initialValues.links || [],
         especialidadeId: String(initialValues?.especialidadeId),
+        medico: initialValues.medico
+          ? {
+              ...initialValues.medico,
+              quadroSocietario: initialValues.medico.quadroSocietario
+                ? 'true'
+                : 'false', // converte boolean para string na edição
+              crm: initialValues.medico.crm.map(crm => ({
+                ...crm,
+                numero: String(crm.numero),
+              })),
+            }
+          : {
+              crm: [],
+            },
       }
     : {
         emails: [],
         contatos: [],
-        crm: [],
+        // crm: [],
         links: [],
         pessoa: {
           nome: '',
+        },
+        medico: {
+          crm: [],
         },
       };
 
@@ -68,7 +86,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
   const contatos = watch('contatos');
   const emails = watch('emails');
-  const crm = watch('crm');
   const links = watch('links');
 
   const handleContatosChange = (newArray: string[]) => {
@@ -79,16 +96,13 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     setValue('emails', newArray, { shouldValidate: true });
   };
 
-  const handleCRMsChange = (newArray: string[]) => {
-    setValue('crm', newArray, { shouldValidate: true });
-  };
-
   const handleLinkChange = (newArray: string[]) => {
     setValue('links', newArray, { shouldValidate: true });
   };
 
-  // useEffect(() => {
-  // }, [errors]);
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   const areaCandidato = watch('areaCandidato');
   const especialidadeId = watch('especialidadeId');
@@ -224,13 +238,13 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
         <div className="border-b border-gray-300 py-2"></div>
 
-        <h3>Endereço</h3>
+        <h3 className="font-bold text-primary">Endereço</h3>
 
         <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
 
         <div className="border-b border-gray-300 py-2"></div>
 
-        <h3 className="text-md font-bold">Dados Profissionais do Cadidato</h3>
+        <h3 className="font-bold  text-primary">Dados do Profissional</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect
@@ -281,23 +295,30 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
           {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
             <>
+              {/* {especialidadeId && (
+                <FormInput
+                  name="medico.rqe"
+                  label="RQE"
+                  placeholder="Adicione o RQE"
+                  inputProps={{ disabled: !areaCandidato }}
+                />
+              )}
               <FormArrayInput
-                name="crm"
+                name="medico.crm"
                 title="CRMs"
                 addButtonText="+"
-                ValuesArrayString
                 value={crm}
                 onChange={handleCRMsChange}
+                containerClassName="col-span-full"
                 validateCustom={(value, fieldConfigs, setErrors) => {
-                  console.log(value);
                   const cleanCrm = value.trim();
-                  const crmRegex = /^\d{1,7}\/[A-Z]{2}$/;
-                  if (!crmRegex.test(cleanCrm)) {
-                    setErrors(
-                      'CRM deve conter apenas números e a sigla do estado (ex: 123456/SP)'
-                    );
-                    return false;
-                  }
+                  // const crmRegex = /^\d{1,7}\/[A-Z]{2}$/;
+                  // if (!crmRegex.test(cleanCrm)) {
+                  //   setErrors(
+                  //     'CRM deve conter apenas números e a sigla do estado (ex: 123456/SP)'
+                  //   );
+                  //   return false;
+                  // }
 
                   if (cleanCrm.length > 20) {
                     setErrors('CRM deve ter no máximo 20 caracteres.');
@@ -308,25 +329,43 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
                 }}
                 fieldConfigs={[
                   {
-                    name: 'crms',
-                    placeholder: 'Exemplo: 0000/UF',
+                    name: 'numero',
+                    placeholder: 'Exemplo: 0000',
+                    inputProps: {
+                      minLength: 4,
+                      classNameContainer: 'w-full',
+                    },
+                  },
+                  {
+                    name: 'ufCrm',
+                    placeholder: 'UF',
+                    inputProps: {
+                      minLength: 4,
+                      classNameContainer: 'w-full',
+                    },
+                  },
+                  {
+                    name: 'dataInscricao',
+                    placeholder: 'data de inscrição',
+                    maskProps: { mask: '00/00/0000' },
                     inputProps: {
                       minLength: 4,
                       classNameContainer: 'w-full',
                     },
                   },
                 ]}
-                renderChipContent={crms => <span>{crms}</span>}
-              />
+                renderChipContent={({ dataInscricao, ufCrm, numero }) => (
+                  <>
+                    <span>
+                      Nº {numero}/{ufCrm}
+                    </span>
+                    {', '}
+                    <span>{dataInscricao}</span>
+                  </>
+                )}
+              /> */}
 
-              {especialidadeId && (
-                <FormInput
-                  name="rqe"
-                  label="RQE"
-                  placeholder="Adicione o RQE"
-                  inputProps={{ disabled: !areaCandidato }}
-                />
-              )}
+              <MedicoForm />
             </>
           )}
         </div>

@@ -14,6 +14,10 @@ export type CandidatoWithRelations = Candidato & {
     contatos?: ContatoInput[];
     localizacoes?: LocalizacaoInput[];
   };
+  medico: {
+    rqe: string;
+    crm: [];
+  };
   especialidade?: Especialidade | null;
 };
 
@@ -30,7 +34,12 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
     key: 'especialidade.nome',
     render: row => row.especialidade?.nome || '-',
   },
-  { label: 'RQE', key: 'rqe' },
+  {
+    label: 'RQE',
+    key: 'rqe',
+
+    render: row => row.medico?.rqe || '-',
+  },
 
   {
     label: 'UF/Cidade',
@@ -113,7 +122,7 @@ const CandidatoList: React.FC = () => {
   return (
     <>
       <Card noShadow>
-        <div className="flex justify-between flex-wrap p-2 items-center mb-2">
+        <div className="flex justify-between flex-wrap items-center mb-2">
           <h2 className="text-2xl font-bold text-primary">
             Lista de Profissionais
           </h2>

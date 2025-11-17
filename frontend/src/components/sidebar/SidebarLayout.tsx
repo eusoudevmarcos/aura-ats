@@ -91,8 +91,8 @@ const Toolbar = ({ collapsed, user }: any) => {
         <Image
           height={40}
           width={40}
-          src={`https://placehold.co/40x40/FFD700/000000?text=${getFirstLetter(
-            user?.nome || user?.razaoSocial
+          src={`https://placehold.co/40x40/8c53ff/ffffff?text=${getFirstLetter(
+            user?.nome || user?.razaoSocial || user?.email
           )}`}
           alt="User Avatar"
           unoptimized

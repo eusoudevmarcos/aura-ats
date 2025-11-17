@@ -1,8 +1,6 @@
 model Candidato {
     id       String   @id @default(uuid(7))
     corem    String?
-    rqe      String?
-    crm      String[] // Sigla do estado na frente
     contatos String[]
     emails   String[]
     links    String[]
@@ -19,7 +17,41 @@ model Candidato {
     pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
     pessoaId String @unique
 
+    medico   Medico? @relation(fields: [medicoId], references: [id])
+    medicoId String? @unique
+
     @@index([especialidadeId])
+    @@schema("Candidato")
+}
+
+model Crm {
+    id            String   @id @default(uuid(7))
+    numero        Int
+    ufCrm         String
+    dataInscricao DateTime
+
+    medico   Medico? @relation(fields: [medicoId], references: [id])
+    medicoId String?
+
+    @@index([medicoId])
+    @@schema("Candidato")
+}
+
+model Medico {
+    id  String  @id @default(uuid(7))
+    crm Crm[] // Sigla do estado na frente
+    rqe String?
+
+    quadroSocietario      Boolean // se faz parte de alguma sociedade
+    quadroDeObservações String?
+
+    exames                     String?
+    especialidadesEnfermidades String?
+    porcentagemRepasseMedico   String?
+    porcentagemConsultas       String?
+    porcentagemExames          String?
+    candidato                  Candidato?
+
     @@schema("Candidato")
 }
 

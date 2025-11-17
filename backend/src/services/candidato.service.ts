@@ -39,6 +39,7 @@ export class CandidatoService {
         pessoa: { include: { localizacoes: true } },
         especialidade: true,
         formacoes: true,
+        medico: { include: { crm: true } },
         anexos: {
           include: {
             anexo: true,
@@ -115,6 +116,7 @@ export class CandidatoService {
       pessoa: { include: { localizacoes: true } },
       especialidade: true,
       anexos: { include: { anexo: true } },
+      medico: { include: { crm: true } },
     };
 
     let candidato: Candidato;

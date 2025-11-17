@@ -235,14 +235,13 @@ export class VagaService {
             candidato: {
               select: {
                 id: true,
-                crm: true,
                 areaCandidato: true,
-                rqe: true,
                 pessoa: {
                   select: {
                     nome: true,
                   },
                 },
+                medico: true,
                 especialidade: {
                   select: {
                     nome: true,

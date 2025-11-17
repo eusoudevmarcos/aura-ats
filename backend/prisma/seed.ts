@@ -1,12 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import * as dotenv from "dotenv";
 import { BeneficiosSeed } from "./seed/beneficios";
-import {
-  plataformaSeed,
-  recrutamentoComRQESeed,
-  recrutamentoDiversosSeed,
-  recrutamentoSemRQESeed,
-} from "./seed/billings";
 import { EspecialidadesSeed } from "./seed/especialidades";
 
 dotenv.config({ path: ".env" });
@@ -74,15 +68,15 @@ async function main() {
     await upsertBeneficios();
 
     // Planos de plataforma (POR_USO)
-    await createPlanos(
-      [
-        ...plataformaSeed,
-        ...recrutamentoSemRQESeed,
-        ...recrutamentoComRQESeed,
-        ...recrutamentoDiversosSeed,
-      ],
-      "de plataforma"
-    );
+    // await createPlanos(
+    //   [
+    //     ...plataformaSeed,
+    //     ...recrutamentoSemRQESeed,
+    //     ...recrutamentoComRQESeed,
+    //     ...recrutamentoDiversosSeed,
+    //   ],
+    //   "de plataforma"
+    // );
     console.log("🎉 Seed concluído com sucesso!");
   } catch (error) {
     console.error("❌ Erro durante a operação de seed:", error);

@@ -10,6 +10,8 @@ export class PessoaRepository {
     return {
       nome: pessoaData.nome,
       cpf: pessoaData.cpf,
+      sexo: pessoaData.sexo || null,
+      signo: pessoaData.signo || null,
       dataNascimento: pessoaData.dataNascimento
         ? new Date(pessoaData.dataNascimento)
         : null,

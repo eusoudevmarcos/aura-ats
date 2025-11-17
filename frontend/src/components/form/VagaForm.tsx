@@ -250,7 +250,6 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormTextarea
           name="descricao"
-          register={register}
           label="Descrição da Vaga"
           placeholder="Ex: Medico residente com mais de 5 anos de experiência"
           errors={errors}

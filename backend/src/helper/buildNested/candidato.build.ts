@@ -2,6 +2,7 @@ import {
   AreaCandidato,
   Candidato,
   Especialidade,
+  Medico,
   Pessoa,
 } from "@prisma/client";
 import { BuildNestedOperation } from "./buildNestedOperation";
@@ -15,6 +16,7 @@ export default function candidatoBuild(
   candidatoData: Candidato & {
     pessoa: Pessoa;
     especialidade: Especialidade;
+    medico: Medico;
   }
 ) {
   const buildNestedOperation = new BuildNestedOperation();
@@ -22,8 +24,6 @@ export default function candidatoBuild(
   // Extraia os objetos da raiz para não dar erro
   let newCandidato = {
     id: candidatoData?.id,
-    rqe: candidatoData.rqe,
-    crm: candidatoData.crm,
     corem: candidatoData.corem,
     areaCandidato: candidatoData.areaCandidato as AreaCandidato,
     emails: candidatoData?.emails || [],
@@ -31,11 +31,14 @@ export default function candidatoBuild(
     links: candidatoData?.links || [],
   } as any;
 
-  const { id, rqe, areaCandidato, crm, corem, emails, contatos, ...rest } =
-    candidatoData;
+  const { id, areaCandidato, corem, emails, contatos, ...rest } = candidatoData;
 
   if (rest.pessoa) {
     newCandidato.pessoa = buildNestedOperation.build(rest.pessoa);
+  }
+
+  if (rest.medico) {
+    newCandidato.medico = buildNestedOperation.build(rest.medico);
   }
 
   if (rest.especialidade || rest.especialidadeId) {

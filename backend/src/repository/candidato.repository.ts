@@ -190,10 +190,8 @@ export class CandidatoRepository {
         take: pageSize,
         select: {
           id: true,
-          rqe: true,
           areaCandidato: true,
           corem: true,
-          crm: true,
           pessoa: {
             select: {
               nome: true,
@@ -204,6 +202,9 @@ export class CandidatoRepository {
                 },
               },
             },
+          },
+          medico: {
+            include: { crm: true },
           },
           especialidade: {
             select: {

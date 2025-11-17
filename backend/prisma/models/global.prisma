@@ -212,3 +212,27 @@ enum CategoriaPlano {
 
     @@schema("public")
 }
+
+enum Sexo {
+    MASCULINO
+    FEMININO
+
+    @@schema("public")
+}
+
+enum Signo {
+    ARIES
+    TOURO
+    GEMEOS
+    CANCER
+    LEAO
+    VIRGEM
+    LIBRA
+    ESCORPIAO
+    SAGITARIO
+    CAPRICORNIO
+    AQUARIO
+    PEIXES
+
+    @@schema("public")
+}

@@ -263,16 +263,23 @@ export function FormArrayInput({
 
   const handleAddItem = (fieldName?: any) => {
     if (!validateItem()) return;
+    console.log('handleAddItem');
+    console.log(newItemValues);
+
     const newItem = ValuesArrayString
       ? newItemValues[fieldName]
       : { ...newItemValues };
+
     let newArray: any[];
+
+    console.log(newItem);
 
     if (ValuesArrayString) {
       newArray = [...value, newItem];
     } else {
       newArray = [...value, { ...newItem }];
     }
+
     onChange(newArray);
 
     setItemError(null);
@@ -307,11 +314,14 @@ export function FormArrayInput({
               : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
           }`}
         >
-          {fieldConfigs.map(config => {
+          {fieldConfigs.map((config, index) => {
             const fieldValue = newItemValues[config.name];
 
             return (
-              <div className="flex items-end gap-2 relative" key={config.name}>
+              <div
+                className="flex items-end flex-wrap md:flex-nowrap gap-2 relative"
+                key={config.name}
+              >
                 {config.component === 'select' ? (
                   <FormSelect
                     name={`${name || 'temp'}_${config.name}` as any}
@@ -333,58 +343,68 @@ export function FormArrayInput({
                     </>
                   </FormSelect>
                 ) : (
-                  <>
-                    <FormInput
-                      name={`${name || 'temp'}_${config.name}` as any}
-                      value={fieldValue}
-                      label={config.label}
-                      placeholder={config.placeholder}
-                      type={config.type || 'text'}
-                      onChange={(e: any) => {
-                        const val =
-                          typeof e === 'string' ? e : e?.target?.value || '';
-                        handleInputChange(config.name, val);
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddItem(config.name);
-                        } else if (
-                          pasteInput &&
-                          e.key === 'Backspace' &&
-                          lastPasted[config.name] &&
-                          fieldValue
-                        ) {
-                          handleBackspaceKey(e, config.name, fieldValue);
-                        }
-                      }}
-                      onFocus={
-                        pasteInput
-                          ? () => handleFocusPaste(config.name)
-                          : undefined
+                  <FormInput
+                    name={`${name || 'temp'}_${config.name}` as any}
+                    value={fieldValue}
+                    label={config.label}
+                    placeholder={config.placeholder}
+                    type={config.type || 'text'}
+                    onChange={(e: any) => {
+                      const val =
+                        typeof e === 'string' ? e : e?.target?.value || '';
+                      handleInputChange(config.name, val);
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddItem(config.name);
+                      } else if (
+                        pasteInput &&
+                        e.key === 'Backspace' &&
+                        lastPasted[config.name] &&
+                        fieldValue
+                      ) {
+                        handleBackspaceKey(e, config.name, fieldValue);
                       }
-                      errors={{} as any}
-                      maskProps={config.maskProps}
-                      inputProps={{
-                        ...config.inputProps,
-                        classNameContainer: ` ${config.inputProps?.classNameContainer}`,
-                      }}
-                      noControl
-                    />
-                    <span className="absolute right-13 top-3 text-[12px] text-gray-300">
-                      Pressione ENTER
-                    </span>
-                  </>
+                    }}
+                    onFocus={
+                      pasteInput
+                        ? () => handleFocusPaste(config.name)
+                        : undefined
+                    }
+                    errors={{} as any}
+                    maskProps={config.maskProps}
+                    inputProps={{
+                      ...config.inputProps,
+                      classNameContainer: ` ${config.inputProps?.classNameContainer}`,
+                    }}
+                    noControl
+                  />
                 )}
-                <div className="flex justify-end">
-                  <PrimaryButton
-                    className="h-10"
-                    type="button"
-                    onClick={() => handleAddItem(config.name)}
-                  >
-                    {addButtonText}
-                  </PrimaryButton>
-                </div>
+
+                <span
+                  className={`absolute ${
+                    index === fieldConfigs.length - 1
+                      ? 'right-2 md:right-12'
+                      : 'right-2'
+                  } top-3 text-[10px] text-gray-300 pointer-events-none select-none`}
+                  tabIndex={-1}
+                  aria-hidden="true"
+                >
+                  Pressione ENTER
+                </span>
+
+                {index === fieldConfigs.length - 1 && (
+                  <div className="flex justify-end w-full md:w-auto">
+                    <PrimaryButton
+                      className="h-10 w-full md:w-auto"
+                      type="button"
+                      onClick={() => handleAddItem(config.name)}
+                    >
+                      {addButtonText}
+                    </PrimaryButton>
+                  </div>
+                )}
               </div>
             );
           })}

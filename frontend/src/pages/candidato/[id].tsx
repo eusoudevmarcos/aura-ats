@@ -149,18 +149,24 @@ const CandidatoPage: React.FC = () => {
         <div className="flex flex-wrap gap-4">
           {/* Sessão Pessoa */}
           {candidato.pessoa && (
-            <Card title="Dados Pessoais">
-              <span className="font-medium mr-2">Nome:</span>
+            <Card
+              title={
+                <span className="text-primary text-lg">Dados Pessoais</span>
+              }
+            >
+              <span className="font-medium text-primary mr-2">Nome:</span>
               <span className="font-bold text-xl">{candidato.pessoa.nome}</span>
               <div>
-                <span className="font-medium">Data de Nascimento:</span>
+                <span className="font-medium text-primary">
+                  Data de Nascimento:
+                </span>
                 <span className="text-secondary ml-2">
                   {candidato.pessoa.dataNascimento || '-'}
                 </span>
               </div>
 
               <div>
-                <span className="font-medium">CPF:</span>
+                <span className="font-medium text-primary">CPF:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
                     {candidato.pessoa.cpf || '-'}
@@ -169,75 +175,177 @@ const CandidatoPage: React.FC = () => {
               </div>
 
               <div>
-                <span className="font-medium">Sexo:</span>
+                <span className="font-medium text-primary">Sexo:</span>
                 <span className="text-secondary ml-2">
                   {candidato.pessoa.sexo || '-'}
+                </span>
+              </div>
+
+              <div>
+                <span className="font-medium text-primary">Signo:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.pessoa.signo || '-'}
                 </span>
               </div>
             </Card>
           )}
 
           {/* Sessão Dados do Candidato */}
-          <Card title="Dados do Candidato">
+          <Card
+            title={
+              <span className="text-primary text-lg">Dados do Candidato</span>
+            }
+          >
             <div>
-              <span className="font-medium">Área de Atuação:</span>
+              <span className="font-medium text-primary">Área de Atuação:</span>
               <span className="text-secondary ml-2">
                 {candidato.areaCandidato?.replace(/_/g, ' ') || '-'}
               </span>
             </div>
 
-            {candidato.crm && (
+            {candidato?.medico?.porcentagemConsultas && (
               <div>
-                <span className="font-medium">CRM:</span>
+                <span className="font-medium text-primary">
+                  Porcentagem Consultas:
+                </span>
                 <span className="text-secondary ml-2">
-                  <AdminGuard typeText>{candidato.crm || '-'}</AdminGuard>
+                  {candidato.medico.porcentagemConsultas || '-'} %
                 </span>
               </div>
             )}
 
+            {candidato?.medico?.porcentagemExames && (
+              <div>
+                <span className="font-medium text-primary">
+                  Porcentagem Exames:
+                </span>
+                <span className="text-secondary ml-2">
+                  {candidato.medico.porcentagemExames || '-'} %
+                </span>
+              </div>
+            )}
+
+            {candidato?.medico?.porcentagemRepasseMedico && (
+              <div>
+                <span className="font-medium text-primary">
+                  Porcentagem Repasse Médico:
+                </span>
+                <span className="text-secondary ml-2">
+                  {candidato.medico.porcentagemRepasseMedico || '-'} %
+                </span>
+              </div>
+            )}
+
+            {candidato?.medico?.quadroDeObservações && (
+              <div className="flex flex-col">
+                <span className="font-medium text-primary">
+                  Quadro de Observações:
+                </span>
+                <span className="text-secondary ml-2 wrap-break-word">
+                  {candidato.medico.quadroDeObservações || '-'}
+                </span>
+              </div>
+            )}
+
+            {candidato?.medico?.especialidadesEnfermidades && (
+              <div className="flex flex-col">
+                <span className="font-medium text-primary">
+                  Especilidade e Enfermidades:
+                </span>
+                <span className="text-secondary ml-2 wrap-break-word">
+                  {candidato.medico.especialidadesEnfermidades || '-'}
+                </span>
+              </div>
+            )}
+
+            {candidato?.medico?.quadroSocietario !== null &&
+              candidato?.medico?.quadroSocietario !== undefined && (
+                <div>
+                  <span className="font-medium text-primary">
+                    Quadro Societario:
+                  </span>
+                  <span className="text-secondary ml-2">
+                    {candidato.medico.quadroSocietario ? 'SIM' : 'NÂO'}
+                  </span>
+                </div>
+              )}
+
             {candidato.corem && (
               <div>
-                <span className="font-medium">COREM:</span>
+                <span className="font-medium text-primary">COREM:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>{candidato.corem || '-'}</AdminGuard>
                 </span>
               </div>
             )}
 
-            {candidato.rqe && (
+            {candidato?.medico?.rqe && (
               <div>
-                <span className="font-medium">RQE:</span>
+                <span className="font-medium text-primary">RQE:</span>
                 <span className="text-secondary ml-2">
-                  <AdminGuard typeText>{candidato.rqe || '-'}</AdminGuard>
+                  <AdminGuard typeText>
+                    {candidato.medico.rqe || '-'}
+                  </AdminGuard>
                 </span>
               </div>
             )}
-            <div>
-              <span className="font-medium">Especialidade:</span>
-              <span className="text-secondary ml-2">
-                {candidato.especialidade?.nome || 'N/A'}
-              </span>
-            </div>
+
+            {candidato?.especialidade?.nome && (
+              <div>
+                <span className="font-medium text-primary">Especialidade:</span>
+                <span className="text-secondary ml-2">
+                  {candidato.especialidade?.nome || 'N/A'}
+                  {' / '}
+                  {candidato.especialidade?.sigla || 'N/A'}
+                </span>
+              </div>
+            )}
+
+            {Array.isArray(candidato?.medico?.crm) &&
+              candidato?.medico?.crm.length > 0 && (
+                <div>
+                  <span className="font-medium text-primary">CRM:</span>
+                  <span className="text-secondary ml-2 bg-secondary rounded-full text-white! py-1 px-2">
+                    {candidato.medico.crm.map((crm: any) => (
+                      <AdminGuard key={crm} typeText>
+                        {crm.numero +
+                          '/' +
+                          crm.ufCrm +
+                          ' - ' +
+                          crm.dataInscricao}
+                      </AdminGuard>
+                    ))}
+                  </span>
+                </div>
+              )}
           </Card>
 
           {/* Sessão Contatos */}
-          <Card title="Contatos">
+          <Card title={<span className="text-primary">Contatos</span>}>
             <>
               {candidato.emails && candidato.emails.length > 0 && (
-                <div>
-                  <span className="font-medium">Emails:</span>
-                  <span className="text-secondary ml-2">
-                    {candidato.emails}
-                  </span>
+                <div className="mb-2">
+                  <span className="font-medium text-primary">Emails:</span>
+                  {candidato.emails.map((email: string) => (
+                    <span className="text-secondary ml-2 bg-secondary rounded-full text-white! py-1 px-2">
+                      <AdminGuard key={email} typeText>
+                        {email || '-'}
+                      </AdminGuard>
+                    </span>
+                  ))}
                 </div>
               )}
 
               {candidato.contatos && candidato.contatos.length > 0 && (
                 <div>
-                  <span className="font-medium">Contatos:</span>
-                  <span className="text-secondary ml-2">
-                    {candidato.contatos || '-'}
-                  </span>
+                  <span className="font-medium text-primary">Contatos:</span>
+                  {candidato.contatos.map((contato: string) => (
+                    <span className="text-secondary ml-2 bg-secondary rounded-full text-white! py-1 px-2">
+                      <AdminGuard key={contato} typeText>
+                        {contato || '-'}
+                      </AdminGuard>
+                    </span>
+                  ))}
                 </div>
               )}
             </>
@@ -245,42 +353,44 @@ const CandidatoPage: React.FC = () => {
 
           {/* Sessão Localizações */}
           {candidato.pessoa?.localizacoes?.length > 0 && (
-            <Card title="Localizações">
+            <Card title={<span className="text-primary">Localizações</span>}>
               {candidato.pessoa.localizacoes.map((loc: any) => (
                 <ul key={loc.id} className="mb-2 list-inside">
                   {loc.cidade && (
                     <li>
-                      <span className="font-medium">Cidade:</span>
+                      <span className="font-medium text-primary">Cidade:</span>
                       <span className="text-secondary ml-2">{loc.cidade}</span>
                     </li>
                   )}
                   {loc.estado && (
                     <li>
-                      <span className="font-medium">Estado:</span>
+                      <span className="font-medium text-primary">Estado:</span>
                       <span className="text-secondary ml-2">{loc.estado}</span>
                     </li>
                   )}
                   {loc.cep && (
                     <li>
-                      <span className="font-medium">CEP:</span>
+                      <span className="font-medium text-primary">CEP:</span>
                       <span className="text-secondary ml-2">{loc.cep}</span>
                     </li>
                   )}
                   {loc.bairro && (
                     <li>
-                      <span className="font-medium">Bairro:</span>
+                      <span className="font-medium text-primary">Bairro:</span>
                       <span className="text-secondary ml-2">{loc.bairro}</span>
                     </li>
                   )}
                   {loc.uf && (
                     <li>
-                      <span className="font-medium">UF:</span>
+                      <span className="font-medium text-primary">UF:</span>
                       <span className="text-secondary ml-2">{loc.uf}</span>
                     </li>
                   )}
                   {loc.complemento && (
                     <li>
-                      <span className="font-medium">Complemento:</span>
+                      <span className="font-medium text-primary">
+                        Complemento:
+                      </span>
                       <span className="text-secondary ml-2">
                         {loc.complemento}
                       </span>
@@ -288,7 +398,9 @@ const CandidatoPage: React.FC = () => {
                   )}
                   {loc.logradouro && (
                     <li>
-                      <span className="font-medium">Logradouro:</span>
+                      <span className="font-medium text-primary">
+                        Logradouro:
+                      </span>
                       <span className="text-secondary ml-2">
                         {loc.logradouro}
                       </span>
@@ -296,7 +408,7 @@ const CandidatoPage: React.FC = () => {
                   )}
                   {loc.regiao && (
                     <li>
-                      <span className="font-medium">Região:</span>
+                      <span className="font-medium text-primary">Região:</span>
                       <span className="text-secondary ml-2">{loc.regiao}</span>
                     </li>
                   )}
@@ -307,23 +419,29 @@ const CandidatoPage: React.FC = () => {
 
           {/* Sessão Formações Acadêmicas */}
           {candidato.formacoes?.length > 0 && (
-            <Card title="Formações Acadêmicas">
+            <Card
+              title={<span className="text-primary">Formações Acadêmicas</span>}
+            >
               {candidato.formacoes.map((formacao: any) => (
                 <div key={formacao.id} className="mb-2">
                   <div>
-                    <span className="font-medium">Instituição:</span>
+                    <span className="font-medium text-primary">
+                      Instituição:
+                    </span>
                     <span className="text-secondary ml-2">
                       {formacao.instituicao}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Curso:</span>
+                    <span className="font-medium text-primary">Curso:</span>
                     <span className="text-secondary ml-2">
                       {formacao.curso}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Data de Início:</span>
+                    <span className="font-medium text-primary">
+                      Data de Início:
+                    </span>
                     <span className="text-secondary ml-2">
                       {formacao.dataInicio
                         ? new Date(formacao.dataInicio).toLocaleDateString(
@@ -333,7 +451,9 @@ const CandidatoPage: React.FC = () => {
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Data de Fim:</span>
+                    <span className="font-medium text-primary">
+                      Data de Fim:
+                    </span>
                     <span className="text-secondary ml-2">
                       {formacao.dataFim
                         ? new Date(formacao.dataFim).toLocaleDateString('pt-BR')
@@ -342,7 +462,9 @@ const CandidatoPage: React.FC = () => {
                   </div>
                   {formacao.dataInicioResidencia && (
                     <div>
-                      <span className="font-medium">Início Residência:</span>
+                      <span className="font-medium text-primary">
+                        Início Residência:
+                      </span>
                       <span className="text-secondary ml-2">
                         {new Date(
                           formacao.dataInicioResidencia
@@ -352,7 +474,9 @@ const CandidatoPage: React.FC = () => {
                   )}
                   {formacao.dataFimResidencia && (
                     <div>
-                      <span className="font-medium">Fim Residência:</span>
+                      <span className="font-medium text-primary">
+                        Fim Residência:
+                      </span>
                       <span className="text-secondary ml-2">
                         {new Date(
                           formacao.dataFimResidencia
@@ -367,23 +491,27 @@ const CandidatoPage: React.FC = () => {
 
           {/* Sessão Habilidades */}
           {candidato.habilidades?.length > 0 && (
-            <Card title="Habilidades">
+            <Card title={<span className="text-primary">Habilidades</span>}>
               {candidato.habilidades.map((hab: any) => (
                 <div key={hab.habilidadeId} className="mb-2">
                   <div>
-                    <span className="font-medium">Habilidade:</span>
+                    <span className="font-medium text-primary">
+                      Habilidade:
+                    </span>
                     <span className="text-secondary ml-2">
                       {hab.habilidade?.nome}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Nível:</span>
+                    <span className="font-medium text-primary">Nível:</span>
                     <span className="text-secondary ml-2">
                       {hab.nivel || 'N/A'}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Anos de Experiência:</span>
+                    <span className="font-medium text-primary">
+                      Anos de Experiência:
+                    </span>
                     <span className="text-secondary ml-2">
                       {hab.experienciaAnos || 'N/A'}
                     </span>
@@ -395,15 +523,17 @@ const CandidatoPage: React.FC = () => {
 
           {/* Sessão Vagas */}
           {candidato.vagas?.length > 0 && (
-            <Card title="Vagas Associadas">
+            <Card
+              title={<span className="text-primary">Vagas Associadas</span>}
+            >
               {candidato.vagas.map((vaga: any) => (
                 <div key={vaga.id} className="mb-2">
                   <div>
-                    <span className="font-medium">Título:</span>
+                    <span className="font-medium text-primary">Título:</span>
                     <span className="text-secondary ml-2">{vaga.titulo}</span>
                   </div>
                   <div>
-                    <span className="font-medium">Status:</span>
+                    <span className="font-medium text-primary">Status:</span>
                     <span className="text-secondary ml-2">{vaga.status}</span>
                   </div>
                   {/* Adicione mais campos relevantes da vaga se necessário */}
@@ -414,17 +544,23 @@ const CandidatoPage: React.FC = () => {
 
           {/* Sessão Candidaturas em Vagas */}
           {candidato.CandidaturaVaga?.length > 0 && (
-            <Card title="Candidaturas em Vagas">
+            <Card
+              title={
+                <span className="text-primary text-lg">
+                  Candidaturas em Vagas
+                </span>
+              }
+            >
               {candidato.CandidaturaVaga.map((cand: any) => (
                 <div key={cand.id} className="mb-2">
                   <div>
-                    <span className="font-medium">Vaga:</span>
+                    <span className="font-medium text-primary">Vaga:</span>
                     <span className="text-secondary ml-2">
                       {cand.vaga?.titulo || cand.vagaId}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Status:</span>
+                    <span className="font-medium text-primary">Status:</span>
                     <span className="text-secondary ml-2">{cand.status}</span>
                   </div>
                   {/* Adicione mais campos relevantes da candidatura se necessário */}
@@ -434,7 +570,10 @@ const CandidatoPage: React.FC = () => {
           )}
 
           {candidato.links && candidato.links.length > 0 && (
-            <Card title="Links" classNameContent="flex flex-col gap-2">
+            <Card
+              title={<span className="text-primary">Links</span>}
+              classNameContent="flex flex-col gap-2"
+            >
               {candidato.links.map((link: string, idx: number) => (
                 <div
                   key={idx}
@@ -456,7 +595,7 @@ const CandidatoPage: React.FC = () => {
           )}
           {/* Sessão Anexos */}
           {candidato.anexos && candidato.anexos.length > 0 && (
-            <Card title="Anexos">
+            <Card title={<span className="text-primary">Anexos</span>}>
               <div className="flex flex-col gap-2">
                 {candidato.anexos.map((candidatoAnexo: any) => {
                   const anexo = candidatoAnexo.anexo;
@@ -500,7 +639,7 @@ const CandidatoPage: React.FC = () => {
                       className="flex items-center justify-between gap-2 bg-gray-100 rounded-lg p-3 hover:bg-gray-200 transition-colors"
                     >
                       <div className="flex flex-col flex-1">
-                        <span className="font-medium text-sm">
+                        <span className="font-medium text-primary text-sm">
                           {anexo.nomeArquivo}
                         </span>
                         {anexo.tamanhoKb && (
@@ -543,33 +682,35 @@ const CandidatoPage: React.FC = () => {
               >
                 <Card
                   title={{
-                    className: 'text-xl text-center',
+                    className: 'text-xl text-center text-primary',
                     label: vaga.titulo,
                   }}
                   classNameContainer="cursor-pointer shadow-sm border border-gray-200 hover:scale-105 hover:shadow-md text-sm px-6 py-4"
                 >
                   <div className="flex flex-col justify-between gap-2 mt-2">
                     <div className="text-sm">
-                      <span>Publicado:</span>
+                      <span className="text-primary text-lg">Publicado:</span>
                       <span className="text-secondary">
                         {vaga.dataPublicacao}
                       </span>
                     </div>
 
                     <div>
-                      <span className="font-medium">Status:</span>
+                      <span className="font-medium text-primary">Status:</span>
                       <span className="ml-1 text-secondary">{vaga.status}</span>
                     </div>
                   </div>
 
                   <div>
-                    <span className="font-medium">Categoria:</span>
+                    <span className="font-medium text-primary">Categoria:</span>
                     <span className="ml-1 text-secondary">
                       {vaga.categoria}
                     </span>
                   </div>
                   <div>
-                    <span className="font-medium">Tipo de Salário:</span>
+                    <span className="font-medium text-primary">
+                      Tipo de Salário:
+                    </span>
                     <span className="ml-1 text-secondary">
                       {vaga.tipoSalario}
                     </span>

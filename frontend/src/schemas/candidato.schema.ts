@@ -35,19 +35,62 @@ export const especialidadeSchema = z.object({
 //     }, z.date().optional())
 //     .optional(),
 // });
+
+export const crmSchema = z.object({
+  id: z.uuid().optional(),
+  numero: z.string(),
+  ufCrm: z.string().max(2),
+  dataInscricao: z.union([
+    z
+      .string()
+      .refine(
+        val =>
+          /^\d{2}\/\d{2}\/\d{4}$/.test(val) ||
+          /^\d{4}-\d{2}-\d{2}(T.*Z)?$/.test(val),
+        {
+          message:
+            'Data deve estar no formato DD/MM/AAAA ou ISO (YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss.sssZ)',
+        }
+      ),
+    z.date(),
+  ]),
+});
+
+export const medicoSchema = z.object({
+  id: z.uuid().optional().nullable(),
+  rqe: z
+    .string()
+    .regex(/^\d{1,6}$/, {
+      message: 'RQE deve conter apenas números (ex: 54321)',
+    })
+    .max(20)
+    .nullable()
+    .optional(),
+  crm: z.array(crmSchema),
+  quadroSocietario: z.union([z.string(), z.boolean()]),
+  quadroDeObservações: z.string().optional().nullable(),
+  exames: z.string().optional().nullable(),
+  especialidadesEnfermidades: z.string().optional().nullable(),
+  porcentagemRepasseMedico: z.string().optional().nullable(),
+  porcentagemConsultas: z.string().optional().nullable(),
+  porcentagemExames: z.string().optional().nullable(),
+});
+
 export const candidatoSchema = z.object({
   id: z.uuid().optional(),
   pessoa: pessoaSchema,
   areaCandidato: AreaCandidatoEnum,
-  crm: z.array(
-    z
-      .string()
-      .regex(/^\d{1,7}\/?[A-Z]{0,2}$/, {
-        message:
-          'CRM deve conter apenas números e opcionalmente a sigla do estado (ex: 123456/SP)',
-      })
-      .max(20)
-  ), // Sigla do estado na frente
+  // sexo: SexoEnum.nullable(),
+  // signo: SignoEnum.nullable(),
+  // crm: z.array(
+  //   z
+  //     .string()
+  //     .regex(/^\d{1,7}\/?[A-Z]{0,2}$/, {
+  //       message:
+  //         'CRM deve conter apenas números e opcionalmente a sigla do estado (ex: 123456/SP)',
+  //     })
+  //     .max(20)
+  // ), // Sigla do estado na frente
   corem: z
     .string()
     .regex(/^([A-Z]{2}\s?\d{1,10}|\d{1,10}-[A-Z]{2})$/, {
@@ -57,14 +100,7 @@ export const candidatoSchema = z.object({
     .max(20)
     .nullable()
     .optional(),
-  rqe: z
-    .string()
-    .regex(/^\d{1,6}$/, {
-      message: 'RQE deve conter apenas números (ex: 54321)',
-    })
-    .max(20)
-    .nullable()
-    .optional(),
+
   especialidadeId: z
     .string()
     .refine(val => !isNaN(Number(val)) && Number(val) > 0, {
@@ -94,6 +130,8 @@ export const candidatoSchema = z.object({
       })
     )
     .optional(),
+
+  medico: medicoSchema,
 });
 
 export type CandidatoInput = z.infer<typeof candidatoSchema>;
