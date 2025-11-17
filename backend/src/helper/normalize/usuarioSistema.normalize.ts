@@ -1,3 +1,4 @@
+import { convertAnyDateToPostgres } from "../../utils/convertDateToPostgres";
 import { normalizeClienteData } from "./cliente.normalize";
 
 export const normalizeDataUsuarioSistema = (data: any) => {
@@ -20,6 +21,10 @@ export const normalizeDataUsuarioSistema = (data: any) => {
       clienteId: data.clienteId,
     });
     if (newData?.clienteId) delete newData.clienteId;
+  }
+
+  if (data.pessoa) {
+    newData.pessoa = convertAnyDateToPostgres(data.pessoa);
   }
 
   return newData;
