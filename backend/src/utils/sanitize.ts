@@ -6,7 +6,7 @@ export type SearchType =
   | "EMAIL"
   | "CEP"
   | "PHONE"
-  | "NOME"
+  | "NAME"
   | "RAZAO_SOCIAL";
 
 /**
@@ -18,7 +18,7 @@ const queryParamMap: Record<SearchType, string> = {
   CNPJ: "cnpj",
   EMAIL: "email",
   CEP: "cep",
-  NOME: "nome", // Usado para busca em 'persons/search'
+  NAME: "name", // Usado para busca em 'persons/search'
   PHONE: "telefone", // Assumindo 'telefone' como parâmetro, ajuste se for 'phone'
   RAZAO_SOCIAL: "razao_social",
 };
@@ -76,8 +76,8 @@ export function sanitize(
       isDetail = true;
     }
   } else if (tipo === "persons") {
-    // Busca de lista/search (NOME, EMAIL, PHONE, CEP)
-    if (["NOME", "EMAIL", "PHONE", "CEP"].includes(typeData)) {
+    // Busca de lista/search (NAME, EMAIL, PHONE, CEP)
+    if (["NAME", "EMAIL", "PHONE", "CEP"].includes(typeData)) {
       // Adicionado CEP à busca
       pathname = "persons/search";
       if (options?.uf) {

@@ -65,7 +65,7 @@ const validatePhone = (phone: string): boolean => {
 
 const isPersonName = (str: string): boolean => {
   // Heurística simples: não ter números ou @, e pelo menos 2 palavras
-  return /^[a-zA-ZÀ-ÿ\s']{5,}$/i.test(str.trim());
+  return /^[a-zA-ZÀ-ÿ\s']{3,}$/i.test(str.trim());
 };
 
 const isCompanyName = (str: string): boolean => {
@@ -126,12 +126,12 @@ const getValidationError = (input: string, type: SearchType | null): string => {
         return 'Telefone inválido. Ex: (61) 90000-0000 ou 61900000000';
       if (!validatePhone(input)) return 'Telefone inválido.';
       break;
-    case 'NAME':
-      if (input.trim().length < 5)
-        return 'Nome muito curto. Digite pelo menos 5 caracteres.';
-      if (!/^[a-zA-ZÀ-ÿ\s']{5,}$/i.test(input.trim()))
-        return 'Nome inválido. Apenas letras e espaços são permitidos.';
+    case 'NAME': {
+      const trimmed = input.trim();
+      if (trimmed.length < 3)
+        return 'Nome muito curto. Digite pelo menos 3 caracteres.';
       break;
+    }
     case 'RAZAO_SOCIAL':
       if (input.trim().length < 5)
         return 'Razão social muito curta. Digite pelo menos 3 caracteres.';
@@ -139,7 +139,7 @@ const getValidationError = (input: string, type: SearchType | null): string => {
         return "Razão social inválida. Utilize apenas letras, números e caracteres permitidos (& . - ').";
       break;
     default:
-      return '';
+      return 'Informação não valida';
   }
   return '';
 };
