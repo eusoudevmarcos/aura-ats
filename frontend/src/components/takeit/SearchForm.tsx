@@ -236,7 +236,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       onSubmit={handleSubmit}
     >
       <section className="flex flex-col w-full max-w-full md:max-w-[400px]">
-        <div className="flex gap-2 mb-1 flex-wrap">
+        <div className="flex gap-2 mb-4 flex-wrap">
           {typeButtons.map(option => (
             <button
               key={option.type}

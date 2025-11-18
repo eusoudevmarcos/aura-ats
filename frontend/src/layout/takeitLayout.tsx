@@ -73,13 +73,11 @@ export default function TakeitLayout({ children, fit }: Props) {
         TAKE IT
       </h1>
 
-      <div className="transition-all duration-2000 bg-white w-full shadow-md mb-5 flex flex-col-reverse md:flex-col">
+      <div className="transition-all duration-2000 bg-white w-full mb-5 flex flex-col-reverse md:flex-col">
         <div className="p-4">
-          {typeColumns === 'persons' ? (
-            <p>Pesquise CPF, Nome completo, CEP, Endereço completo, Email</p>
-          ) : (
-            <p>Pesquise CNPJ, Razão social, Email</p>
-          )}
+          <p className="text-primary mb-2">
+            Selecione uma informação para consultar:
+          </p>
 
           <SearchForm
             handleSearch={handleSearch}
@@ -89,9 +87,9 @@ export default function TakeitLayout({ children, fit }: Props) {
         </div>
 
         {!fit && (
-          <div className="flex md:mt-6 md:mb-0 mb-4 w-full justify-center">
+          <div className="flex w-full justify-center border-b border-gray-300 max-w-[900px]">
             <button
-              className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 flex-grow max-w-[200px] ${
+              className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 grow max-w-[140px]  ${
                 typeColumns === 'persons' &&
                 'font-black border-b-primary border-b-2'
               }`}
@@ -100,7 +98,7 @@ export default function TakeitLayout({ children, fit }: Props) {
               Consumidores
             </button>
             <button
-              className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 flex-grow max-w-[200px] ${
+              className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 grow max-w-[140px] px-2 ${
                 typeColumns === 'companies' &&
                 'font-black border-b-primary border-b-2'
               }`}
