@@ -96,16 +96,6 @@ interface SearchFormProps {
   typeColumns: TypeColumns;
 }
 
-const SEARCH_OPTIONS = [
-  { label: 'CPF', type: 'CPF' },
-  { label: 'CNPJ', type: 'CNPJ' },
-  { label: 'Email', type: 'EMAIL' },
-  { label: 'CEP', type: 'CEP' },
-  { label: 'Telefone', type: 'PHONE' },
-  { label: 'Nome', type: 'NAME' },
-  { label: 'Razão Social', type: 'RAZAO_SOCIAL' },
-];
-
 // Função para retornar mensagens de erro personalizadas
 const getValidationError = (input: string, type: SearchType | null): string => {
   if (!type || !input) return '';
@@ -172,7 +162,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       ? [
           { label: 'CPF', type: 'CPF' },
           { label: 'Email', type: 'EMAIL' },
-          { label: 'CEP', type: 'CEP' },
+          // { label: 'CEP', type: 'CEP' },
           { label: 'Telefone', type: 'PHONE' },
           { label: 'Nome', type: 'NAME' },
         ]
