@@ -111,7 +111,7 @@ const ViewCompanyPage: React.FC = () => {
     setCompany(null);
 
     try {
-      const data = await searchApi(cnpj || '', 'companies');
+      const data = await searchApi(cnpj || '', 'companies', 'CNPJ');
       if (data?.data?.length && data?.data[0]) {
         setCompany(data.data[0]);
       } else {

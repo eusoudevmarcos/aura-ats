@@ -39,6 +39,7 @@ export default function ViewPersonPage(): React.ReactElement {
 
     try {
       const params = {
+        typeData: 'CPF',
         query: cpfUnmask,
         tipo: 'persons',
         isDetail: true,

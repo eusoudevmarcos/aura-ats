@@ -4,6 +4,7 @@ import { unmask } from '../utils/mask/unmask';
 export async function searchApi(
   input: string,
   typeColumns: 'persons' | 'companies',
+  typeData: string,
   options = {}
 ): Promise<any> {
   if (!input || input.trim() === '') {
@@ -15,6 +16,7 @@ export async function searchApi(
   const URL = '/api/externalWithAuth/take-it/search';
 
   const params = {
+    typeData: typeData,
     query: inputUnmask,
     tipo: typeColumns,
     isDetail: true,
