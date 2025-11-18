@@ -2,7 +2,7 @@
 
 import axios from "axios";
 import { Request, Response } from "express";
-import { sanitize } from "../utils/sanitize";
+import { sanitize, SearchType } from "../utils/sanitize";
 import CacheController from "./cache.controller";
 
 const cache = new CacheController();
@@ -41,6 +41,7 @@ export interface Query {
   filial: string;
   list: string;
   isDetail: string;
+  typeData: SearchType;
 }
 
 export class DatastoneController {
@@ -53,6 +54,7 @@ export class DatastoneController {
       const {
         query: input,
         tipo,
+        typeData,
         uf = "",
         filial = "",
         list = "",
@@ -68,7 +70,7 @@ export class DatastoneController {
       }
 
       // Sanitiza os dados e identifica tipo e endpoint
-      const result = sanitize(input, tipo, {
+      const result = sanitize(input, tipo, typeData, {
         uf,
         filial: filial === "true",
         list: list === "true",

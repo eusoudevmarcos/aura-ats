@@ -1,7 +1,6 @@
 'use client';
 
 // frontend/src/components/SearchForm.tsx
-import styles from '@/styles/animations.module.css';
 import takeitStyles from '@/styles/takeit.module.scss';
 import { UF_MODEL } from '@/utils/UF';
 import { mask } from '@/utils/mask/mask';
@@ -269,9 +268,9 @@ const SearchForm: React.FC<SearchFormProps> = ({
         </div>
 
         <div className="relative w-full flex">
-          {!!selectedType && (
+          {/* {!!selectedType && (
             <div
-              className={`absolute top-0 right-0 border-r-2 border-primary bg-neutral-50 h-full flex justify-center items-center px-2 font-bold transition-all duration-300 ease-in-out rounded-lg
+              className={`border-r-2 border-primary bg-neutral-50 h-full flex justify-center items-center px-2 font-bold transition-all duration-300 ease-in-out rounded-lg
                 ${
                   selectedType
                     ? 'translate-x-0 opacity-100'
@@ -288,7 +287,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
                 ? 'RAZÃO SOCIAL'
                 : selectedType}
             </div>
-          )}
+          )} */}
 
           <div className="flex flex-col relative w-full mb-5 md:mb-0">
             <input

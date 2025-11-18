@@ -1,7 +1,20 @@
 // Função principal que sanitiza entradas e define o tipo de dado, rota e query para chamada na API Datastone
+
+import { unmask } from "./unmask";
+
+export type SearchType =
+  | "CPF"
+  | "CNPJ"
+  | "EMAIL"
+  | "CEP"
+  | "PHONE"
+  | "NOME"
+  | "RAZAO_SOCIAL";
+
 export function sanitize(
-  params: string,
+  value: string,
   tipo: "persons" | "companies",
+  typeData: SearchType,
   options?: { filial?: boolean; list?: boolean; uf?: string }
 ):
   | {
@@ -12,45 +25,23 @@ export function sanitize(
       isDetail: boolean;
     }
   | { error: true; mensagem: string } {
-  const resultado: Record<string, string> = {};
-  const paramsTrim = params.trim();
-
-  // Validação individual de tipos possíveis
-  const cpfValido = validateCPF(paramsTrim);
-  if (cpfValido) resultado.cpf = cpfValido;
-
-  const emailValido = validateEmail(paramsTrim);
-  if (emailValido) resultado.email = emailValido;
-
-  const cnpjValido = validateCNPJ(paramsTrim);
-  if (cnpjValido) resultado.cnpj = cnpjValido;
-
-  const phoneValido = validatePhone(paramsTrim);
-  if (phoneValido) resultado.phone = phoneValido;
-
-  const cepValido = validateCEP(paramsTrim);
-  if (cepValido) resultado.cep = cepValido;
-
-  const nameValido = isName(paramsTrim);
-  if (nameValido) {
-    if (tipo === "companies") resultado.razao_social = nameValido;
-    else resultado.name = nameValido;
-  }
+  const resultado = typeData;
 
   // Verifica se ao menos um tipo foi detectado
   if (Object.keys(resultado).length > 0) {
     const chave = Object.keys(resultado)[0];
-    const dado = resultado[chave];
+    const newvalue = unmask(value);
+
     let pathname = "";
-    let query = `${chave}=${dado}`;
+    let query = `${typeData.toLowerCase()}=${newvalue}`;
     let isDetail = false;
 
     // Gera rotas e queries baseadas no tipo de entidade e dado informado
     if (tipo === "companies") {
       if (options?.filial) {
         pathname = "company/search/filial/";
-        query = `cnpj=${resultado["cnpj"] ?? dado}`;
-      } else if (options?.list || resultado?.razao_social) {
+        if (typeData === "CNPJ") query = `cnpj=${newvalue}`;
+      } else if (options?.list || typeData === "RAZAO_SOCIAL") {
         pathname = "company/list";
       } else {
         pathname = "companies/";
@@ -66,7 +57,7 @@ export function sanitize(
       }
     }
 
-    return { tipo: chave, dado, query, pathname, isDetail };
+    return { tipo: chave, dado: value, query, pathname, isDetail };
   } else {
     // Nenhum tipo reconhecido
     return {
@@ -83,7 +74,7 @@ const validateEmail = (email: string): string | null =>
 
 // Verifica se a string possui estrutura de nome completo
 const isName = (name: string): string | null =>
-  /^([A-Za-zÀ-ÿ]{2,})(\s[A-Za-zÀ-ÿ]{2,})+$/.test(name.trim())
+  /^[a-zA-ZÀ-ÿ\s']{5,}$/i.test(name.trim())
     ? name.trim().replace(/\s+/g, " ")
     : null;
 
