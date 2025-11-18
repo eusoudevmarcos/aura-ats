@@ -392,7 +392,7 @@ export const AgendaForm = ({ onSuccess, initialValues }: AgendaFormProps) => {
     <FormProvider {...methods}>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex flex-col max-w-3xl mx-auto bg-white rounded-lg space-y-3"
+        className="flex flex-col max-w-5xl mx-auto bg-white rounded-lg space-y-3"
       >
         <ConnectGoogleButton />
 

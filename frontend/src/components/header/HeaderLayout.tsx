@@ -1,5 +1,5 @@
 // frontend/components/Header/Header.tsx
-import logo from '@/assets/logo.svg';
+import logo from '@/assets/auralogoh.svg';
 import { usePlano, useUser } from '@/context/AuthContext';
 import styles from '@/styles/header.module.css'; // Importa o módulo CSS
 import { getFirstLetter } from '@/utils/getFirstLetter';
@@ -52,7 +52,13 @@ const HeaderLayout: React.FC<HeaderLayoutProps> = ({
     <header className="fixed bg-white w-full p-4 shadow-md z-50">
       <section className="flex justify-between items-center mx-auto max-w-[1440px] gap-2">
         <Link href="/atividades/agendas">
-          <Image height={0} width={50} src={logo} alt="Logo Aura" />
+          <Image
+            height={80}
+            width={120}
+            className="object-cover h-9"
+            src={logo}
+            alt="Logo Aura"
+          />
         </Link>
 
         {/* DESKTOP */}

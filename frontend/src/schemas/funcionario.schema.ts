@@ -11,8 +11,8 @@ export const TipoUsuarioEnum = z.enum(
     'RECRUTADOR',
     'VENDEDOR',
     'CLIENTE',
-    'CLIENTE_ATS',
-    'CLIENTE_CRM',
+    // 'CLIENTE_ATS',
+    // 'CLIENTE_CRM',
   ],
   { error: 'Selecione o tipo de Usuario' }
 );
@@ -36,7 +36,9 @@ export const funcionarioSchema = z.object({
     .optional(),
   cliente: clienteWithEmpresaSchema.optional(),
   clienteId: z.uuid().optional(),
-  tipoPessoaOuEmpresa: z.enum(['funcionario.pessoa', 'cliente.empresa']),
+  tipoPessoaOuEmpresa: z.enum(['funcionario.pessoa', 'cliente.empresa'], {
+    error: 'Campo Obrigatorio',
+  }),
 });
 
 export type FuncionarioInput = z.infer<typeof funcionarioSchema>;

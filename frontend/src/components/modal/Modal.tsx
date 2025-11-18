@@ -18,7 +18,7 @@ const Modal: React.FC<ModalProps> = ({
   title,
   backdropClose = false,
   fit = false,
-  classNameBody,
+  classNameBody = '',
 }) => {
   const [show, setShow] = useState(isOpen);
   const [visible, setVisible] = useState(isOpen);
@@ -40,32 +40,6 @@ const Modal: React.FC<ModalProps> = ({
     timeoutRef.current = setTimeout(() => setShow(false), 200);
   };
 
-  const handleBackdropClick = (
-    e: React.MouseEvent<HTMLDivElement, MouseEvent>
-  ) => {
-    // e.preventDefault();
-    // e.stopPropagation();
-    // if (containerRef.current) {
-    //   containerRef.current.style.transition =
-    //     'transform 0.2s cubic-bezier(0.4,0,0.2,1)';
-    //   containerRef.current.style.transform = 'scale(1.02)';
-    //   setTimeout(() => {
-    //     if (containerRef.current) {
-    //       containerRef.current.style.transform = 'scale(1)';
-    //       // setTimeout(() => {
-    //       //   handleClose();
-    //       // }, 300);
-    //     }
-    //   }, 150);
-    // }
-    // if (backdropClose && modalRef.current && e.target === e.currentTarget) {
-    //   // Animação de scale no containerRef
-    //   if (containerRef.current) {
-    //     handleClose();
-    //   }
-    // }
-  };
-
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -77,7 +51,6 @@ const Modal: React.FC<ModalProps> = ({
   return (
     <div
       ref={modalRef}
-      onClick={handleBackdropClick}
       className={`fixed inset-0 backdrop-blur-sm flex items-center justify-center z-50 p-2 transition-opacity duration-200 bg-[#00000020] ${
         visible ? 'opacity-100' : 'opacity-0'
       }`}
@@ -88,18 +61,19 @@ const Modal: React.FC<ModalProps> = ({
           ${!fit && 'w-full max-w-4xl'}
           ${visible ? 'scale-100' : 'scale-95'}`}
       >
-        <div className="flex justify-between items-center px-6 py-3  text-white bg-primary gap-4 rounded-t-2xl">
+        <div className="flex justify-between items-center px-6 py-4  text-white bg-primary gap-4 rounded-t-2xl">
           {title && <h3 className="text-xl font-semibold ">{title}</h3>}
           <button
+            title="Fechar modal"
             onClick={handleClose}
-            className="text-white hover:text-gray-700 text-2xl font-bold ml-auto cursor-pointer"
+            className="text-white hover:bg-white hover:text-black! hover:rounded-full px-2 text-xl font-bold ml-auto cursor-pointer"
           >
             &times;
           </button>
         </div>
 
         <div
-          className={`px-6 py-4 mb-10 overflow-auto h-full max-h-[90vh] ${classNameBody}`}
+          className={`px-6 py-4 mb-10 md:mb-0 overflow-auto h-full max-h-[80vh] ${classNameBody}`}
         >
           {children}
         </div>

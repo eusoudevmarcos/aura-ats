@@ -79,7 +79,6 @@ export const FuncionarioForm = ({
       } as FuncionarioInput;
     }
     return {
-      tipoPessoaOuEmpresa: 'funcionario.pessoa',
       funcionario: {
         setor: '',
         cargo: '',
@@ -244,14 +243,17 @@ export const FuncionarioForm = ({
       <form
         onSubmit={handleSubmit(onSubmit)}
         noValidate
-        className="max-w-3xl mx-auto bg-white rounded-lg space-y-6"
+        className="max-w-5xl mx-auto bg-white rounded-lg space-y-6"
         autoComplete="off"
       >
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-2 border-b-[1px] border-gray-400 py-4">
-          <h4 className="col-span-full">Dados de Acesso</h4>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
+          <h4 className="col-span-full text-primary font-bold">
+            Informações de Acesso
+          </h4>
           <FormInput
             name="email"
-            label="Email de login"
+            label="Email de Acesso"
+            placeholder="exemplo@gmail.com"
             inputProps={{ type: 'email', classNameContainer: 'col-span-2' }}
           />
 
@@ -260,6 +262,7 @@ export const FuncionarioForm = ({
             <FormInput
               name="password"
               label="Senha"
+              placeholder="******"
               inputProps={{
                 type: showPassword ? 'text' : 'password',
                 classNameContainer: `w-full`,
@@ -268,7 +271,7 @@ export const FuncionarioForm = ({
             <button
               type="button"
               tabIndex={-1}
-              className="absolute right-3 top-8 z-10 flex items-center"
+              className="absolute right-3 top-9 z-10 flex items-center"
               onClick={() => setShowPassword(prev => !prev)}
               aria-label={showPassword ? 'Ocultar senha' : 'Mostrar senha'}
             >
@@ -292,12 +295,16 @@ export const FuncionarioForm = ({
           </div>
         </div>
 
+        <div className=" border-b border-gray-300"></div>
+
         <div className="flex flex-col gap-2">
-          <h3>Dados do Sistema</h3>
+          <h4 className="text-primary font-bold">
+            Informações de Função e Permissões
+          </h4>
 
           <FormSelect
             name="tipoUsuario"
-            label="Acessos e permissões do funcionario"
+            label="Permissões"
             selectProps={{
               classNameContainer: 'col-span-full',
             }}
@@ -331,7 +338,8 @@ export const FuncionarioForm = ({
 
           <FormSelect
             name="tipoPessoaOuEmpresa"
-            label="Tipo de funcionário"
+            label="Tipo de Acesso"
+            placeholder="Selecione o Tipo de Acesso"
             selectProps={{
               disabled: !tipoUsuario || isClienteUsuario,
             }}
@@ -351,24 +359,41 @@ export const FuncionarioForm = ({
               <FormInput
                 name={setor}
                 label="Setor"
+                placeholder="Ex: Recrutamento"
                 inputProps={{ classNameContainer: 'flex-1 w-full' }}
               />
               <FormInput
                 name={cargo}
                 label="Cargo"
+                placeholder="Ex: Recrutador"
                 inputProps={{ classNameContainer: 'flex-1 w-full' }}
               />
             </div>
           ) : null}
 
-          {tipoPessoaOuEmpresa === 'funcionario.pessoa' ? (
-            tipoUsuario && <PessoaForm namePrefix="funcionario.pessoa" />
-          ) : (
+          {tipoPessoaOuEmpresa && (
             <>
-              <EmpresaForm namePrefix="cliente.empresa" />
+              <div className=" border-b border-gray-300 py-2"></div>
+
+              <h4 className="text-primary font-bold">
+                Informações{' '}
+                {tipoPessoaOuEmpresa === 'funcionario.pessoa'
+                  ? 'Pessoal'
+                  : 'da Empresa'}
+              </h4>
+
+              {tipoPessoaOuEmpresa === 'funcionario.pessoa' ? (
+                tipoUsuario && <PessoaForm namePrefix="funcionario.pessoa" />
+              ) : (
+                <>
+                  <EmpresaForm namePrefix="cliente.empresa" />
+                </>
+              )}
             </>
           )}
         </div>
+
+        <div className=" border-b border-gray-300 py-2"></div>
 
         <PrimaryButton
           type="submit"

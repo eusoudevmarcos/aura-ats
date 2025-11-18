@@ -117,7 +117,6 @@ function TR<T>({
 
   return (
     <tr
-      className=""
       onClick={handleRowClick}
       style={{ cursor: onRowClick ? 'pointer' : 'default' }}
     >
@@ -128,7 +127,7 @@ function TR<T>({
         return (
           <td
             key={String(col.key)}
-            className="relative group max-w-[160px] min-w-[80px] align-middle px-4 py-3 border-b border-gray-300"
+            className="relative group max-w-[160px] min-w-[80px] align-middle p-4 border-t border-gray-200"
             style={{ verticalAlign: 'middle' }}
           >
             <div className="flex items-center gap-2 w-full">
@@ -307,14 +306,14 @@ function Table<T>({
 }: TableProps<T>) {
   return (
     <>
-      <div className="hidden md:block overflow-x-auto w-full">
-        <table className="min-w-full border-separate border border-gray-300 border-spacing-0 bg-white rounded-lg">
+      <div className="hidden md:block overflow-x-auto w-full rounded-xl border border-gray-200">
+        <table className="min-w-full bg-white">
           <thead>
-            <tr>
+            <tr className="bg-neutral">
               {columns.map(col => (
                 <th
                   key={String(col.key)}
-                  className="px-4 py-3 text-left font-semibold bg-neutral text-primary"
+                  className="p-4 text-left font-semibold text-primary"
                   style={{ position: 'sticky', top: 0, zIndex: 1 }}
                 >
                   {col.label}

@@ -24,7 +24,7 @@ export default function Funcionarios() {
       <Modal
         isOpen={showFuncionarioForm}
         onClose={() => setShowFuncionarioForm(false)}
-        title="Cadastro de Usuario do Sistema"
+        title="Cadastro de Acesso ao Sistema"
       >
         <FuncionarioForm
           onSuccess={() => {

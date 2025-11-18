@@ -90,10 +90,10 @@ const EmpresaForm = ({
           </div>
         )}
 
+        <div className=" border-b border-gray-300 py-2"></div>
+
         <div title="Representante">
-          <h3 className="block text-primary text-xl font-bold mb-2">
-            Representante
-          </h3>
+          <h3 className="block text-primary font-bold mb-2">Representante</h3>
           <PessoaForm namePrefix={`${namePrefix}.representantes[0]`} />
         </div>
       </div>

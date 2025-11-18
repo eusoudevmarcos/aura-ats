@@ -12,9 +12,9 @@ const Card: React.FC<{
   noShadow?: boolean;
 }> = ({ title, children, classNameContent, classNameContainer, noShadow }) => (
   <div
-    className={`bg-white rounded-lg px-4 py-2 w-full ${
+    className={`bg-white rounded-2xl px-4 py-4 w-full ${
       classNameContainer ?? ''
-    } ${!noShadow ? 'shadow-md' : ''}`}
+    } ${!noShadow ? 'shadow-sm' : ''}`}
   >
     {title &&
       (React.isValidElement(title) || typeof title !== 'string' ? (

@@ -120,7 +120,7 @@ const Toolbar = ({ collapsed, user }: any) => {
       <div
         onMouseEnter={handleToolbarMouseEnter}
         onMouseLeave={handleToolbarMouseLeave}
-        className={`absolute top-1/2 -translate-y-1/2 flex-col gap-2 bg-white shadow-lg rounded-lg p-2 duration-300 z-50 border border-gray-100 min-w-[160px] 
+        className={`absolute top-1/2 -translate-y-1/2 flex-col gap-2 bg-white shadow-sm rounded-lg p-2 duration-300 z-50 border border-gray-100 min-w-[160px] 
                   ${collapsed ? 'right-[-170px]' : 'right-[-190px]'}
                   ${
                     showToolbar
@@ -138,13 +138,6 @@ const Toolbar = ({ collapsed, user }: any) => {
         >
           <span className="material-icons-outlined">account_circle</span>
           Visualizar perfil
-        </Link>
-        <Link
-          href="/configuracoes"
-          className="flex items-center gap-2 px-3 py-2 rounded hover:bg-gray-100 text-sm text-gray-700 transition"
-        >
-          <span className="material-icons-outlined">settings</span>
-          Configurações
         </Link>
         <button
           onClick={onLogout}
@@ -185,7 +178,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
           onClick={() => setCollapsed(!collapsed)}
           className={`cursor-pointer absolute ${
             collapsed ? 'right-[-28px]' : 'right-[-20px]'
-          } top-12 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200`}
+          } top-12 -translate-y-1/2 bg-white p-2 rounded-full shadow-sm z-30 border border-gray-200`}
         >
           {collapsed ? <ListIcon /> : <ListClosedIcon />}
         </button>
@@ -202,7 +195,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                         router.pathname === item.href ||
                         router.pathname.split('/')[1] ===
                           item.href.split('/')[1]
-                          ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
+                          ? 'bg-[#f1eefe] text-[#7839cd]'
                           : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                       } ${collapsed ? 'justify-center px-3' : ''}`}
                     >
@@ -227,12 +220,12 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
       <div className="fixed top-24 left-2 h-[calc(90vh-2rem)] z-40 md:hidden">
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className="cursor-pointer absolute Dright-[-22px] top-30 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-50 border border-gray-200"
+          className="cursor-pointer absolute Dright-[-22px] top-30 -translate-y-1/2 bg-white p-2 rounded-full z-50 border border-gray-200"
         >
           {collapsed ? <ListIcon /> : <ListClosedIcon />}
         </button>
         <aside
-          className={`bg-white text-[#474747] h-[calc(90vh-2rem)] flex flex-col shadow-lg rounded-lg transition-all duration-300 ease-in-out z-40 ${
+          className={`bg-white text-[#474747] h-[calc(90vh-2rem)] flex flex-col shadow-sm rounded-lg transition-all duration-300 ease-in-out z-40 ${
             collapsed ? 'w-0 p-0' : 'w-64 p-6'
           }`}
         >
@@ -245,7 +238,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                     className={`flex items-center gap-3 p-3 rounded-lg text-sm font-medium transition-all duration-200 w-full text-left border-0 cursor-pointer ${
                       router.pathname === item.href ||
                       router.pathname.split('/')[1] === item.href
-                        ? 'bg-[#f1eefe] text-[#7839cd] shadow-md'
+                        ? 'bg-[#f1eefe] text-[#7839cd]'
                         : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                     } ${collapsed ? 'justify-center px-0' : ''}`}
                   >
