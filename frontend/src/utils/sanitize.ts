@@ -30,7 +30,7 @@ export function sanitize(params: string, type: string) {
     resultado.cep = cepValido;
   }
 
-  if (type === "persons") {
+  if (type === 'persons') {
     const nameValido = isName(paramsTrim);
     if (nameValido) {
       resultado.name = isName(paramsTrim);
@@ -55,7 +55,7 @@ export function sanitize(params: string, type: string) {
     return {
       error: true,
       mensagem:
-        "Erro ao consultar, verifique se é um CPF, CNPJ, email, CEP, Nome Completo ou Telefone válido",
+        'Erro ao consultar, verifique se é um CPF, CNPJ, email, CEP, Nome Completo ou Telefone válido',
     };
   }
 }
@@ -68,7 +68,7 @@ const validateEmail = (email: string): string | null => {
 };
 
 const validateCNPJ = (cnpj: string): string | null => {
-  const cnpjLimpo = cnpj.replace(/\D/g, "");
+  const cnpjLimpo = cnpj.replace(/\D/g, '');
 
   if (cnpjLimpo.length !== 14) return null;
   // CNPJs inválidos com todos os dígitos iguais
@@ -98,13 +98,13 @@ const validateCNPJ = (cnpj: string): string | null => {
 };
 
 const isName = (name: string) => {
-  const nameReplace = name.trim().replace(/\s+/g, " ");
-  const regex = /^([A-Za-zÀ-ÿ]{2,})(\s[A-Za-zÀ-ÿ]{2,})+$/;
+  const nameReplace = name.trim().replace(/\s+/g, ' ');
+  const regex = /^([A-Za-zÀ-ÿ]{2,})(\s[A-Za-zÀ-ÿ]{2,})?$/;
   return regex.test(nameReplace) ? nameReplace : null;
 };
 
 const validateCPF = (cpf: string) => {
-  const cpfLimpo = cpf.replace(/\D/g, "");
+  const cpfLimpo = cpf.replace(/\D/g, '');
 
   if (cpfLimpo.length !== 11) return null;
 
@@ -114,16 +114,16 @@ const validateCPF = (cpf: string) => {
 
   // Elimina CPFs inválidos conhecidos
   if (
-    cpfLimpo === "00000000000" ||
-    cpfLimpo === "11111111111" ||
-    cpfLimpo === "22222222222" ||
-    cpfLimpo === "33333333333" ||
-    cpfLimpo === "44444444444" ||
-    cpfLimpo === "55555555555" ||
-    cpfLimpo === "66666666666" ||
-    cpfLimpo === "77777777777" ||
-    cpfLimpo === "88888888888" ||
-    cpfLimpo === "99999999999"
+    cpfLimpo === '00000000000' ||
+    cpfLimpo === '11111111111' ||
+    cpfLimpo === '22222222222' ||
+    cpfLimpo === '33333333333' ||
+    cpfLimpo === '44444444444' ||
+    cpfLimpo === '55555555555' ||
+    cpfLimpo === '66666666666' ||
+    cpfLimpo === '77777777777' ||
+    cpfLimpo === '88888888888' ||
+    cpfLimpo === '99999999999'
   ) {
     return null;
   }
@@ -154,11 +154,11 @@ const validateCPF = (cpf: string) => {
 };
 
 const validatePhone = (cep: string) => {
-  const telefoneLimpo = cep.replace(/[^\d]+/g, "");
+  const telefoneLimpo = cep.replace(/[^\d]+/g, '');
   return !/^\d{10,11}$/.test(telefoneLimpo) ? null : telefoneLimpo;
 };
 
 const validateCEP = (cep: string) => {
-  const cepLimpo = cep.replace(/[^\d]+/g, "");
+  const cepLimpo = cep.replace(/[^\d]+/g, '');
   return !/^\d{8}$/.test(cepLimpo) ? null : cepLimpo;
 };
