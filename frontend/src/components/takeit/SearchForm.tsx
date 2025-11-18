@@ -133,7 +133,7 @@ const getValidationError = (input: string, type: SearchType | null): string => {
       break;
     }
     case 'RAZAO_SOCIAL':
-      if (input.trim().length < 5)
+      if (input.trim().length < 3)
         return 'Razão social muito curta. Digite pelo menos 3 caracteres.';
       if (!/^[a-zA-ZÀ-ÿ0-9&.\s\-']{3,}$/i.test(input.trim()))
         return "Razão social inválida. Utilize apenas letras, números e caracteres permitidos (& . - ').";
