@@ -1,5 +1,4 @@
 import api from '@/axios';
-import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import PessoaForm from '@/components/form/PessoaForm';
 import ModalSuccess from '@/components/modal/ModalSuccess';
 import { CandidatoInput, candidatoSchema } from '@/schemas/candidato.schema';
@@ -14,6 +13,7 @@ import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 import FileUploadForm from './FileUploadForm';
+import LocalizacaoForm from './LocalizacaoForm';
 import MedicoForm from './MedicoForm';
 
 type CandidatoFormProps = {
@@ -190,9 +190,19 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   return (
     <FormProvider {...methods}>
       <form onSubmit={handleSubmit(submitHandler as any)} className="space-y-2">
+        <h3 className="font-bold text-primary">Informações Particulares</h3>
+
         <PessoaForm namePrefix="pessoa" isYear />
 
-        <div className="border-b border-gray-300"></div>
+        <div className="border-b border-gray-300 py-2"></div>
+
+        <h3 className="font-bold text-primary">Onde o Profissional Reside</h3>
+
+        <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
+
+        <div className="border-b border-gray-300 py-2"></div>
+
+        <h3 className="font-bold text-primary">Contatos do Profissional</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           <FormArrayInput
@@ -215,7 +225,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
           <FormArrayInput
             name="contatos"
-            title="Contatos"
+            title="Telefone/Celular"
             addButtonText="+"
             ValuesArrayString
             value={contatos}
@@ -235,13 +245,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
         <div className="border-b border-gray-300 py-2"></div>
 
-        <h3 className="font-bold text-primary">Endereço</h3>
-
-        <LocalizacaoForm namePrefix="pessoa.localizacoes[0]" />
-
-        <div className="border-b border-gray-300 py-2"></div>
-
-        <h3 className="font-bold  text-primary">Dados do Profissional</h3>
+        <h3 className="font-bold  text-primary">Carreira do Profissional</h3>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect
@@ -293,13 +297,16 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && <MedicoForm />}
         </div>
 
+        <div className="border-b border-gray-300 py-2"></div>
+
+        <h3 className="font-bold  text-primary">Links do Profissional</h3>
+
         <FormArrayInput
           name="links"
-          title="Links"
+          title="Adicione redes sociais ou outros links relevantes"
           addButtonText="+"
           ValuesArrayString
           value={links}
-          containerClassName="mb-10"
           onChange={handleLinkChange}
           validateCustom={(value, fieldConfigs, setErrors) => {
             const url = value.trim();
@@ -332,6 +339,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           ]}
           renderChipContent={link => <span>{link}</span>}
         />
+
+        <div className="border-b border-gray-300 py-2"></div>
+
+        <h3 className="font-bold  text-primary">Arquvios do Profissional</h3>
 
         <FileUploadForm />
 

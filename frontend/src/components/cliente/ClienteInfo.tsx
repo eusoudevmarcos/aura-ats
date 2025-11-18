@@ -138,14 +138,16 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
                 <div key={representante.nome}>
                   <p>
                     <span className="font-medium text-primary">CPF:</span>{' '}
-                    <span className="text-secondary">{representante.cpf}</span>
+                    <span className="text-secondary">
+                      {representante.cpf || '-'}
+                    </span>
                   </p>
                   <p>
                     <span className="font-medium text-primary">
                       Data Nascimento:
                     </span>{' '}
                     <span className="text-secondary">
-                      {representante.dataNascimento.toString()}
+                      {representante.dataNascimento || '-'}
                     </span>
                   </p>
                   <p>

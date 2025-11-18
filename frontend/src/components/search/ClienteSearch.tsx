@@ -148,7 +148,7 @@ const ClienteSearch = ({
                   setSearchQuery(e.target.value);
                   setShowAutocomplete(true);
                 }}
-                placeholder={`Buscar por CNPJ ou e-mail`}
+                placeholder={`Pesquise o cliente`}
               />
 
               <PrimaryButton
@@ -180,7 +180,7 @@ const ClienteSearch = ({
                   <div className="text-xs text-gray-500">
                     CNPJ: {e.empresa.cnpj}
                   </div>
-                  {e.usuarioSistema.email && (
+                  {e?.usuarioSistema?.email && (
                     <div className="text-xs text-gray-500">
                       E-mail: {e.usuarioSistema.email}
                     </div>

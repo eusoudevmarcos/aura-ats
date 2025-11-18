@@ -1,5 +1,6 @@
 import { PessoaInput, SexoEnum, SignoEnum } from '@/schemas/pessoa.schema';
 import { makeName } from '@/utils/makeName';
+import axios from 'axios';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
@@ -55,6 +56,27 @@ const PessoaForm = ({
 
   const idade = calcularIdadePorDataNascimento(dataNascimentoValue);
 
+  // Método para consultar candidato por CPF usando a API
+  // Retorna o candidato caso encontrado
+
+  async function getCandidatoByCpf(cpf: string) {
+    try {
+      const response = await axios.get(
+        `/api/externalWithAuth/candidato/cpf/${cpf}`
+      );
+      return response.data;
+    } catch (error: any) {
+      throw (
+        error?.response?.data?.message || 'Erro ao buscar candidato pelo CPF.'
+      );
+    }
+  }
+
+
+  const handleSearchCpf =() =>{
+
+  }
+
   return (
     <section className="grid grid-cols-1 md:grid-cols-2 gap-2">
       <FormInput
@@ -62,9 +84,14 @@ const PessoaForm = ({
         maskProps={{ mask: '000.000.000-00' }}
         label="CPF"
         placeholder="000.000.000-00"
+        onChange={() => { handleSearchCpf()}}
       />
 
-      <FormInput name={nome} label="Nome Completo" />
+      <FormInput
+        name={nome}
+        label="Nome Completo"
+        placeholder="João da Silva"
+      />
 
       <div className="flex flex-col gap-2">
         <FormInput

@@ -154,6 +154,11 @@ const InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
           onFocus={onFocus}
           onKeyDown={onKeyDown}
           autoComplete="off"
+          readonly
+          onfocus={function (e: any) {
+            e.target.removeAttribute('readonly');
+            if (onFocus) onFocus(e);
+          }}
           {...maskProps}
           {...props}
         />
@@ -162,10 +167,14 @@ const InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
     return (
       <input
         ref={ref}
-        onChange={e => onChange(e.target.value)}
-        onFocus={onFocus}
-        onKeyDown={onKeyDown}
         autoComplete="off"
+        readOnly
+        onChange={e => onChange(e.target.value)}
+        onFocus={function (e) {
+          e.target.removeAttribute('readonly');
+          if (onFocus) onFocus(e);
+        }}
+        onKeyDown={onKeyDown}
         {...props}
       />
     );
