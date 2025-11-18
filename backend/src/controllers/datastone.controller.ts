@@ -88,7 +88,7 @@ export class DatastoneController {
       // }
 
       const URL = `${BASE_URL}/${result.pathname}?${result.query}`;
-
+      console.log(URL);
       const response = await axios.get(URL, {
         headers: {
           Authorization: process.env.DATASTONE_KEY,

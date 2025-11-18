@@ -96,7 +96,8 @@ const columnsCompany: TableColumn<CompanyResult>[] = [
   {
     label: 'Razão Social',
     key: 'razaoSocial',
-    render: row => row.razaoSocial ?? row.razao_social ?? '-',
+    render: row =>
+      row.razaoSocial ?? row.razao_social ?? row.company_name ?? '-',
   },
   {
     label: 'CNPJ',
@@ -106,7 +107,8 @@ const columnsCompany: TableColumn<CompanyResult>[] = [
   {
     label: 'Nome Fantasia',
     key: 'nome_fantasia',
-    render: row => row.nomeFantasia ?? row.nome_fantasia ?? '-',
+    render: row =>
+      row.nomeFantasia ?? row.nome_fantasia ?? row.trading_name ?? '-',
   },
   {
     label: 'Uf',

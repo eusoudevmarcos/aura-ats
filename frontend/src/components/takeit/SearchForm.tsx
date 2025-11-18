@@ -82,7 +82,7 @@ type SearchType =
   | 'EMAIL'
   | 'CEP'
   | 'PHONE'
-  | 'NOME'
+  | 'NAME'
   | 'RAZAO_SOCIAL';
 
 interface SearchFormProps {
@@ -102,7 +102,7 @@ const SEARCH_OPTIONS = [
   { label: 'Email', type: 'EMAIL' },
   { label: 'CEP', type: 'CEP' },
   { label: 'Telefone', type: 'PHONE' },
-  { label: 'Nome', type: 'NOME' },
+  { label: 'Nome', type: 'NAME' },
   { label: 'Razão Social', type: 'RAZAO_SOCIAL' },
 ];
 
@@ -136,7 +136,7 @@ const getValidationError = (input: string, type: SearchType | null): string => {
         return 'Telefone inválido. Ex: (61) 90000-0000 ou 61900000000';
       if (!validatePhone(input)) return 'Telefone inválido.';
       break;
-    case 'NOME':
+    case 'NAME':
       if (input.trim().length < 5)
         return 'Nome muito curto. Digite pelo menos 5 caracteres.';
       if (!/^[a-zA-ZÀ-ÿ\s']{5,}$/i.test(input.trim()))
@@ -174,7 +174,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
           { label: 'Email', type: 'EMAIL' },
           { label: 'CEP', type: 'CEP' },
           { label: 'Telefone', type: 'PHONE' },
-          { label: 'Nome', type: 'NOME' },
+          { label: 'Nome', type: 'NAME' },
         ]
       : [
           { label: 'CNPJ', type: 'CNPJ' },
@@ -196,7 +196,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
         return validateCEP(value);
       case 'PHONE':
         return validatePhone(value);
-      case 'NOME':
+      case 'NAME':
         return isPersonName(value);
       case 'RAZAO_SOCIAL':
         return isCompanyName(value);
@@ -234,7 +234,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
       filial: isFiliar,
     };
     if (!selectedType || !validateInputByType(input, selectedType)) return;
-    // descriptionData será agora o tipo (ex: CPF, NOME, EMAIL, etc)
+    // descriptionData será agora o tipo (ex: CPF, NAME, EMAIL, etc)
     handleSearch(input, uf, options, selectedType);
   };
 
@@ -268,27 +268,6 @@ const SearchForm: React.FC<SearchFormProps> = ({
         </div>
 
         <div className="relative w-full flex">
-          {/* {!!selectedType && (
-            <div
-              className={`border-r-2 border-primary bg-neutral-50 h-full flex justify-center items-center px-2 font-bold transition-all duration-300 ease-in-out rounded-lg
-                ${
-                  selectedType
-                    ? 'translate-x-0 opacity-100'
-                    : 'translate-x-full opacity-0'
-                } ${styles.slideInFromRight}`}
-              style={{
-                transform: 'translateX(100%)',
-                opacity: 0,
-              }}
-            >
-              {selectedType === 'NOME'
-                ? 'NOME'
-                : selectedType === 'RAZAO_SOCIAL'
-                ? 'RAZÃO SOCIAL'
-                : selectedType}
-            </div>
-          )} */}
-
           <div className="flex flex-col relative w-full mb-5 md:mb-0">
             <input
               type="text"

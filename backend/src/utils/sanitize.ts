@@ -1,5 +1,3 @@
-// Função principal que sanitiza entradas e define o tipo de dado, rota e query para chamada na API Datastone
-
 import { unmask } from "./unmask";
 
 export type SearchType =
@@ -11,120 +9,88 @@ export type SearchType =
   | "NOME"
   | "RAZAO_SOCIAL";
 
+/**
+ * Mapeia o SearchType (tipo de dado de busca) para o nome exato
+ * do parâmetro de consulta (query parameter) esperado pela API Datastone.
+ */
+const queryParamMap: Record<SearchType, string> = {
+  CPF: "cpf",
+  CNPJ: "cnpj",
+  EMAIL: "email",
+  CEP: "cep",
+  NOME: "nome", // Usado para busca em 'persons/search'
+  PHONE: "telefone", // Assumindo 'telefone' como parâmetro, ajuste se for 'phone'
+  RAZAO_SOCIAL: "razao_social",
+};
+
+/**
+ * Sanitiza entradas e define o tipo de dado, rota e query para chamada na API Datastone.
+ *
+ * @param value O valor de busca (ex: "123.456.789-00").
+ * @param tipo O tipo de entidade alvo ("persons" ou "companies").
+ * @param typeData O tipo de dado a ser consultado (ex: "CPF", "CNPJ").
+ * @param options Opções adicionais (filial, list, uf).
+ * @returns Um objeto contendo os componentes da URL e metadados.
+ */
 export function sanitize(
   value: string,
   tipo: "persons" | "companies",
   typeData: SearchType,
   options?: { filial?: boolean; list?: boolean; uf?: string }
-):
-  | {
-      tipo: string;
-      dado: string;
-      query: string;
-      pathname: string;
-      isDetail: boolean;
+): {
+  tipo: string;
+  dado: string;
+  query: string;
+  pathname: string;
+  isDetail: boolean;
+} {
+  const newvalue = unmask(value);
+
+  // 1. Determina o parâmetro de query e a query string base
+  const queryParam = queryParamMap[typeData];
+  let query = `${queryParam}=${newvalue}`;
+
+  let pathname = "";
+  let isDetail = false;
+
+  // 2. Define rotas e queries baseadas no tipo de entidade e dado
+  if (tipo === "companies") {
+    // Busca detalhada de filial
+    if (options?.filial) {
+      pathname = "company/search/filial/";
+      // O CNPJ é o único SearchType relevante para esta rota
+      // Se não for CNPJ, a query padrão será usada, mas o Datastone pode rejeitar.
     }
-  | { error: true; mensagem: string } {
-  const resultado = typeData;
-
-  // Verifica se ao menos um tipo foi detectado
-  if (Object.keys(resultado).length > 0) {
-    const chave = Object.keys(resultado)[0];
-    const newvalue = unmask(value);
-
-    let pathname = "";
-    let query = `${typeData.toLowerCase()}=${newvalue}`;
-    let isDetail = false;
-
-    // Gera rotas e queries baseadas no tipo de entidade e dado informado
-    if (tipo === "companies") {
-      if (options?.filial) {
-        pathname = "company/search/filial/";
-        if (typeData === "CNPJ") query = `cnpj=${newvalue}`;
-      } else if (options?.list || typeData === "RAZAO_SOCIAL") {
-        pathname = "company/list";
-      } else {
-        pathname = "companies/";
-        isDetail = true;
-      }
-    } else if (tipo === "persons") {
-      if (["name", "email", "phone"].includes(chave)) {
-        pathname = "persons/search";
-        if (options?.uf) query += `&uf=${options.uf}`;
-      } else {
-        pathname = "persons/";
-        isDetail = true;
+    // Busca de lista (list, busca por nome/email/cep)
+    else if (
+      options?.list ||
+      typeData === "RAZAO_SOCIAL" ||
+      typeData === "EMAIL" ||
+      typeData === "CEP" // Adicionado CEP à busca de lista
+    ) {
+      pathname = "company/list";
+    }
+    // Busca detalhada (Implica busca por CNPJ ou CEP - se não for lista)
+    else {
+      pathname = "companies/";
+      isDetail = true;
+    }
+  } else if (tipo === "persons") {
+    // Busca de lista/search (NOME, EMAIL, PHONE, CEP)
+    if (["NOME", "EMAIL", "PHONE", "CEP"].includes(typeData)) {
+      // Adicionado CEP à busca
+      pathname = "persons/search";
+      if (options?.uf) {
+        query += `&uf=${options.uf}`; // Adiciona UF, se fornecido
       }
     }
-
-    return { tipo: chave, dado: value, query, pathname, isDetail };
-  } else {
-    // Nenhum tipo reconhecido
-    return {
-      error: true,
-      mensagem:
-        "Erro ao consultar, verifique se é um CPF, CNPJ, email, CEP, Nome Completo ou Telefone válido",
-    };
+    // Busca detalhada (CPF - chave única)
+    else {
+      pathname = "persons/";
+      isDetail = true;
+    }
   }
+
+  // 3. Retorno da URL e metadados
+  return { tipo: typeData, dado: value, query, pathname, isDetail };
 }
-
-// Regex básica para validar e-mail
-const validateEmail = (email: string): string | null =>
-  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : null;
-
-// Verifica se a string possui estrutura de nome completo
-const isName = (name: string): string | null =>
-  /^[a-zA-ZÀ-ÿ\s']{5,}$/i.test(name.trim())
-    ? name.trim().replace(/\s+/g, " ")
-    : null;
-
-// Valida CPF com cálculo de dígitos verificadores
-const validateCPF = (cpf: string): string | null => {
-  const c = cpf.replace(/\D/g, "");
-  if (c.length !== 11 || /^([0-9])\1{10}$/.test(c)) return null;
-  let s = 0;
-  for (let i = 0; i < 9; i++) s += +c[i] * (10 - i);
-  let r = (s * 10) % 11;
-  if (r === 10) r = 0;
-  if (r !== +c[9]) return null;
-  s = 0;
-  for (let i = 0; i < 10; i++) s += +c[i] * (11 - i);
-  r = (s * 10) % 11;
-  if (r === 10) r = 0;
-  return r === +c[10] ? c : null;
-};
-
-// Valida CNPJ com cálculo de dígitos verificadores
-const validateCNPJ = (cnpj: string): string | null => {
-  const c = cnpj.replace(/\D/g, "");
-  if (c.length !== 14 || /^([0-9])\1{13}$/.test(c)) return null;
-  let t = 12,
-    n = c.substring(0, t),
-    d = c.substring(t),
-    s = 0,
-    p = t - 7;
-  for (let i = t; i >= 1; i--)
-    (s += +n.charAt(t - i) * p--), (p = p < 2 ? 9 : p);
-  let r = s % 11 < 2 ? 0 : 11 - (s % 11);
-  if (r !== +d.charAt(0)) return null;
-  t++;
-  n = c.substring(0, t);
-  s = 0;
-  p = t - 7;
-  for (let i = t; i >= 1; i--)
-    (s += +n.charAt(t - i) * p--), (p = p < 2 ? 9 : p);
-  r = s % 11 < 2 ? 0 : 11 - (s % 11);
-  return r === +d.charAt(1) ? c : null;
-};
-
-// Valida número de telefone (10 ou 11 dígitos)
-const validatePhone = (val: string): string | null => {
-  const cleaned = val.replace(/[^\d]/g, "");
-  return /^\d{10,11}$/.test(cleaned) ? cleaned : null;
-};
-
-// Valida CEP (8 dígitos)
-const validateCEP = (val: string): string | null => {
-  const cleaned = val.replace(/[^\d]/g, "");
-  return /^\d{8}$/.test(cleaned) ? cleaned : null;
-};
