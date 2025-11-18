@@ -35,7 +35,7 @@ export type ClienteWithEmpresaInput = z.infer<typeof clienteWithEmpresaSchema>;
 
 export const clienteWithEmpresaAndPlanosSchema =
   clienteWithEmpresaSchema.extend({
-    planos: z.array(planoAssinadoSchema),
+    planos: z.array(planoAssinadoSchema).optional(),
   });
 
 export type ClienteWithEmpresaAndPlanosSchema = z.infer<
