@@ -103,9 +103,9 @@ export const candidatoSchema = z.object({
 
   especialidadeId: z
     .string()
-    .refine(val => !isNaN(Number(val)) && Number(val) > 0, {
-      message: 'Especialidade inválida',
-    })
+    // .refine(val => val && val != 'undefined' && Number(val) > 0, {
+    //   message: 'Especialidade inválida',
+    // })
     .optional()
     .nullable(),
   emails: z.array(z.string()),

@@ -1,11 +1,14 @@
+import api from '@/axios';
 import Table, { TableColumn } from '@/components/Table';
 import PersonDetailsModal from '@/components/takeit/PersonDetailsModal';
+import SearchForm, { SearchType } from '@/components/takeit/SearchForm';
+import { useSearchContext } from '@/context/SearchTakeitContext';
 import TakeitLayout from '@/layout/takeitLayout';
 import styles from '@/styles/takeit.module.scss';
 import { handleZeroLeft } from '@/utils/helper/helperCPF';
 import { mask } from '@/utils/mask/mask';
 import { useRouter } from 'next/navigation';
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 // Tipos para os dados de resultado e item selecionado
 type TypeColumns = 'persons' | 'companies';
@@ -118,11 +121,89 @@ const columnsCompany: TableColumn<CompanyResult>[] = [
 ];
 
 // Componente principal
-const TakeItPage: React.FC = () => {
+const TakeItContent: React.FC = () => {
+  const [typeColumns, setTypeColumns] = useState<TypeColumns>('persons');
+  const [loading, setLoading] = useState<boolean>(false);
+  const [results, setResults] = useState<ResultItem[] | null>(null);
   const [selectedItem, setSelectedItem] = useState<ResultItem | null>(null);
   const [error, setError] = useState<string | null>(null);
-
+  const { lastSearchParams, setSearchData } = useSearchContext();
+  const restoredSearch = useRef(false);
   const router = useRouter();
+
+  const handleSearch = useCallback(
+    async (
+      input: string,
+      uf: string,
+      options: { filial: boolean },
+      descriptionData: SearchType,
+      overrideType?: TypeColumns
+    ) => {
+      const currentType = overrideType ?? typeColumns;
+      setLoading(true);
+      setError(null);
+      setResults(null);
+
+      try {
+        const response = await api.get('/api/externalWithAuth/take-it/search', {
+          params: {
+            query: input,
+            tipo: currentType,
+            typeData: descriptionData,
+            ...options,
+            uf,
+          },
+        });
+
+        const data = Array.isArray(response.data?.data)
+          ? response.data.data
+          : [];
+
+        setResults(data);
+        setSearchData({
+          searchTerm: input,
+          lastSearchParams: {
+            input,
+            uf,
+            options,
+            descriptionData,
+            typeColumns: currentType,
+          },
+        });
+      } catch (erro: any) {
+        console.log(erro);
+        setError(
+          erro?.response?.data?.details?.mensagem ||
+            erro?.response?.data?.error ||
+            'Erro ao buscar dados.'
+        );
+        setResults(null);
+      } finally {
+        setLoading(false);
+      }
+    },
+    [typeColumns, setSearchData]
+  );
+
+  useEffect(() => {
+    if (restoredSearch.current) return;
+    if (!lastSearchParams) {
+      restoredSearch.current = true;
+      return;
+    }
+
+    restoredSearch.current = true;
+    const savedType = lastSearchParams.typeColumns ?? 'persons';
+    setTypeColumns(savedType);
+
+    handleSearch(
+      lastSearchParams.input,
+      lastSearchParams.uf,
+      lastSearchParams.options,
+      lastSearchParams.descriptionData as SearchType,
+      savedType
+    );
+  }, [lastSearchParams, handleSearch]);
 
   const handleSelectItem = (item: ResultItem) => {
     setSelectedItem(item);
@@ -132,60 +213,117 @@ const TakeItPage: React.FC = () => {
     setSelectedItem(null);
   };
 
+  const handleCategoryChange = (category: TypeColumns) => {
+    setTypeColumns(category);
+  };
+
+  const columns =
+    typeColumns === 'persons'
+      ? (columnsPerson as TableColumn<ResultItem>[])
+      : (columnsCompany as TableColumn<ResultItem>[]);
+
+  const onRowClick = (row: ResultItem) => {
+    setSelectedItem(row);
+    let url = null;
+
+    if (row?.cpf) {
+      const cpf = handleZeroLeft(row.cpf);
+      url = `/take-it/view-person/${cpf}`;
+    } else if (row?.cnpj) {
+      url = `/take-it/view-company/${row?.cnpj}`;
+    } else {
+      setError('CPF ou CNPJ não encontrados, contato o Administrador');
+    }
+
+    if (!url) {
+      setError('Erro ao acessar a url, contate o Administrador');
+      return;
+    }
+
+    router.push(url);
+  };
+
   return (
-    <TakeitLayout>
-      {({ results, loading, typeColumns }) => {
-        // Decide as colunas de acordo com o tipo selecionado
-        const columns =
-          typeColumns === 'persons'
-            ? (columnsPerson as TableColumn<ResultItem>[])
-            : (columnsCompany as TableColumn<ResultItem>[]);
+    <>
+      <div className="transition-all duration-2000 bg-white w-full mb-5 flex flex-col-reverse md:flex-col">
+        <div className="p-4">
+          <p className="text-primary mb-2">
+            Selecione uma informação para consultar:
+          </p>
 
-        // Permite clicar em linhas para ver detalhes
-        const onRowClick = (row: ResultItem) => {
-          setSelectedItem(row);
-          let url = null;
+          <SearchForm
+            handleSearch={handleSearch}
+            loading={loading}
+            typeColumns={typeColumns}
+            initialSearchParams={
+              lastSearchParams
+                ? {
+                    input: lastSearchParams.input,
+                    uf: lastSearchParams.uf,
+                    options: lastSearchParams.options ?? { filial: false },
+                    descriptionData:
+                      (lastSearchParams.descriptionData as SearchType) ?? null,
+                  }
+                : undefined
+            }
+          />
+        </div>
 
-          if (row?.cpf) {
-            const cpf = handleZeroLeft(row.cpf);
-            url = `/take-it/view-person/${cpf}`;
-          } else if (row?.cnpj) {
-            url = `/take-it/view-company/${row?.cnpj}`;
-          } else {
-            setError('CPF ou CNPJ não encontrados, contato o Administrador');
-          }
+        <div className="flex w-full justify-center border-b border-gray-300 max-w-[900px]">
+          <button
+            className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 grow max-w-[140px]  ${
+              typeColumns === 'persons' &&
+              'font-black border-b-primary border-b-2'
+            }`}
+            onClick={() => handleCategoryChange('persons')}
+          >
+            Consumidores
+          </button>
+          <button
+            className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 grow max-w-[140px] px-2 ${
+              typeColumns === 'companies' &&
+              'font-black border-b-primary border-b-2'
+            }`}
+            onClick={() => handleCategoryChange('companies')}
+          >
+            Empresas
+          </button>
+        </div>
+      </div>
 
-          if (!url) {
-            setError('Erro ao acessar a url, contate o Administrador');
-            return;
-          }
+      {error && (
+        <div
+          className={`${styles.errorMessage} bg-red-200 rounded-md px-6 py-2 font-bold`}
+        >
+          {error}
+        </div>
+      )}
 
-          router.push(url);
-        };
+      <div className={`${styles.container} shadow-md p-4`}>
+        <Table
+          data={Array.isArray(results) ? results : []}
+          columns={columns}
+          loading={loading}
+          emptyMessage="Nenhum resultado encontrado."
+          onRowClick={onRowClick}
+        />
 
-        return (
-          <div className={`${styles.container} shadow-md p-4`}>
-            {error && <p className="text-red-500 text-sm">{error}</p>}
-            <Table
-              data={Array.isArray(results) ? results : []}
-              columns={columns}
-              loading={loading}
-              emptyMessage="Nenhum resultado encontrado."
-              onRowClick={onRowClick}
-            />
-
-            {selectedItem && (
-              <PersonDetailsModal
-                itemId={selectedItem.id}
-                type={selectedItem.type}
-                onClose={handleCloseModal}
-              />
-            )}
-          </div>
-        );
-      }}
-    </TakeitLayout>
+        {selectedItem && (
+          <PersonDetailsModal
+            itemId={selectedItem.id}
+            type={selectedItem.type}
+            onClose={handleCloseModal}
+          />
+        )}
+      </div>
+    </>
   );
 };
+
+const TakeItPage: React.FC = () => (
+  <TakeitLayout>
+    <TakeItContent />
+  </TakeitLayout>
+);
 
 export default TakeItPage;

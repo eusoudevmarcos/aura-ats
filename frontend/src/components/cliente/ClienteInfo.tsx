@@ -145,7 +145,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
                       Data Nascimento:
                     </span>{' '}
                     <span className="text-secondary">
-                      {representante.dataNascimento.toString()}
+                      {representante.dataNascimento}
                     </span>
                   </p>
                   <p>

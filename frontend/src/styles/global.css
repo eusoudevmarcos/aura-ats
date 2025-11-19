@@ -61,3 +61,24 @@ body {
     background-color: #8c53ff; /* indigo-700 */
   }
 }
+
+.buttonPrimary-outlined {
+  background-color: white; /* indigo-600 */
+  color: #8c53ff;
+  padding: 10px 20px;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  display: flex;
+  gap: 8px;
+  border: none;
+  cursor: pointer;
+  transition: all 200ms ease-in-out;
+  box-shadow: 0 2px 4px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border: 1px solid #8c53ff;
+
+  &:hover {
+    border: 1px solid white;
+  }
+}
