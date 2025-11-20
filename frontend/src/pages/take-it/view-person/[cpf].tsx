@@ -147,7 +147,7 @@ export default function ViewPersonPage(): React.ReactElement {
         </button>
 
         <div className="relative flex gap-2" id="export-dropdown">
-          <button
+          {/* <button
             id="export-btn"
             className="buttonPrimary flex items-center"
             onClick={() => setShowExportDropdown(prev => !prev)}
@@ -168,7 +168,7 @@ export default function ViewPersonPage(): React.ReactElement {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </button>
+          </button> */}
           <button
             id="salvar-candidato-btn"
             className={`${

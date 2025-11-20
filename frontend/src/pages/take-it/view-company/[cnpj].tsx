@@ -184,7 +184,7 @@ const ViewCompanyPage: React.FC = () => {
           Voltar
         </button>
         <div className="relative inline-block" id="export-dropdown">
-          <button
+          {/* <button
             id="export-btn"
             className="buttonPrimary flex items-center"
             onClick={() => setShowExportDropdown(prev => !prev)}
@@ -205,7 +205,7 @@ const ViewCompanyPage: React.FC = () => {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
-          </button>
+          </button> */}
           {showExportDropdown && (
             <div className="absolute z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
               <button
