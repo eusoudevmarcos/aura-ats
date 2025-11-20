@@ -31,7 +31,7 @@ export class TarefaController {
       const tarefa = await this.service.save(data);
       return res.status(201).json(tarefa);
     } catch (error: any) {
-      console.error("Erro ao salvar tarefa:", error);
+      console.log("Erro ao salvar tarefa:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao salvar tarefa",
         error,
@@ -55,7 +55,7 @@ export class TarefaController {
       const tarefas = await this.service.getAllByUsuario(userId);
       return res.status(200).json(tarefas);
     } catch (error: any) {
-      console.error("Erro ao buscar tarefas:", error);
+      console.log("Erro ao buscar tarefas:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao buscar tarefas",
         error,
@@ -74,7 +74,7 @@ export class TarefaController {
 
       return res.status(200).json(tarefa);
     } catch (error: any) {
-      console.error("Erro ao buscar tarefa:", error);
+      console.log("Erro ao buscar tarefa:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao buscar tarefa",
         error,
@@ -93,7 +93,7 @@ export class TarefaController {
       await this.service.delete(id);
       return res.status(204).send();
     } catch (error: any) {
-      console.error("Erro ao deletar tarefa:", error);
+      console.log("Erro ao deletar tarefa:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao deletar tarefa",
         error,
@@ -114,7 +114,7 @@ export class TarefaController {
       await this.service.updateOrder(tarefas);
       return res.status(200).json({ message: "Ordem atualizada com sucesso" });
     } catch (error: any) {
-      console.error("Erro ao atualizar ordem das tarefas:", error);
+      console.log("Erro ao atualizar ordem das tarefas:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao atualizar ordem das tarefas",
         error,

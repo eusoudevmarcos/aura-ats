@@ -101,7 +101,7 @@ export default async function handler(
         response.data.conferenceData?.entryPoints?.[0]?.uri,
     });
   } catch (error: any) {
-    console.error('Erro ao criar evento:', error);
+    console.log('Erro ao criar evento:', error);
     if (error.code === 401 || error.message?.includes('invalid_grant')) {
       return res.status(401).json({
         message: 'Token expirado. Faça login novamente.',

@@ -30,7 +30,7 @@ export default async function handler(
 
     return res.status(200).json(response.data.items || []);
   } catch (error: any) {
-    console.error('Erro ao listar eventos:', error);
+    console.log('Erro ao listar eventos:', error);
     return res.status(500).json({ message: error.message });
   }
 }

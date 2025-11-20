@@ -59,7 +59,7 @@ export const authMiddleware = (
     req.user = decoded;
     next();
   } catch (error) {
-    console.error("Erro na validação do token:", error);
+    console.log("Erro na validação do token:", error);
     if (error instanceof jwt.TokenExpiredError) {
       return res
         .status(401)

@@ -38,7 +38,7 @@ export function sanitize(
   typeData: SearchType,
   options?: { filial?: boolean; list?: boolean; uf?: string }
 ): {
-  tipo: string;
+  tipo: SearchType;
   dado: string;
   query: string;
   pathname: string;

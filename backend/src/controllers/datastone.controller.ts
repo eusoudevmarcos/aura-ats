@@ -2,8 +2,9 @@
 
 import axios from "axios";
 import { Request, Response } from "express";
+import prisma from "../lib/prisma";
 import { sanitize, SearchType } from "../utils/sanitize";
-import CacheController from "./cache.controller";
+import CacheController, { CacheEntryPayload } from "./cache.controller";
 
 const cache = new CacheController();
 
@@ -69,7 +70,6 @@ export class DatastoneController {
         return;
       }
 
-      // Sanitiza os dados e identifica tipo e endpoint
       const result = sanitize(input, tipo, typeData, {
         uf,
         filial: filial === "true",
@@ -80,22 +80,56 @@ export class DatastoneController {
         res.status(400).json(result);
         return;
       }
+      const key = cache.buildKey({ typeData: result.tipo, input });
 
-      // const cached = cache.getFromCacheFileByKey(tipo, result.tipo, input);
-      // if (cached) {
-      //   res.status(200).json({ status: 200, cache: true, data: cached });
-      //   return;
-      // }
+      const cachedPayload = cache.getCachedRequest(key);
+
+      if (cachedPayload) {
+        res.status(200).json({ status: 200, cache: true, ...cachedPayload });
+        return;
+      }
 
       const URL = `${BASE_URL}/${result.pathname}?${result.query}`;
-      console.log(URL);
+
       const response = await axios.get(URL, {
         headers: {
           Authorization: process.env.DATASTONE_KEY,
         },
       });
 
-      const data = response.data;
+      const dataFromApi = this.ensureArray(response.data);
+      let candidato = null;
+      let isSave = false;
+
+      if (result.tipo === "CPF") {
+        candidato = await prisma.candidato.findFirst({
+          where: { pessoa: { cpf: input } },
+        });
+
+        isSave = candidato ? true : false;
+      }
+
+      const payload: CacheEntryPayload = {
+        data: dataFromApi,
+        isSave,
+        candidato: candidato && candidato.id ? { id: candidato.id } : null,
+        tipo,
+        typeData: result.tipo,
+        request: {
+          input,
+          uf,
+          filial: filial === "true",
+          list: list === "true",
+          isDetail: isDetail === "true" || result.isDetail,
+          query: result.query,
+          tipo,
+          typeData: result.tipo,
+          url: URL,
+        },
+        meta: {
+          fetchedAt: new Date().toISOString(),
+        },
+      };
 
       // if (isDetail === "true" && data?.[0]?.id) {
       //   const enriched = await this.detail(data[0], tipo);
@@ -105,10 +139,13 @@ export class DatastoneController {
       //   res.status(200).json({ status: 200, enriched, saveCache });
       // }
 
-      const saveCache = cache.saveCacheFile(tipo, data);
-      await log({ status: 200, data, URL, saveCache });
+      const saveCache = cache.saveCachedRequest(
+        cache.buildKey({ typeData: result.tipo, input }),
+        payload
+      );
+      await log({ status: 200, data: payload, URL, cacheKey: saveCache?.key });
 
-      res.status(200).json({ status: 200, data, saveCache });
+      res.status(200).json({ status: 200, cache: !!saveCache, ...payload });
     } catch (error: any) {
       await log(error);
       console.log(
@@ -121,6 +158,18 @@ export class DatastoneController {
         mensagem: `Erro interno na consulta da API. Verifique sua conta ou entre me contato com um Administrador. STATUS: ${error?.status}`,
       });
     }
+  }
+
+  private ensureArray(responseData: any): any[] {
+    if (Array.isArray(responseData)) return responseData;
+    if (Array.isArray(responseData?.data)) return responseData.data;
+    if (responseData?.data && typeof responseData.data === "object") {
+      return [responseData.data];
+    }
+    if (responseData && typeof responseData === "object") {
+      return [responseData];
+    }
+    return [];
   }
 
   private async detail(data: any, tipo: "persons" | "companies"): Promise<any> {
@@ -144,7 +193,7 @@ export class DatastoneController {
   }
 
   public listCache(req: Request, res: Response): void {
-    const cacheEntries = cache.readCacheFile();
+    const cacheEntries = cache.listCachedEntries();
 
     res.json(cacheEntries);
   }

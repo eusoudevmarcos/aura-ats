@@ -52,7 +52,7 @@ export class EmailService {
       await this.transporter.verify();
       return true;
     } catch (err) {
-      console.error("EmailService verification failed:", err);
+      console.log("EmailService verification failed:", err);
       return false;
     }
   }
@@ -72,7 +72,7 @@ export class EmailService {
       const info = await this.transporter.sendMail(mail);
       return info;
     } catch (err) {
-      console.error("EmailService sendMail error:", err);
+      console.log("EmailService sendMail error:", err);
       throw err;
     }
   }
@@ -130,7 +130,7 @@ export class EmailService {
       await transporter.sendMail(mailOptions);
       console.log("Email enviado com sucesso para:", usuarioSistemaData.email);
     } catch (error) {
-      console.error("Erro ao enviar email:", error);
+      console.log("Erro ao enviar email:", error);
       // Não falha o processo se o email não for enviado
     }
   }

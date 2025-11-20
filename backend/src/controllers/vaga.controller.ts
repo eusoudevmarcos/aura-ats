@@ -16,7 +16,7 @@ export class VagaController {
       );
       return res.status(201).json(newVaga);
     } catch (error: any) {
-      console.error("Error creating vaga:", error);
+      console.log("Error creating vaga:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });
@@ -50,7 +50,7 @@ export class VagaController {
       });
       return res.status(200).json(vagas);
     } catch (error: any) {
-      console.error("Error fetching vagas:", error);
+      console.log("Error fetching vagas:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });
@@ -75,7 +75,7 @@ export class VagaController {
       });
       return res.status(200).json(nonEmptyAndConvertDataDTO(vagas));
     } catch (error: any) {
-      console.error("Error fetching vagas:", error);
+      console.log("Error fetching vagas:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });
@@ -100,7 +100,7 @@ export class VagaController {
       });
       return res.status(200).json(nonEmptyAndConvertDataDTO(vagas));
     } catch (error: any) {
-      console.error("Error fetching vagas:", error);
+      console.log("Error fetching vagas:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });
@@ -113,7 +113,7 @@ export class VagaController {
       const vaga = await this.service.getById(id);
       return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
     } catch (error: any) {
-      console.error("Error fetching vaga by ID:", error);
+      console.log("Error fetching vaga by ID:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });
@@ -128,7 +128,7 @@ export class VagaController {
       );
       return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
     } catch (error: any) {
-      console.error("Error fetching vaga by ID:", error);
+      console.log("Error fetching vaga by ID:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });

@@ -18,7 +18,7 @@ export class TriagemService {
       });
       return triagem;
     } catch (error) {
-      console.error("Erro ao buscar triagem por ID:", error);
+      console.log("Erro ao buscar triagem por ID:", error);
       throw new Error("Não foi possível buscar a triagem.");
     }
   }
@@ -56,7 +56,7 @@ export class TriagemService {
         totalPages: Math.ceil(total / pageSize),
       };
     } catch (error) {
-      console.error("Erro ao buscar triagens:", error);
+      console.log("Erro ao buscar triagens:", error);
       throw new Error("Não foi possível buscar as triagens.");
     }
   }
@@ -116,7 +116,7 @@ export class TriagemService {
         totalPages: Math.ceil(total / pageSize),
       };
     } catch (error) {
-      console.error("Erro ao buscar triagens:", error);
+      console.log("Erro ao buscar triagens:", error);
       throw new Error("Não foi possível buscar as triagens.");
     }
   }
@@ -154,7 +154,7 @@ export class TriagemService {
         return updated;
       }
     } catch (error: any) {
-      console.error("Erro ao salvar triagem:", error);
+      console.log("Erro ao salvar triagem:", error);
       throw new Error(error?.message || "Erro ao salvar triagem.");
     }
   }

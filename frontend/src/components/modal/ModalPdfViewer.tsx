@@ -34,7 +34,7 @@ const ModalPdfViewer: React.FC<ModalPdfViewerProps> = ({
           setPdfBlobUrl(url);
         })
         .catch(error => {
-          console.error('Erro ao carregar PDF:', error);
+          console.log('Erro ao carregar PDF:', error);
           alert('Erro ao carregar o arquivo PDF');
         });
     }

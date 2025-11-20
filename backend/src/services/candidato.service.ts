@@ -1,12 +1,12 @@
 // src/services/candidato.service.ts
 import { Candidato, Especialidade } from "@prisma/client";
 import { inject, injectable } from "tsyringe";
+import CacheController from "../controllers/cache.controller";
 import candidatoBuild from "../helper/buildNested/candidato.build";
 import { normalizeCandidatoData } from "../helper/normalize/candidato.normalize";
 import { validateBasicFieldsCandidato } from "../helper/validate/candidato.validate";
 import prisma from "../lib/prisma";
 import { CandidatoRepository } from "../repository/candidato.repository";
-import { PessoaRepository } from "../repository/pessoa.repository";
 import { CandidatoUpdateInput } from "../types/prisma.types";
 import { AnexoService } from "./anexo.service";
 import { BillingService } from "./billing.service";
@@ -16,12 +16,12 @@ export class CandidatoService {
   constructor(
     @inject(CandidatoRepository)
     private candidatoRepository: CandidatoRepository,
-    @inject(PessoaRepository)
-    private pessoaRepository: PessoaRepository,
     @inject(BillingService)
     private billingService: BillingService,
     @inject(AnexoService)
-    private anexoService: AnexoService
+    private anexoService: AnexoService,
+    @inject(CacheController)
+    private cacheController: CacheController
   ) {}
 
   async getEspecialidades(): Promise<Especialidade[]> {
@@ -59,7 +59,7 @@ export class CandidatoService {
           `Uso debitado para cliente ${clienteId} ao consultar candidato ${id}`
         );
       } catch (error) {
-        console.error("Erro ao debitar uso:", error);
+        console.log("Erro ao debitar uso:", error);
         // Não falha a consulta se não conseguir debitar o uso
       }
     }
@@ -118,8 +118,8 @@ export class CandidatoService {
       anexos: { include: { anexo: true } },
       medico: { include: { crm: true } },
     };
-
-    let candidato: Candidato;
+    console.log("SALVANDO CANDIDATO");
+    let candidato: any;
 
     // Cria ou atualiza o candidato
     if (candidatoData.id) {
@@ -135,6 +135,18 @@ export class CandidatoService {
         include: includeRelations,
       });
     }
+
+    const key = this.cacheController.buildKey({
+      typeData: "CPF",
+      input: candidato.pessoa.cpf,
+    });
+
+    const payload = this.cacheController.getCachedRequest(key);
+    this.cacheController.saveCachedRequest(key, {
+      ...payload,
+      candidato,
+      isSave: true,
+    });
 
     // === 🧩 PROCESSAR ANEXOS ===
     if (!Array.isArray(anexos)) return candidato;
@@ -188,10 +200,10 @@ export class CandidatoService {
     }
 
     // 🔹 Retorna candidato atualizado
-    candidato = (await prisma.candidato.findUnique({
+    candidato = await prisma.candidato.findUnique({
       where: { id: candidato.id },
       include: includeRelations,
-    })) as Candidato;
+    });
 
     return candidato;
   }

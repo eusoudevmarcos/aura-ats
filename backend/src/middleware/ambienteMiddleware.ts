@@ -10,7 +10,7 @@ export async function ambienteMiddleware(): Promise<void> {
 
       const requiredPassword = process.env.PASSWORD_ACESS_PROD;
       if (!requiredPassword) {
-        console.error(
+        console.log(
           "\x1b[31m[ERRO] PASSWORD_ACESS_PROD não está definido no arquivo .env\x1b[0m"
         );
         process.exit(1);
@@ -49,7 +49,7 @@ export async function ambienteMiddleware(): Promise<void> {
       }
 
       if (userPassword !== requiredPassword) {
-        console.error(
+        console.log(
           "\x1b[31m[SENHA INCORRETA] A senha fornecida está incorreta. Encerrando a aplicação.\x1b[0m"
         );
         process.exit(1);

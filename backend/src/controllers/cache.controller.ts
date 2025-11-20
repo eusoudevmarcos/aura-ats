@@ -1,271 +1,213 @@
-import isEqual from "lodash.isequal";
-import cache from "../cache"; // Importa o LRUCache configurado
 import fs from "fs";
+import os from "os";
 import path from "path";
+import cache from "../cache";
 
-type CacheKey = "persons" | "companies";
-type CacheData = { persons?: any[]; companies?: any[] };
+const CACHE_DIR = path.join(__dirname, "../public/cache");
+const CACHE_FILE_PATH = path.join(CACHE_DIR, "datastone-cache.json");
+const CACHE_TTL = 1000 * 60 * 60; // 1 hora
+const MEMORY_THRESHOLD_RATIO = 0.15; // 15% livre mínimo
 
-const CACHE_PERSIST_PATH = path.join(
-  __dirname,
-  "../public/cache/cache_data.json"
-);
-const CACHE_PERSIST_TTL = 1000 * 60 * 60 * 2; // 2 horas em ms
-
-function getIdentifierKey(key: CacheKey): string {
-  return key === "persons" ? "cpf" : "cnpj";
+export interface CacheEntryPayload {
+  [key: string]: any;
 }
 
-function persistCacheToFile(cacheObj: CacheData) {
-  try {
-    const cacheDir = path.dirname(CACHE_PERSIST_PATH);
-    if (!fs.existsSync(cacheDir)) {
-      fs.mkdirSync(cacheDir, { recursive: true });
-    }
-    fs.writeFileSync(
-      CACHE_PERSIST_PATH,
-      JSON.stringify(cacheObj, null, 2),
-      "utf-8"
-    );
-    // Salva também o timestamp de persistência
-    fs.writeFileSync(
-      CACHE_PERSIST_PATH + ".meta",
-      JSON.stringify({ lastPersist: Date.now() }),
-      "utf-8"
-    );
-  } catch (error: any) {
-    console.error("Erro ao persistir cache em arquivo:", error.message);
-  }
+interface CacheEntry {
+  key: string;
+  payload: CacheEntryPayload;
+  createdAt: number;
 }
 
-function readPersistedCacheFile(): CacheData | null {
-  try {
-    if (!fs.existsSync(CACHE_PERSIST_PATH)) return null;
-    // Verifica se o cache persistente está expirado
-    const metaPath = CACHE_PERSIST_PATH + ".meta";
-    if (fs.existsSync(metaPath)) {
-      const meta = JSON.parse(fs.readFileSync(metaPath, "utf-8"));
-      if (
-        meta.lastPersist &&
-        Date.now() - meta.lastPersist > CACHE_PERSIST_TTL
-      ) {
-        // Expirou, remove arquivo
-        fs.unlinkSync(CACHE_PERSIST_PATH);
-        fs.unlinkSync(metaPath);
-        return null;
-      }
-    }
-    const fileContent = fs.readFileSync(CACHE_PERSIST_PATH, "utf-8");
-    return JSON.parse(fileContent);
-  } catch (error: any) {
-    return null;
-  }
-}
+type PersistedCache = Record<string, CacheEntry>;
 
 export default class CacheController {
-  saveCacheFile(key: CacheKey, data: any): void {
-    try {
-      // 1. Lê cache persistente do disco
-      let cacheObj: CacheData = readPersistedCacheFile() || {};
-      const existingData: any[] = Array.isArray(cacheObj[key])
-        ? cacheObj[key]!
-        : [];
-      const newItems: any[] = Array.isArray(data) ? data : [data];
-      const identifierKey = getIdentifierKey(key);
-
-      // 2. Atualiza dados conforme regras de completude
-      const updatedData: any[] = [...existingData];
-      for (const newItem of newItems) {
-        const id = newItem?.[identifierKey];
-        if (id == null) continue;
-
-        // Se objeto exatamente igual já existir, ignora
-        const alreadyExists = existingData.some((item) =>
-          isEqual(item, newItem)
-        );
-        if (alreadyExists) continue;
-
-        const index = updatedData.findIndex(
-          (item) => String(item?.[identifierKey]) === String(id)
-        );
-
-        if (index >= 0) {
-          const existingItem = updatedData[index];
-          const existingProps = Object.keys(existingItem).length;
-          const newProps = Object.keys(newItem).length;
-          if (newProps > existingProps) {
-            updatedData[index] = newItem;
-          }
-        } else {
-          updatedData.push(newItem);
-        }
-      }
-      cacheObj[key] = updatedData;
-
-      // 3. Atualiza o cache LRU (memória) para cada item individualmente
-      for (const item of updatedData) {
-        const id = item?.[identifierKey];
-        if (id != null) {
-          // A chave do LRU será `${key}:${id}`
-          cache.set(`${key}:${id}`, item);
-        }
-      }
-
-      // 4. Persiste o cache atualizado no disco
-      persistCacheToFile(cacheObj);
-    } catch (error: any) {
-      console.error("Erro ao salvar cache:", error.message);
+  private ensureCacheDir(): void {
+    if (!fs.existsSync(CACHE_DIR)) {
+      fs.mkdirSync(CACHE_DIR, { recursive: true });
     }
   }
 
-  readCacheFile(tipo?: CacheKey): any {
-    // Lê do cache persistente (disco)
-    const cacheObj = readPersistedCacheFile();
-    if (!cacheObj) return tipo ? [] : {};
-    return tipo ? cacheObj[tipo] || [] : cacheObj;
+  private readPersistedCache(): PersistedCache {
+    try {
+      if (!fs.existsSync(CACHE_FILE_PATH)) {
+        return {};
+      }
+      const content = fs.readFileSync(CACHE_FILE_PATH, "utf-8");
+      const parsed = JSON.parse(content) as PersistedCache;
+      return this.pruneExpiredEntries(parsed);
+    } catch (error: any) {
+      console.log("Erro ao ler cache persistido:", error.message);
+      return {};
+    }
   }
 
-  getFromCacheFileByKey(
-    key: CacheKey,
-    searchKey: string,
-    searchValue: string | number
-  ): any {
+  private persistCache(cacheObj: PersistedCache): void {
     try {
-      const identifierKey = getIdentifierKey(key);
-      const normalize = (val: any) =>
-        String(val).toLowerCase().replace(/^0+/, "");
-
-      const normalizedSearch = normalize(searchValue);
-
-      // 1. Tenta buscar no cache LRU (memória) por id exato
-      if (searchKey === identifierKey) {
-        const cached = cache.get(`${key}:${normalizedSearch}`);
-        if (cached) return [cached];
-      }
-
-      // 2. Busca no cache persistente (disco)
-      const cacheData = this.readCacheFile(key);
-      if (!Array.isArray(cacheData)) return null;
-
-      // Busca na raiz do objeto
-      const rootMatches = cacheData.filter((item: any) => {
-        const value = item?.[searchKey];
-        if (value !== undefined && value !== null) {
-          return normalize(value).includes(normalizedSearch);
-        }
-        return false;
-      });
-
-      if (rootMatches.length > 0) return rootMatches;
-
-      // Busca em subpropriedades
-      const containsKeyValue = (obj: any): boolean => {
-        if (typeof obj !== "object" || obj === null) return false;
-        for (const [k, v] of Object.entries(obj)) {
-          if (k === searchKey && v != null) {
-            if (normalize(v).includes(normalizedSearch)) return true;
-          }
-          if (typeof v === "object") {
-            if (Array.isArray(v)) {
-              if (v.some((el) => containsKeyValue(el))) return true;
-            } else {
-              if (containsKeyValue(v)) return true;
-            }
-          }
-        }
-        return false;
-      };
-
-      const nestedMatches = cacheData.filter((item: any) =>
-        containsKeyValue(item)
+      const safeCache = this.relieveMemoryPressure({ ...cacheObj });
+      this.ensureCacheDir();
+      fs.writeFileSync(
+        CACHE_FILE_PATH,
+        JSON.stringify(safeCache, null, 2),
+        "utf-8"
       );
-
-      return nestedMatches.length > 0 ? nestedMatches : null;
     } catch (error: any) {
-      console.error("Erro ao buscar no cache:", error.message);
+      console.log("Erro ao persistir cache:", error.message);
+    }
+  }
+
+  private getMemoryStats() {
+    const total = os.totalmem();
+    const free = os.freemem();
+    const used = total - free;
+    return {
+      total,
+      free,
+      used,
+      freeRatio: total === 0 ? 0 : free / total,
+    };
+  }
+
+  private relieveMemoryPressure(cacheObj: PersistedCache): PersistedCache {
+    const stats = this.getMemoryStats();
+    if (stats.freeRatio > MEMORY_THRESHOLD_RATIO) {
+      return cacheObj;
+    }
+
+    const sortedEntries = Object.values(cacheObj).sort(
+      (a, b) => a.createdAt - b.createdAt
+    );
+
+    for (const entry of sortedEntries) {
+      const currentStats = this.getMemoryStats();
+      if (currentStats.freeRatio > MEMORY_THRESHOLD_RATIO) break;
+
+      delete cacheObj[entry.key];
+      cache.delete(entry.key);
+    }
+
+    return cacheObj;
+  }
+
+  buildKey(...args: (string | Record<string, any>)[]): string {
+    // Se for apenas uma string, retorna a própria string
+    if (args.length === 1 && typeof args[0] === "string") {
+      return args[0];
+    }
+
+    // Se for objeto(s), mescla todos os objetos
+    const merged = Object.assign(
+      {},
+      ...args.filter((arg) => typeof arg === "object" && arg !== null)
+    );
+
+    // Se não houver propriedades, retorna string vazia
+    if (Object.keys(merged).length === 0) {
+      return "";
+    }
+
+    // Ordena as chaves alfabeticamente para garantir consistência
+    const orderedKeys = Object.keys(merged).sort();
+
+    // Concatena apenas os valores normalizados com traço
+    const values: string[] = [];
+    for (const key of orderedKeys) {
+      const value = merged[key];
+      // Normaliza: trim + lowercase se for string, senão converte para string
+      const normalized =
+        typeof value === "string" ? value.trim().toLowerCase() : String(value);
+      values.push(normalized);
+    }
+
+    return values.join("-");
+  }
+
+  private isExpired(entry: CacheEntry): boolean {
+    return Date.now() - entry.createdAt > CACHE_TTL;
+  }
+  // @protected
+  pruneExpiredEntries(cacheObj: PersistedCache): PersistedCache {
+    let mutated = false;
+    for (const key of Object.keys(cacheObj)) {
+      const entry = cacheObj[key];
+      if (!entry || this.isExpired(entry)) {
+        mutated = true;
+        delete cacheObj[key];
+        cache.delete(key);
+      }
+    }
+
+    if (mutated) {
+      this.persistCache(cacheObj);
+    }
+
+    return cacheObj;
+  }
+
+  getCachedRequest(key: string): CacheEntryPayload | null {
+    const inMemory = cache.get(key) as CacheEntry | undefined;
+    if (inMemory && !this.isExpired(inMemory)) {
+      return inMemory.payload;
+    }
+
+    const persistedCache = this.readPersistedCache();
+    const entry = persistedCache[key];
+
+    if (!entry || this.isExpired(entry)) {
+      if (entry) {
+        delete persistedCache[key];
+        this.persistCache(persistedCache);
+      }
+      cache.delete(key);
       return null;
     }
+
+    cache.set(key, entry, { ttl: CACHE_TTL });
+    return entry.payload;
   }
 
-  /**
-   * Limpa do cache (memória e disco) todos os itens que contenham a subpropriedade informada.
-   * Os parâmetros são os mesmos de getFromCacheFileByKey.
-   */
-  clearCacheBySubproperty(
-    key: CacheKey,
-    searchKey: string,
-    searchValue: string | number
-  ): void {
-    try {
-      const identifierKey = getIdentifierKey(key);
-      const normalize = (val: any) =>
-        String(val).toLowerCase().replace(/^0+/, "");
-      const normalizedSearch = normalize(searchValue);
+  saveCachedRequest(
+    key: string,
+    payload: CacheEntryPayload
+  ): CacheEntry | null {
+    const entry: CacheEntry = {
+      key,
+      payload,
+      createdAt: Date.now(),
+    };
 
-      // Lê o cache persistente
-      let cacheObj: CacheData = readPersistedCacheFile() || {};
-      let dataArr: any[] = Array.isArray(cacheObj[key]) ? cacheObj[key]! : [];
+    cache.set(key, entry, { ttl: CACHE_TTL });
 
-      // Função para identificar se o item deve ser removido
-      const containsKeyValue = (obj: any): boolean => {
-        if (typeof obj !== "object" || obj === null) return false;
-        for (const [k, v] of Object.entries(obj)) {
-          if (k === searchKey && v != null) {
-            if (normalize(v).includes(normalizedSearch)) return true;
-          }
-          if (typeof v === "object") {
-            if (Array.isArray(v)) {
-              if (v.some((el) => containsKeyValue(el))) return true;
-            } else {
-              if (containsKeyValue(v)) return true;
-            }
-          }
-        }
-        return false;
-      };
+    const persistedCache = this.readPersistedCache();
+    persistedCache[key] = entry;
+    this.persistCache(persistedCache);
 
-      // Filtra os itens que NÃO devem ser removidos
-      const filteredData = dataArr.filter(
-        (item: any) => !containsKeyValue(item)
-      );
+    return entry;
+  }
 
-      // Remove do cache LRU os itens removidos
-      const removedItems = dataArr.filter((item: any) =>
-        containsKeyValue(item)
-      );
-      for (const item of removedItems) {
-        const id = item?.[identifierKey];
-        if (id != null) {
-          cache.delete(`${key}:${id}`);
-        }
-      }
+  deleteCacheByKey(key: string) {
+    // Remove da memória
+    cache.delete(key);
 
-      // Atualiza o cacheObj e persiste
-      cacheObj[key] = filteredData;
-      persistCacheToFile(cacheObj);
-    } catch (error: any) {
-      console.error("Erro ao limpar subpropriedade do cache:", error.message);
+    // Remove do arquivo persistido
+    const persistedCache = this.readPersistedCache();
+    if (persistedCache[key]) {
+      delete persistedCache[key];
+      this.persistCache(persistedCache);
     }
   }
 
-  /**
-   * Limpa todo o cache (memória e disco).
-   */
-  clearAllCache(): void {
+  clearAll(): void {
     try {
-      // Limpa o cache LRU (memória)
       cache.clear();
-
-      // Remove os arquivos de cache persistente
-      if (fs.existsSync(CACHE_PERSIST_PATH)) {
-        fs.unlinkSync(CACHE_PERSIST_PATH);
-      }
-      const metaPath = CACHE_PERSIST_PATH + ".meta";
-      if (fs.existsSync(metaPath)) {
-        fs.unlinkSync(metaPath);
+      if (fs.existsSync(CACHE_FILE_PATH)) {
+        fs.unlinkSync(CACHE_FILE_PATH);
       }
     } catch (error: any) {
-      console.error("Erro ao limpar todo o cache:", error.message);
+      console.log("Erro ao limpar cache:", error.message);
     }
+  }
+
+  listCachedEntries(): PersistedCache {
+    return this.readPersistedCache();
   }
 }

@@ -112,7 +112,7 @@ export default function Tarefas() {
       ]);
       setInput('');
     } catch (error) {
-      console.error('Erro ao adicionar tarefa:', error);
+      console.log('Erro ao adicionar tarefa:', error);
     }
   };
 
@@ -122,7 +122,7 @@ export default function Tarefas() {
       await tarefaApi.delete(id);
       setTodos(todos.filter(t => t.id !== id));
     } catch (error) {
-      console.error('Erro ao deletar tarefa:', error);
+      console.log('Erro ao deletar tarefa:', error);
     }
   };
 
@@ -146,7 +146,7 @@ export default function Tarefas() {
       setEditId(null);
       setEditText('');
     } catch (error) {
-      console.error('Erro ao salvar edição:', error);
+      console.log('Erro ao salvar edição:', error);
     }
   };
 
@@ -165,7 +165,7 @@ export default function Tarefas() {
 
       setTodos(todos.map(t => (t.id === id ? { ...t, done: !t.done } : t)));
     } catch (error) {
-      console.error('Erro ao atualizar status da tarefa:', error);
+      console.log('Erro ao atualizar status da tarefa:', error);
     }
   };
 
@@ -204,7 +204,7 @@ export default function Tarefas() {
       }));
       await tarefaApi.updateOrder(tarefasComOrdem);
     } catch (error) {
-      console.error('Erro ao atualizar ordem das tarefas:', error);
+      console.log('Erro ao atualizar ordem das tarefas:', error);
     }
 
     dragItem.current = null;

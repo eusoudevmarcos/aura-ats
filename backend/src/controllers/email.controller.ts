@@ -15,7 +15,7 @@ export class EmailController {
         message: isVerify ? "Email sent successfully" : "Failed to send email",
       });
     } catch (error: Error | any) {
-      console.error("EmailController verify error:", error);
+      console.log("EmailController verify error:", error);
       return res.status(500).json({
         success: false,
         message: "Failed to send email",

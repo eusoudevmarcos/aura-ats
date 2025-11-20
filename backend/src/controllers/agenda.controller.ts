@@ -19,7 +19,7 @@ export class AgendaController {
       const agenda = await this.service.create(data);
       return res.status(201).json(agenda);
     } catch (error: any) {
-      console.error("Erro ao criar agenda:", error);
+      console.log("Erro ao criar agenda:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao criar agenda",
         error,
@@ -44,7 +44,7 @@ export class AgendaController {
         })
       );
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return res.status(500).json({ message: "Erro ao buscar agenda", error });
     }
   }
@@ -95,7 +95,7 @@ export class AgendaController {
       });
       return res.status(200).json(agenda);
     } catch (error: any) {
-      console.error("Erro ao atualizar agenda:", error);
+      console.log("Erro ao atualizar agenda:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao atualizar agenda",
         error,
@@ -112,7 +112,7 @@ export class AgendaController {
       });
       return res.status(204).send();
     } catch (error: any) {
-      console.error("Erro ao deletar agenda:", error);
+      console.log("Erro ao deletar agenda:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao deletar agenda",
         error,

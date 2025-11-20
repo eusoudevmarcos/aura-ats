@@ -344,7 +344,10 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
       <ModalSuccess
         isOpen={showSuccessModal}
-        onClose={() => setShowSuccessModal(false)}
+        onClose={() => {
+          setShowSuccessModal(false);
+          if (onSuccess) onSuccess;
+        }}
         message={successMessage}
       />
     </FormProvider>

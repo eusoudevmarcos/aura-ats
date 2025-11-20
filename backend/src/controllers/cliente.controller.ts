@@ -38,7 +38,7 @@ export class ClienteController {
         .status(200)
         .json(nonEmptyAndConvertDataDTO({ ...rest, planos: planosUpdate }));
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return res.status(500).json({ message: "Erro ao buscar cliente", error });
     }
   }

@@ -4,7 +4,7 @@
 import takeitStyles from '@/styles/takeit.module.scss';
 import { UF_MODEL } from '@/utils/UF';
 import { mask } from '@/utils/mask/mask';
-import React, { ChangeEvent, FormEvent, useState } from 'react';
+import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
 
 // VALIDATORS
@@ -76,7 +76,7 @@ const isCompanyName = (str: string): boolean => {
 // Definindo os tipos para as props
 type TypeColumns = 'persons' | 'companies';
 
-type SearchType =
+export type SearchType =
   | 'CPF'
   | 'CNPJ'
   | 'EMAIL'
@@ -90,10 +90,17 @@ interface SearchFormProps {
     input: string,
     uf: string,
     options: { filial: boolean },
-    descriptionData: string
+    descriptionData: SearchType,
+    overrideType?: TypeColumns
   ) => void;
   loading: boolean;
   typeColumns: TypeColumns;
+  initialSearchParams?: {
+    input?: string;
+    uf?: string;
+    options?: { filial: boolean };
+    descriptionData?: SearchType | null;
+  };
 }
 
 // Função para retornar mensagens de erro personalizadas
@@ -148,6 +155,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   handleSearch,
   loading,
   typeColumns,
+  initialSearchParams,
 }) => {
   const [input, setInput] = useState<string>('');
   const [selectedType, setSelectedType] = useState<SearchType | null>(null);
@@ -155,6 +163,29 @@ const SearchForm: React.FC<SearchFormProps> = ({
   const [uf, setUf] = useState<string>('');
   const [isFiliar, setIsFiliar] = useState<boolean>(false);
   const [errorMsg, setErrorMsg] = useState<string>('');
+
+  useEffect(() => {
+    if (!initialSearchParams) return;
+
+    setInput(initialSearchParams.input ?? '');
+    setSelectedType(initialSearchParams.descriptionData ?? null);
+    setUf(initialSearchParams.uf ?? '');
+    setIsFiliar(Boolean(initialSearchParams.options?.filial));
+
+    if (initialSearchParams.descriptionData && initialSearchParams.input) {
+      const isValid = validateInputByType(
+        initialSearchParams.input,
+        initialSearchParams.descriptionData
+      );
+      setDisableBtn(!isValid);
+      setErrorMsg(
+        getValidationError(
+          initialSearchParams.input,
+          initialSearchParams.descriptionData
+        )
+      );
+    }
+  }, [initialSearchParams]);
 
   // Defina os tipos disponíveis conforme typeColumns
   const typeButtons =

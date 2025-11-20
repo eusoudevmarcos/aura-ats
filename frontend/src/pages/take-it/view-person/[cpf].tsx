@@ -1,13 +1,15 @@
 import api from '@/axios';
+import CandidatoForm from '@/components/form/CandidatoForm';
 import { SearchIcon, WhatsAppIcon } from '@/components/icons';
+import Modal from '@/components/modal/Modal';
 import Card from '@/components/takeit/Card';
+import { convertDataStoneToCandidatoDTO } from '@/dto/dataStoneCandidato.dto';
 import { convertDateFromPostgres } from '@/utils/date/convertDateFromPostgres';
 import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
 import { unmask } from '@/utils/mask/unmask';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
-
 interface SearchOptions {
   [key: string]: any;
 }
@@ -22,6 +24,10 @@ export default function ViewPersonPage(): React.ReactElement {
   const [data, setData] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(false);
+  const [showModalEdit, setShowModalEdit] = useState<boolean>(false);
+  const [isSave, setIsSave] = useState<boolean>(false);
+  const [candidatoId, setCandidatoId] = useState(null);
+  const [cache, setCache] = useState(false);
 
   // Função para buscar dados da pessoa pelo CPF
   const fetchPersonData = async (cpf: string) => {
@@ -54,6 +60,15 @@ export default function ViewPersonPage(): React.ReactElement {
         ? response.data.data[0]
         : response.data?.data;
 
+      setIsSave(response.data.isSave);
+      if (response?.data?.candidato?.id) {
+        setCandidatoId(response.data.candidato.id);
+      }
+      console.log(response?.data?.cache);
+      if (response?.data?.cache) {
+        setCache(response.data.cache);
+      }
+
       if (!rawData) {
         setError('Pessoa não encontrada.');
         setData(null);
@@ -77,7 +92,6 @@ export default function ViewPersonPage(): React.ReactElement {
     if (cpf) {
       fetchPersonData(cpf as string);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cpf]);
 
   // Função para exportar
@@ -123,8 +137,8 @@ export default function ViewPersonPage(): React.ReactElement {
   return (
     // <TakeitLayout fit>
     //   {({}) => (
-    <div className="px-4 py-2 mb-30">
-      <div className="flex justify-between mb-10 px-4 py-2">
+    <div className="px-4 py-2 mb-10">
+      <div className="flex justify-between py-2">
         <button
           onClick={() => router.push('/take-it')}
           className="buttonPrimary"
@@ -132,8 +146,8 @@ export default function ViewPersonPage(): React.ReactElement {
           Voltar
         </button>
 
-        <div className="relative inline-block" id="export-dropdown">
-          <button
+        <div className="relative flex gap-2" id="export-dropdown">
+          {/* <button
             id="export-btn"
             className="buttonPrimary flex items-center"
             onClick={() => setShowExportDropdown(prev => !prev)}
@@ -154,28 +168,35 @@ export default function ViewPersonPage(): React.ReactElement {
                 d="M19 9l-7 7-7-7"
               />
             </svg>
+          </button> */}
+          <button
+            id="salvar-candidato-btn"
+            className={`${
+              candidatoId && isSave ? 'buttonPrimary-outlined' : 'buttonPrimary'
+            } flex items-center`}
+            onClick={async () => {
+              if (candidatoId && isSave) {
+                console.log('router');
+                await router.push(`/candidato/${candidatoId}`);
+                return;
+              }
+              setShowModalEdit(prev => !prev);
+            }}
+            type="button"
+          >
+            {candidatoId && isSave
+              ? 'Ver Profissional'
+              : 'Salvar como Profissional'}
           </button>
-          {showExportDropdown && (
-            <div className="absolute z-10 mt-2 w-36 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5">
-              <button
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100  p-2"
-                onClick={() => handleExport('csv')}
-              >
-                Exportar CSV
-              </button>
-              <button
-                className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100  p-2"
-                onClick={() => handleExport('pdf')}
-              >
-                Exportar PDF
-              </button>
-            </div>
-          )}
         </div>
       </div>
+
+      <p className="text-primary font-bold">Cache: {cache ? 'SIM' : 'NÂO'}</p>
+
       <h1 className="text-2xl mb-4 font-black">
         <span className="text-primary">Nome:</span> {mostrarValor(data.name)}
       </h1>
+
       <div
         className="grid grid-cols-1 md:grid-cols-2 gap-2"
         id="card"
@@ -537,6 +558,22 @@ export default function ViewPersonPage(): React.ReactElement {
           )}
         </Card>
       </div>
+
+      <Modal
+        isOpen={showModalEdit}
+        onClose={() => setShowModalEdit(false)}
+        title="Editar Candidato"
+      >
+        <CandidatoForm
+          initialValues={convertDataStoneToCandidatoDTO(data)}
+          onSuccess={candidato => {
+            setShowModalEdit(prev => !prev);
+            setIsSave(true);
+            setCache(true);
+            setCandidatoId(candidato.id);
+          }}
+        />
+      </Modal>
     </div>
     //   )}
     // </TakeitLayout>
