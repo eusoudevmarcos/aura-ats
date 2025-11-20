@@ -29,7 +29,7 @@ export class TriagemController {
 
       return res.status(200).json(nonEmptyAndConvertDataDTO(triagem));
     } catch (error) {
-      console.error(error);
+      console.log(error);
       return res.status(500).json({ message: "Erro ao buscar triagem", error });
     }
   }

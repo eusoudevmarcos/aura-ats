@@ -16,7 +16,7 @@ export class CandidatoController {
       const newCandidato = await this.candidatoService.save(candidatoData);
       return res.status(201).json(nonEmptyAndConvertDataDTO(newCandidato));
     } catch (error: any) {
-      console.error("Erro ao criar candidato:", error.message);
+      console.log("Erro ao criar candidato:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -28,7 +28,7 @@ export class CandidatoController {
   //     const updatedCandidato = await this.candidatoService.save(candidatoData);
   //     return res.status(200).json(updatedCandidato);
   //   } catch (error: any) {
-  //     console.error("Erro ao atualizar candidato:", error.message);
+  //     console.log("Erro ao atualizar candidato:", error.message);
   //     return res.status(400).json({ message: error.message });
   //   }
   // }
@@ -46,7 +46,7 @@ export class CandidatoController {
       }
       return res.status(200).json(nonEmptyAndConvertDataDTO(candidato));
     } catch (error: any) {
-      console.error("Erro ao buscar candidato por ID:", error.message);
+      console.log("Erro ao buscar candidato por ID:", error.message);
       return res.status(500).json({ message: "Erro interno do servidor." });
     }
   }
@@ -61,7 +61,7 @@ export class CandidatoController {
       );
       return res.status(200).json(result);
     } catch (error: any) {
-      console.error("Erro ao listar candidatos:", error.message);
+      console.log("Erro ao listar candidatos:", error.message);
       return res.status(500).json({ message: "Erro interno do servidor." });
     }
   }
@@ -72,7 +72,7 @@ export class CandidatoController {
       await this.candidatoService.deleteCandidato(id);
       return res.status(204).send();
     } catch (error: any) {
-      console.error("Erro ao deletar candidato:", error.message);
+      console.log("Erro ao deletar candidato:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -82,7 +82,7 @@ export class CandidatoController {
       const especialidades = await this.candidatoService.getEspecialidades();
       return res.status(200).send(especialidades);
     } catch (error: any) {
-      console.error("Erro ao consultar especialidades:", error.message);
+      console.log("Erro ao consultar especialidades:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -129,7 +129,7 @@ export class CandidatoController {
 
       fileStream.pipe(res);
     } catch (error: any) {
-      console.error("Erro ao fazer download do anexo:", error.message);
+      console.log("Erro ao fazer download do anexo:", error.message);
       return res.status(404).json({ message: error.message });
     }
   }

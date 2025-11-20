@@ -235,7 +235,7 @@ export class BillingService {
 
       return true;
     } catch (error) {
-      console.error("Erro ao debitar uso:", error);
+      console.log("Erro ao debitar uso:", error);
       return false;
     }
   }

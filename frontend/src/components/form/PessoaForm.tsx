@@ -99,7 +99,9 @@ const PessoaForm = ({
       <FormSelect name={signo} label="Signo" placeholder="Selecione o signo">
         {SignoEnum.options.map(signo => (
           <>
-            <option value={signo}>{signo}</option>
+            <option key={signo} value={signo}>
+              {signo}
+            </option>
           </>
         ))}
       </FormSelect>

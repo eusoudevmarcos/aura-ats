@@ -70,7 +70,6 @@ export class DatastoneController {
         return;
       }
 
-      // Sanitiza os dados e identifica tipo e endpoint
       const result = sanitize(input, tipo, typeData, {
         uf,
         filial: filial === "true",
@@ -81,12 +80,14 @@ export class DatastoneController {
         res.status(400).json(result);
         return;
       }
+      const key = cache.buildKey({ typeData: result.tipo, input });
 
-      // const cachedPayload = cache.getCachedRequest(result.tipo, input);
-      // if (cachedPayload) {
-      //   res.status(200).json({ status: 200, cache: true, ...cachedPayload });
-      //   return;
-      // }
+      const cachedPayload = cache.getCachedRequest(key);
+
+      if (cachedPayload) {
+        res.status(200).json({ status: 200, cache: true, ...cachedPayload });
+        return;
+      }
 
       const URL = `${BASE_URL}/${result.pathname}?${result.query}`;
 
@@ -138,10 +139,13 @@ export class DatastoneController {
       //   res.status(200).json({ status: 200, enriched, saveCache });
       // }
 
-      const saveCache = cache.saveCachedRequest(result.tipo, input, payload);
+      const saveCache = cache.saveCachedRequest(
+        cache.buildKey({ typeData: result.tipo, input }),
+        payload
+      );
       await log({ status: 200, data: payload, URL, cacheKey: saveCache?.key });
 
-      res.status(200).json({ status: 200, cache: false, ...payload });
+      res.status(200).json({ status: 200, cache: !!saveCache, ...payload });
     } catch (error: any) {
       await log(error);
       console.log(

@@ -191,7 +191,7 @@ export default class AuthenticationController {
         data: { message: error.message },
       });
 
-      console.error("Erro ao logar:", error);
+      console.log("Erro ao logar:", error);
       return res.status(401).json({ error: "Erro interno ao logar" });
     }
   }
@@ -240,7 +240,7 @@ export default class AuthenticationController {
         data: { message: error.message },
       });
 
-      console.error("Erro ao fazer logout:", error);
+      console.log("Erro ao fazer logout:", error);
       return res.status(500).json({ error: "Erro ao fazer logout" });
     }
   }

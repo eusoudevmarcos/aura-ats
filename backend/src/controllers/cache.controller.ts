@@ -2,8 +2,6 @@ import fs from "fs";
 import os from "os";
 import path from "path";
 import cache from "../cache";
-import { SearchType } from "../utils/sanitize";
-import { unmask } from "../utils/unmask";
 
 const CACHE_DIR = path.join(__dirname, "../public/cache");
 const CACHE_FILE_PATH = path.join(CACHE_DIR, "datastone-cache.json");
@@ -11,17 +9,11 @@ const CACHE_TTL = 1000 * 60 * 60; // 1 hora
 const MEMORY_THRESHOLD_RATIO = 0.15; // 15% livre mínimo
 
 export interface CacheEntryPayload {
-  data: any[];
-  request: Record<string, any>;
-  meta?: Record<string, any>;
   [key: string]: any;
 }
 
 interface CacheEntry {
   key: string;
-  typeData: SearchType;
-  input: string;
-  normalizedInput: string;
   payload: CacheEntryPayload;
   createdAt: number;
 }
@@ -44,7 +36,7 @@ export default class CacheController {
       const parsed = JSON.parse(content) as PersistedCache;
       return this.pruneExpiredEntries(parsed);
     } catch (error: any) {
-      console.error("Erro ao ler cache persistido:", error.message);
+      console.log("Erro ao ler cache persistido:", error.message);
       return {};
     }
   }
@@ -59,7 +51,7 @@ export default class CacheController {
         "utf-8"
       );
     } catch (error: any) {
-      console.error("Erro ao persistir cache:", error.message);
+      console.log("Erro ao persistir cache:", error.message);
     }
   }
 
@@ -96,25 +88,44 @@ export default class CacheController {
     return cacheObj;
   }
 
-  private normalizeInput(value: string, typeData: SearchType): string {
-    if (!value) return "";
-    if (typeData === "CPF" || typeData === "CNPJ") {
-      return unmask(value);
+  buildKey(...args: (string | Record<string, any>)[]): string {
+    // Se for apenas uma string, retorna a própria string
+    if (args.length === 1 && typeof args[0] === "string") {
+      return args[0];
     }
 
-    return value.trim().toLowerCase();
-  }
+    // Se for objeto(s), mescla todos os objetos
+    const merged = Object.assign(
+      {},
+      ...args.filter((arg) => typeof arg === "object" && arg !== null)
+    );
 
-  private buildKey(typeData: SearchType, input: string): string {
-    const normalized = this.normalizeInput(input, typeData);
-    return `${typeData}:${normalized}`;
+    // Se não houver propriedades, retorna string vazia
+    if (Object.keys(merged).length === 0) {
+      return "";
+    }
+
+    // Ordena as chaves alfabeticamente para garantir consistência
+    const orderedKeys = Object.keys(merged).sort();
+
+    // Concatena apenas os valores normalizados com traço
+    const values: string[] = [];
+    for (const key of orderedKeys) {
+      const value = merged[key];
+      // Normaliza: trim + lowercase se for string, senão converte para string
+      const normalized =
+        typeof value === "string" ? value.trim().toLowerCase() : String(value);
+      values.push(normalized);
+    }
+
+    return values.join("-");
   }
 
   private isExpired(entry: CacheEntry): boolean {
     return Date.now() - entry.createdAt > CACHE_TTL;
   }
-
-  private pruneExpiredEntries(cacheObj: PersistedCache): PersistedCache {
+  // @protected
+  pruneExpiredEntries(cacheObj: PersistedCache): PersistedCache {
     let mutated = false;
     for (const key of Object.keys(cacheObj)) {
       const entry = cacheObj[key];
@@ -132,13 +143,7 @@ export default class CacheController {
     return cacheObj;
   }
 
-  public getCachedRequest(
-    typeData: SearchType | undefined,
-    input: string | undefined
-  ): CacheEntryPayload | null {
-    if (!typeData || !input) return null;
-    const key = this.buildKey(typeData, input);
-
+  getCachedRequest(key: string): CacheEntryPayload | null {
     const inMemory = cache.get(key) as CacheEntry | undefined;
     if (inMemory && !this.isExpired(inMemory)) {
       return inMemory.payload;
@@ -160,20 +165,13 @@ export default class CacheController {
     return entry.payload;
   }
 
-  public saveCachedRequest(
-    typeData: SearchType | undefined,
-    input: string,
+  saveCachedRequest(
+    key: string,
     payload: CacheEntryPayload
   ): CacheEntry | null {
-    if (!typeData || !input) return null;
-
-    const key = this.buildKey(typeData, input);
     const entry: CacheEntry = {
       key,
-      input,
-      normalizedInput: this.normalizeInput(input, typeData),
       payload,
-      typeData,
       createdAt: Date.now(),
     };
 
@@ -186,18 +184,30 @@ export default class CacheController {
     return entry;
   }
 
-  public clearAll(): void {
+  deleteCacheByKey(key: string) {
+    // Remove da memória
+    cache.delete(key);
+
+    // Remove do arquivo persistido
+    const persistedCache = this.readPersistedCache();
+    if (persistedCache[key]) {
+      delete persistedCache[key];
+      this.persistCache(persistedCache);
+    }
+  }
+
+  clearAll(): void {
     try {
       cache.clear();
       if (fs.existsSync(CACHE_FILE_PATH)) {
         fs.unlinkSync(CACHE_FILE_PATH);
       }
     } catch (error: any) {
-      console.error("Erro ao limpar cache:", error.message);
+      console.log("Erro ao limpar cache:", error.message);
     }
   }
 
-  public listCachedEntries(): PersistedCache {
+  listCachedEntries(): PersistedCache {
     return this.readPersistedCache();
   }
 }

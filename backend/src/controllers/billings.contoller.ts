@@ -13,7 +13,7 @@ export class BillingController {
       const result = await this.billingService.createAssinaturaMensal(data);
       return res.status(201).json(result);
     } catch (error: any) {
-      console.error("Erro ao criar assinatura mensal:", error.message);
+      console.log("Erro ao criar assinatura mensal:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -25,7 +25,7 @@ export class BillingController {
       const result = await this.billingService.createPlanoPorUso(data);
       return res.status(201).json(result);
     } catch (error: any) {
-      console.error("Erro ao criar compra de plano por uso:", error.message);
+      console.log("Erro ao criar compra de plano por uso:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -43,7 +43,7 @@ export class BillingController {
       }
       return res.status(200).json(planoAssinatura);
     } catch (error: any) {
-      console.error("Erro ao obter assinatura/plano:", error.message);
+      console.log("Erro ao obter assinatura/plano:", error.message);
       return res.status(500).json({ message: error.message });
     }
   }
@@ -56,7 +56,7 @@ export class BillingController {
       const result = await this.billingService.getAll(page, pageSize);
       return res.status(200).json(result);
     } catch (error: any) {
-      console.error("Erro ao listar planos:", error.message);
+      console.log("Erro ao listar planos:", error.message);
       return res.status(500).json({ message: "Erro interno do servidor." });
     }
   }
@@ -69,7 +69,7 @@ export class BillingController {
       const updatedPlano = await this.billingService.update(id, data);
       return res.status(200).json(updatedPlano);
     } catch (error: any) {
-      console.error("Erro ao atualizar plano:", error.message);
+      console.log("Erro ao atualizar plano:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -81,7 +81,7 @@ export class BillingController {
       await this.billingService.delete(id);
       return res.status(204).send();
     } catch (error: any) {
-      console.error("Erro ao deletar plano:", error.message);
+      console.log("Erro ao deletar plano:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }
@@ -108,7 +108,7 @@ export class BillingController {
           .json({ message: "Não foi possível debitar o uso" });
       }
     } catch (error: any) {
-      console.error("Erro ao debitar uso:", error.message);
+      console.log("Erro ao debitar uso:", error.message);
       return res.status(500).json({ message: error.message });
     }
   }
@@ -124,7 +124,7 @@ export class BillingController {
       const planos = await this.billingService.getPlanosUsuario(clienteId);
       return res.status(200).json({ planos });
     } catch (error: any) {
-      console.error("Erro ao buscar planos do usuário:", error.message);
+      console.log("Erro ao buscar planos do usuário:", error.message);
       return res.status(500).json({ message: error.message });
     }
   }

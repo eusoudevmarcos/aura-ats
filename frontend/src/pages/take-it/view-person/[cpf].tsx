@@ -172,10 +172,10 @@ export default function ViewPersonPage(): React.ReactElement {
           <button
             id="salvar-candidato-btn"
             className={`${
-              isSave ? 'buttonPrimary-outlined' : 'buttonPrimary'
+              candidatoId && isSave ? 'buttonPrimary-outlined' : 'buttonPrimary'
             } flex items-center`}
             onClick={async () => {
-              if (candidatoId) {
+              if (candidatoId && isSave) {
                 console.log('router');
                 await router.push(`/candidato/${candidatoId}`);
                 return;
@@ -184,7 +184,9 @@ export default function ViewPersonPage(): React.ReactElement {
             }}
             type="button"
           >
-            {candidatoId ? 'Ver Profissional' : 'Salvar como Profissional'}
+            {candidatoId && isSave
+              ? 'Ver Profissional'
+              : 'Salvar como Profissional'}
           </button>
         </div>
       </div>
@@ -562,7 +564,15 @@ export default function ViewPersonPage(): React.ReactElement {
         onClose={() => setShowModalEdit(false)}
         title="Editar Candidato"
       >
-        <CandidatoForm initialValues={convertDataStoneToCandidatoDTO(data)} />
+        <CandidatoForm
+          initialValues={convertDataStoneToCandidatoDTO(data)}
+          onSuccess={candidato => {
+            setShowModalEdit(prev => !prev);
+            setIsSave(true);
+            setCache(true);
+            setCandidatoId(candidato.id);
+          }}
+        />
       </Modal>
     </div>
     //   )}

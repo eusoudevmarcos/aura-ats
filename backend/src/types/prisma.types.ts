@@ -149,7 +149,7 @@ export type CandidatoHabilidadeCreateInput = {
 
 export type CandidatoCreateUpdateInput = Omit<
   Prisma.CandidatoCreateInput,
-  "pessoa" | "especialidade" | "formacoes" | "habilidades"
+  "pessoa" | "especialidade" | "formacoes" | "habilidades" | "medico"
 > & {
   id?: string;
   pessoa: PessoaCreateOrConnectNested;
@@ -159,6 +159,7 @@ export type CandidatoCreateUpdateInput = Omit<
     update?: { where: Prisma.FormacaoWhereUniqueInput; data: FormacaoInput }[];
     delete?: Prisma.FormacaoWhereUniqueInput[];
   };
+  medico: any;
   // habilidades?: {
   //   create?: CandidatoHabilidadeCreateInput[];
   //   update?: {

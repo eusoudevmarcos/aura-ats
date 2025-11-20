@@ -629,7 +629,7 @@ const CandidatoPage: React.FC = () => {
                         link.remove();
                         window.URL.revokeObjectURL(url);
                       } catch (error) {
-                        console.error('Erro ao fazer download:', error);
+                        console.log('Erro ao fazer download:', error);
                         alert('Erro ao fazer download do arquivo');
                       }
                     }

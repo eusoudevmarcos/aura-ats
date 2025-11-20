@@ -69,7 +69,7 @@ export class UsuarioSistemaService {
         totalPages: Math.ceil(totalUsuarios / pageSize),
       };
     } catch (error) {
-      console.error("Erro ao buscar usuários do sistema:", error);
+      console.log("Erro ao buscar usuários do sistema:", error);
       throw new Error("Não foi possível buscar os usuários do sistema.");
     }
   }

@@ -66,7 +66,7 @@ async function getUserFromToken(token: string) {
     }
     return null;
   } catch (error) {
-    console.error('Erro ao verificar token:', error);
+    console.log('Erro ao verificar token:', error);
     return null;
   }
 }

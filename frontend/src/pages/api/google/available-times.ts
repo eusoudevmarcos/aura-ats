@@ -79,7 +79,7 @@ export default async function handler(
 
     return res.status(200).json({ date, available });
   } catch (err: any) {
-    console.error('Erro ao buscar horários:', err);
+    console.log('Erro ao buscar horários:', err);
     return res.status(500).json({
       message: 'Erro ao consultar horários disponíveis.',
       details: err.message,

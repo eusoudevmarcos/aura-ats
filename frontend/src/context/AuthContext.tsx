@@ -110,7 +110,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       }
       return false;
     } catch (error) {
-      console.error('Erro ao debitar uso:', error);
+      console.log('Erro ao debitar uso:', error);
       return false;
     }
   };
@@ -131,7 +131,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
       }
     } catch (error) {
-      console.error('Erro ao atualizar planos:', error);
+      console.log('Erro ao atualizar planos:', error);
     }
   };
 

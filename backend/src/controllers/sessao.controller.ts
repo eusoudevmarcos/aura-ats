@@ -31,7 +31,7 @@ export class SessaoController {
         usuarioSistema: (sessao as any).usuarioSistema,
       });
     } catch (error: any) {
-      console.error("Erro ao buscar sessão atual:", error);
+      console.log("Erro ao buscar sessão atual:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao buscar sessão atual",
         error,
@@ -57,7 +57,7 @@ export class SessaoController {
 
       return res.status(200).json({ userId });
     } catch (error: any) {
-      console.error("Erro ao buscar ID do usuário:", error);
+      console.log("Erro ao buscar ID do usuário:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao buscar ID do usuário",
         error,
@@ -77,7 +77,7 @@ export class SessaoController {
 
       return res.status(200).json({ valid: isValid });
     } catch (error: any) {
-      console.error("Erro ao validar sessão:", error);
+      console.log("Erro ao validar sessão:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao validar sessão",
         error,
@@ -97,7 +97,7 @@ export class SessaoController {
 
       return res.status(204).send();
     } catch (error: any) {
-      console.error("Erro ao deletar sessão:", error);
+      console.log("Erro ao deletar sessão:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao deletar sessão",
         error,
@@ -117,7 +117,7 @@ export class SessaoController {
 
       return res.status(204).send();
     } catch (error: any) {
-      console.error("Erro ao deletar todas as sessões do usuário:", error);
+      console.log("Erro ao deletar todas as sessões do usuário:", error);
       return res.status(500).json({
         message:
           error?.message || "Erro ao deletar todas as sessões do usuário",
@@ -134,7 +134,7 @@ export class SessaoController {
         .status(200)
         .json({ message: "Sessões expiradas removidas com sucesso" });
     } catch (error: any) {
-      console.error("Erro ao limpar sessões expiradas:", error);
+      console.log("Erro ao limpar sessões expiradas:", error);
       return res.status(500).json({
         message: error?.message || "Erro ao limpar sessões expiradas",
         error,

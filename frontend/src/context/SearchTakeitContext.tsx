@@ -39,7 +39,7 @@ const loadSavedState = (): SimplifiedSearchState => {
         return JSON.parse(savedData) as SimplifiedSearchState;
       }
     } catch (e) {
-      console.error('Erro ao carregar dados do localStorage:', e);
+      console.log('Erro ao carregar dados do localStorage:', e);
     }
   }
 

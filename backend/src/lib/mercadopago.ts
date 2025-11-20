@@ -65,7 +65,7 @@ async function createPixPayment(params: CreatePixPaymentParams) {
       externalReference: response.external_reference,
     };
   } catch (error) {
-    console.error("Erro ao criar pagamento PIX:", error);
+    console.log("Erro ao criar pagamento PIX:", error);
     throw error;
   }
 }
@@ -94,7 +94,7 @@ async function exemploUso() {
     // <img src={`data:image/png;base64,${resultado.qrCodeBase64}`} />
     return resultado;
   } catch (error) {
-    console.error("Erro:", error);
+    console.log("Erro:", error);
   }
 }
 

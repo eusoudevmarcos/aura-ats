@@ -246,7 +246,7 @@ const TakeItContent: React.FC = () => {
   return (
     <>
       <div className="transition-all duration-2000 bg-white w-full mb-5 flex flex-col-reverse md:flex-col">
-        <div className="p-4">
+        <div className="p-4 flex flex-col justify-center items-center">
           <p className="text-primary mb-2">
             Selecione uma informação para consultar:
           </p>
@@ -269,7 +269,7 @@ const TakeItContent: React.FC = () => {
           />
         </div>
 
-        <div className="flex w-full justify-center border-b border-gray-300 max-w-[900px]">
+        <div className="flex w-full justify-center items-center border-b border-gray-300">
           <button
             className={`text-[1.3em] font-semibold cursor-pointer text-primary transition-colors duration-300 grow max-w-[140px]  ${
               typeColumns === 'persons' &&

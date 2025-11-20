@@ -19,7 +19,7 @@ export default function Tarefas() {
       const tarefasData = await tarefaApi.getAll();
       setTarefas(tarefasData);
     } catch (error) {
-      console.error('Erro ao carregar tarefas:', error);
+      console.log('Erro ao carregar tarefas:', error);
     } finally {
       setLoading(false);
     }

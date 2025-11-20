@@ -79,14 +79,14 @@ async function main() {
     // );
     console.log("🎉 Seed concluído com sucesso!");
   } catch (error) {
-    console.error("❌ Erro durante a operação de seed:", error);
+    console.log("❌ Erro durante a operação de seed:", error);
     throw error;
   }
 }
 
 main()
   .catch(async (e) => {
-    console.error("🔥 Erro fatal no seed:", e);
+    console.log("🔥 Erro fatal no seed:", e);
     await prisma.$disconnect();
     process.exit(1);
   })

@@ -266,8 +266,14 @@ export function convertDataStoneToCandidatoDTO(
       nome: dataStoneData.name || '',
       cpf: dataStoneData.cpf ? formatCpf(dataStoneData.cpf) : null,
       rg: dataStoneData.rg || null,
-      dataNascimento,
-      signo: dataStoneData.sign,
+      dataNascimento: dataNascimento || null,
+      signo: dataStoneData.sign
+        ? dataStoneData.sign
+            .toString()
+            .toUpperCase()
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '') // remove acentuação
+        : null,
       sexo: dataStoneData.gender === 'M' ? 'MASCULINO' : 'FEMININO',
       localizacoes,
       ...(socios.length > 0 && { socios }),
