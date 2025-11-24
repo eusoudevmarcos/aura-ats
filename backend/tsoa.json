@@ -1,0 +1,20 @@
+{
+  "entryFile": "src/index.ts",
+  "noImplicitAdditionalProperties": "silently-remove-extras",
+  "controllerPathGlobs": ["src/docs/**/*.ts"],
+  "spec": {
+    "name": "Aura ATS API",
+    "specVersion": 3,
+    "outputDirectory": "src/config",
+    "basePath": "/api",
+    "schemes": ["http", "https"],
+    "host": "localhost:3001",
+    "securityDefinitions": {
+      "bearerAuth": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
+    }
+  }
+}

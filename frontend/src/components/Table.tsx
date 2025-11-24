@@ -210,7 +210,7 @@ const Pagination: React.FC<PaginationProps> = ({
         </button>
       </div>
       <span className="text-primary text-sm text-center">
-        Página {page} de {totalPages} ({total} registros)
+        Página {page} de {totalPages} {total > 0 && `(${total} registros)`}
       </span>
     </div>
   );

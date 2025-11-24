@@ -3,9 +3,11 @@ import dotenv from "dotenv";
 import express from "express";
 import path from "path";
 import "reflect-metadata";
+import swaggerUi from "swagger-ui-express";
 
 dotenv.config();
 
+import { swaggerSpec } from "./config/swagger";
 import { ambienteMiddleware } from "./middleware/ambienteMiddleware";
 import agendaRoute from "./routes/agenda.routes";
 import authenticationRoutes from "./routes/authentication.routes";
@@ -92,6 +94,10 @@ async function startServer() {
   const publicPath = path.resolve(__dirname, "public");
 
   app.use("/files", express.static(path.join(publicPath, "files")));
+
+  // Documentação Swagger disponível em /api/docs
+  app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+  app.get("/api/docs.json", (req, res) => res.status(200).json(swaggerSpec));
 
   app.use("/api/auth", authenticationRoutes);
   app.use("/api/users", userRoutes);

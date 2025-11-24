@@ -231,8 +231,10 @@ export const AgendaForm = ({ onSuccess, initialValues }: AgendaFormProps) => {
     setVagasOpened(false);
   }, [initialValues?.candidatoId, initialValues?.candidato?.id]);
 
-  // useEffect(() => {
-  // }, [errors]);
+  useEffect(() => {
+    console.log('ERRO DO FORMULARIO AGENDAMENTO:');
+    console.log(errors);
+  }, [errors]);
 
   function handleFullDateTime(times: string, e: any) {
     e.preventDefault();
