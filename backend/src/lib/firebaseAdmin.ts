@@ -1,4 +1,4 @@
-import { initializeApp, cert, getApps } from "firebase-admin/app";
+import { cert, getApps, initializeApp } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
 import fs from "fs";
 import path from "path";
@@ -11,8 +11,12 @@ if (!sdkPath) {
   );
 }
 
-// Resolve caminho absoluto
-const filePath = path.resolve(sdkPath);
+// Garante que o caminho é relativo à raiz do projeto (na pasta src/public/etc/secrets)
+const filePath = path.resolve(
+  __dirname,
+  "../public/etc/secrets",
+  sdkPath.replace(/^(\.\/|\/)?etc\/secrets\//, "")
+);
 console.log("Usando SDK Firebase Admin JSON:", filePath);
 
 // Verifica se o arquivo existe

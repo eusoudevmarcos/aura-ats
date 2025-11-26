@@ -2,7 +2,7 @@ export async function ambienteMiddleware(): Promise<void> {
   if (process.env.NODE_ENV === "development") {
     if (
       process.env.DATABASE_URL &&
-      !process.env.DATABASE_URL.includes("localhost")
+      !process.env.DATABASE_URL.includes("postgres.render.com")
     ) {
       console.warn(
         '\x1b[31m[ALERTA] Você está rodando em ambiente de PRODUÇÃO (DATABASE_URL não contém "localhost")\x1b[0m'
