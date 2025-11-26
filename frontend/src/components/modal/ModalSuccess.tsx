@@ -12,7 +12,7 @@ const ModalSuccess: React.FC<ModalSuccessProps> = ({
   message,
 }) => {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
+    <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col items-center justify-center p-2 text-center">
         <span className="material-icons text-[200px]! text-green-500">
           check_circle

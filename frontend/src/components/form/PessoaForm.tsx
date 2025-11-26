@@ -8,6 +8,7 @@ type PessoaFormProps = {
   namePrefix?: string;
   isYear?: boolean;
   onSubmit?: (data: PessoaInput) => void;
+  disabledFields?: boolean;
 };
 
 function calcularIdadePorDataNascimento(
@@ -42,6 +43,7 @@ function calcularIdadePorDataNascimento(
 const PessoaForm = ({
   namePrefix = 'pessoa',
   isYear = false,
+  disabledFields,
 }: PessoaFormProps) => {
   const nome = makeName<PessoaInput>(namePrefix, 'nome');
   const cpf = makeName<PessoaInput>(namePrefix, 'cpf');
@@ -62,15 +64,26 @@ const PessoaForm = ({
         maskProps={{ mask: '000.000.000-00' }}
         label="CPF"
         placeholder="000.000.000-00"
+        inputProps={{ disabled: disabledFields }}
       />
 
-      <FormInput name={nome} label="Nome Completo" />
+      <FormInput
+        name={nome}
+        label="Nome Completo"
+        inputProps={{
+          disabled: disabledFields,
+        }}
+      />
 
       <div className="flex flex-col gap-2">
         <FormInput
           name={dataNascimento}
           label="Data de Nascimento"
-          inputProps={{ type: 'text', placeholder: '00/00/0000' }}
+          inputProps={{
+            type: 'text',
+            placeholder: '00/00/0000',
+            disabled: disabledFields,
+          }}
           maskProps={{ mask: '00/00/0000' }}
         />
 
@@ -86,17 +99,36 @@ const PessoaForm = ({
         maskProps={{ mask: '0000000000' }}
         label="RG"
         placeholder="000000000"
+        inputProps={{
+          disabled: disabledFields,
+        }}
       />
 
-      <FormSelect name={sexo} label="Sexo" placeholder="Selecione o sexo">
+      <FormSelect
+        name={sexo}
+        label="Sexo"
+        placeholder="Selecione o sexo"
+        selectProps={{
+          disabled: disabledFields,
+        }}
+      >
         {SexoEnum.options.map(sexo => (
           <>
-            <option value={sexo}>{sexo}</option>
+            <option value={sexo} key={sexo}>
+              {sexo}
+            </option>
           </>
         ))}
       </FormSelect>
 
-      <FormSelect name={signo} label="Signo" placeholder="Selecione o signo">
+      <FormSelect
+        name={signo}
+        label="Signo"
+        placeholder="Selecione o signo"
+        selectProps={{
+          disabled: disabledFields,
+        }}
+      >
         {SignoEnum.options.map(signo => (
           <>
             <option key={signo} value={signo}>

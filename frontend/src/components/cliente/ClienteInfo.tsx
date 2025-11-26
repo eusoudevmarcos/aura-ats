@@ -6,155 +6,173 @@ interface ClienteInfoProps {
   variant?: 'mini' | 'full';
 }
 
+// Ajuste: container padronizado para label e valor
+const LabelController = ({
+  label,
+  value,
+}: {
+  label: string;
+  value: React.ReactNode;
+}) => {
+  return (
+    <div className="flex items-center gap-2 mb-1">
+      <span className="font-medium text-primary">{label}</span>
+      <span className={`${value ? 'text-secondary' : 'text-gray-400'}`}>
+        {value ? value : 'N/A'}
+      </span>
+    </div>
+  );
+};
+
+const StatusLabel = ({ status }: { status: string }) => (
+  <div className="flex items-center gap-2 flex-wrap">
+    <LabelController
+      label="Status:"
+      value={
+        <span className="bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
+          {status}
+        </span>
+      }
+    />
+  </div>
+);
+
+const EmailLabel = ({
+  email,
+  isAdmin,
+}: {
+  email: string;
+  isAdmin?: boolean;
+}) => (
+  <LabelController
+    label="E-mail:"
+    value={
+      isAdmin ? (
+        <AdminGuard typeText>
+          <span className="text-secondary ml-2">{email}</span>
+        </AdminGuard>
+      ) : (
+        <span className="text-secondary ml-2">{email}</span>
+      )
+    }
+  />
+);
+
+const EmpresaInfo = ({ empresa }: { empresa: any }) => (
+  <>
+    {empresa.razaoSocial && (
+      <LabelController
+        label="Razão Social:"
+        value={<span className="ml-2">{empresa.razaoSocial}</span>}
+      />
+    )}
+    {empresa.nomeFantasia && (
+      <LabelController
+        label="Nome Fantasia:"
+        value={<span className="ml-2">{empresa.nomeFantasia}</span>}
+      />
+    )}
+    <LabelController
+      label="CNPJ:"
+      value={
+        <span className="ml-2">
+          {empresa.cnpj
+            ? empresa.cnpj.replace(
+                /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
+                '$1.$2.$3/$4-$5'
+              )
+            : ''}
+        </span>
+      }
+    />
+    {empresa.dataAbertura && (
+      <LabelController
+        label="Data de Abertura:"
+        value={<span className="ml-2">{empresa.dataAbertura.toString()}</span>}
+      />
+    )}
+  </>
+);
+
+const RepresentanteInfo = ({ representante }: { representante: any }) => (
+  <div className="mb-2" key={representante.nome}>
+    <LabelController label="CPF:" value={representante.cpf} />
+    <LabelController label="Nome:" value={representante.nome} />
+    <LabelController
+      label="Data Nascimento:"
+      value={representante.dataNascimento}
+    />
+    <LabelController label="Signo:" value={representante.signo} />
+    <LabelController label="Sexo:" value={representante.sexo} />
+  </div>
+);
+
 const ClienteInfo: React.FC<ClienteInfoProps> = ({
   cliente,
   variant = 'full',
 }) => {
   if (variant === 'mini') {
     return (
-      <div className="flex flex-col">
-        <div>
-          <span className="font-medium text-primary">CNPJ:</span>
-          <span className="text-secondary ml-2">
-            {cliente.empresa.cnpj
+      <div className="flex flex-col py-2">
+        <LabelController
+          label="CNPJ:"
+          value={
+            cliente.empresa.cnpj
               ? cliente.empresa.cnpj.replace(
                   /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
                   '$1.$2.$3/$4-$5'
                 )
-              : ''}
-          </span>
-        </div>
-
-        {cliente.status && (
-          <div className="flex gap-2 flex-wrap">
-            <span className="font-medium text-primary">Status:</span>
-            <span className="bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
-              {cliente.status}
-            </span>
-          </div>
-        )}
-
-        {cliente.empresa && (
-          <div className="flex flex-col gap-1">
-            <div>
-              <span className="font-medium text-primary">Razão Social:</span>
-              <span className="text-secondary ml-2">
-                {cliente.empresa.razaoSocial}
-              </span>
-            </div>
-          </div>
-        )}
-
+              : ''
+          }
+        />
+        {cliente.status && <StatusLabel status={cliente.status} />}
+        {cliente.empresa && <EmpresaInfo empresa={cliente.empresa} />}
         {cliente.usuarioSistema?.email && (
-          <div className="flex flex-col gap-1">
-            <div>
-              <span className="font-medium text-primary">E-mail:</span>
-              <span className="text-secondary ml-2">
-                {cliente?.usuarioSistema?.email}
-              </span>
-            </div>
-          </div>
+          <EmailLabel email={cliente.usuarioSistema.email} />
         )}
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col flex-wrap gap-2">
+    <div className="flex flex-col flex-wrap">
       {cliente.empresa && (
         <>
           {cliente.usuarioSistema?.email && (
-            <div className="flex flex-col gap-1">
-              <div>
-                <span className="font-medium text-primary">E-mail:</span>
-                <span className="text-secondary ml-2">
-                  <AdminGuard typeText>
-                    {cliente?.usuarioSistema?.email}
-                  </AdminGuard>
-                </span>
-              </div>
-            </div>
+            <EmailLabel email={cliente.usuarioSistema.email} isAdmin />
           )}
-          <div>
-            <span className="font-medium text-primary">Razão Social:</span>
-            <span className="text-secondary ml-2">
-              {cliente.empresa.razaoSocial}
-            </span>
-          </div>
-          <div>
-            <span className="font-medium text-primary">Nome Fantasia:</span>
-            <span className="text-secondary ml-2">
-              {cliente.empresa.nomeFantasia}
-            </span>
-          </div>
-          <div>
-            <span className="font-medium text-primary">CNPJ:</span>
-            <span className="text-secondary ml-2">
-              {cliente.empresa.cnpj
-                ? cliente.empresa.cnpj.replace(
-                    /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
-                    '$1.$2.$3/$4-$5'
-                  )
-                : ''}
-            </span>
-          </div>
-          {cliente.empresa.dataAbertura && (
-            <div>
-              <span className="font-medium text-primary">
-                Data de Abertura:
-              </span>
-              <span className="text-secondary ml-2">
-                {cliente.empresa.dataAbertura.toString()}
-              </span>
-            </div>
-          )}
+          <EmpresaInfo empresa={cliente.empresa} />
         </>
       )}
 
       {cliente?.email && (
-        <div>
-          <span className="font-medium text-primary">Email:</span>
-          <span className="ml-2  text-secondary font-semibold">
-            {cliente.email}
-          </span>
-        </div>
+        <LabelController
+          label="Email:"
+          value={
+            <span className="ml-2 text-secondary font-semibold">
+              {cliente.email}
+            </span>
+          }
+        />
       )}
 
-      <div>
-        <span className="font-medium text-primary">Status:</span>
-        <span className="ml-2 bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
-          {cliente.status}
-        </span>
-      </div>
+      <StatusLabel status={cliente.status} />
 
-      {cliente.empresa.representantes &&
+      {cliente.empresa?.representantes &&
         cliente.empresa.representantes.length > 0 && (
-          <div title="Dados do representante">
-            <h3 className="text-lg text-primary font-bold">
+          <div
+            title="Dados do representante"
+            className="border-y py-2 border-gray-200"
+          >
+            <h3 className="text-lg text-primary font-bold mb-2">
               Dados do representante
             </h3>
-            {cliente.empresa.representantes.map((representante: any) => {
-              return (
-                <div key={representante.nome}>
-                  <p>
-                    <span className="font-medium text-primary">CPF:</span>{' '}
-                    <span className="text-secondary">{representante.cpf}</span>
-                  </p>
-                  <p>
-                    <span className="font-medium text-primary">
-                      Data Nascimento:
-                    </span>{' '}
-                    <span className="text-secondary">
-                      {representante.dataNascimento}
-                    </span>
-                  </p>
-                  <p>
-                    <span className="font-medium text-primary">Nome:</span>{' '}
-                    <span className="text-secondary">{representante.nome}</span>
-                  </p>
-                </div>
-              );
-            })}
+            {cliente.empresa.representantes.map((representante: any) => (
+              <RepresentanteInfo
+                representante={representante}
+                key={representante.nome}
+              />
+            ))}
           </div>
         )}
     </div>

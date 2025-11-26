@@ -1,6 +1,16 @@
 import prisma from "../../lib/prisma";
 
 export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
+  if (data.email) {
+    const isEmail = await prisma.usuarioSistema.findUnique({
+      where: { email: data.email },
+    });
+
+    if (isEmail) {
+      throw new Error("E-mail já existe no sistema como Usuario do Sistema");
+    }
+  }
+
   if (!data.empresa && !data.empresaId) {
     throw new Error(
       "Dados da empresa (ID ou objeto) são obrigatórios para um cliente."

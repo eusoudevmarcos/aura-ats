@@ -94,7 +94,10 @@ const EmpresaForm = ({
           <h3 className="block text-primary text-xl font-bold mb-2">
             Representante
           </h3>
-          <PessoaForm namePrefix={`${namePrefix}.representantes[0]`} />
+          <PessoaForm
+            namePrefix={`${namePrefix}.representantes[0]`}
+            disabledFields={disabledFields}
+          />
         </div>
       </div>
     </section>

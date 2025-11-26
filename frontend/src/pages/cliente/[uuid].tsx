@@ -4,10 +4,10 @@ import { getClienteById } from '@/axios/cliente.axios';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card';
 import ClienteInfo from '@/components/cliente/ClienteInfo';
-import ClienteForm from '@/components/form/ClienteForm';
 import VagaForm from '@/components/form/VagaForm';
 import { EditPenIcon, PlusIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
+import ModalClienteForm from '@/components/modal/ModalClienteForm';
 import { ModalPlanoCliente } from '@/components/modal/ModalPlanoCliente';
 import { ModalVagasCliente } from '@/components/modal/ModalVagasCliente';
 import { useAdmin } from '@/context/AuthContext';
@@ -333,23 +333,14 @@ const ClientePage: React.FC<{
       )}
 
       {showModalEdit && (
-        <Modal
+        <ModalClienteForm
           isOpen={showModalEdit}
-          onClose={() => setShowModalEdit(false)}
-          title="Editar Cliente"
-        >
-          <ClienteForm
-            onSuccess={cliente => {
-              setShowModalEdit(false);
-              setCliente(cliente);
-              // Atualizar as vagas caso o cliente seja editado
-              if (cliente && cliente.id) {
-                refetchVagas({ search: cliente.id });
-              }
-            }}
-            initialValues={cliente}
-          />
-        </Modal>
+          onClose={() => setShowModalEdit(prev => !prev)}
+          initialValues={cliente}
+          onSuccess={() => {
+            setShowModalEdit(prev => !prev);
+          }}
+        />
       )}
 
       {showVagasForm && (

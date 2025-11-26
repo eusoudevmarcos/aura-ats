@@ -49,13 +49,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   initialValues,
 }) => {
   const [loading, setLoading] = useState(false);
+  const [errorLabel, setErrorLabel] = useState(null);
 
   const normInitialValues = React.useMemo(() => {
-    // const initialPlanosIds = getPlanoIds(initialValues?.planos);
-    return {
-      ...initialValues,
-      // planos: initialPlanosIds,
-    };
+    return initialValues;
   }, [initialValues]);
 
   const methods = useForm<ClienteWithEmpresaAndPlanosSchema>({
@@ -77,9 +74,10 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   }, [errors]);
 
   const status = watch('status') || '';
-  // const planos = watch('planos') || '';
 
   const submitHandler = async (data: ClienteWithEmpresaAndPlanosSchema) => {
+    setErrorLabel(null);
+
     const payload: any = {
       ...data,
     };
@@ -95,10 +93,12 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
-      alert(
-        'Erro ao criar cliente: ' +
-          (erro?.response?.data?.message || 'Erro não encontrado')
-      );
+      const message =
+        erro?.response?.data?.details?.message ||
+        erro?.response?.data?.message ||
+        erro?.data?.message ||
+        'Erro ao Salvar o Cliente, tente novamente ou contate o administrador';
+      setErrorLabel(message);
     } finally {
       setLoading(false);
     }
@@ -110,10 +110,17 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         onSubmit={handleSubmit(submitHandler)}
         className="space-y-3 flex flex-col"
       >
+        {errorLabel && (
+          <p className="bg-red-500 p-2 text-center text-white">{errorLabel}</p>
+        )}
         <h3 className="block text-primary text-xl font-bold mb-2">
           Status do cliente
         </h3>
-        <FormSelect name="status" placeholder="Selecione o status do Cliente">
+        <FormSelect
+          name="status"
+          placeholder="Selecione o status do Cliente"
+          selectProps={{ disabled: loading }}
+        >
           <>
             {StatusClienteEnum.options.map(st => (
               <option key={st} value={st}>
@@ -130,12 +137,13 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           name="email"
           label="Email do cliente"
           placeholder="exemplo@gmail.com"
-          inputProps={{ type: 'email' }}
+          inputProps={{ type: 'email', disabled: loading }}
         />
 
         <div className="border-t border-gray-200 pt-4">
           <h3 className="block text-primary text-xl font-bold mb-2">Cliente</h3>
-          <EmpresaForm namePrefix="empresa" />
+          <EmpresaForm namePrefix="empresa" disabledFields={loading} />
+
           {getError(errors, 'empresa') &&
             typeof getError(errors, 'empresa') === 'string' && (
               <p className="text-red-500 text-xs italic mt-2">
@@ -152,6 +160,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               onChange={planosSelecionados => {
                 setValue('planos', planosSelecionados);
               }}
+              disabledFields={loading}
             />
 
             {getError(errors, 'planos') && (
@@ -163,12 +172,22 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         )}
 
         <div className="border-t border-gray-200 pt-4">
-          <PrimaryButton className="self-end w-full" type="submit">
-            {loading
-              ? '...loading'
-              : initialValues
-              ? 'Editar Cliente'
-              : 'Cadastrar Cliente'}
+          <PrimaryButton
+            className="self-end w-full flex items-center justify-center"
+            type="submit"
+            disabled={loading}
+          >
+            {loading ? (
+              <span className="flex items-center justify-center gap-2">
+                <span className="material-icons-outlined animate-spin text-md text-black">
+                  autorenew
+                </span>
+              </span>
+            ) : initialValues ? (
+              'Editar Cliente'
+            ) : (
+              'Cadastrar Cliente'
+            )}
           </PrimaryButton>
         </div>
       </form>
