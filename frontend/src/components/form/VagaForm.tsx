@@ -147,7 +147,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
                   }
                 : null
             }
-            showInput={!initialValues?.clienteId}
+            showInput={!initialValues?.cliente?.id && !initialValues?.clienteId}
             isBtnDelete={isBtnDelete}
             isBtnView={isBtnView}
           />

@@ -35,5 +35,6 @@
     "**/*.css",
     "**/*.scss",
     "**/*.sass"
-  ]
+  ],
+  "prisma.pinToPrisma6": true
 }

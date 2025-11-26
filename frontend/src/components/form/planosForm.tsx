@@ -15,10 +15,11 @@ type PlanosFormProps = {
   errors?: any;
   onChange?: (planosIds: PlanoAssinado[]) => void;
   initialValues: PlanoAssinado[];
+  disabledFields?: boolean;
 };
 
 export default function PlanosForm(props: PlanosFormProps) {
-  const { errors, onChange } = props;
+  const { errors, onChange, disabledFields } = props;
   const [planos, setPlanos] = useState<Plano[]>([]);
   const [loadingPlanos, setLoadingPlanos] = useState(false);
 
@@ -178,6 +179,7 @@ export default function PlanosForm(props: PlanosFormProps) {
                   classNameContainer: 'flex-1/2',
                   onChange: e => setCategoria(e.target.value),
                   value: categoria,
+                  disabled: disabledFields,
                 }}
               >
                 <>
@@ -200,6 +202,7 @@ export default function PlanosForm(props: PlanosFormProps) {
                   classNameContainer: 'flex-1/2',
                   onChange: e => setSelectedPlanoId(e.target.value),
                   value: selectedPlanoId,
+                  disabled: disabledFields,
                 }}
               >
                 <>
@@ -226,6 +229,7 @@ export default function PlanosForm(props: PlanosFormProps) {
                   inputProps={{
                     max: 10,
                     value: qtdVagas ?? '',
+                    disabled: disabledFields,
                   }}
                 ></FormInput>
                 <label>
@@ -250,6 +254,7 @@ export default function PlanosForm(props: PlanosFormProps) {
                     min: 1,
                     max: 100,
                     value: porcentagemMinima ?? '',
+                    disabled: disabledFields,
                   }}
                 ></FormInput>
                 <label>

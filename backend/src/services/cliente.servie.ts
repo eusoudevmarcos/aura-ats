@@ -12,7 +12,6 @@ import { UsuarioSistemaService } from "./usuarioSistema.service";
 @injectable()
 export class ClienteService {
   constructor(
-    // @inject(EmpresaRepository) private empresaRepository: EmpresaRepository,
     @inject(UsuarioSistemaService)
     private usuarioSistemaService: UsuarioSistemaService
   ) {}
@@ -61,6 +60,8 @@ export class ClienteService {
                 cpf: true,
                 rg: true,
                 dataNascimento: true,
+                signo: true,
+                sexo: true,
                 empresaRepresentadaId: true,
               },
             },
@@ -160,7 +161,6 @@ export class ClienteService {
     const relations = {
       empresa: {
         include: {
-          // contatos: true,
           // localizacoes: true,
           representantes: true,
           socios: true,

@@ -34,7 +34,6 @@ const Modal: React.FC<ModalProps> = ({
   }, [isOpen]);
 
   const handleClose = () => {
-    console.log('close');
     if (onClose) onClose(false);
     setShow(false);
     timeoutRef.current = setTimeout(() => setShow(false), 200);

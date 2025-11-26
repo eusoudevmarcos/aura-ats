@@ -10,7 +10,7 @@ export class ClienteController {
   async save(req: Request, res: Response) {
     try {
       const response = await this.service.save(req.body);
-      return res.status(201).json(response);
+      return res.status(201).json(nonEmptyAndConvertDataDTO(response));
     } catch (error: any) {
       return res
         .status(500)
