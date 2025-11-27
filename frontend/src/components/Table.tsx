@@ -89,7 +89,7 @@ function MobileCard<T>({
               <div className="text-xs font-medium text-gray-600 mb-1">
                 {col.label}
               </div>
-              <div className="text-sm text-gray-900 break-words">{content}</div>
+              <div className="text-sm text-gray-900 words">{content}</div>
             </div>
           </div>
         );
