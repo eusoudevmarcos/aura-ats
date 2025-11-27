@@ -23,11 +23,15 @@ export function FormSelect<T extends FieldValues>({
   const control = formContext?.control;
   const errors = formContext?.formState?.errors;
 
+  // Prioriza controle manual quando onChange e value são fornecidos explicitamente
+  // Isso permite usar o componente fora do react-hook-form ou com controle customizado
+  const useManualControl = onChange !== undefined && value !== undefined;
+
   const errorMessage = getError(errors, name);
   const id = selectProps?.id || name.toString();
 
   const baseClass =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90 min-h-[42px]';
   const errorClass = errorMessage ? 'border-red-500' : '';
 
   const { classNameContainer, ...otherSelectProps } = selectProps || {};
@@ -37,6 +41,8 @@ export function FormSelect<T extends FieldValues>({
     .join(' ');
 
   // Wrapper para adicionar onMenuScrollToBottom se fornecido
+  // Nota: onMenuScrollToBottom é útil apenas para selects customizados (ex: react-select)
+  // Para selects nativos HTML, esta prop pode não ter efeito esperado
   const SelectWrapper: React.FC<{ children: React.ReactNode }> = ({
     children,
   }) =>
@@ -65,7 +71,13 @@ export function FormSelect<T extends FieldValues>({
             id={id}
             className={selectClassName}
             value={fieldValue ?? ''}
-            onChange={e => fieldOnChange(e.target.value)}
+            onChange={e => {
+              fieldOnChange(e.target.value);
+              // Chama onChange customizado se fornecido (para compatibilidade)
+              if (onChange) {
+                onChange(e);
+              }
+            }}
             onBlur={onBlur}
             required={required}
             {...otherSelectProps}
@@ -102,11 +114,16 @@ export function FormSelect<T extends FieldValues>({
     </SelectWrapper>
   );
 
-  // Fallback para uso sem react-hook-form (select controlado manualmente)
+  // Usa controle manual quando onChange e value são fornecidos explicitamente
+  // Caso contrário, usa react-hook-form se disponível
   return (
     <Container id={id} label={label} className={classNameContainer}>
       <div className="relative">
-        {control ? ControlElement : SelectInput}
+        {useManualControl
+          ? SelectInput
+          : control
+          ? ControlElement
+          : SelectInput}
         <ErrorMessage message={errorMessage ?? null} />
       </div>
     </Container>

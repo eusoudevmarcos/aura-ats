@@ -198,7 +198,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           <FormArrayInput
             name="emails"
             title="E-mails"
-            addButtonText="+"
             ValuesArrayString
             value={emails}
             onChange={handleEmailsChange}
@@ -216,7 +215,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           <FormArrayInput
             name="contatos"
             title="Contatos"
-            addButtonText="+"
             ValuesArrayString
             value={contatos}
             onChange={handleContatosChange}
@@ -248,6 +246,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             name="areaCandidato"
             label="Area de Atuação"
             placeholder="Adicione a área de atuação"
+            selectProps={{
+              classNameContainer: 'col-span-full',
+            }}
           >
             <>
               {AreaCandidatoEnum.options.map(area => (
@@ -296,15 +297,12 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         <FormArrayInput
           name="links"
           title="Links"
-          addButtonText="+"
           ValuesArrayString
           value={links}
-          containerClassName="mb-10"
           onChange={handleLinkChange}
           validateCustom={(value, fieldConfigs, setErrors) => {
             const url = value.trim();
 
-            // Expressão regular simples para validar URLs começando com http(s)
             const urlRegex =
               /^(https?:\/\/)(([\w-]+\.)+[\w-]{2,})(:[0-9]{1,5})?(\/.*)?$/i;
             if (!urlRegex.test(url)) {
@@ -332,6 +330,8 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           ]}
           renderChipContent={link => <span>{link}</span>}
         />
+
+        <div className="border-b border-gray-300 py-2"></div>
 
         <FileUploadForm />
 

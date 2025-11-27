@@ -6,6 +6,7 @@ import { UF_MODEL } from '@/utils/UF';
 import { mask } from '@/utils/mask/mask';
 import React, { ChangeEvent, FormEvent, useEffect, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
+import { FormInput } from '../input/FormInput';
 
 // VALIDATORS
 const validateEmail = (email: string): boolean => {
@@ -167,7 +168,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
   useEffect(() => {
     if (!initialSearchParams) return;
 
-    setInput(initialSearchParams.input ?? '');
+    // setInput(initialSearchParams.input ?? '');
     setSelectedType(initialSearchParams.descriptionData ?? null);
     setUf(initialSearchParams.uf ?? '');
     setIsFiliar(Boolean(initialSearchParams.options?.filial));
@@ -290,18 +291,28 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
         <div className="relative w-full flex">
           <div className="flex flex-col relative w-full mb-5 md:mb-0">
-            <input
+            <FormInput
+              name="searchInput"
               type="text"
               value={input}
-              onChange={handleChange}
+              onChange={(e: React.ChangeEvent<HTMLInputElement> | string) => {
+                if (typeof e === 'string') {
+                  handleChange({
+                    target: { value: e },
+                  } as React.ChangeEvent<HTMLInputElement>);
+                } else {
+                  handleChange(e);
+                }
+              }}
               placeholder="PESQUISAR"
-              disabled={loading}
-              autoComplete="off"
-              className={`
-              w-full rounded-lg pl-4 border-2
-              ${input !== '' ? ' border-primary' : ''}
-              min-h-[44px]
-            `}
+              inputProps={{
+                disabled: loading,
+                autoComplete: 'off',
+                className: `w-full rounded-lg pl-4 border-2${
+                  input !== '' ? ' border-primary' : ''
+                } min-h-[44px]`,
+              }}
+              noControl
             />
             {errorMsg && (
               <p className="text-red-500 text-sm absolute top-12">{errorMsg}</p>

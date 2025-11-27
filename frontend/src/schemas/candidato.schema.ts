@@ -40,20 +40,7 @@ export const crmSchema = z.object({
   id: z.uuid().optional(),
   numero: z.string(),
   ufCrm: z.string().max(2),
-  dataInscricao: z.union([
-    z
-      .string()
-      .refine(
-        val =>
-          /^\d{2}\/\d{2}\/\d{4}$/.test(val) ||
-          /^\d{4}-\d{2}-\d{2}(T.*Z)?$/.test(val),
-        {
-          message:
-            'Data deve estar no formato DD/MM/AAAA ou ISO (YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss.sssZ)',
-        }
-      ),
-    z.date(),
-  ]),
+  dataInscricao: z.string(),
 });
 
 export const medicoSchema = z.object({

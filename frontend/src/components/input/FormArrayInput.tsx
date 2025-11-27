@@ -22,7 +22,7 @@ interface FieldConfig {
 interface FormArrayInputProps {
   name?: string;
   title: string;
-  addButtonText: string;
+  addButtonText?: string;
   fieldConfigs: FieldConfig[];
   renderChipContent: (item: any, index: number) => React.ReactNode;
   initialItemData?: any;
@@ -83,6 +83,8 @@ export function FormArrayInput({
       ...prev,
       [fieldName]: false, // Reset pasted state on manual change
     }));
+
+    // if (!validateItem()) return;
   };
 
   // Handler para onFocus no input: lê clipboard se necessário
@@ -168,7 +170,6 @@ export function FormArrayInput({
   const validateItem = (): boolean => {
     for (const config of fieldConfigs) {
       const val = newItemValues[config.name];
-
       // Required
       if (config.required && (!val || String(val).trim() === '')) {
         setItemError(`O campo '${config.label || config.name}' é obrigatório.`);
@@ -263,23 +264,15 @@ export function FormArrayInput({
 
   const handleAddItem = (fieldName?: any) => {
     if (!validateItem()) return;
-    console.log('handleAddItem');
-    console.log(newItemValues);
 
     const newItem = ValuesArrayString
       ? newItemValues[fieldName]
       : { ...newItemValues };
 
-    let newArray: any[];
-
-    console.log(newItem);
-
-    if (ValuesArrayString) {
-      newArray = [...value, newItem];
-    } else {
-      newArray = [...value, { ...newItem }];
-    }
-
+    // Elimine logs desnecessários e deixe o código mais sucinto e robusto
+    const currentArray = Array.isArray(value) ? value : [];
+    const itemToAdd = ValuesArrayString ? newItem : { ...newItemValues };
+    const newArray = [...currentArray, itemToAdd];
     onChange(newArray);
 
     setItemError(null);
@@ -304,123 +297,110 @@ export function FormArrayInput({
   return (
     <Container label={title} className={containerClassName}>
       {/* Campos de entrada */}
-      <div className="space-y-4 mb-4">
-        <div
-          className={`grid gap-4 ${
-            fieldConfigs.length === 1
-              ? 'grid-cols-1'
-              : fieldConfigs.length === 2
-              ? 'grid-cols-1 md:grid-cols-2'
-              : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-          }`}
-        >
-          {fieldConfigs.map((config, index) => {
-            const fieldValue = newItemValues[config.name];
+      <div
+        className={`grid gap-4 ${
+          fieldConfigs.length === 1
+            ? 'grid-cols-1'
+            : fieldConfigs.length === 2
+            ? 'grid-cols-1 md:grid-cols-2'
+            : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+        }`}
+      >
+        {fieldConfigs.map((config, index) => {
+          const fieldValue = newItemValues[config.name];
 
-            return (
-              <div
-                className="flex items-end flex-wrap md:flex-nowrap gap-2 relative"
-                key={config.name}
-              >
-                <div className="relative w-full">
-                  {config.component === 'select' ? (
-                    <FormSelect
-                      name={`${name || 'temp'}_${config.name}` as any}
-                      value={fieldValue}
-                      label={config.label}
-                      placeholder={config.placeholder}
-                      onChange={(e: any) =>
-                        handleInputChange(config.name, e.target.value)
-                      }
-                      errors={{} as any}
-                      selectProps={config.inputProps as any}
-                    >
-                      <>
-                        {config.selectOptions?.map(opt => (
-                          <option key={opt.value} value={opt.value}>
-                            {opt.label}
-                          </option>
-                        ))}
-                      </>
-                    </FormSelect>
-                  ) : (
-                    <FormInput
-                      name={`${name || 'temp'}_${config.name}` as any}
-                      value={fieldValue}
-                      label={config.label}
-                      placeholder={config.placeholder}
-                      type={config.type || 'text'}
-                      onChange={(e: any) => {
-                        const val =
-                          typeof e === 'string' ? e : e?.target?.value || '';
-                        handleInputChange(config.name, val);
-                      }}
-                      onKeyDown={(e: React.KeyboardEvent) => {
-                        if (e.key === 'Enter') {
-                          e.preventDefault();
-                          handleAddItem(config.name);
-                        } else if (
-                          pasteInput &&
-                          e.key === 'Backspace' &&
-                          lastPasted[config.name] &&
-                          fieldValue
-                        ) {
-                          handleBackspaceKey(e, config.name, fieldValue);
-                        }
-                      }}
-                      onFocus={
-                        pasteInput
-                          ? () => handleFocusPaste(config.name)
-                          : undefined
-                      }
-                      errors={{} as any}
-                      maskProps={config.maskProps}
-                      inputProps={{
-                        ...config.inputProps,
-                        classNameContainer: ` ${config.inputProps?.classNameContainer}`,
-                      }}
-                      noControl
-                    />
-                  )}
-
-                  {/* <span
-                    className={`absolute ${
-                      index === fieldConfigs.length - 1
-                        ? 'right-2 md:right-12'
-                        : 'right-2'
-                    } top-10 text-[10px] text-gray-300 pointer-events-none select-none`}
-                    tabIndex={-1}
-                    aria-hidden="true"
+          return (
+            <div
+              className="flex items-end flex-wrap md:flex-nowrap gap-2 relative"
+              key={config.name}
+            >
+              <div className="relative w-full">
+                {config.component === 'select' ? (
+                  <FormSelect
+                    name={`${name || 'temp'}_${config.name}` as any}
+                    value={fieldValue}
+                    label={config.label}
+                    placeholder={config.placeholder}
+                    onChange={(e: any) => {
+                      handleInputChange(config.name, e.target.value);
+                    }}
+                    selectProps={config.inputProps as any}
                   >
-                    Pressione ENTER
-                  </span> */}
-                </div>
-
-                {index === fieldConfigs.length - 1 && (
-                  <div className="flex justify-end w-full md:w-auto">
-                    <PrimaryButton
-                      className="h-10 w-full md:w-auto"
-                      type="button"
-                      onClick={() => handleAddItem(config.name)}
-                    >
-                      {addButtonText}
-                    </PrimaryButton>
-                  </div>
+                    <>
+                      {config.selectOptions?.map(opt => (
+                        <option key={opt.value} value={opt.value}>
+                          {opt.label}
+                        </option>
+                      ))}
+                    </>
+                  </FormSelect>
+                ) : (
+                  <FormInput
+                    name={`${name || 'temp'}_${config.name}` as any}
+                    value={fieldValue}
+                    label={config.label}
+                    placeholder={config.placeholder}
+                    type={config.type || 'text'}
+                    onChange={(e: any) => {
+                      const val =
+                        typeof e === 'string' ? e : e?.target?.value || '';
+                      handleInputChange(config.name, val);
+                    }}
+                    onKeyDown={(e: React.KeyboardEvent) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddItem(config.name);
+                      } else if (
+                        pasteInput &&
+                        e.key === 'Backspace' &&
+                        lastPasted[config.name] &&
+                        fieldValue
+                      ) {
+                        handleBackspaceKey(e, config.name, fieldValue);
+                      }
+                    }}
+                    onFocus={
+                      pasteInput
+                        ? () => handleFocusPaste(config.name)
+                        : undefined
+                    }
+                    errors={{} as any}
+                    maskProps={config.maskProps}
+                    inputProps={{
+                      ...config.inputProps,
+                      classNameContainer: ` ${config.inputProps?.classNameContainer}`,
+                    }}
+                    noControl
+                  />
                 )}
               </div>
-            );
-          })}
-        </div>
 
-        {/* Mensagem de erro de validação */}
-        {itemError && (
-          <p className="text-red-500 text-sm font-medium">{itemError}</p>
-        )}
+              {index === fieldConfigs.length - 1 && (
+                <div className="flex justify-end w-full md:w-auto">
+                  <PrimaryButton
+                    className="h-10 w-full md:w-auto"
+                    type="button"
+                    onClick={() => handleAddItem(config.name)}
+                    disabled={!fieldValue}
+                  >
+                    {addButtonText ?? 'Incluir'}
+                  </PrimaryButton>
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
 
+      {itemError && (
+        <span className="text-red-500 text-sm font-medium absolute">
+          {itemError}
+        </span>
+      )}
+
       {/* Lista de itens adicionados (chips) */}
-      {!!value?.length && (
-        <div className="flex flex-wrap gap-2 mt-4 px-2">
+      {!!value?.length ? (
+        <div className="flex flex-wrap gap-2 mt-6 px-2">
           {value.map((item, index) => (
             <div
               key={
@@ -454,59 +434,11 @@ export function FormArrayInput({
             </div>
           ))}
         </div>
+      ) : (
+        <p className="text-primary text-sm pl-4 mt-5">
+          Nenhuma Informação Adicionada
+        </p>
       )}
-
-      {/* Mensagem de erro se necessário para o array completo, se desejar implementar */}
     </Container>
   );
 }
-
-/**
- * Exemplo de uso do FormArrayInput em um componente pai com react-hook-form:
- *
- * import React from 'react';
- * import { useForm } from 'react-hook-form';
- * import { FormArrayInput } from './FormArrayInput';
- *
- * export function ExampleParentForm() {
- *   const { register, setValue, watch, handleSubmit } = useForm({
- *     defaultValues: { contatos: [] }
- *   });
- *   const contatos = watch("contatos");
- *
- *   // Atualiza o campo contatos com o novo array vindo do FormArrayInput
- *   const handleContatosChange = (newArray: string[]) => {
- *     setValue("contatos", newArray, { shouldValidate: true });
- *   };
- *
- *   const onSubmit = (data: any) => {
- *   };
- *
- *   return (
- *     <form onSubmit={handleSubmit(onSubmit)}>
- *       <FormArrayInput
- *         name="contatos"
- *         title="Contatos"
- *         addButtonText="+"
- *         ValuesArrayString
- *         value={contatos}
- *         onChange={handleContatosChange}
- *         fieldConfigs={[
- *           {
- *             name: "contato",
- *             label: "Contato",
- *             type: "text",
- *             required: true,
- *             maskProps: { mask: "(00) 000000000" },
- *             inputProps: { minLength: 8 }
- *           }
- *         ]}
- *         renderChipContent={(contato) => <span>{contato}</span>}
- *         pasteInput
- *       />
- *       <button type="submit">Enviar</button>
- *     </form>
- *   );
- * }
- *
- */
