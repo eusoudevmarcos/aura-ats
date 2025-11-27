@@ -9,7 +9,7 @@ import { saveCliente } from '@/axios/cliente.axios';
 import { StatusClienteEnum } from '@/schemas/statusClienteEnum.schema';
 import { getError } from '@/utils/getError';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
@@ -49,7 +49,15 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
   initialValues,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [errorLabel, setErrorLabel] = useState(null);
+  const [errorLabel, setErrorLabel] = useState<null | string>(null);
+
+  const errorLabelRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (errorLabel && errorLabelRef.current) {
+      errorLabelRef.current.focus();
+    }
+  }, [errorLabel]);
 
   const normInitialValues = React.useMemo(() => {
     return initialValues;
@@ -111,7 +119,14 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         className="space-y-3 flex flex-col"
       >
         {errorLabel && (
-          <p className="bg-red-500 p-2 text-center text-white">{errorLabel}</p>
+          <p
+            ref={errorLabelRef}
+            tabIndex={-1}
+            className="bg-red-500 p-2 text-center text-white"
+            aria-live="assertive"
+          >
+            {errorLabel}
+          </p>
         )}
         <h3 className="block text-primary text-xl font-bold mb-2">
           Status do cliente

@@ -3,30 +3,36 @@ import { getFirestore } from "firebase-admin/firestore";
 import fs from "fs";
 import path from "path";
 
-// Caminho para o JSON da conta de serviço via .env
-const sdkPath = process.env.FIREBASE_ADMIN_SDK_PATH;
-if (!sdkPath) {
+// O FIREBASE_ADMIN_SDK_PATH será apenas o nome do arquivo, ex: "firebase-admin.json"
+const sdkFileName = process.env.FIREBASE_ADMIN_SDK_PATH;
+
+if (!sdkFileName) {
   throw new Error(
     "A variável de ambiente FIREBASE_ADMIN_SDK_PATH não está definida."
   );
 }
 
-// Garante que o caminho é relativo à raiz do projeto (na pasta src/public/etc/secrets)
-const filePath = path.resolve(
-  __dirname,
-  "../public/etc/secrets",
-  sdkPath.replace(/^(\.\/|\/)?etc\/secrets\//, "")
-);
+/**
+ * Ajusta o caminho para funcionar localmente e no Render.
+ * - __dirname pode variar conforme build (src/lib em dev, dist/src/lib em produção)
+ * - rootDir aponta para a raiz do projeto em qualquer ambiente.
+ */
+const rootDir =
+  process.env.NODE_ENV === "production"
+    ? path.resolve(__dirname, "../../..")
+    : path.resolve(__dirname, "../..");
+
+// Caminho relativo à raiz do projeto para o diretório secrets
+const filePath = path.resolve(rootDir, "src/public/etc/secrets", sdkFileName);
+
 console.log("Usando SDK Firebase Admin JSON:", filePath);
 
-// Verifica se o arquivo existe
 if (!fs.existsSync(filePath)) {
   throw new Error(
     `Arquivo de credencial Firebase não encontrado em: ${filePath}`
   );
 }
 
-// Faz a leitura e parse seguro do JSON
 let serviceAccount: Record<string, any>;
 try {
   const raw = fs.readFileSync(filePath, "utf-8");
@@ -38,7 +44,6 @@ try {
   );
 }
 
-// Inicializa o Firebase Admin se ainda não estiver inicializado
 if (!getApps().length) {
   initializeApp({
     credential: cert(serviceAccount),
