@@ -210,13 +210,13 @@ const ClienteSearch = ({
             <div className="flex gap-2 relative">
               {isBtnView && (
                 <PrimaryButton
-                  className="h-fit !p-1"
+                  className="h-fit p-1"
                   onClick={() => setOpenModal(!openModal)}
                 >
                   <span className="material-icons-outlined">visibility</span>
                 </PrimaryButton>
               )}
-              {isBtnDelete && <BtnDelete className="h-fit !p-1" />}
+              {isBtnDelete && <BtnDelete className="h-fit p-1" />}
             </div>
           </div>
           <Modal

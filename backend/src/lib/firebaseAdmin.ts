@@ -3,7 +3,7 @@ import { getFirestore } from "firebase-admin/firestore";
 import fs from "fs";
 import path from "path";
 
-// O FIREBASE_ADMIN_SDK_PATH será apenas o nome do arquivo, ex: "firebase-admin.json"
+// O FIREBASE_ADMIN_SDK_PATH deve ser APENAS o nome do arquivo, ex: "firebase-admin.json"
 const sdkFileName = process.env.FIREBASE_ADMIN_SDK_PATH;
 
 if (!sdkFileName) {
@@ -13,29 +13,43 @@ if (!sdkFileName) {
 }
 
 /**
- * Ajusta o caminho para funcionar localmente e no Render.
- * - __dirname pode variar conforme build (src/lib em dev, dist/src/lib em produção)
- * - rootDir aponta para a raiz do projeto em qualquer ambiente.
+ * Ajusta o caminho corretamente para desenvolvimento e produção.
+ *
+ * - Em dev:           /backend/src/public/etc/secrets/<arquivo>
+ * - Em produção:      /opt/render/project/src/backend/src/public/etc/secrets/<arquivo>
+ *
+ * No Render, a pasta de trabalho é /opt/render/project/src/backend/dist,
+ * mas os arquivos estáticos NÃO são transpilados, então 'src/public/etc/secrets'
+ * existe em tempo de execução na raiz do projeto (mesmo após o build do TypeScript).
+ *
+ * Em produção, o __dirname será algo como "/opt/render/project/src/backend/dist/src/lib"
+ * e precisamos subir alguns níveis até a raiz DO PROJETO e ACESSAR 'src/public/etc/secrets'
  */
-const rootDir =
+
+// resolve até a raiz do projeto (em produção está em dist/src/lib, precisa subir 3 níveis)
+const projectRoot =
   process.env.NODE_ENV === "production"
-    ? path.resolve(__dirname, "../../..")
+    ? path.resolve(__dirname, "../../../../")
     : path.resolve(__dirname, "../..");
 
-// Caminho relativo à raiz do projeto para o diretório secrets
-const filePath = path.resolve(rootDir, "src/public/etc/secrets", sdkFileName);
+// Caminho correto (mantém src/public/etc/secrets em ambos ambientes)
+const credFilePath = path.resolve(
+  projectRoot,
+  "src/public/etc/secrets",
+  sdkFileName
+);
 
-console.log("Usando SDK Firebase Admin JSON:", filePath);
+console.log("Usando SDK Firebase Admin JSON:", credFilePath);
 
-if (!fs.existsSync(filePath)) {
+if (!fs.existsSync(credFilePath)) {
   throw new Error(
-    `Arquivo de credencial Firebase não encontrado em: ${filePath}`
+    `Arquivo de credencial Firebase não encontrado em: ${credFilePath}`
   );
 }
 
 let serviceAccount: Record<string, any>;
 try {
-  const raw = fs.readFileSync(filePath, "utf-8");
+  const raw = fs.readFileSync(credFilePath, "utf-8");
   serviceAccount = JSON.parse(raw);
 } catch (err) {
   throw new Error(
