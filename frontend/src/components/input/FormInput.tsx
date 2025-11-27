@@ -191,7 +191,7 @@ function buildInputClasses(
   customClassName?: string
 ) {
   const base =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90 focus:border-primary placeholder:text-md';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90 focus:border-primary placeholder:text-md min-h-[42px]';
   const errorClass = errorMessage ? 'border-red-500' : '';
   return [base, errorClass, customClassName].filter(Boolean).join(' ');
 }

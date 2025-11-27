@@ -177,10 +177,7 @@ const ViewCompanyPage: React.FC = () => {
     //   {({}) => (
     <div className="px-4 py-2 mb-30">
       <div className="flex justify-between mb-10 px-4 py-2">
-        <button
-          onClick={() => router.push('/take-it')}
-          className="buttonPrimary"
-        >
+        <button onClick={() => router.back()} className="buttonPrimary">
           Voltar
         </button>
         <div className="relative inline-block" id="export-dropdown">

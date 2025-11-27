@@ -6,7 +6,7 @@ export const Container: React.FC<ContainerProps> = ({
   id,
   className,
 }) => (
-  <div className={`${className || ''}`}>
+  <div className={`relative ${className || ''}`}>
     {label && (
       <label
         htmlFor={id}

@@ -139,10 +139,7 @@ export default function ViewPersonPage(): React.ReactElement {
     //   {({}) => (
     <div className="px-4 py-2 mb-10">
       <div className="flex justify-between py-2">
-        <button
-          onClick={() => router.push('/take-it')}
-          className="buttonPrimary"
-        >
+        <button onClick={() => router.back()} className="buttonPrimary">
           Voltar
         </button>
 

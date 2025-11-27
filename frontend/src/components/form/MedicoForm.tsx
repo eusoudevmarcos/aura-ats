@@ -50,9 +50,9 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
   const crm = watch(crmName);
 
   const handleCRMsChange = (newArray: any[]) => {
-    console.log(newArray);
     setValue(crmName, newArray, { shouldValidate: true });
   };
+
   return (
     <>
       {especialidadeId && (
@@ -64,28 +64,18 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
         />
       )}
 
-      <div className="border-b border-gray-300 col-span-full"></div>
-
       <FormArrayInput
         name={crmName}
-        title="CRMs"
+        title="Adicione os CRM´s"
         addButtonText="+"
         value={crm}
         onChange={handleCRMsChange}
         containerClassName="col-span-full"
-        validateCustom={(value, fieldConfigs, setErrors) => {
-          const cleanCrm = value.trim();
-          if (cleanCrm.length > 20) {
-            setErrors('CRM deve ter no máximo 20 caracteres.');
-            return false;
-          }
-
-          return true;
-        }}
         fieldConfigs={[
           {
             name: 'numero',
             label: 'Número',
+            required: true,
             placeholder: 'Exemplo: 0000',
             inputProps: {
               minLength: 4,
@@ -93,15 +83,17 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
             },
           },
           {
+            component: 'select',
             name: 'ufCrm',
             label: 'UF',
-            placeholder: 'UF',
-            component: 'select',
+            required: true,
+            placeholder: 'Selecione a UF',
             selectOptions: UF_MODEL,
           },
           {
             name: 'dataInscricao',
-            placeholder: 'data de inscrição',
+            label: 'Data de Inscrição',
+            placeholder: '00/00/0000',
             maskProps: { mask: '00/00/0000' },
             inputProps: {
               minLength: 4,
