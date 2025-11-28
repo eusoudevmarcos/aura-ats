@@ -26,7 +26,8 @@ export const empresaSchema = z.object({
         message:
           'Data deve estar no formato DD/MM/AAAA ou ISO (YYYY-MM-DD ou YYYY-MM-DDTHH:mm:ss.sssZ)',
       }
-    ),
+    )
+    .optional(),
   representantes: z.array(pessoaSchema).optional(),
   createdAt: z
     .string()

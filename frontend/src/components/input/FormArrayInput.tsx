@@ -176,6 +176,7 @@ export function FormArrayInput({
         return false;
       }
 
+      // Validação de e-mail
       if (
         config.type === 'email' &&
         typeof val === 'string' &&
@@ -187,6 +188,28 @@ export function FormArrayInput({
             `O campo '${
               config.label || config.name
             }' deve conter um e-mail válido.`
+          );
+          return false;
+        }
+      }
+
+      // Validação de telefone/celular no padrão mascara:
+      // (00) 0000-0000 ou (00) 0 0000-0000
+      if (
+        (config.type === 'telefone' ||
+          config.type === 'celular' ||
+          config.type === 'phone') &&
+        typeof val === 'string' &&
+        val.length > 0
+      ) {
+        // Aceita (00) 0000-0000  ou (00) 0 0000-0000
+        // Aceita ou não o espaço após DDD e aceita traço
+        const phoneRegex = /^\(\d{2}\)(\s\d)?\s?\d{4}-\d{4}$/;
+        if (!phoneRegex.test(val.trim())) {
+          setItemError(
+            `O campo '${
+              config.label || config.name
+            }' deve conter um telefone válido no formato (00) 0000-0000 ou (00) 0 0000-0000.`
           );
           return false;
         }

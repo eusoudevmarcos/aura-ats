@@ -1,41 +1,12 @@
 import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
 import { AdminGuard } from '../auth/AdminGuard';
+import { LabelController } from '../global/label/LabelController';
+import { LabelStatus } from '../global/label/LabelStatus';
 
 interface ClienteInfoProps {
   cliente: ClienteWithEmpresaAndPlanosSchema;
   variant?: 'mini' | 'full';
 }
-
-// Ajuste: container padronizado para label e valor
-const LabelController = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => {
-  return (
-    <div className="flex items-center gap-2 mb-1">
-      <span className="font-medium text-primary">{label}</span>
-      <span className={`${value ? 'text-secondary' : 'text-gray-400'}`}>
-        {value ? value : 'N/A'}
-      </span>
-    </div>
-  );
-};
-
-const StatusLabel = ({ status }: { status: string }) => (
-  <div className="flex items-center gap-2 flex-wrap">
-    <LabelController
-      label="Status:"
-      value={
-        <span className="bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
-          {status}
-        </span>
-      }
-    />
-  </div>
-);
 
 const EmailLabel = ({
   email,
@@ -114,6 +85,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
   if (variant === 'mini') {
     return (
       <div className="flex flex-col py-2">
+        {cliente.status && <LabelStatus status={cliente.status} />}
         <LabelController
           label="CNPJ:"
           value={
@@ -125,7 +97,6 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
               : ''
           }
         />
-        {cliente.status && <StatusLabel status={cliente.status} />}
         {cliente.empresa && <EmpresaInfo empresa={cliente.empresa} />}
         {cliente.usuarioSistema?.email && (
           <EmailLabel email={cliente.usuarioSistema.email} />
@@ -136,6 +107,8 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
 
   return (
     <div className="flex flex-col flex-wrap">
+      <LabelStatus status={cliente.status} />
+
       {cliente.empresa && (
         <>
           {cliente.usuarioSistema?.email && (
@@ -155,8 +128,6 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
           }
         />
       )}
-
-      <StatusLabel status={cliente.status} />
 
       {cliente.empresa?.representantes &&
         cliente.empresa.representantes.length > 0 && (
