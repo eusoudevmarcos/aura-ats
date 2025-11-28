@@ -166,7 +166,7 @@ export class ClienteService {
           socios: true,
         },
       },
-      planos: true,
+      // planos: true,
       usuarioSistema: true,
     };
 

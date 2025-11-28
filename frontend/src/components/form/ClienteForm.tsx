@@ -15,9 +15,6 @@ import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 
-// IMPORTAÇÃO DO COMPONENTE PlanosForm
-import PlanosForm from './planosForm';
-
 type ClienteFormProps = {
   formContexto?: UseFormReturn<ClienteWithEmpresaInput>;
   onSubmit?: (data: ClienteWithEmpresaInput) => void;
@@ -167,7 +164,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             )}
         </div>
 
-        {status === 'ATIVO' && (
+        {/* {status === 'ATIVO' && (
           <div className="border-t border-gray-200 pt-4">
             <PlanosForm
               errors={errors}
@@ -184,7 +181,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               </p>
             )}
           </div>
-        )}
+        )} */}
 
         <div className="border-t border-gray-200 pt-4">
           <PrimaryButton
