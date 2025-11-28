@@ -323,39 +323,41 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
       <div className="flex flex-col gap-2 flex-wrap w-full md:flex-row md:w-auto">
         {typeColumns === 'companies' && (
-          <section className="flex items-center gap-2 cursor-pointer">
-            <input
-              id="filial"
-              className="accent-[#48038a]"
-              type="checkbox"
-              checked={isFiliar}
-              onChange={() => {
-                setIsFiliar(!isFiliar);
-              }}
-            />
-            <label htmlFor="filial" className="cursor-pointer">
-              Filial
-            </label>
-          </section>
+          <>
+            <section className="flex items-center gap-2 cursor-pointer">
+              <input
+                id="filial"
+                className="accent-[#48038a]"
+                type="checkbox"
+                checked={isFiliar}
+                onChange={() => {
+                  setIsFiliar(!isFiliar);
+                }}
+              />
+              <label htmlFor="filial" className="cursor-pointer">
+                Filial
+              </label>
+            </section>
+            <section className="flex flex-wrap w-full md:w-auto">
+              <select
+                id="uf"
+                name="uf"
+                className="w-full rounded-lg border-2 min-h-[44px] md:w-auto"
+                value={uf}
+                onChange={handleUfChange}
+              >
+                <option value="" selected>
+                  TODOS
+                </option>
+                {UF_MODEL.map(({ value, label }, index) => (
+                  <option key={index} value={value ?? ''}>
+                    {label}
+                  </option>
+                ))}
+              </select>
+            </section>
+          </>
         )}
-        <section className="flex flex-wrap w-full md:w-auto">
-          <select
-            id="uf"
-            name="uf"
-            className="w-full rounded-lg border-2 min-h-[44px] md:w-auto"
-            value={uf}
-            onChange={handleUfChange}
-          >
-            <option value="" selected>
-              TODOS
-            </option>
-            {UF_MODEL.map(({ value, label }, index) => (
-              <option key={index} value={value ?? ''}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </section>
 
         <section className="w-full md:w-auto">
           <PrimaryButton
