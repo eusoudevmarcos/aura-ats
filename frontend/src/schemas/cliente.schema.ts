@@ -9,8 +9,11 @@ export const clienteSchema = z.object({
   id: z.uuid().optional(),
   status: StatusClienteEnum,
   criarUsuarioSistema: z.boolean().optional(),
-  email: z.email().optional(),
+  email: z.email().optional(), // E-mail de acesso ao sistema
   usuarioSistema: z.object({ email: z.email('Email inválido') }).optional(),
+
+  emails: z.array(z.string()),
+  telefones: z.array(z.string()),
 });
 export type ClienteInput = z.infer<typeof clienteSchema>;
 

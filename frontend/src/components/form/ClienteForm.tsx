@@ -12,6 +12,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useRef, useState } from 'react';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
 import { PrimaryButton } from '../button/PrimaryButton';
+import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
 import { FormSelect } from '../input/FormSelect';
 
@@ -73,12 +74,22 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     setValue,
   } = methods;
 
-  useEffect(() => {
-    // Apenas para debug
-    console.log(errors);
-  }, [errors]);
+  // useEffect(() => {
+  //   // Apenas para debug
+  //   console.log(errors);
+  // }, [errors]);
 
   const status = watch('status') || '';
+  const emails = watch('emails') || '';
+  const telefones = watch('telefones') || '';
+
+  const handleEmailsChange = (emails: any) => {
+    setValue('emails', emails);
+  };
+
+  const handleTelefonesChange = (emails: any) => {
+    setValue('telefones', emails);
+  };
 
   const submitHandler = async (data: ClienteWithEmpresaAndPlanosSchema) => {
     setErrorLabel(null);
@@ -163,6 +174,47 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
               </p>
             )}
         </div>
+
+        <FormArrayInput
+          name="emails"
+          title="Adicione os E-mail´s"
+          ValuesArrayString
+          value={emails}
+          onChange={handleEmailsChange}
+          fieldConfigs={[
+            {
+              name: 'email',
+              placeholder: 'Adicione os E-mails',
+              inputProps: {
+                minLength: 4,
+                classNameContainer: 'w-full',
+              },
+              type: 'email',
+            },
+          ]}
+          renderChipContent={link => <span>{link}</span>}
+        />
+
+        <FormArrayInput
+          name="telefones"
+          title="Adicione os Telefones/Celulares"
+          ValuesArrayString
+          value={telefones}
+          onChange={handleTelefonesChange}
+          fieldConfigs={[
+            {
+              name: 'telefone',
+              placeholder: 'Adicione os Telefones',
+              inputProps: {
+                minLength: 4,
+                classNameContainer: 'w-full',
+              },
+              maskProps: { mask: ['(00) 0000-0000', '(00) 00000-0000'] },
+              type: 'phone',
+            },
+          ]}
+          renderChipContent={link => <span>{link}</span>}
+        />
 
         {/* {status === 'ATIVO' && (
           <div className="border-t border-gray-200 pt-4">

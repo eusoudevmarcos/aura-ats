@@ -6,6 +6,8 @@ export const buildClienteData = async (data: any): Promise<any> => {
   const { email, id, dataAssinatura, ...rest } = data;
   const clienteData: any = {
     status: rest.status as StatusCliente,
+    emails: rest.emails || [],
+    telefones: rest.telefones || [],
   };
 
   const buildNestedOperation = new BuildNestedOperation();

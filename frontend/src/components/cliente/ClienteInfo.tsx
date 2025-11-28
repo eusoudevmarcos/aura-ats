@@ -1,4 +1,8 @@
 import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
+import {
+  StatusClienteEnum,
+  StatusClienteEnumInput,
+} from '@/schemas/statusClienteEnum.schema';
 import { AdminGuard } from '../auth/AdminGuard';
 
 interface ClienteInfoProps {
@@ -24,18 +28,39 @@ const LabelController = ({
   );
 };
 
-const StatusLabel = ({ status }: { status: string }) => (
-  <div className="flex items-center gap-2 flex-wrap">
-    <LabelController
-      label="Status:"
-      value={
-        <span className="bg-[#ede9fe] text-secondary text-xs font-semibold px-3 py-1 rounded-full border border-secondary">
-          {status}
-        </span>
-      }
-    />
-  </div>
-);
+const StatusLabel = ({ status }: { status: StatusClienteEnumInput }) => {
+  let statusBgColor = 'bg-[#ede9fe]';
+
+  switch (status) {
+    case StatusClienteEnum.enum.ATIVO:
+      statusBgColor = 'bg-green-500 text-white';
+      break;
+    case StatusClienteEnum.enum.INATIVO:
+      statusBgColor = 'bg-red-500 text-secondary';
+      break;
+    case StatusClienteEnum.enum.LEAD:
+      statusBgColor = 'bg-cyan-500 text-white';
+      break;
+    case StatusClienteEnum.enum.PROSPECT:
+      statusBgColor = 'bg-gray-500 text-white';
+      break;
+  }
+
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      <LabelController
+        label="Status:"
+        value={
+          <span
+            className={`${statusBgColor} text-xs font-semibold px-3 py-1 rounded-full`}
+          >
+            {status}
+          </span>
+        }
+      />
+    </div>
+  );
+};
 
 const EmailLabel = ({
   email,
@@ -114,6 +139,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
   if (variant === 'mini') {
     return (
       <div className="flex flex-col py-2">
+        {cliente.status && <StatusLabel status={cliente.status} />}
         <LabelController
           label="CNPJ:"
           value={
@@ -125,7 +151,6 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
               : ''
           }
         />
-        {cliente.status && <StatusLabel status={cliente.status} />}
         {cliente.empresa && <EmpresaInfo empresa={cliente.empresa} />}
         {cliente.usuarioSistema?.email && (
           <EmailLabel email={cliente.usuarioSistema.email} />
@@ -136,6 +161,8 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
 
   return (
     <div className="flex flex-col flex-wrap">
+      <StatusLabel status={cliente.status} />
+
       {cliente.empresa && (
         <>
           {cliente.usuarioSistema?.email && (
@@ -155,8 +182,6 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
           }
         />
       )}
-
-      <StatusLabel status={cliente.status} />
 
       {cliente.empresa?.representantes &&
         cliente.empresa.representantes.length > 0 && (

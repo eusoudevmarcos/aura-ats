@@ -21,6 +21,8 @@ export class ClienteService {
       where: { id },
       select: {
         id: true,
+        emails: true,
+        telefones: true,
         status: true,
         planos: {
           select: {

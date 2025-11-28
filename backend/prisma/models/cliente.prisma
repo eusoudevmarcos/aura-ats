@@ -18,6 +18,9 @@ model Cliente {
 
     deletedAt DateTime?
 
+    emails    String[]
+    telefones String[]
+
     @@index([empresaId])
     @@schema("Cliente")
 }
