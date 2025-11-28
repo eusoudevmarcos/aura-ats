@@ -1,66 +1,12 @@
 import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
-import {
-  StatusClienteEnum,
-  StatusClienteEnumInput,
-} from '@/schemas/statusClienteEnum.schema';
 import { AdminGuard } from '../auth/AdminGuard';
+import { LabelController } from '../global/label/LabelController';
+import { LabelStatus } from '../global/label/LabelStatus';
 
 interface ClienteInfoProps {
   cliente: ClienteWithEmpresaAndPlanosSchema;
   variant?: 'mini' | 'full';
 }
-
-// Ajuste: container padronizado para label e valor
-const LabelController = ({
-  label,
-  value,
-}: {
-  label: string;
-  value: React.ReactNode;
-}) => {
-  return (
-    <div className="flex items-center gap-2 mb-1">
-      <span className="font-medium text-primary">{label}</span>
-      <span className={`${value ? 'text-secondary' : 'text-gray-400'}`}>
-        {value ? value : 'N/A'}
-      </span>
-    </div>
-  );
-};
-
-const StatusLabel = ({ status }: { status: StatusClienteEnumInput }) => {
-  let statusBgColor = 'bg-[#ede9fe]';
-
-  switch (status) {
-    case StatusClienteEnum.enum.ATIVO:
-      statusBgColor = 'bg-green-500 text-white';
-      break;
-    case StatusClienteEnum.enum.INATIVO:
-      statusBgColor = 'bg-red-500 text-secondary';
-      break;
-    case StatusClienteEnum.enum.LEAD:
-      statusBgColor = 'bg-cyan-500 text-white';
-      break;
-    case StatusClienteEnum.enum.PROSPECT:
-      statusBgColor = 'bg-gray-500 text-white';
-      break;
-  }
-
-  return (
-    <div className="flex items-center gap-2 flex-wrap">
-      <LabelController
-        label="Status:"
-        value={
-          <span
-            className={`${statusBgColor} text-xs font-semibold px-3 py-1 rounded-full`}
-          >
-            {status}
-          </span>
-        }
-      />
-    </div>
-  );
-};
 
 const EmailLabel = ({
   email,
@@ -139,7 +85,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
   if (variant === 'mini') {
     return (
       <div className="flex flex-col py-2">
-        {cliente.status && <StatusLabel status={cliente.status} />}
+        {cliente.status && <LabelStatus status={cliente.status} />}
         <LabelController
           label="CNPJ:"
           value={
@@ -161,7 +107,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
 
   return (
     <div className="flex flex-col flex-wrap">
-      <StatusLabel status={cliente.status} />
+      <LabelStatus status={cliente.status} />
 
       {cliente.empresa && (
         <>

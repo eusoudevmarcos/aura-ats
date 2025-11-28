@@ -307,7 +307,7 @@ const CandidatoPage: React.FC = () => {
               candidato?.medico?.crm.length > 0 && (
                 <div>
                   <span className="font-medium text-primary">CRM:</span>
-                  <span className="text-secondary ml-2 bg-secondary rounded-full text-white! py-1 px-2">
+                  <span className="text-secondary ml-2 bg-[#ede9fe] rounded-full text-black py-1 px-2 text-sm">
                     {candidato.medico.crm.map((crm: any) => (
                       <AdminGuard key={crm} typeText>
                         {crm.numero +
@@ -329,7 +329,7 @@ const CandidatoPage: React.FC = () => {
                 <div className="mb-2">
                   <span className="font-medium text-primary">Emails:</span>
                   {candidato.emails.map((email: string) => (
-                    <span className="text-secondary ml-2 bg-secondary rounded-full text-white! py-1 px-2">
+                    <span className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm">
                       <AdminGuard key={email} typeText>
                         {email || '-'}
                       </AdminGuard>
@@ -342,7 +342,7 @@ const CandidatoPage: React.FC = () => {
                 <div>
                   <span className="font-medium text-primary">Contatos:</span>
                   {candidato.contatos.map((contato: string) => (
-                    <span className="text-secondary ml-2 bg-secondary rounded-full text-white! py-1 px-2">
+                    <span className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm">
                       <AdminGuard key={contato} typeText>
                         {contato || '-'}
                       </AdminGuard>
