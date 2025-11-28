@@ -56,19 +56,19 @@ const columnsPerson: TableColumn<PersonResult>[] = [
       return mask(handleZeroLeft(row.cpf), 'cpf');
     },
   },
-  {
-    label: 'Email',
-    key: 'email',
-    render: row => {
-      if (Array.isArray(row.emails) && row.emails.length > 0) {
-        return <span>{row.emails.map(email => email.email).join(', ')}</span>;
-      }
-      if (row.email) {
-        return row.email;
-      }
-      return '-';
-    },
-  },
+  // {
+  //   label: 'Email',
+  //   key: 'email',
+  //   render: row => {
+  //     if (Array.isArray(row.emails) && row.emails.length > 0) {
+  //       return <span>{row.emails.map(email => email.email).join(', ')}</span>;
+  //     }
+  //     if (row.email) {
+  //       return row.email;
+  //     }
+  //     return '-';
+  //   },
+  // },
   {
     label: 'Endereço',
     hiddeBtnCopy: true,

@@ -169,16 +169,16 @@ const SearchForm: React.FC<SearchFormProps> = ({
     if (!initialSearchParams) return;
 
     // setInput(initialSearchParams.input ?? '');
-    setSelectedType(initialSearchParams.descriptionData ?? null);
-    setUf(initialSearchParams.uf ?? '');
-    setIsFiliar(Boolean(initialSearchParams.options?.filial));
+    // setSelectedType(initialSearchParams.descriptionData ?? null);
+    // setUf(initialSearchParams.uf ?? '');
+    // setIsFiliar(Boolean(initialSearchParams.options?.filial));
 
     if (initialSearchParams.descriptionData && initialSearchParams.input) {
       const isValid = validateInputByType(
         initialSearchParams.input,
         initialSearchParams.descriptionData
       );
-      setDisableBtn(!isValid);
+      // setDisableBtn(!isValid);
       setErrorMsg(
         getValidationError(
           initialSearchParams.input,
@@ -263,18 +263,17 @@ const SearchForm: React.FC<SearchFormProps> = ({
   return (
     <form
       className={`${takeitStyles.searchForm}
-        flex flex-col gap-2 w-full justify-between
-        md:flex-row md:items-end`}
+        flex flex-col gap-2 w-full justify-center
+        md:flex-col md:items-center`}
       onSubmit={handleSubmit}
     >
-      <section className="flex flex-col w-full max-w-full md:max-w-[400px]">
-        <div className="flex gap-2 mb-4 flex-wrap">
-          {typeButtons.map(option => (
-            <button
-              key={option.type}
-              type="button"
-              disabled={loading}
-              className={`
+      <div className="flex gap-2 mb-4 flex-wrap justify-center">
+        {typeButtons.map(option => (
+          <button
+            key={option.type}
+            type="button"
+            disabled={loading}
+            className={`
                 px-3 py-1 rounded-lg font-semibold text-xs transition-all border
                 ${
                   selectedType === option.type
@@ -282,14 +281,14 @@ const SearchForm: React.FC<SearchFormProps> = ({
                     : 'bg-white text-primary border-primary hover:bg-primary/10'
                 }
                 `}
-              onClick={() => handleTypeChange(option.type as SearchType)}
-            >
-              {option.label}
-            </button>
-          ))}
-        </div>
-
-        <div className="relative w-full flex">
+            onClick={() => handleTypeChange(option.type as SearchType)}
+          >
+            {option.label}
+          </button>
+        ))}
+      </div>
+      <section className="flex flex-col w-full max-w-full md:max-w-[400px]">
+        <div className="relative w-full flex gap-1">
           <div className="flex flex-col relative w-full mb-5 md:mb-0">
             <FormInput
               name="searchInput"
@@ -315,49 +314,12 @@ const SearchForm: React.FC<SearchFormProps> = ({
               noControl
             />
             {errorMsg && (
-              <p className="text-red-500 text-sm absolute top-12">{errorMsg}</p>
+              <p className="text-red-500 text-[12px] absolute bottom-12 left-3">
+                {errorMsg}
+              </p>
             )}
           </div>
-        </div>
-      </section>
 
-      <div className="flex flex-col gap-2 flex-wrap w-full md:flex-row md:w-auto">
-        {typeColumns === 'companies' && (
-          <section className="flex items-center gap-2 cursor-pointer">
-            <input
-              id="filial"
-              className="accent-[#48038a]"
-              type="checkbox"
-              checked={isFiliar}
-              onChange={() => {
-                setIsFiliar(!isFiliar);
-              }}
-            />
-            <label htmlFor="filial" className="cursor-pointer">
-              Filial
-            </label>
-          </section>
-        )}
-        <section className="flex flex-wrap w-full md:w-auto">
-          <select
-            id="uf"
-            name="uf"
-            className="w-full rounded-lg border-2 min-h-[44px] md:w-auto"
-            value={uf}
-            onChange={handleUfChange}
-          >
-            <option value="" disabled>
-              Pesquisar UF
-            </option>
-            {UF_MODEL.map(({ value, label }, index) => (
-              <option key={index} value={value ?? ''}>
-                {label}
-              </option>
-            ))}
-          </select>
-        </section>
-
-        <section className="w-full md:w-auto">
           <PrimaryButton
             type="submit"
             disabled={loading || disableBtn}
@@ -371,8 +333,45 @@ const SearchForm: React.FC<SearchFormProps> = ({
               <span className="material-icons text-2xl">search</span>
             )}
           </PrimaryButton>
-        </section>
-      </div>
+        </div>
+      </section>
+      {typeColumns === 'companies' && (
+        <>
+          {/* <section className="flex items-center gap-2 cursor-pointer">
+              <input
+                id="filial"
+                className="accent-[#48038a]"
+                type="checkbox"
+                checked={isFiliar}
+                onChange={() => {
+                  setIsFiliar(!isFiliar);
+                }}
+              />
+              <label htmlFor="filial" className="cursor-pointer">
+                Filial
+              </label>
+            </section> */}
+          <section className="flex flex-col w-full md:w-auto">
+            <label>Selecione uma UF</label>
+            <select
+              id="uf"
+              name="uf"
+              className="w-full rounded-lg border-2 max-w-[100px] md:w-auto"
+              value={uf}
+              onChange={handleUfChange}
+            >
+              <option value="" selected>
+                TODOS
+              </option>
+              {UF_MODEL.map(({ value, label }, index) => (
+                <option key={index} value={value ?? ''}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </section>
+        </>
+      )}
     </form>
   );
 };
