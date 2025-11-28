@@ -170,7 +170,7 @@ const SearchForm: React.FC<SearchFormProps> = ({
 
     // setInput(initialSearchParams.input ?? '');
     setSelectedType(initialSearchParams.descriptionData ?? null);
-    setUf(initialSearchParams.uf ?? '');
+    // setUf(initialSearchParams.uf ?? '');
     setIsFiliar(Boolean(initialSearchParams.options?.filial));
 
     if (initialSearchParams.descriptionData && initialSearchParams.input) {
@@ -346,8 +346,8 @@ const SearchForm: React.FC<SearchFormProps> = ({
             value={uf}
             onChange={handleUfChange}
           >
-            <option value="" disabled>
-              Pesquisar UF
+            <option value="" selected>
+              TODOS
             </option>
             {UF_MODEL.map(({ value, label }, index) => (
               <option key={index} value={value ?? ''}>
