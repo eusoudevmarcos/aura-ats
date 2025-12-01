@@ -35,6 +35,7 @@ type VagaFormProps = {
   initialValues?: Partial<VagaWithClienteInput>;
   isBtnDelete?: boolean;
   isBtnView?: boolean;
+  showInput?: boolean;
 };
 
 const VagaForm: React.FC<VagaFormProps> = ({
@@ -43,6 +44,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
   initialValues,
   isBtnDelete = true,
   isBtnView = true,
+  showInput = true,
 }) => {
   const [loading, setLoading] = useState(false);
   const [habilidadesAllow, setHabilidadesAllow] = useState(false);
@@ -147,7 +149,10 @@ const VagaForm: React.FC<VagaFormProps> = ({
                   }
                 : null
             }
-            showInput={!initialValues?.cliente?.id && !initialValues?.clienteId}
+            showInput={
+              (!initialValues?.cliente?.id && !initialValues?.clienteId) ||
+              showInput
+            }
             isBtnDelete={isBtnDelete}
             isBtnView={isBtnView}
           />
