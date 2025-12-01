@@ -8,6 +8,8 @@ import VagaForm from '@/components/form/VagaForm';
 import { LabelStatus } from '@/components/global/label/LabelStatus';
 import { EditPenIcon, TrashIcon } from '@/components/icons'; // Certifique-se que o caminho está correto
 import Modal from '@/components/modal/Modal'; // Certifique-se que o caminho está correto
+import ModalConfirmation from '@/components/modal/ModalConfirmation';
+import ModalDelete from '@/components/modal/ModalDelete';
 import CandidatoSearch from '@/components/search/CandidatoSearch';
 import Tabs from '@/components/utils/Tabs';
 import Link from 'next/link';
@@ -23,6 +25,9 @@ const VagaPage: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalCandidato, setShowModalCandidato] = useState(false);
+  const [showModalConfirmationDelete, setShowModalConfirmationDelete] =
+    useState(false);
+  const [showModalDeleteSucess, setShowModalDeleteSucess] = useState(false);
   const [currentTab, setCurrentTab] = useState('');
 
   const fetchVaga = async () => {
@@ -47,13 +52,12 @@ const VagaPage: React.FC = () => {
 
   const handleDelete = async () => {
     if (!vaga) return;
-    if (confirm('Tem certeza que deseja excluir esta vaga?')) {
-      try {
-        await api.delete(`/api/vaga/${vaga.id}`);
-        router.push('/vagas');
-      } catch {
-        alert('Erro ao excluir vaga.');
-      }
+    try {
+      await api.delete(`/api/externalWithAuth/vaga/${vaga.id}`);
+      setShowModalDeleteSucess(prev => !prev);
+    } catch (error) {
+      console.log(error);
+      alert('Erro ao excluir vaga.');
     }
   };
 
@@ -118,7 +122,7 @@ const VagaPage: React.FC = () => {
             </button>
             <button
               className="px-3 py-2 bg-[#f72929] text-white rounded shadow-md hover:scale-110 transition-transform"
-              onClick={handleDelete}
+              onClick={() => setShowModalConfirmationDelete(prev => !prev)}
             >
               <TrashIcon />
             </button>
@@ -465,6 +469,24 @@ const VagaPage: React.FC = () => {
           initialValues={vaga}
         />
       </Modal>
+
+      <ModalConfirmation
+        isOpen={showModalConfirmationDelete}
+        onClose={() => setShowModalConfirmationDelete(false)}
+        onClickConfirm={handleDelete}
+      ></ModalConfirmation>
+
+      <ModalDelete
+        isOpen={showModalDeleteSucess}
+        onClose={() => setShowModalDeleteSucess(false)}
+        message="Vaga deletada com sucesso!"
+        btn={{
+          next: {
+            label: 'Voltar para Vagas',
+            onClick: () => router.push('/vagas'),
+          },
+        }}
+      ></ModalDelete>
     </div>
   );
 };

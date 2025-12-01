@@ -1,5 +1,5 @@
-import type { Plan } from '@/data/PLANOS';
-import { PLANS_DATA } from '@/data/PLANOS';
+import type { Plan } from '@/dto/data/PLANOS';
+import { PLANS_DATA } from '@/dto/data/PLANOS';
 import Link from 'next/link';
 import React from 'react';
 import { FaCheckCircle } from 'react-icons/fa';
