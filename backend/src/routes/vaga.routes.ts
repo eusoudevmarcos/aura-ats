@@ -18,6 +18,8 @@ router.post("/", authMiddleware, (req, res) => vagaController.save(req, res));
 router.post("/vincular-candidatos/:id", authMiddleware, (req, res) =>
   vagaController.vincularCandidato(req, res)
 );
-// router.delete("/:id", (req, res) => vagaController.delete(req, res));
+router.delete("/:id", authMiddleware, (req, res) =>
+  vagaController.delete(req, res)
+);
 
 export default router;

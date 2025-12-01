@@ -206,7 +206,7 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
                           : 'text-gray-400 hover:bg-gray-700 hover:text-white'
                       } ${collapsed ? 'justify-center px-3' : ''}`}
                     >
-                      <p>{item?.icon}</p>
+                      {item?.icon}
                       <span
                         className={`whitespace-nowrap overflow-hidden transition duration-100 ${
                           collapsed && 'hidden w-0'

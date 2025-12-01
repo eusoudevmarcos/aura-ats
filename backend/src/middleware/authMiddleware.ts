@@ -29,7 +29,6 @@ export const authMiddleware = (
   if (!JWT_SECRET) {
     throw new Error("JWT_SECRET não está definido.");
   }
-
   let token: string | undefined;
 
   // 1. Authorization: Bearer

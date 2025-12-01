@@ -340,6 +340,12 @@ export class VagaService {
     return saved;
   }
 
+  async delete(id: string) {
+    await prisma.vaga.delete({
+      where: { id },
+    });
+  }
+
   async vincularCandidatos(id: string, candidatos: string[]) {
     if (!id || !Array.isArray(candidatos) || candidatos.length === 0) {
       throw new Error("ID da vaga e lista de candidatos são obrigatórios.");

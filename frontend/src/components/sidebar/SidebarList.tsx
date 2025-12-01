@@ -4,8 +4,6 @@ import {
   CalendarIcon,
   ClipboardCheckIcon,
   EmployeesIcon,
-  HandshakeIcon,
-  UsersIcon,
 } from '../icons';
 
 export const getNavItems = (user: any) => {
@@ -28,7 +26,7 @@ export const getNavItems = (user: any) => {
     user?.tipo === TipoUsuarioEnum.enum.RECRUTADOR
   ) {
     navItems.push({
-      icon: <UsersIcon className="w-5 h-5 text-inherit" />,
+      icon: <span className="material-icons-outlined">person</span>,
       label: 'Profissionais',
       href: '/profissionais',
     });
@@ -40,7 +38,7 @@ export const getNavItems = (user: any) => {
     user?.tipo === TipoUsuarioEnum.enum.VENDEDOR
   ) {
     navItems.push({
-      icon: <HandshakeIcon className="w-5 h-5 text-inherit" />,
+      icon: <span className="material-icons-outlined p-0 m-0">group</span>,
       label: 'Clientes',
       href: '/clientes',
     });

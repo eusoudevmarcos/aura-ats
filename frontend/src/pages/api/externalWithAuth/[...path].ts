@@ -95,7 +95,7 @@ export default async function handler(
       case 'DELETE':
         externalResponse = await externalBackendApi.delete(
           urlToExternalBackend,
-          { headers, data: req.body }
+          { headers }
         );
         // if (externalPath) await invalidateGetCache(externalPath);
         break;
@@ -113,10 +113,7 @@ export default async function handler(
 
     res.status(externalResponse.status).json(externalResponse.data);
   } catch (error: any) {
-    console.log(
-      'Erro no proxy da API externa:',
-      error.response?.data || error.message
-    );
+    console.log(error);
     const statusCode = error.response?.status || 500;
     res.status(statusCode).json({
       error: 'Erro ao se comunicar com a API externa.',
