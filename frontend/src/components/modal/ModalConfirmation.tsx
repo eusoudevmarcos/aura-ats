@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import Modal from './Modal';
 
 interface ModalSuccessProps {
@@ -11,6 +12,8 @@ const ModalSuccess: React.FC<ModalSuccessProps> = ({
   onClose,
   onClickConfirm,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="flex flex-col items-center justify-center p-2 text-center">
@@ -25,13 +28,18 @@ const ModalSuccess: React.FC<ModalSuccessProps> = ({
         <div className="flex gap-2">
           <button
             className="mt-6 px-6 py-2 bg-red-500 text-white rounded-lg hover:bg-primary/90 transition-colors"
-            onClick={onClickConfirm}
+            onClick={e => {
+              if (onClickConfirm) onClickConfirm();
+              setLoading(prev => !prev);
+            }}
+            disabled={loading}
           >
             CONFIRMAR
           </button>
           <button
             className="mt-6 px-6 py-2 bg-secondary text-white rounded-lg hover:bg-primary/90 transition-colors"
             onClick={onClose}
+            disabled={loading}
           >
             FECHAR
           </button>
