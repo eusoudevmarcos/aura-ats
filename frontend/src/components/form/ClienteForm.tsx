@@ -124,6 +124,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
       <form
         onSubmit={handleSubmit(submitHandler)}
         className="space-y-3 flex flex-col"
+        autoComplete="off"
       >
         {errorLabel && (
           <p
