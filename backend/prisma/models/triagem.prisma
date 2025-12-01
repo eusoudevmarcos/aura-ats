@@ -5,7 +5,7 @@ model TriagemVaga {
     update_at   DateTime          @updatedAt
     tipoTriagem TipoEventoTriagem @default(TRIAGEM_INICIAL)
     // relacionamento
-    vaga        Vaga              @relation(fields: [vagaId], references: [id])
+    vaga        Vaga              @relation(fields: [vagaId], references: [id], onDelete: Cascade)
     vagaId      String
 
     agenda Agenda[]
