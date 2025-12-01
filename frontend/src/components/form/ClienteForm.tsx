@@ -74,14 +74,13 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
     setValue,
   } = methods;
 
-  // useEffect(() => {
-  //   // Apenas para debug
-  //   console.log(errors);
-  // }, [errors]);
+  useEffect(() => {
+    // Apenas para debug
+    console.log(errors);
+  }, [errors]);
 
-  const status = watch('status') || '';
-  const emails = watch('emails') || '';
-  const telefones = watch('telefones') || '';
+  const emails = watch('emails') || [];
+  const telefones = watch('telefones') || [];
 
   const handleEmailsChange = (emails: any) => {
     setValue('emails', emails);

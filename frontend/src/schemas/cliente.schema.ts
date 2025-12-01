@@ -12,8 +12,8 @@ export const clienteSchema = z.object({
   email: z.email().optional(), // E-mail de acesso ao sistema
   usuarioSistema: z.object({ email: z.email('Email inválido') }).optional(),
 
-  emails: z.array(z.string()),
-  telefones: z.array(z.string()),
+  emails: z.array(z.string()).optional(),
+  telefones: z.array(z.string()).optional(),
 });
 export type ClienteInput = z.infer<typeof clienteSchema>;
 
