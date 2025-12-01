@@ -41,7 +41,7 @@ model VagaHabilidade {
     habilidade   Habilidade @relation(fields: [habilidadeId], references: [id])
     habilidadeId String
 
-    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vaga   Vaga   @relation(fields: [vagaId], references: [id], onDelete: Cascade)
     vagaId String
 
     @@id([vagaId, habilidadeId])
@@ -58,7 +58,7 @@ model CandidaturaVaga {
     candidato   Candidato @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
     candidatoId String
 
-    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vaga   Vaga   @relation(fields: [vagaId], references: [id], onDelete: Cascade)
     vagaId String
 
     agendaCandidatura       AgendaCandidatura[]
@@ -90,7 +90,7 @@ model VagaAnexo {
     anexo   Anexo  @relation(fields: [anexoId], references: [id])
     anexoId String
 
-    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vaga   Vaga   @relation(fields: [vagaId], references: [id], onDelete: Cascade)
     vagaId String
 
     @@id([vagaId, anexoId])
@@ -112,7 +112,7 @@ model VagaBeneficio {
     beneficio   Beneficio @relation(fields: [beneficioId], references: [id])
     beneficioId String
 
-    vaga   Vaga   @relation(fields: [vagaId], references: [id])
+    vaga   Vaga   @relation(fields: [vagaId], references: [id], onDelete: Cascade)
     vagaId String
 
     @@id([vagaId, beneficioId])
