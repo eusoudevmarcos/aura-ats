@@ -108,6 +108,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
+      console.log(erro);
       const message =
         erro?.response?.data?.details?.message ||
         erro?.response?.data?.message ||

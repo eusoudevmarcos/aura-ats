@@ -12,6 +12,7 @@ export class ClienteController {
       const response = await this.service.save(req.body);
       return res.status(201).json(nonEmptyAndConvertDataDTO(response));
     } catch (error: any) {
+      console.log(error);
       return res
         .status(500)
         .json({ message: error?.message || "Erro ao salvar cliente", error });

@@ -1,6 +1,28 @@
 import prisma from "../../lib/prisma";
+import { unmask } from "../../utils/unmask";
 
 export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
+  if (
+    !data?.empresa?.representantes &&
+    data.empresa.representantes.length === 0
+  ) {
+    throw new Error(
+      "Ao criar uma nova empresa, é obrigatório informar pelo menos um representante."
+    );
+  }
+
+  if (data?.empresa?.representantes?.[0]) {
+    const cpf = unmask(data.empresa.representantes[0].cpf);
+
+    const isPessoa = await prisma.pessoa.findUnique({
+      where: { cpf: cpf },
+    });
+
+    if (isPessoa) {
+      throw new Error("CPF já existe no sistema como Pessoa");
+    }
+  }
+
   if (data.email) {
     const isEmail = await prisma.usuarioSistema.findUnique({
       where: { email: data.email },
@@ -14,15 +36,6 @@ export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
   if (!data.empresa && !data.empresaId) {
     throw new Error(
       "Dados da empresa (ID ou objeto) são obrigatórios para um cliente."
-    );
-  }
-
-  if (
-    !data?.empresa?.representantes &&
-    data.empresa.representantes.length === 0
-  ) {
-    throw new Error(
-      "Ao criar uma nova empresa, é obrigatório informar pelo menos um representante."
     );
   }
 
@@ -47,8 +60,10 @@ export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
   // }
 
   if (!data.empresa.id && data.empresa?.cnpj) {
+    const cnpj = unmask(data.empresa.cnpj);
+
     const empresaExistentePorCnpj = await prisma.empresa.findUnique({
-      where: { cnpj: data.empresa.cnpj },
+      where: { cnpj: cnpj },
     });
 
     if (empresaExistentePorCnpj) {
