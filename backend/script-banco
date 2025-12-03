@@ -1,0 +1,1 @@
+pg_dump --format=t -Fc \  --no-owner \  --dbname="postgresql://postgres:SENHA@HOST:5432/postgres" \  -f backup-prod.dump

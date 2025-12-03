@@ -3,6 +3,4 @@ model Contato {
     telefone String?
     whatsapp String?
     email    String?
-
-    @@schema("Contato")
 }

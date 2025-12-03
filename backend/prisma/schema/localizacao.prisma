@@ -21,5 +21,4 @@ model Localizacao {
 
     @@index([pessoaId])
     @@index([empresaId])
-    @@schema("Localizacao")
 }

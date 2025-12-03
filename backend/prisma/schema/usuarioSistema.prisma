@@ -15,5 +15,4 @@ model UsuarioSistema {
     cliente   Cliente? @relation(fields: [clienteId], references: [id])
 
     @@unique([email])
-    @@schema("UsuarioSistema")
 }

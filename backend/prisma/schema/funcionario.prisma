@@ -10,5 +10,4 @@ model Funcionario {
     pessoaId String? @unique
 
     @@index([pessoaId])
-    @@schema("Funcionario")
 }

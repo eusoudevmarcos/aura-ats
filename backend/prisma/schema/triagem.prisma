@@ -11,5 +11,4 @@ model TriagemVaga {
     agenda Agenda[]
 
     @@index([vagaId])
-    @@schema("TriagemVaga")
 }

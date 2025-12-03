@@ -8,5 +8,4 @@ model Sessao {
 
     @@index([usuarioSistemaId])
     @@map("sessao")
-    @@schema("Sessao")
 }
