@@ -4,12 +4,13 @@ import { AdminGuard } from '@/components/auth/AdminGuard';
 import ButtonCopy from '@/components/button/ButtonCopy';
 import Card from '@/components/Card';
 import { AgendaForm } from '@/components/form/AgendaForm';
-import CandidatoForm from '@/components/form/CandidatoForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
+import ModalCandidatoForm from '@/components/modal/ModalCandidatoForm';
 import ModalPdfViewer from '@/components/modal/ModalPdfViewer';
 import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
+import { CandidatoInput } from '@/schemas/candidato.schema';
 import { SessionProvider } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -19,7 +20,7 @@ const CandidatoPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
 
-  const [candidato, setCandidato] = useState<any | null>(null);
+  const [candidato, setCandidato] = useState<CandidatoInput | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -281,24 +282,17 @@ const CandidatoPage: React.FC = () => {
               </div>
             )}
 
-            {candidato?.medico?.rqe && (
+            {candidato?.medico?.especialidades && (
               <div>
                 <span className="font-medium text-primary">RQE:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
-                    {candidato.medico.rqe || '-'}
+                    {candidato?.medico?.especialidades.map(especialidade => (
+                      <span>
+                        {especialidade.rqe} - {especialidade.especialidadeId}
+                      </span>
+                    ))}
                   </AdminGuard>
-                </span>
-              </div>
-            )}
-
-            {candidato?.especialidade?.nome && (
-              <div>
-                <span className="font-medium text-primary">Especialidade:</span>
-                <span className="text-secondary ml-2">
-                  {candidato.especialidade?.nome || 'N/A'}
-                  {' / '}
-                  {candidato.especialidade?.sigla || 'N/A'}
                 </span>
               </div>
             )}
@@ -325,7 +319,7 @@ const CandidatoPage: React.FC = () => {
           {/* Sessão Contatos */}
           <Card title={<span className="text-primary">Contatos</span>}>
             <>
-              {candidato.emails && candidato.emails.length > 0 && (
+              {candidato.emails && candidato.emails.length > 0 ? (
                 <div className="mb-2">
                   <span className="font-medium text-primary">Emails:</span>
                   {candidato.emails.map((email: string) => (
@@ -336,6 +330,10 @@ const CandidatoPage: React.FC = () => {
                     </span>
                   ))}
                 </div>
+              ) : (
+                <p className="text-secondary text-sm">
+                  Nenhum Contato Cadastrado
+                </p>
               )}
 
               {candidato.contatos && candidato.contatos.length > 0 && (
@@ -354,73 +352,90 @@ const CandidatoPage: React.FC = () => {
           </Card>
 
           {/* Sessão Localizações */}
-          {candidato.pessoa?.localizacoes?.length > 0 && (
-            <Card title={<span className="text-primary">Localizações</span>}>
-              {candidato.pessoa.localizacoes.map((loc: any) => (
-                <ul key={loc.id} className="mb-2 list-inside">
-                  {loc.cidade && (
-                    <li>
-                      <span className="font-medium text-primary">Cidade:</span>
-                      <span className="text-secondary ml-2">{loc.cidade}</span>
-                    </li>
-                  )}
-                  {loc.estado && (
-                    <li>
-                      <span className="font-medium text-primary">Estado:</span>
-                      <span className="text-secondary ml-2">{loc.estado}</span>
-                    </li>
-                  )}
-                  {loc.cep && (
-                    <li>
-                      <span className="font-medium text-primary">CEP:</span>
-                      <span className="text-secondary ml-2">{loc.cep}</span>
-                    </li>
-                  )}
-                  {loc.bairro && (
-                    <li>
-                      <span className="font-medium text-primary">Bairro:</span>
-                      <span className="text-secondary ml-2">{loc.bairro}</span>
-                    </li>
-                  )}
-                  {loc.uf && (
-                    <li>
-                      <span className="font-medium text-primary">UF:</span>
-                      <span className="text-secondary ml-2">{loc.uf}</span>
-                    </li>
-                  )}
-                  {loc.complemento && (
-                    <li>
-                      <span className="font-medium text-primary">
-                        Complemento:
-                      </span>
-                      <span className="text-secondary ml-2">
-                        {loc.complemento}
-                      </span>
-                    </li>
-                  )}
-                  {loc.logradouro && (
-                    <li>
-                      <span className="font-medium text-primary">
-                        Logradouro:
-                      </span>
-                      <span className="text-secondary ml-2">
-                        {loc.logradouro}
-                      </span>
-                    </li>
-                  )}
-                  {loc.regiao && (
-                    <li>
-                      <span className="font-medium text-primary">Região:</span>
-                      <span className="text-secondary ml-2">{loc.regiao}</span>
-                    </li>
-                  )}
-                </ul>
-              ))}
-            </Card>
-          )}
+          {candidato.pessoa?.localizacoes &&
+            candidato.pessoa?.localizacoes?.length > 0 && (
+              <Card title={<span className="text-primary">Localizações</span>}>
+                {candidato.pessoa.localizacoes.map((loc: any) => (
+                  <ul key={loc.id} className="mb-2 list-inside">
+                    {loc.cidade && (
+                      <li>
+                        <span className="font-medium text-primary">
+                          Cidade:
+                        </span>
+                        <span className="text-secondary ml-2">
+                          {loc.cidade}
+                        </span>
+                      </li>
+                    )}
+                    {loc.estado && (
+                      <li>
+                        <span className="font-medium text-primary">
+                          Estado:
+                        </span>
+                        <span className="text-secondary ml-2">
+                          {loc.estado}
+                        </span>
+                      </li>
+                    )}
+                    {loc.cep && (
+                      <li>
+                        <span className="font-medium text-primary">CEP:</span>
+                        <span className="text-secondary ml-2">{loc.cep}</span>
+                      </li>
+                    )}
+                    {loc.bairro && (
+                      <li>
+                        <span className="font-medium text-primary">
+                          Bairro:
+                        </span>
+                        <span className="text-secondary ml-2">
+                          {loc.bairro}
+                        </span>
+                      </li>
+                    )}
+                    {loc.uf && (
+                      <li>
+                        <span className="font-medium text-primary">UF:</span>
+                        <span className="text-secondary ml-2">{loc.uf}</span>
+                      </li>
+                    )}
+                    {loc.complemento && (
+                      <li>
+                        <span className="font-medium text-primary">
+                          Complemento:
+                        </span>
+                        <span className="text-secondary ml-2">
+                          {loc.complemento}
+                        </span>
+                      </li>
+                    )}
+                    {loc.logradouro && (
+                      <li>
+                        <span className="font-medium text-primary">
+                          Logradouro:
+                        </span>
+                        <span className="text-secondary ml-2">
+                          {loc.logradouro}
+                        </span>
+                      </li>
+                    )}
+                    {loc.regiao && (
+                      <li>
+                        <span className="font-medium text-primary">
+                          Região:
+                        </span>
+                        <span className="text-secondary ml-2">
+                          {loc.regiao}
+                        </span>
+                      </li>
+                    )}
+                  </ul>
+                ))}
+              </Card>
+            )}
 
           {/* Sessão Formações Acadêmicas */}
-          {candidato.formacoes?.length > 0 && (
+          {/* {candidato.formacoes?.length > 0 && (
             <Card
               title={<span className="text-primary">Formações Acadêmicas</span>}
             >
@@ -489,10 +504,10 @@ const CandidatoPage: React.FC = () => {
                 </div>
               ))}
             </Card>
-          )}
+          )} */}
 
           {/* Sessão Habilidades */}
-          {candidato.habilidades?.length > 0 && (
+          {/* {candidato.habilidades?.length > 0 && (
             <Card title={<span className="text-primary">Habilidades</span>}>
               {candidato.habilidades.map((hab: any) => (
                 <div key={hab.habilidadeId} className="mb-2">
@@ -521,14 +536,14 @@ const CandidatoPage: React.FC = () => {
                 </div>
               ))}
             </Card>
-          )}
+          )} */}
 
           {/* Sessão Vagas */}
-          {candidato.vagas?.length > 0 && (
+          {vagas && vagas?.length > 0 && (
             <Card
               title={<span className="text-primary">Vagas Associadas</span>}
             >
-              {candidato.vagas.map((vaga: any) => (
+              {vagas.map((vaga: any) => (
                 <div key={vaga.id} className="mb-2">
                   <div>
                     <span className="font-medium text-primary">Título:</span>
@@ -545,7 +560,7 @@ const CandidatoPage: React.FC = () => {
           )}
 
           {/* Sessão Candidaturas em Vagas */}
-          {candidato.CandidaturaVaga?.length > 0 && (
+          {/* {candidato.CandidaturaVaga?.length > 0 && (
             <Card
               title={
                 <span className="text-primary text-lg">
@@ -565,11 +580,10 @@ const CandidatoPage: React.FC = () => {
                     <span className="font-medium text-primary">Status:</span>
                     <span className="text-secondary ml-2">{cand.status}</span>
                   </div>
-                  {/* Adicione mais campos relevantes da candidatura se necessário */}
                 </div>
               ))}
             </Card>
-          )}
+          )} */}
 
           {candidato.links && candidato.links.length > 0 && (
             <Card
@@ -728,19 +742,14 @@ const CandidatoPage: React.FC = () => {
         )}
       </section>
 
-      <Modal
+      <ModalCandidatoForm
         isOpen={showModalEdit}
         onClose={() => setShowModalEdit(false)}
-        title="Editar Candidato"
-      >
-        <CandidatoForm
-          onSuccess={candidato => {
-            setShowModalEdit(false);
-            setCandidato(candidato);
-          }}
-          initialValues={candidato}
-        />
-      </Modal>
+        initialValues={candidato}
+        onSuccess={candidatoAtualizado => {
+          setCandidato(candidatoAtualizado);
+        }}
+      />
 
       <SessionProvider>
         <Modal
@@ -755,7 +764,7 @@ const CandidatoPage: React.FC = () => {
             initialValues={{
               candidatoId: candidato.id,
               candidato: candidato,
-              convidados: [candidato.email],
+              convidados: candidato.emails,
             }}
           />
         </Modal>

@@ -43,6 +43,16 @@ export const crmSchema = z.object({
   dataInscricao: z.string(),
 });
 
+export const EspecialidadeMedicoSchema = z.object({
+  id: z.uuid().optional(),
+  rqe: z.string().max(20),
+  especialidadeId: z.union([z.string(), z.number()]),
+});
+
+export type EspecialidadeMedicoInput = z.infer<
+  typeof EspecialidadeMedicoSchema
+>;
+
 export const medicoSchema = z.object({
   id: z.uuid().optional().nullable(),
   rqe: z
@@ -61,6 +71,7 @@ export const medicoSchema = z.object({
   porcentagemRepasseMedico: z.string().optional().nullable(),
   porcentagemConsultas: z.string().optional().nullable(),
   porcentagemExames: z.string().optional().nullable(),
+  especialidades: z.array(EspecialidadeMedicoSchema),
 });
 
 export const candidatoSchema = z.object({
@@ -88,13 +99,6 @@ export const candidatoSchema = z.object({
     .nullable()
     .optional(),
 
-  especialidadeId: z
-    .string()
-    // .refine(val => val && val != 'undefined' && Number(val) > 0, {
-    //   message: 'Especialidade inválida',
-    // })
-    .optional()
-    .nullable(),
   emails: z.array(z.string()),
 
   links: z.array(z.url()),

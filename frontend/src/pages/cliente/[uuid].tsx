@@ -335,11 +335,10 @@ const ClientePage: React.FC<{
       {showModalEdit && (
         <ModalClienteForm
           isOpen={showModalEdit}
-          onClose={() => setShowModalEdit(prev => !prev)}
+          onClose={() => setShowModalEdit(false)}
           initialValues={cliente}
-          onSuccess={cliente => {
-            setCliente(cliente);
-            setShowModalEdit(prev => !prev);
+          onSuccess={clienteAtualizado => {
+            setCliente(clienteAtualizado);
           }}
         />
       )}

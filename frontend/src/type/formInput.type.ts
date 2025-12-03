@@ -17,12 +17,14 @@ type FormInputOnChange = (
 ) => void;
 type FormInputOnFocus = (e: React.FocusEvent<HTMLInputElement>) => void;
 
+export type InputProps = React.InputHTMLAttributes<HTMLInputElement> & {
+  classNameContainer?: string;
+};
+
 export type CommonProps<T extends FieldValues> = {
   name: Path<T>;
   errors?: FieldErrors<T>;
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement> & {
-    classNameContainer?: string;
-  };
+  inputProps?: InputProps;
   // Tornar maskProps opcional e corrigir tipagem
   maskProps?: MaskProps;
   label?: React.ReactNode | string;

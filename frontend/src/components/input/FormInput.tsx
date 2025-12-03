@@ -10,7 +10,6 @@ import { ErrorMessage } from './ErrorMessage';
 type FormInputOnChange = (
   e: React.ChangeEvent<HTMLInputElement> | string
 ) => void;
-type FormInputOnFocus = (e: React.FocusEvent<HTMLInputElement>) => void;
 
 export function FormInput<T extends FieldValues>({
   name,

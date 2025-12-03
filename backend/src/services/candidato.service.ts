@@ -37,9 +37,13 @@ export class CandidatoService {
       where: { id },
       include: {
         pessoa: { include: { localizacoes: true } },
-        especialidade: true,
         formacoes: true,
-        medico: { include: { crm: true } },
+        medico: {
+          include: {
+            crm: true,
+            especialidades: true,
+          },
+        },
         anexos: {
           include: {
             anexo: true,
@@ -114,9 +118,8 @@ export class CandidatoService {
 
     const includeRelations = {
       pessoa: { include: { localizacoes: true } },
-      especialidade: true,
       anexos: { include: { anexo: true } },
-      medico: { include: { crm: true } },
+      medico: { include: { crm: true, especialidades: true } },
     };
     console.log("SALVANDO CANDIDATO");
     let candidato: any;

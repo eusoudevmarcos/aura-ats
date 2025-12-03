@@ -1,4 +1,7 @@
+import api from '@/axios';
+import { EspecialidadeMedicoInput } from '@/schemas/candidato.schema';
 import { UF_MODEL } from '@/utils/UF';
+import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FormArrayInput } from '../input/FormArrayInput';
 import { FormInput } from '../input/FormInput';
@@ -13,7 +16,11 @@ function makeMedicoName(field: string, namePrefix = 'medico') {
 }
 
 const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
-  const rqeName = makeMedicoName('rqe', namePrefix);
+  const [especialidadesFetch, setEspecialidadesFetch] = useState<
+    { id: number; nome: string }[]
+  >([]);
+
+  const especilidades = makeMedicoName('especilidades', namePrefix);
   const crmName = makeMedicoName('crm', namePrefix);
   const quadroSocietarioName = makeMedicoName('quadroSocietario', namePrefix);
   const quadroDeObservacoesName = makeMedicoName(
@@ -42,39 +49,106 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
     setValue,
   } = useFormContext();
 
-  const especialidadeId = watch('especialidadeId');
-  const areaCandidato = watch('areaCandidato');
+  const fetchEspecialidades = async () => {
+    console.log('request');
+    try {
+      const response = await api.get<{ id: number; nome: string }[]>(
+        '/api/externalWithAuth/candidato/especialidades'
+      );
+      setEspecialidadesFetch(response.data);
+    } catch (error) {
+      console.log('Erro ao carregar especialidades:', error);
+    }
+  };
 
-  // O valor selecionado para manter checked na interface de radio
+  useEffect(() => {
+    fetchEspecialidades();
+  }, []);
+
   const quadroSocietarioValue = watch(quadroSocietarioName);
+  const especialidades = watch('medico.especialidades');
   const crm = watch(crmName);
 
   const handleCRMsChange = (newArray: any[]) => {
     setValue(crmName, newArray, { shouldValidate: true });
   };
 
+  const handleEspecilidadeChange = (newArray: EspecialidadeMedicoInput[]) => {
+    setValue('medico.especialidades', newArray, { shouldValidate: true });
+  };
+
   return (
     <>
-      {especialidadeId && (
-        <FormInput
-          name={rqeName}
-          label="RQE"
-          placeholder="Adicione o RQE"
-          inputProps={{ disabled: !areaCandidato }}
+      {especialidadesFetch && (
+        <FormArrayInput
+          name={especilidades}
+          title="Especilidades"
+          value={especialidades}
+          onChange={handleEspecilidadeChange}
+          containerClassName="col-span-full"
+          validateCustom={() => {
+            return true;
+          }}
+          fieldConfigs={[
+            {
+              name: 'rqe',
+              label: 'Número RQE do Médicoo',
+              required: true,
+              placeholder: 'Adicione o RQE',
+              inputProps: {
+                minLength: 4,
+                classNameContainer: 'w-full',
+              },
+              type: 'number',
+              maskProps: { mask: /^\d*$/ },
+            },
+            {
+              component: 'select',
+              label: 'Especilidade do Médico',
+              required: true,
+              name: 'especialidadeId',
+              placeholder: 'Adicione a Especilidade',
+              selectOptions: (
+                <>
+                  {especialidadesFetch ? (
+                    especialidadesFetch.map(esp => (
+                      <option key={esp.id} value={esp.id}>
+                        {esp.nome}
+                      </option>
+                    ))
+                  ) : (
+                    <option key={null} className="text-red-500">
+                      Não foi possivel buscar especialidades
+                    </option>
+                  )}
+                </>
+              ),
+            },
+          ]}
+          renderChipContent={especialidade => {
+            let nomeEspecialidade =
+              especialidadesFetch[especialidade.especialidadeId - 1]?.nome ??
+              '';
+
+            return (
+              <span>
+                {nomeEspecialidade} - RQE {especialidade.rqe}
+              </span>
+            );
+          }}
         />
       )}
-
+      <div className="border-b border-gray-300 col-span-full"></div>
       <FormArrayInput
         name={crmName}
-        title="Adicione os CRM´s"
-        addButtonText="+"
+        title="CRM´s"
         value={crm}
         onChange={handleCRMsChange}
         containerClassName="col-span-full"
         fieldConfigs={[
           {
             name: 'numero',
-            label: 'Número',
+            label: 'Número CRM do Médico',
             required: true,
             placeholder: 'Exemplo: 0000',
             inputProps: {
@@ -111,9 +185,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           </>
         )}
       />
-
       <div className="border-b border-gray-300 col-span-full"></div>
-
       <section className="grid grid-cols-1 md:grid-cols-3 gap-2 col-span-full">
         <FormInput
           name={porcentagemRepasseMedicoName}
@@ -140,7 +212,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           label="Quadro de Observações"
           textareaProps={{
             placeholder: 'Observações adicionais',
-            classNameContainer: 'col-span-full',
+            classNameContainer: 'md:col-span-1 col-span-full',
           }}
         />
 
@@ -148,14 +220,14 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           name={examesName}
           placeholder="Digite os exames"
           label="Quadro de Exames"
-          textareaProps={{ classNameContainer: 'col-span-full' }}
+          textareaProps={{ classNameContainer: 'md:col-span-1 col-span-full' }}
         />
 
         <FormTextarea
           name={especialidadesEnfermidadesName}
           label="Especialidades/Enfermidades"
           textareaProps={{
-            classNameContainer: 'col-span-full',
+            classNameContainer: 'md:col-span-1 col-span-full',
             placeholder:
               'Adicione as Especialidades e infermidades tratadas pelo médico',
           }}
@@ -163,7 +235,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
 
         <div className="border-b border-gray-300 col-span-full"></div>
 
-        <div className="flex items-center gap-4 col-span-full">
+        <div className="flex items-center gap-6 col-span-full">
           <span className="font-medium text-sm">
             Faz parte de quadro societário?
           </span>
@@ -173,6 +245,15 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
               value="true"
               {...register(quadroSocietarioName)}
               checked={quadroSocietarioValue === 'true'}
+              onClick={e => {
+                if (quadroSocietarioValue === 'true') {
+                  // Limpa a seleção se clicar novamente
+                  e.preventDefault(); // impede que o radio marque
+                  // Limpa no react-hook-form
+                  if (typeof setValue === 'function')
+                    setValue(quadroSocietarioName, '');
+                }
+              }}
             />
             Sim
           </label>
@@ -182,12 +263,36 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
               value="false"
               {...register(quadroSocietarioName)}
               checked={quadroSocietarioValue === 'false'}
+              onClick={e => {
+                if (quadroSocietarioValue === 'false') {
+                  e.preventDefault();
+                  if (typeof setValue === 'function')
+                    setValue(quadroSocietarioName, '');
+                }
+              }}
             />
             Não
           </label>
+          <label className="flex items-center gap-1">
+            <input
+              type="radio"
+              value=""
+              {...register(quadroSocietarioName)}
+              checked={quadroSocietarioValue === ''}
+              onClick={e => {
+                if (quadroSocietarioValue === '') {
+                  e.preventDefault();
+                  // Already unset, don't do anything
+                } else {
+                  if (typeof setValue === 'function')
+                    setValue(quadroSocietarioName, '');
+                }
+              }}
+            />
+            Não sei
+          </label>
         </div>
       </section>
-
       <div className="border-b border-gray-300 col-span-full"></div>
     </>
   );

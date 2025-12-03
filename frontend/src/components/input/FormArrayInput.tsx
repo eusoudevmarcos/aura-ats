@@ -1,4 +1,5 @@
-import { MaskProps } from '@/type/formInput.type';
+import { InputProps, MaskProps } from '@/type/formInput.type';
+import { SelectProps } from '@/type/formSelect.type';
 import React, { useRef, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
@@ -11,12 +12,11 @@ interface FieldConfig {
   placeholder?: string;
   type?: string;
   component?: 'input' | 'select';
-  selectOptions?: { value: any; label: string }[];
+  selectOptions?: { value: any; label: string }[] | React.ReactNode;
   required?: boolean;
   maskProps?: MaskProps;
-  inputProps?: React.InputHTMLAttributes<HTMLInputElement> & {
-    classNameContainer?: string;
-  };
+  inputProps?: InputProps;
+  selectProps?: SelectProps;
 }
 
 interface FormArrayInputProps {
@@ -342,7 +342,7 @@ export function FormArrayInput({
                   <FormSelect
                     name={`${name || 'temp'}_${config.name}` as any}
                     value={fieldValue}
-                    label={config.label}
+                    label={<p className="text-seconrary">{config.label}</p>}
                     placeholder={config.placeholder}
                     onChange={(e: any) => {
                       handleInputChange(config.name, e.target.value);
@@ -350,11 +350,13 @@ export function FormArrayInput({
                     selectProps={config.inputProps as any}
                   >
                     <>
-                      {config.selectOptions?.map(opt => (
-                        <option key={opt.value} value={opt.value}>
-                          {opt.label}
-                        </option>
-                      ))}
+                      {Array.isArray(config.selectOptions)
+                        ? config.selectOptions?.map(opt => (
+                            <option key={opt.value} value={opt.value}>
+                              {opt.label}
+                            </option>
+                          ))
+                        : config.selectOptions}
                     </>
                   </FormSelect>
                 ) : (

@@ -12,7 +12,12 @@ enum CategoriaVaga {
 }
 
 enum StatusVaga {
-    ATIVA
+    ALINHAMENTO
+    ABERTA
+    DIVULGACAO
+    TRIAGEM_DE_CURRICULO
+    CONCUIDA
+    GARANTIA
     PAUSADA
     ENCERRADA
     ARQUIVADA
