@@ -241,12 +241,7 @@ export class VagaService {
                     nome: true,
                   },
                 },
-                medico: true,
-                especialidade: {
-                  select: {
-                    nome: true,
-                  },
-                },
+                medico: { include: { especialidades: true } },
               },
             },
           },
