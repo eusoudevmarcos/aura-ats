@@ -58,7 +58,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
       ...initialValues,
       tipoSalario: 'A COMBINAR',
       categoria: 'SAUDE',
-      status: initialValues?.status ?? 'ATIVA',
+      status: initialValues?.status ?? 'ABERTA',
       tipoLocalTrabalho: initialValues?.tipoLocalTrabalho || 'PRESENCIAL',
     },
   });

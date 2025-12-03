@@ -10,7 +10,8 @@ export const localizacaoSchema = z.object({
     .transform(s => s.toUpperCase())
     .refine(val => UF_MODEL.some(({ value }) => value === val), {
       message: 'UF inválida',
-    }),
+    })
+    .optional(),
   // complemento: z.string().optional(),
 
   // cep: z.string().length(9, 'CEP deve ter 9 caracteres').optional(),
