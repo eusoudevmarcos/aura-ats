@@ -12,21 +12,30 @@ export const LabelStatus = ({
 }) => {
   let statusBgColor = 'bg-[#ede9fe]';
 
+  // Cores ajustadas para representar melhor o sentido dos status
   switch (status) {
     case StatusClienteEnum.enum.ATIVO:
-      statusBgColor = 'bg-green-500 text-white';
+      // Sucesso/Presente
+      statusBgColor = 'bg-emerald-600 text-white';
       break;
-    case StatusVagaEnum.enum.ATIVA:
-      statusBgColor = 'bg-green-500 text-white';
+    case StatusVagaEnum.enum.ABERTA:
+      // Disponível/Sucesso
+      statusBgColor = 'bg-teal-500 text-white';
       break;
     case StatusClienteEnum.enum.INATIVO:
-      statusBgColor = 'bg-red-500 text-secondary';
+      // Atenção importante/Perigo
+      statusBgColor = 'bg-rose-600 text-white';
       break;
     case StatusClienteEnum.enum.LEAD:
-      statusBgColor = 'bg-cyan-500 text-white';
+      // Aviso, oportunidade em progresso
+      statusBgColor = 'bg-amber-500 text-white';
       break;
     case StatusClienteEnum.enum.PROSPECT:
-      statusBgColor = 'bg-gray-500 text-white';
+      // Estado inicial/Em preparação
+      statusBgColor = 'bg-sky-400 text-white';
+      break;
+    default:
+      statusBgColor = 'bg-zinc-200 text-gray-700';
       break;
   }
 
