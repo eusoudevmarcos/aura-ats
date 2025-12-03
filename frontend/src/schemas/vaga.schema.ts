@@ -39,7 +39,17 @@ export const CategoriaVagaEnum = z.enum(
 export type CategoriaVagaEnum = z.infer<typeof CategoriaVagaEnum>;
 
 export const StatusVagaEnum = z.enum(
-  ['ATIVA', 'PAUSADA', 'ENCERRADA', 'ARQUIVADA'],
+  [
+    'ALINHAMENTO',
+    'ABERTA',
+    'DIVULGACAO',
+    'TRIAGEM_DE_CURRICULO',
+    'CONCUIDA',
+    'GARANTIA',
+    'PAUSADA',
+    'ENCERRADA',
+    'ARQUIVADA',
+  ],
   'Status da vaga é obrigatório'
 );
 
@@ -94,7 +104,7 @@ export type BeneficioInput = z.infer<typeof beneficioSchema>;
 export const vagaSchema = z.object({
   id: z.uuid().optional(),
   titulo: z.string().min(3, 'O título da vaga é obrigatório.'),
-  status: StatusVagaEnum.default('ATIVA').optional(),
+  status: StatusVagaEnum,
   nivelExperiencia: NivelExperienciaEnum.optional(),
   tipoContrato: TipoContratoEnum.optional(),
   categoria: CategoriaVagaEnum.optional(),
@@ -102,7 +112,7 @@ export const vagaSchema = z.object({
   salario: z.string().optional(),
   descricao: z.string().min(20, 'minimo 20 caracteres'),
   localizacao: localizacaoSchema.optional(),
-  triagens: z.array(triagemSchema).max(4, 'Máximo de 4 triagens').optional(),
+  // triagens: z.array(triagemSchema).max(4, 'Máximo de 4 triagens').optional(),
 });
 export type VagaInput = z.infer<typeof vagaSchema>;
 
