@@ -21,17 +21,19 @@ type CandidatoFormProps = {
   onSubmit?: (data: CandidatoInput) => void;
   onSuccess?: (data: any) => void;
   initialValues?: Partial<CandidatoInput>;
+  disableSuccessModal?: boolean;
 };
 
 const CandidatoForm: React.FC<CandidatoFormProps> = ({
   onSubmit,
   onSuccess,
   initialValues,
+  disableSuccessModal,
 }) => {
   const [loading, setLoading] = useState(false);
-  const [especialidades, setEspecialidades] = useState<
-    { id: number; nome: string }[]
-  >([]);
+  // const [especialidadesFetch, setEspecialidadesFetch] = useState<
+  //   { id: number; nome: string }[]
+  // >([]);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
 
@@ -41,7 +43,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         emails: initialValues.emails || [],
         contatos: initialValues.contatos || [],
         links: initialValues.links || [],
-        especialidadeId: String(initialValues?.especialidadeId),
         medico: initialValues.medico
           ? {
               ...initialValues.medico,
@@ -53,6 +54,11 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
                 initialValues.medico?.crm?.map(crm => ({
                   ...crm,
                   numero: String(crm.numero),
+                })) || [],
+              especialidades:
+                initialValues.medico?.especialidades?.map(especilidade => ({
+                  ...especilidade,
+                  especialidadeId: String(especilidade.especialidadeId),
                 })) || [],
             }
           : {
@@ -84,6 +90,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const contatos = watch('contatos');
   const emails = watch('emails');
   const links = watch('links');
+  // const especialidades = watch('medico.especialidades');
 
   const handleContatosChange = (newArray: string[]) => {
     setValue('contatos', newArray, { shouldValidate: true });
@@ -97,27 +104,30 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     setValue('links', newArray, { shouldValidate: true });
   };
 
+  // const handleEspecilidadeChange = (newArray: EspecialidadeMedicoInput[]) => {
+  //   setValue('medico.especialidades', newArray, { shouldValidate: true });
+  // };
+
   useEffect(() => {
     console.log(errors);
   }, [errors]);
 
   const areaCandidato = watch('areaCandidato');
-  const especialidadeId = watch('especialidadeId');
 
-  const fetchEspecialidades = async () => {
-    try {
-      const response = await api.get<{ id: number; nome: string }[]>(
-        '/api/externalWithAuth/candidato/especialidades'
-      );
-      setEspecialidades(response.data);
-    } catch (error) {
-      console.log('Erro ao carregar especialidades:', error);
-    }
-  };
+  // const fetchEspecialidades = async () => {
+  //   try {
+  //     const response = await api.get<{ id: number; nome: string }[]>(
+  //       '/api/externalWithAuth/candidato/especialidades'
+  //     );
+  //     setEspecialidadesFetch(response.data);
+  //   } catch (error) {
+  //     console.log('Erro ao carregar especialidades:', error);
+  //   }
+  // };
 
-  useEffect(() => {
-    fetchEspecialidades();
-  }, []);
+  // useEffect(() => {
+  //   fetchEspecialidades();
+  // }, []);
 
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
@@ -147,9 +157,16 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
     const payload = {
       ...data,
-      especialidadeId: Number(data.especialidadeId),
       contatos: data.contatos.map(contato => contato),
     };
+
+    payload.medico.especialidades = payload.medico.especialidades.map(
+      especialidade => ({
+        ...especialidade,
+        especialidadeId: +especialidade.especialidadeId,
+      })
+    );
+
     setLoading(true);
 
     try {
@@ -164,7 +181,9 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             ? 'Profissional editado com sucesso!'
             : 'Profissional cadastrado com sucesso!'
         );
-        setShowSuccessModal(true);
+        if (!disableSuccessModal) {
+          setShowSuccessModal(true);
+        }
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
@@ -259,28 +278,48 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
             </>
           </FormSelect>
 
-          {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
-            <FormSelect
-              selectProps={{ disabled: !areaCandidato }}
-              name="especialidadeId"
-              label="Especilidade"
-              placeholder="Selecione a especialidade"
-            >
-              <>
-                {especialidades ? (
-                  especialidades.map(esp => (
-                    <option key={esp.id} value={esp.id}>
-                      {esp.nome}
-                    </option>
-                  ))
-                ) : (
-                  <option key={null} className="text-red-500">
-                    Não foi possivel buscar especialidades
-                  </option>
-                )}
-              </>
-            </FormSelect>
-          )}
+          {/* {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
+            <FormArrayInput
+              name="medico.especilidades"
+              title="Especilidades"
+              value={especialidades}
+              onChange={handleEspecilidadeChange}
+              validateCustom={(value, fieldConfigs, setErrors) => {
+                return true;
+              }}
+              fieldConfigs={[
+                {
+                  name: 'rqe',
+                  placeholder: 'Adicione o RQE',
+                  inputProps: {
+                    minLength: 4,
+                    classNameContainer: 'w-full',
+                  },
+                },
+                {
+                  component: 'select',
+                  name: 'especilidadeId',
+                  placeholder: 'Adicione a Especilidade',
+                  selectOptions: (
+                    <>
+                      {especialidadesFetch ? (
+                        especialidadesFetch.map(esp => (
+                          <option key={esp.id} value={esp.id}>
+                            {esp.nome}
+                          </option>
+                        ))
+                      ) : (
+                        <option key={null} className="text-red-500">
+                          Não foi possivel buscar especialidades
+                        </option>
+                      )}
+                    </>
+                  ),
+                },
+              ]}
+              renderChipContent={link => <span>{link}</span>}
+            />
+          )} */}
 
           {areaCandidato === AreaCandidatoEnum.enum.ENFERMAGEM && (
             <FormInput
@@ -342,14 +381,15 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         </div>
       </form>
 
-      <ModalSuccess
-        isOpen={showSuccessModal}
-        onClose={() => {
-          setShowSuccessModal(false);
-          if (onSuccess) onSuccess;
-        }}
-        message={successMessage}
-      />
+      {!disableSuccessModal && (
+        <ModalSuccess
+          isOpen={showSuccessModal}
+          onClose={() => {
+            setShowSuccessModal(false);
+          }}
+          message={successMessage}
+        />
+      )}
     </FormProvider>
   );
 };

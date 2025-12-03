@@ -1,16 +1,16 @@
 import React from 'react';
-import ClienteForm from '../form/ClienteForm';
+import CandidatoForm from '../form/CandidatoForm';
 import Modal from './Modal';
 import ModalSuccess from './ModalSuccess';
 
-type ModalClienteFormProps = {
+type ModalCandidatoFormProps = {
   isOpen: boolean;
   onClose: () => void;
   initialValues?: any;
-  onSuccess?: (cliente: any) => void;
+  onSuccess?: (candidato: any) => void;
 };
 
-const ModalClienteForm: React.FC<ModalClienteFormProps> = ({
+const ModalCandidatoForm: React.FC<ModalCandidatoFormProps> = ({
   isOpen,
   onClose,
   initialValues,
@@ -30,10 +30,10 @@ const ModalClienteForm: React.FC<ModalClienteFormProps> = ({
   };
 
   const isEdit = !!initialValues?.id;
-  const title = isEdit ? 'Editar Cliente' : 'Cadastrar Cliente';
+  const title = isEdit ? 'Editar Profissional' : 'Cadastrar Profissional';
   const successMessage = isEdit
-    ? 'Cliente editado com sucesso!'
-    : 'Cliente cadastrado com sucesso!';
+    ? 'Profissional editado com sucesso!'
+    : 'Profissional cadastrado com sucesso!';
 
   return (
     <>
@@ -42,12 +42,13 @@ const ModalClienteForm: React.FC<ModalClienteFormProps> = ({
         onClose={handleCloseAll}
         title={title}
       >
-        <ClienteForm
+        <CandidatoForm
           initialValues={initialValues}
-          onSuccess={cliente => {
-            onSuccess?.(cliente);
+          onSuccess={candidato => {
+            onSuccess?.(candidato);
             setStep('success');
           }}
+          disableSuccessModal
         />
       </Modal>
 
@@ -60,4 +61,4 @@ const ModalClienteForm: React.FC<ModalClienteFormProps> = ({
   );
 };
 
-export default ModalClienteForm;
+export default ModalCandidatoForm;

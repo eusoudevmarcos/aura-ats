@@ -6,12 +6,14 @@ import {
   UseFormRegister,
 } from 'react-hook-form';
 
+export type SelectProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
+  classNameContainer?: string;
+};
+
 export type CommonSelectProps<T extends FieldValues> = {
   name: Path<T>;
   errors?: FieldErrors<T>;
-  selectProps?: React.SelectHTMLAttributes<HTMLSelectElement> & {
-    classNameContainer?: string;
-  };
+  selectProps?: SelectProps;
   label?: React.ReactNode | string;
   placeholder?: string;
 

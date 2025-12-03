@@ -106,12 +106,13 @@ const VagaPage: React.FC = () => {
         </button>
 
         <div className="flex gap-2">
-          <Link
+          {/* TRIAGEM COMENTADA */}
+          {/* <Link
             href={`/vaga/${vaga.id}/triagens`}
             className="px-4 py-2 bg-primary text-white rounded shadow-md hover:scale-105 transition-transform"
           >
             Triagem <span className="material-icons-outlined"></span>
-          </Link>
+          </Link> */}
 
           <AdminGuard>
             <button

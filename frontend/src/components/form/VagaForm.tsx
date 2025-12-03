@@ -26,7 +26,6 @@ import {
 } from '@/schemas/vaga.schema';
 import ClienteSearch from '../search/ClienteSearch';
 import LocalizacaoForm from './LocalizacaoForm';
-import TriagemForm from './TriagemForm';
 
 type VagaFormProps = {
   formContexto?: UseFormReturn<VagaInput>;
@@ -428,7 +427,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
         )} */}
 
         {/* Triagens da Vaga */}
-        <TriagemForm />
+        {/* TRIAGEM COMENTADA */}
+        {/* <TriagemForm /> */}
 
         <div className="flex justify-end col-span-full">
           <PrimaryButton type="submit" disabled={loading}>
