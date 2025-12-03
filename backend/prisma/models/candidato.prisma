@@ -10,10 +10,6 @@ model Candidato {
     formacoes       Formacao[]
     anexos          CandidatoAnexo[]
 
-    // Especialidade para Médicos
-    especialidade   Especialidade? @relation(fields: [especialidadeId], references: [id])
-    especialidadeId Int?
-
     pessoa   Pessoa @relation(fields: [pessoaId], references: [id])
     pessoaId String @unique
 
@@ -21,7 +17,6 @@ model Candidato {
 
     deletedAt DateTime?
 
-    @@index([especialidadeId])
     @@schema("Candidato")
 }
 
@@ -43,6 +38,8 @@ model Medico {
     crm Crm[] // Sigla do estado na frente
     rqe String?
 
+    especialidades EspecialidadeMedico[]
+
     quadroSocietario      Boolean? // se faz parte de alguma sociedade
     quadroDeObservações String?
 
@@ -59,11 +56,26 @@ model Medico {
     @@schema("Candidato")
 }
 
+model EspecialidadeMedico {
+    id  String @id @default(uuid(7))
+    rqe String
+
+    especialidade   Especialidade @relation(fields: [especialidadeId], references: [id])
+    especialidadeId Int
+
+    medico   Medico @relation(fields: [medicoId], references: [id])
+    medicoId String
+
+    @@index([especialidadeId])
+    @@index([medicoId])
+    @@schema("EspecialidadeMedico")
+}
+
 model Especialidade {
-    id        Int         @id @default(autoincrement())
-    nome      String      @unique
-    sigla     String
-    candidato Candidato[]
+    id     Int                   @id @default(autoincrement())
+    nome   String                @unique
+    sigla  String
+    medico EspecialidadeMedico[]
 
     @@schema("Especialidade")
 }

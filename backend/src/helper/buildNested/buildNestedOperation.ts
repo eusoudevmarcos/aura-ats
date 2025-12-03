@@ -26,13 +26,22 @@ export class BuildNestedOperation {
       throw new Error(
         `buildNestedOperation: max depth ${this.maxDepth} excedido`
       );
-
-    // Arrays de primitivos
-    if (Array.isArray(entityData) && this.isArrayOfPrimitives(entityData))
-      return entityData;
-
-    // Array de objetos
+    // Arrays (primitivos ou de objetos)
     if (Array.isArray(entityData)) {
+      // ✅ Array vazio
+      // - Em CREATE: não faz nada (mantém compatibilidade anterior, que retornava undefined)
+      // - Em UPDATE: interpreta como "remover todos os itens" -> deleteMany: {}
+      if (entityData.length === 0) {
+        if (parentOperation === "update") {
+          return { deleteMany: {} };
+        }
+        return undefined;
+      }
+
+      // Arrays de primitivos (string[], number[], boolean[], Date[])
+      if (this.isArrayOfPrimitives(entityData)) return entityData;
+
+      // Array de objetos (relacionamentos)
       const create: any[] = [];
       const update: any[] = [];
       const connect: any[] = [];
@@ -161,6 +170,8 @@ export class BuildNestedOperation {
   }
 
   private isArrayOfPrimitives(arr: any[]): boolean {
-    return arr.length === 0 || arr.every((item) => this.isPrimitive(item));
+    // Não consideramos array vazio como "array de primitivos" para que
+    // relacionamentos Many[] possam ser tratados de forma especial no UPDATE.
+    return arr.length > 0 && arr.every((item) => this.isPrimitive(item));
   }
 }

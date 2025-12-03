@@ -129,12 +129,14 @@ export class CandidatoRepository {
       where: { id },
       include: {
         pessoa: { include: { localizacoes: true } },
-        especialidade: true,
         formacoes: true,
         anexos: {
           include: {
             anexo: true,
           },
+        },
+        medico: {
+          include: { crm: true, especialidades: true },
         },
       },
     });
@@ -204,12 +206,7 @@ export class CandidatoRepository {
             },
           },
           medico: {
-            include: { crm: true },
-          },
-          especialidade: {
-            select: {
-              nome: true,
-            },
+            include: { crm: true, especialidades: true },
           },
         },
         orderBy: {
