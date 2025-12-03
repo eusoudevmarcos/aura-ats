@@ -7,8 +7,6 @@ enum CategoriaVaga {
     MARKETING
     VENDAS
     OUTROS
-
-    @@schema("public")
 }
 
 enum StatusVaga {
@@ -21,8 +19,6 @@ enum StatusVaga {
     PAUSADA
     ENCERRADA
     ARQUIVADA
-
-    @@schema("public")
 }
 
 enum TipoContrato {
@@ -31,8 +27,6 @@ enum TipoContrato {
     ESTAGIO
     FREELANCER
     TEMPORARIO
-
-    @@schema("public")
 }
 
 enum NivelExperiencia {
@@ -42,8 +36,6 @@ enum NivelExperiencia {
     SENIOR
     ESPECIALISTA
     GERENTE
-
-    @@schema("public")
 }
 
 enum TipoEtapa {
@@ -53,8 +45,6 @@ enum TipoEtapa {
     ENTREVISTA
     OFERTA
     CONTRATACAO
-
-    @@schema("public")
 }
 
 enum StatusCandidatura {
@@ -67,8 +57,6 @@ enum StatusCandidatura {
     OFERTA_RECUSADA
     DESCLASSIFICADO
     CONTRATADO
-
-    @@schema("public")
 }
 
 enum TipoServico {
@@ -76,16 +64,12 @@ enum TipoServico {
     RECRUTAMENTO_DISPARO_CURRICULO
     RECRUTAMENTO_INFORMACAO
     PLATAFORMA
-
-    @@schema("public")
 }
 
 enum AreaCandidato {
     MEDICINA
     ENFERMAGEM
     OUTRO
-
-    @@schema("public")
 }
 
 enum StatusCliente {
@@ -94,8 +78,6 @@ enum StatusCliente {
     ATIVO
     INATIVO
     PENDENTE
-
-    @@schema("public")
 }
 
 enum TipoEventoAgenda {
@@ -107,8 +89,6 @@ enum TipoEventoAgenda {
     DINAMICA_GRUPO
     PROPOSTA
     OUTRO
-
-    @@schema("public")
 }
 
 enum TipoEventoTriagem {
@@ -120,8 +100,6 @@ enum TipoEventoTriagem {
     DINAMICA_GRUPO
     PROPOSTA
     OUTRO
-
-    @@schema("public")
 }
 
 // novos enums para vaga/salário
@@ -129,8 +107,6 @@ enum Moeda {
     BRL
     USD
     EUR
-
-    @@schema("public")
 }
 
 enum PeriodicidadeSalario {
@@ -138,16 +114,12 @@ enum PeriodicidadeSalario {
     DIA
     MES
     ANO
-
-    @@schema("public")
 }
 
 enum TipoSocio {
     REPRESENTANTE
     SOCIO
     ADMINISTRADOR
-
-    @@schema("public")
 }
 
 enum EstadoCivil {
@@ -157,8 +129,6 @@ enum EstadoCivil {
     VIUVO
     SEPARADO
     UNIAO_ESTAVEL
-
-    @@schema("public")
 }
 
 enum TipoUsuario {
@@ -171,23 +141,17 @@ enum TipoUsuario {
     CLIENTE_ATS_CRM
     CLIENTE_CRM
     CLIENTE
-
-    @@schema("public")
 }
 
 enum TipoPessoa {
     FISICA
     JURIDICA
-
-    @@schema("public")
 }
 
 enum LocalEvento {
     REMOTO
     PRESENCIAL
     HIBRIDO
-
-    @@schema("public")
 }
 
 enum AssinaturaStatus {
@@ -195,8 +159,6 @@ enum AssinaturaStatus {
     EXPIRADA
     CANCELADA
     PENDENTE
-
-    @@schema("public")
 }
 
 enum TipoPlano {
@@ -205,8 +167,6 @@ enum TipoPlano {
     PERSONALIZADO
     POR_VAGA
     PERCENTUAL
-
-    @@schema("public")
 }
 
 enum CategoriaPlano {
@@ -214,15 +174,11 @@ enum CategoriaPlano {
     RECRUTAMENTO_COM_RQE
     RECRUTAMENTO_SEM_RQE
     RECRUTAMENTO_DIVERSOS
-
-    @@schema("public")
 }
 
 enum Sexo {
     MASCULINO
     FEMININO
-
-    @@schema("public")
 }
 
 enum Signo {
@@ -238,6 +194,4 @@ enum Signo {
     CAPRICORNIO
     AQUARIO
     PEIXES
-
-    @@schema("public")
 }

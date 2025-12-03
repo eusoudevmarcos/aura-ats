@@ -12,5 +12,4 @@ model Tarefa {
 
     @@index([idUsuarioSistema])
     @@map("tarefas")
-    @@schema("Tarefa")
 }

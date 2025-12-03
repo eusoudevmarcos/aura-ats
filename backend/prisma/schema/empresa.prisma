@@ -13,7 +13,6 @@ model Empresa {
     socios         Socio[]
 
     @@unique([cnpj])
-    @@schema("Empresa")
 }
 
 model Socio {
@@ -28,5 +27,4 @@ model Socio {
 
     @@unique([pessoaId])
     @@unique([empresaId])
-    @@schema("Socio")
 }

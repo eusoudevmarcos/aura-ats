@@ -16,8 +16,6 @@ model Candidato {
     medico Medico?
 
     deletedAt DateTime?
-
-    @@schema("Candidato")
 }
 
 model Crm {
@@ -30,7 +28,6 @@ model Crm {
     medicoId String?
 
     @@index([medicoId])
-    @@schema("Candidato")
 }
 
 model Medico {
@@ -53,7 +50,6 @@ model Medico {
     candidatoId String?    @unique
 
     @@index([candidatoId])
-    @@schema("Candidato")
 }
 
 model EspecialidadeMedico {
@@ -68,7 +64,6 @@ model EspecialidadeMedico {
 
     @@index([especialidadeId])
     @@index([medicoId])
-    @@schema("EspecialidadeMedico")
 }
 
 model Especialidade {
@@ -76,8 +71,6 @@ model Especialidade {
     nome   String                @unique
     sigla  String
     medico EspecialidadeMedico[]
-
-    @@schema("Especialidade")
 }
 
 model Formacao {
@@ -93,7 +86,6 @@ model Formacao {
     candidatoId String?
 
     @@index([candidatoId])
-    @@schema("Formacao")
 }
 
 model CandidatoAnexo {
@@ -105,7 +97,6 @@ model CandidatoAnexo {
 
     @@id([candidatoId, anexoId])
     @@index([anexoId])
-    @@schema("Candidato")
 }
 
 // model CandidatoHabilidade {

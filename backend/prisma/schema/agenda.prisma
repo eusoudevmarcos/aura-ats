@@ -34,7 +34,6 @@ model Agenda {
     @@index([clienteId])
     @@index([triagemId])
     @@index([usuarioSistemaId])
-    @@schema("Agenda")
 }
 
 model ProcessoSeletivoEtapa {
@@ -46,8 +45,6 @@ model ProcessoSeletivoEtapa {
     ativa        Boolean           @default(true)
     agendaVaga   Agenda[]
     candidaturas CandidaturaVaga[]
-
-    @@schema("ProcessoSeletivoEtapa")
 }
 
 // model Agenda {
@@ -86,5 +83,4 @@ model AgendaCandidatura {
 
     @@index([agendaId])
     @@index([candidaturaId])
-    @@schema("AgendaCandidatura")
 }

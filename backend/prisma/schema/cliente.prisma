@@ -22,5 +22,4 @@ model Cliente {
     telefones String[]
 
     @@index([empresaId])
-    @@schema("Cliente")
 }
