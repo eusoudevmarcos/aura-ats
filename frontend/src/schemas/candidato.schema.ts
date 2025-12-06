@@ -74,55 +74,54 @@ export const medicoSchema = z.object({
   especialidades: z.array(EspecialidadeMedicoSchema),
 });
 
-export const candidatoSchema = z.object({
-  id: z.uuid().optional(),
-  pessoa: pessoaSchema,
-  areaCandidato: AreaCandidatoEnum,
-  // sexo: SexoEnum.nullable(),
-  // signo: SignoEnum.nullable(),
-  // crm: z.array(
-  //   z
-  //     .string()
-  //     .regex(/^\d{1,7}\/?[A-Z]{0,2}$/, {
-  //       message:
-  //         'CRM deve conter apenas números e opcionalmente a sigla do estado (ex: 123456/SP)',
-  //     })
-  //     .max(20)
-  // ), // Sigla do estado na frente
-  corem: z
-    .string()
-    .regex(/^([A-Z]{2}\s?\d{1,10}|\d{1,10}-[A-Z]{2})$/, {
-      message:
-        "COREN deve estar no formato 'XX 123456' ou '123456-XX' (ex: MG 123456)",
-    })
-    .max(20)
-    .nullable()
-    .optional(),
-
-  emails: z.array(z.string()),
-
-  links: z.array(z.url()),
-
-  contatos: z.array(z.string()),
-  // formacoes: z.array(formacaoSchema).optional(),
-  anexos: z
-    .array(
-      z.object({
-        anexo: z.object({
-          nomeArquivo: z.string(),
-          mimetype: z.string().optional(),
-          tamanhoKb: z.number().optional(),
-          tipo: z.string(),
-          url: z.string().optional().nullable(),
-          fileObj: z.any().optional(), // File object do browser
-        }),
-        anexoId: z.string().optional(),
-        candidatoId: z.string().optional(),
+export const candidatoSchema = z
+  .object({
+    id: z.uuid().optional(),
+    pessoa: pessoaSchema,
+    areaCandidato: AreaCandidatoEnum,
+    corem: z
+      .string()
+      .regex(/^([A-Z]{2}\s?\d{1,10}|\d{1,10}-[A-Z]{2})$/, {
+        message:
+          "COREN deve estar no formato 'XX 123456' ou '123456-XX' (ex: MG 123456)",
       })
-    )
-    .optional(),
+      .max(20)
+      .nullable()
+      .optional(),
 
-  medico: medicoSchema,
-});
+    emails: z.array(z.string()),
+
+    links: z.array(z.url()),
+
+    contatos: z.array(z.string()),
+    anexos: z
+      .array(
+        z.object({
+          anexo: z.object({
+            nomeArquivo: z.string(),
+            mimetype: z.string().optional(),
+            tamanhoKb: z.number().optional(),
+            tipo: z.string(),
+            url: z.string().optional().nullable(),
+            fileObj: z.any().optional(), // File object do browser
+          }),
+          anexoId: z.string().optional(),
+          candidatoId: z.string().optional(),
+        })
+      )
+      .optional(),
+
+    medico: medicoSchema.optional(),
+  })
+  .superRefine((data, ctx) => {
+    if (data.areaCandidato === 'MEDICO' && !data.medico) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message:
+          "O campo 'medico' é obrigatório quando área do candidato for 'MEDICO'.",
+        path: ['medico'],
+      });
+    }
+  });
 
 export type CandidatoInput = z.infer<typeof candidatoSchema>;
