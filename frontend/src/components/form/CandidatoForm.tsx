@@ -85,12 +85,23 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     watch,
     formState: { errors },
     setValue,
+    unregister,
   } = methods;
+
+  useEffect(() => {
+    console.log(errors);
+  }, [errors]);
 
   const contatos = watch('contatos');
   const emails = watch('emails');
   const links = watch('links');
-  // const especialidades = watch('medico.especialidades');
+  const areaCandidato = watch('areaCandidato');
+
+  useEffect(() => {
+    if (areaCandidato !== AreaCandidatoEnum.enum.MEDICINA) {
+      unregister('medico');
+    }
+  }, [areaCandidato]);
 
   const handleContatosChange = (newArray: string[]) => {
     setValue('contatos', newArray, { shouldValidate: true });
@@ -103,31 +114,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
   const handleLinkChange = (newArray: string[]) => {
     setValue('links', newArray, { shouldValidate: true });
   };
-
-  // const handleEspecilidadeChange = (newArray: EspecialidadeMedicoInput[]) => {
-  //   setValue('medico.especialidades', newArray, { shouldValidate: true });
-  // };
-
-  useEffect(() => {
-    console.log(errors);
-  }, [errors]);
-
-  const areaCandidato = watch('areaCandidato');
-
-  // const fetchEspecialidades = async () => {
-  //   try {
-  //     const response = await api.get<{ id: number; nome: string }[]>(
-  //       '/api/externalWithAuth/candidato/especialidades'
-  //     );
-  //     setEspecialidadesFetch(response.data);
-  //   } catch (error) {
-  //     console.log('Erro ao carregar especialidades:', error);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   fetchEspecialidades();
-  // }, []);
 
   const submitHandler = async (data: CandidatoInput) => {
     if (onSubmit) onSubmit(data);
@@ -160,12 +146,14 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       contatos: data.contatos.map(contato => contato),
     };
 
-    payload.medico.especialidades = payload.medico.especialidades.map(
-      especialidade => ({
-        ...especialidade,
-        especialidadeId: +especialidade.especialidadeId,
-      })
-    );
+    if (payload.medico) {
+      payload.medico.especialidades = payload.medico.especialidades.map(
+        especialidade => ({
+          ...especialidade,
+          especialidadeId: +especialidade.especialidadeId,
+        })
+      );
+    }
 
     setLoading(true);
 
@@ -277,49 +265,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               ))}
             </>
           </FormSelect>
-
-          {/* {areaCandidato === AreaCandidatoEnum.enum.MEDICINA && (
-            <FormArrayInput
-              name="medico.especilidades"
-              title="Especilidades"
-              value={especialidades}
-              onChange={handleEspecilidadeChange}
-              validateCustom={(value, fieldConfigs, setErrors) => {
-                return true;
-              }}
-              fieldConfigs={[
-                {
-                  name: 'rqe',
-                  placeholder: 'Adicione o RQE',
-                  inputProps: {
-                    minLength: 4,
-                    classNameContainer: 'w-full',
-                  },
-                },
-                {
-                  component: 'select',
-                  name: 'especilidadeId',
-                  placeholder: 'Adicione a Especilidade',
-                  selectOptions: (
-                    <>
-                      {especialidadesFetch ? (
-                        especialidadesFetch.map(esp => (
-                          <option key={esp.id} value={esp.id}>
-                            {esp.nome}
-                          </option>
-                        ))
-                      ) : (
-                        <option key={null} className="text-red-500">
-                          Não foi possivel buscar especialidades
-                        </option>
-                      )}
-                    </>
-                  ),
-                },
-              ]}
-              renderChipContent={link => <span>{link}</span>}
-            />
-          )} */}
 
           {areaCandidato === AreaCandidatoEnum.enum.ENFERMAGEM && (
             <FormInput
