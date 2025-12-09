@@ -360,6 +360,7 @@ const ClientePage: React.FC<{
             initialValues={{ cliente } as any}
             isBtnDelete={false}
             isBtnView={false}
+            showInput={false}
           />
         </Modal>
       )}

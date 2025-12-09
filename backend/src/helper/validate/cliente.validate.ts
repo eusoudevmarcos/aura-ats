@@ -11,16 +11,22 @@ export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
     );
   }
 
-  if (data?.empresa?.representantes?.[0]) {
-    const cpf = unmask(data.empresa.representantes[0].cpf);
+  const representantes = data?.empresa?.representantes;
 
-    const isPessoa = await prisma.pessoa.findUnique({
+  if (
+    !data?.empresa?.id &&
+    !representantes[0]?.id &&
+    representantes[0] &&
+    representantes[0]?.cpf
+  ) {
+    // Esse cemario é um connect previnindo o update e create.
+    const cpf = unmask(representantes.cpf);
+    const pessoa = await prisma.pessoa.findUnique({
       where: { cpf: cpf },
     });
 
-    if (isPessoa) {
-      throw new Error("CPF já existe no sistema como Pessoa");
-    }
+    if (pessoa && pessoa?.id)
+      data.empresa.representantes[0] = { id: pessoa.id };
   }
 
   if (data.email) {
@@ -38,26 +44,6 @@ export const validateBasicFieldsCliente = async (data: any): Promise<void> => {
       "Dados da empresa (ID ou objeto) são obrigatórios para um cliente."
     );
   }
-
-  // if (data.empresaId) {
-  //   const empresaExistente = await prisma.empresa.findUnique({
-  //     where: { id: data.empresaId },
-  //   });
-
-  //   if (!empresaExistente) {
-  //     throw new Error(`Empresa com ID ${data.empresaId} não encontrada.`);
-  //   }
-
-  //   const clienteExistente = await prisma.cliente.findUnique({
-  //     where: { empresaId: data.empresaId },
-  //   });
-
-  //   if (clienteExistente) {
-  //     throw new Error(
-  //       `Já existe um cliente associado à empresa com ID: ${data.empresaId}`
-  //     );
-  //   }
-  // }
 
   if (!data.empresa.id && data.empresa?.cnpj) {
     const cnpj = unmask(data.empresa.cnpj);

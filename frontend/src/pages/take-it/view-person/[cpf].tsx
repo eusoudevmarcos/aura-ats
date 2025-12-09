@@ -3,16 +3,14 @@ import CandidatoForm from '@/components/form/CandidatoForm';
 import { SearchIcon, WhatsAppIcon } from '@/components/icons';
 import Modal from '@/components/modal/Modal';
 import Card from '@/components/takeit/Card';
+import { Info } from '@/components/takeit/Info';
 import { convertDataStoneToCandidatoDTO } from '@/dto/dataStoneCandidato.dto';
-import { convertDateFromPostgres } from '@/utils/date/convertDateFromPostgres';
-import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
+import { handleZeroLeft } from '@/utils/helper/helperCPF';
+import { mask } from '@/utils/mask/mask';
 import { unmask } from '@/utils/mask/unmask';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useEffect, useRef, useState } from 'react';
-interface SearchOptions {
-  [key: string]: any;
-}
 
 export default function ViewPersonPage(): React.ReactElement {
   const router = useRouter();
@@ -55,7 +53,6 @@ export default function ViewPersonPage(): React.ReactElement {
         params,
       });
 
-      // Adaptação do backend: pode vir como [{}] ou {}
       const rawData = Array.isArray(response.data?.data)
         ? response.data.data[0]
         : response.data?.data;
@@ -64,7 +61,6 @@ export default function ViewPersonPage(): React.ReactElement {
       if (response?.data?.candidato?.id) {
         setCandidatoId(response.data.candidato.id);
       }
-      console.log(response?.data?.cache);
       if (response?.data?.cache) {
         setCache(response.data.cache);
       }
@@ -76,7 +72,6 @@ export default function ViewPersonPage(): React.ReactElement {
         setData(rawData);
       }
     } catch (erro: any) {
-      console.log(erro);
       setError(
         erro?.response?.data?.details?.mensagem ||
           erro?.response?.data?.error ||
@@ -94,16 +89,6 @@ export default function ViewPersonPage(): React.ReactElement {
     }
   }, [cpf]);
 
-  // Função para exportar
-  const handleExport = async (type: 'csv' | 'pdf') => {
-    setShowExportDropdown(false);
-    if (type === 'csv') {
-      exportToCSV(data);
-    } else if (type === 'pdf') {
-      await exportToPDF(cardRef as React.RefObject<HTMLDivElement>);
-    }
-  };
-
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (
@@ -119,440 +104,400 @@ export default function ViewPersonPage(): React.ReactElement {
   }, [showExportDropdown]);
 
   if (loading) {
-    return <div className="p-8 text-center text-gray-500">Carregando...</div>;
+    return (
+      <div className="w-full flex justify-center items-center min-h-[300px] text-neutral-500">
+        Carregando...
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="p-8 text-center text-red-500">{error}</div>;
+    return (
+      <div className="w-full flex justify-center items-center min-h-[200px] text-red-500 font-bold">
+        {error}
+      </div>
+    );
   }
 
   if (!data) {
     return (
-      <div className="p-8 text-center text-gray-500">
+      <div className="w-full flex justify-center items-center min-h-[200px] text-neutral-400">
         Nenhum dado disponível para exibir.
       </div>
     );
   }
 
   return (
-    // <TakeitLayout fit>
-    //   {({}) => (
-    <div className="px-4 py-2 mb-10">
-      <div className="flex justify-between py-2">
+    <div className="px-4 py-2 mb-30">
+      <div className="flex flex-wrap gap-2 justify-between">
         <button onClick={() => router.back()} className="buttonPrimary">
           Voltar
         </button>
-
-        <div className="relative flex gap-2" id="export-dropdown">
-          {/* <button
-            id="export-btn"
-            className="buttonPrimary flex items-center"
-            onClick={() => setShowExportDropdown(prev => !prev)}
-            type="button"
-          >
-            Exportar
-            <svg
-              className="ml-2 w-4 h-4"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M19 9l-7 7-7-7"
-              />
-            </svg>
-          </button> */}
+        <div id="export-dropdown" className="relative flex gap-2">
           <button
             id="salvar-candidato-btn"
-            className={`${
+            className={`h-9 px-4 disabled:opacity-50 ${
               candidatoId && isSave ? 'buttonPrimary-outlined' : 'buttonPrimary'
             } flex items-center`}
             onClick={async () => {
               if (candidatoId && isSave) {
-                console.log('router');
                 await router.push(`/candidato/${candidatoId}`);
                 return;
               }
               setShowModalEdit(prev => !prev);
             }}
             type="button"
+            disabled={isSave && !candidatoId}
           >
             {candidatoId && isSave
               ? 'Ver Profissional'
+              : isSave && !candidatoId
+              ? 'Representante de empresa'
               : 'Salvar como Profissional'}
           </button>
         </div>
       </div>
+      <div className="flex flex-wrap items-center mb-1 gap-2">
+        <span className="rounded bg-primary/10 font-medium text-primary py-1 text-sm select-none ">
+          {cache ? 'Cache: SIM' : 'Cache: NÃO'}
+        </span>
+      </div>
 
-      <p className="text-primary font-bold">Cache: {cache ? 'SIM' : 'NÂO'}</p>
-
-      <h1 className="text-2xl mb-4 font-black">
-        <span className="text-primary">Nome:</span> {mostrarValor(data.name)}
-      </h1>
+      <div className="mb-6 flex flex-wrap items-end gap-x-6 gap-y-2">
+        <h1 className="text-2xl md:text-3xl font-bold text-primary">
+          Nome: <span className="text-neutral-900 font-black">{data.name}</span>
+        </h1>
+      </div>
 
       <div
-        className="grid grid-cols-1 md:grid-cols-2 gap-2"
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-2"
         id="card"
         ref={cardRef}
       >
         {/* Dados Pessoais */}
-        <Card title="Dados Pessoais" className={'md:col-start-1 md:col-end-3'}>
-          <div className="grid grid-cols-1 md:grid-cols-4 space-y-4 space-x-3">
-            <p className="font-medium">
-              <strong className="text-primary">CPF:</strong>{' '}
-              {mostrarValor(data.cpf)}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">RG:</strong>{' '}
-              {mostrarValor(data.rg)}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Sexo:</strong>
-              {data.gender === 'F'
-                ? 'Feminino'
-                : data.gender === 'M'
-                ? 'Masculino'
-                : 'N/A'}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Data de Nascimento:</strong>
-              {data.birthday && typeof data.birthday === 'string'
-                ? (() => {
-                    const [year, month, day] = data.birthday.split('-');
-                    if (year && month && day) {
-                      return `${day.padStart(2, '0')}/${month.padStart(
-                        2,
-                        '0'
-                      )}/${year}`;
-                    }
-                    return data.birthday;
-                  })()
-                : 'N/A'}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Idade:</strong>{' '}
-              {mostrarValor(data.age)}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Nome da Mãe:</strong>{' '}
-              {mostrarValor(data.mother_name)}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Falecido:</strong>
-              {data.possibly_dead === null || data.possibly_dead === undefined
-                ? 'N/A'
-                : data.possibly_dead
-                ? 'Sim'
-                : 'Não'}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Aposentado:</strong>
-              {data.retired === null || data.retired === undefined
-                ? 'N/A'
-                : data.retired
-                ? 'Sim'
-                : 'Não'}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Bolsa Família:</strong>
-              {data.bolsa_familia === null || data.bolsa_familia === undefined
-                ? 'N/A'
-                : data.bolsa_familia
-                ? 'Sim'
-                : 'Não'}
-            </p>
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">
+              Dados do Profissional
+            </span>
+          }
+          className="col-span-2"
+        >
+          <div className="grid gap-1 sm:grid-cols-2">
+            <Info label="CPF" value={mask(handleZeroLeft(data.cpf))} />
+            <Info label="RG" value={data.rg} />
+            <Info
+              label="Sexo"
+              value={
+                data.gender === 'F'
+                  ? 'Feminino'
+                  : data.gender === 'M'
+                  ? 'Masculino'
+                  : 'N/A'
+              }
+            />
+            <Info
+              label="Data de Nascimento"
+              value={
+                data.birthday && typeof data.birthday === 'string'
+                  ? (() => {
+                      const [year, month, day] = data.birthday.split('-');
+                      if (year && month && day) {
+                        return `${day.padStart(2, '0')}/${month.padStart(
+                          2,
+                          '0'
+                        )}/${year}`;
+                      }
+                      return data.birthday;
+                    })()
+                  : 'N/A'
+              }
+            />
+            <Info label="Idade" value={data.age} />
+            <Info label="Nome da Mãe" value={data.mother_name} />
+            <Info
+              label="Falecido"
+              value={
+                data.possibly_dead === null || data.possibly_dead === undefined
+                  ? 'N/A'
+                  : data.possibly_dead
+                  ? 'Sim'
+                  : 'Não'
+              }
+            />
+            <Info
+              label="Aposentado"
+              value={
+                data.retired === null || data.retired === undefined
+                  ? 'N/A'
+                  : data.retired
+                  ? 'Sim'
+                  : 'Não'
+              }
+            />
+            <Info
+              label="Bolsa Família"
+              value={
+                data.bolsa_familia === null || data.bolsa_familia === undefined
+                  ? 'N/A'
+                  : data.bolsa_familia
+                  ? 'Sim'
+                  : 'Não'
+              }
+            />
+            <Info label="Signo" value={data.sign || '-'} />
+          </div>
+        </Card>
 
-            <p className="font-medium">
-              <strong className="text-primary">Signo:</strong>
-              {data.sign || '-'}
-            </p>
-          </div>
-        </Card>
-        {/* Profissão e Renda */}
-        <Card title="Profissão e Renda">
-          <div className="flex flex-wrap space-y-4 space-x-9">
-            <p className="font-medium">
-              <strong className="text-primary">CBO:</strong>{' '}
-              {mostrarValor(data.cbo_code)} -
-              {mostrarValor(data.cbo_description)}
-            </p>
-            <p className="font-medium">
-              <strong className="text-primary">Renda Estimada:</strong>
-              {mostrarValor(data.estimated_income)}
-            </p>
-          </div>
-        </Card>
-        {/* PEP */}
-        <Card title="Pessoa Politicamente Exposta (PEP)">
-          <div className="flex flex-wrap space-y-4 space-x-2">
-            <p className="font-medium">
-              <strong className="text-primary">PEP:</strong>
-              {data.pep === null || data.pep === undefined
-                ? 'N/A'
-                : data.pep
-                ? 'Sim'
-                : 'Não'}
-            </p>
-            {data.pep && (
-              <p className="font-medium">
-                <strong className="text-primary">Tipo de PEP:</strong>{' '}
-                {mostrarValor(data.pep_type)}
-              </p>
-            )}
-          </div>
-        </Card>
-        {/* Endereços */}
-        <Card title="Endereços">
-          {data.addresses && data.addresses.length > 0 ? (
-            <div>
-              {data.addresses.map((addr: any, idx: any) => (
-                <div
-                  key={idx}
-                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100 p-2 rounded-xl mb-2"
-                >
-                  <div className="flex flex-wrap space-y-2 space-x-4 justify-between">
-                    <p className="font-medium">
-                      <strong className="text-primary">Tipo:</strong>{' '}
-                      {mostrarValor(addr.type)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Rua:</strong>{' '}
-                      {mostrarValor(addr.street)},{mostrarValor(addr.number)}
-                      {addr.complement && mostrarValor(`- ${addr.complement}`)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Bairro:</strong>
-                      {mostrarValor(addr.neighborhood)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Cidade:</strong>{' '}
-                      {mostrarValor(addr.city)} -{mostrarValor(addr.district)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">CEP:</strong>{' '}
-                      {mostrarValor(addr.postal_code)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Prioridade:</strong>
-                      {mostrarValor(addr.priority)}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div>Nenhum endereço cadastrado.</div>
-          )}
-        </Card>
         {/* Telefones Celulares */}
-        <Card title="Telefones Celulares">
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">
+              Telefones Celulares
+            </span>
+          }
+        >
           {data.mobile_phones && data.mobile_phones.length > 0 ? (
-            <div>
+            <div className="flex flex-wrap gap-2">
               {data.mobile_phones.map((phone: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2 justify-between"
+                  className="border border-neutral-200 bg-neutral-50 p-3 rounded-xl w-fit"
                 >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium flex gap-2 items-center">
-                      <strong className="text-primary">Número:</strong>(
-                      {mostrarValor(phone.ddd)}){mostrarValor(phone.number)}
-                      <Link
-                        href={
-                          phone.number
-                            ? `https://wa.me/${phone.ddd + phone.number}`
-                            : ''
-                        }
-                        target="_blank"
-                        className="bg-emerald-600 rounded-md p-1"
-                      >
-                        <WhatsAppIcon color="white" />
-                      </Link>
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Prioridade:</strong>
-                      {mostrarValor(phone.priority)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Data CDR:</strong>
-                      {mostrarValor(phone.cdr_datetime)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Data Hot:</strong>
-                      {mostrarValor(phone.hot_datetime)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">data:</strong>
-                      {mostrarValor(phone.whatsapp_datetime)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">CPC:</strong>
-                      {mostrarValor(phone.cpc_datetime)}
-                    </p>
-                  </div>
+                  <Info
+                    label={
+                      <span className="flex items-center gap-2">
+                        <Link
+                          href={
+                            phone.number
+                              ? `https://wa.me/${phone.ddd + phone.number}`
+                              : ''
+                          }
+                          target="_blank"
+                          className="ml-2 bg-emerald-600 rounded-md p-1"
+                        >
+                          <WhatsAppIcon color="white" />
+                        </Link>
+                      </span>
+                    }
+                    value={`(${phone.ddd})${phone.number}`}
+                  />
                 </div>
               ))}
             </div>
           ) : (
-            <div>Nenhum celular cadastrado.</div>
+            <div className="text-neutral-500 p-2">
+              Nenhum celular cadastrado.
+            </div>
           )}
         </Card>
+
         {/* Telefones Fixos */}
-        <Card title="Telefones Fixos">
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">
+              Telefones Fixos
+            </span>
+          }
+        >
           {data.land_lines && data.land_lines.length > 0 ? (
-            <div>
+            <div className="flex flex-wrap gap-2">
               {data.land_lines.map((phone: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2 justify-between"
+                  className="border border-neutral-200 bg-neutral-50 p-3 rounded-xl w-fit"
                 >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong className="text-primary">Número:</strong>(
-                      {mostrarValor(phone.ddd)}){mostrarValor(phone.number)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Prioridade:</strong>
-                      {mostrarValor(phone.priority)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Data CDR:</strong>
-                      {mostrarValor(phone.cdr_datetime)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Data Hot:</strong>
-                      {mostrarValor(phone.hot_datetime)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">data:</strong>
-                      <Link
-                        href={
-                          phone.whatsapp_datetime
-                            ? `https://wa.me/${phone.whatsapp_datetime}`
-                            : ''
-                        }
-                      >
-                        {convertDateFromPostgres(
-                          phone.whatsapp_datetime
-                        )?.toString()}
-                      </Link>
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">CPC:</strong>
-                      {mostrarValor(phone.cpc_datetime)}
-                    </p>
-                  </div>
+                  <Info value={`(${phone.ddd})${phone.number}`} />
                 </div>
               ))}
             </div>
           ) : (
-            <div>Nenhum telefone fixo cadastrado.</div>
+            <div className="text-neutral-500 p-2">
+              Nenhum telefone fixo cadastrado.
+            </div>
           )}
         </Card>
+
         {/* E-mails */}
-        <Card title="E-mails">
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">E-mails</span>
+          }
+        >
           {data.emails && data.emails.length > 0 ? (
-            <div className="space-y-2">
+            <div className="flex flex-wrap gap-2">
               {data.emails.map((email: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2"
+                  className="border border-neutral-200 bg-neutral-50 p-3 rounded-xl"
                 >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong className="text-primary">E-mail:</strong>{' '}
-                      {mostrarValor(email.email)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Prioridade:</strong>
-                      {mostrarValor(email.priority)}
-                    </p>
-                  </div>
+                  <Info value={email.email} />
                 </div>
               ))}
             </div>
           ) : (
-            <div>Nenhum e-mail cadastrado.</div>
-          )}
-        </Card>
-        {/* Familiares */}
-        <Card title="Familiares">
-          {data.family_datas && data.family_datas.length > 0 ? (
-            <div className="space-y-2">
-              {data.family_datas.map((fam: any, idx: any) => (
-                <div
-                  key={idx}
-                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2"
-                >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <p className="font-medium">
-                      <strong className="text-primary">Nome:</strong>{' '}
-                      {mostrarValor(fam.name)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">CPF:</strong>{' '}
-                      {mostrarValor(fam.cpf)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Descrição:</strong>
-                      {mostrarValor(fam.description)}
-                    </p>
-                  </div>
-                </div>
-              ))}
+            <div className="text-neutral-500 p-2">
+              Nenhum e-mail cadastrado.
             </div>
-          ) : (
-            <div>Nenhum familiar cadastrado.</div>
           )}
         </Card>
+
+        {/* Profissão e Renda */}
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">
+              Profissão e Renda
+            </span>
+          }
+        >
+          <div className="flex flex-col">
+            <Info
+              label="CBO"
+              value={`${data.cbo_code ? data.cbo_code : ''}${
+                data.cbo_code && data.cbo_description ? ' - ' : ''
+              }${data.cbo_description ? data.cbo_description : ''}`}
+            />
+            <Info label="Renda Estimada" value={data.estimated_income} />
+          </div>
+        </Card>
+
         {/* Empresas Relacionadas */}
-        <Card title="Empresas Relacionadas">
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">
+              Empresas Relacionadas
+            </span>
+          }
+        >
           {data.related_companies && data.related_companies.length > 0 ? (
-            <div className="space-y-2">
+            <div className="flex flex-col gap-2">
               {data.related_companies.map((company: any, idx: any) => (
                 <div
                   key={idx}
-                  className="border-b border-gray-400 last:border-b-0 pb-2 bg-gray-100  p-2 rounded-xl mb-2"
+                  className="border border-neutral-200 bg-neutral-50 p-3 rounded-xl"
                 >
-                  <div className="flex flex-wrap space-y-4 space-x-9">
-                    <div className="flex gap-2">
-                      <p className="font-medium">
-                        <strong className="text-primary">CNPJ:</strong>{' '}
-                        {mostrarValor(company.cnpj)}
-                      </p>
+                  <div className="flex flex-col">
+                    <div className="flex gap-2 items-center">
+                      <Info
+                        label="CNPJ"
+                        value={mask(handleZeroLeft(company.cnpj))}
+                      />
                       <Link
-                        href={`/take-it/view-company/${company.cnpj}`}
-                        className="bg-primary rounded"
+                        href={`/take-it/view-company/${handleZeroLeft(
+                          company.cnpj
+                        )}`}
+                        className="ml-1 bg-primary rounded p-0.5 inline-flex"
+                        title="Visualizar empresa"
                       >
                         <SearchIcon color="white" style={{ padding: '2px' }} />
                       </Link>
                     </div>
-
-                    <p className="font-medium">
-                      <strong className="text-primary">Razão Social:</strong>
-                      {mostrarValor(company.company_name)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">Nome Fantasia:</strong>
-                      {mostrarValor(company.trading_name)}
-                    </p>
-                    <p className="font-medium">
-                      <strong className="text-primary">
-                        Situação Cadastral:
-                      </strong>
-                      {mostrarValor(company.registry_situation)}
-                    </p>
+                    <Info label="Razão Social" value={company.company_name} />
+                    <Info label="Nome Fantasia" value={company.trading_name} />
+                    <Info
+                      label="Situação Cadastral"
+                      value={company.registry_situation}
+                    />
                   </div>
                 </div>
               ))}
             </div>
           ) : (
-            <div>Nenhuma empresa relacionada cadastrada.</div>
+            <div className="text-neutral-500 p-2">
+              Nenhuma empresa relacionada cadastrada.
+            </div>
           )}
+        </Card>
+
+        {/* Endereços */}
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">Endereços</span>
+          }
+        >
+          {data.addresses && data.addresses.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {data.addresses.map((addr: any, idx: any) => (
+                <div
+                  key={idx}
+                  className="border border-neutral-200 bg-neutral-50 p-3 rounded-xl"
+                >
+                  <div className="flex flex-col-reverse">
+                    <Info label="Tipo" value={addr.type} />
+                    <Info
+                      label="Rua"
+                      value={`${addr.street ? `${addr.street}, ` : ''} ${
+                        addr.number ? `${addr.number}, ` : ''
+                      } ${addr.complement ? `${addr.complement}` : ''}`}
+                    />
+                    <Info label="Bairro" value={addr.neighborhood} />
+                    <Info
+                      label="Cidade"
+                      value={`${addr.city}${
+                        addr.district ? ' , ' + addr.district : ''
+                      }`}
+                    />
+                    <Info label="CEP" value={addr.postal_code} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-neutral-500 p-2">
+              Nenhum endereço cadastrado.
+            </div>
+          )}
+        </Card>
+
+        {/* Familiares */}
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">Familiares</span>
+          }
+        >
+          {data.family_datas && data.family_datas.length > 0 ? (
+            <div className="flex flex-col gap-2">
+              {data.family_datas.map((fam: any, idx: any) => (
+                <div
+                  key={idx}
+                  className="border border-neutral-200 bg-neutral-50 p-3 rounded-xl"
+                >
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    <Info label="Nome" value={fam.name} />
+                    <Info label="CPF" value={mask(handleZeroLeft(fam.cpf))} />
+                    <Info label="Descrição" value={fam.description} />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-neutral-500 p-2">
+              Nenhum familiar cadastrado.
+            </div>
+          )}
+        </Card>
+
+        {/* PEP */}
+        <Card
+          title={
+            <span className="font-bold text-primary text-lg">
+              Pessoa Politicamente Exposta (PEP)
+            </span>
+          }
+        >
+          <div className="flex flex-col gap-2">
+            <Info
+              label="PEP"
+              value={
+                data.pep === null || data.pep === undefined
+                  ? 'N/A'
+                  : data.pep
+                  ? 'Sim'
+                  : 'Não'
+              }
+            />
+            {data.pep && <Info label="Tipo de PEP" value={data.pep_type} />}
+          </div>
         </Card>
       </div>
 
@@ -572,7 +517,5 @@ export default function ViewPersonPage(): React.ReactElement {
         />
       </Modal>
     </div>
-    //   )}
-    // </TakeitLayout>
   );
 }

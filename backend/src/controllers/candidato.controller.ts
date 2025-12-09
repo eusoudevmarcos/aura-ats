@@ -16,7 +16,6 @@ export class CandidatoController {
       const newCandidato = await this.candidatoService.save(candidatoData);
       return res.status(201).json(nonEmptyAndConvertDataDTO(newCandidato));
     } catch (error: any) {
-      console.log("Erro ao criar candidato:", error.message);
       return res.status(400).json({ message: error.message });
     }
   }

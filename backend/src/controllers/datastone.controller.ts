@@ -2,6 +2,7 @@
 
 import axios from "axios";
 import { Request, Response } from "express";
+import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import prisma from "../lib/prisma";
 import { sanitize, SearchType } from "../utils/sanitize";
 import CacheController, { CacheEntryPayload } from "./cache.controller";
@@ -80,9 +81,44 @@ export class DatastoneController {
         res.status(400).json(result);
         return;
       }
+
       const key = cache.buildKey({ typeData: result.tipo, input });
 
       const cachedPayload = cache.getCachedRequest(key);
+      let candidato = null;
+      let cliente = null;
+      let isSave = false;
+
+      if (result.tipo === "CPF") {
+        candidato = await prisma.candidato.findFirst({
+          where: { pessoa: { cpf: input } },
+        });
+
+        let pessoa = null;
+        if (!candidato) {
+          pessoa = await prisma.pessoa.findFirst({
+            where: { cpf: input },
+          });
+        }
+        console.log("aqui");
+
+        console.log(candidato);
+        console.log(input);
+
+        isSave = candidato || pessoa ? true : false;
+      } else if (result.tipo === "CNPJ") {
+        cliente = await prisma.cliente.findFirst({
+          where: { empresa: { cnpj: input } },
+        });
+
+        isSave = cliente ? true : false;
+      }
+
+      if (cachedPayload) {
+        cachedPayload.isSave = isSave;
+        cachedPayload.candidato = candidato;
+        cachedPayload.cliente = cliente;
+      }
 
       if (cachedPayload) {
         res.status(200).json({ status: 200, cache: true, ...cachedPayload });
@@ -98,21 +134,12 @@ export class DatastoneController {
       });
 
       const dataFromApi = this.ensureArray(response.data);
-      let candidato = null;
-      let isSave = false;
-
-      if (result.tipo === "CPF") {
-        candidato = await prisma.candidato.findFirst({
-          where: { pessoa: { cpf: input } },
-        });
-
-        isSave = candidato ? true : false;
-      }
 
       const payload: CacheEntryPayload = {
         data: dataFromApi,
         isSave,
         candidato: candidato && candidato.id ? { id: candidato.id } : null,
+        cliente: cliente && cliente.id ? { id: cliente.id } : null,
         tipo,
         typeData: result.tipo,
         request: {
@@ -143,6 +170,7 @@ export class DatastoneController {
         cache.buildKey({ typeData: result.tipo, input }),
         payload
       );
+
       await log({ status: 200, data: payload, URL, cacheKey: saveCache?.key });
 
       res.status(200).json({ status: 200, cache: !!saveCache, ...payload });
@@ -161,15 +189,41 @@ export class DatastoneController {
   }
 
   private ensureArray(responseData: any): any[] {
-    if (Array.isArray(responseData)) return responseData;
-    if (Array.isArray(responseData?.data)) return responseData.data;
-    if (responseData?.data && typeof responseData.data === "object") {
-      return [responseData.data];
+    function padCpfCnpj(obj: any) {
+      if (!obj || typeof obj !== "object") return obj;
+
+      // CPF: 11 dígitos, CNPJ: 14 dígitos
+      if (
+        typeof obj.cpf === "string" &&
+        obj.cpf.replace(/\D/g, "").length < 11
+      ) {
+        const value = obj.cpf.replace(/\D/g, "");
+        obj.cpf = value.padStart(11, "0");
+      }
+      if (
+        typeof obj.cnpj === "string" &&
+        obj.cnpj.replace(/\D/g, "").length < 14
+      ) {
+        const value = obj.cnpj.replace(/\D/g, "");
+        obj.cnpj = value.padStart(14, "0");
+      }
+      return obj;
     }
-    if (responseData && typeof responseData === "object") {
-      return [responseData];
+
+    let arr: any[] = [];
+    if (Array.isArray(responseData)) {
+      arr = responseData.map(padCpfCnpj);
+    } else if (Array.isArray(responseData?.data)) {
+      arr = responseData.data.map(padCpfCnpj);
+    } else if (responseData?.data && typeof responseData.data === "object") {
+      arr = [padCpfCnpj(responseData.data)];
+    } else if (responseData && typeof responseData === "object") {
+      arr = [padCpfCnpj(responseData)];
     }
-    return [];
+
+    // Converte todas as datas da estrutura para padrão BR, profundamente
+    arr = arr.map((item) => nonEmptyAndConvertDataDTO(item));
+    return arr;
   }
 
   private async detail(data: any, tipo: "persons" | "companies"): Promise<any> {

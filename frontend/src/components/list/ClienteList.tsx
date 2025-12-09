@@ -3,8 +3,9 @@ import api from '@/axios';
 import Card from '@/components/Card';
 import { useAdmin } from '@/context/AuthContext';
 import { Pagination } from '@/type/pagination.type';
+import { unmask } from '@/utils/mask/unmask';
 import { useRouter } from 'next/router';
-import React, { ChangeEvent, useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import Table, { TableColumn } from '../Table';
@@ -63,63 +64,90 @@ function normalizarTable(clientes: Cliente[]) {
 const ClienteList: React.FC<{
   onlyProspects?: boolean;
 }> = ({ onlyProspects }) => {
-  const [search, setSearch] = useState<string>('');
   const [clientes, setClientes] = useState<Cliente[]>([]);
+  const [totalPages, setTotalPages] = useState<number>(1);
   const [loading, setLoading] = useState<boolean>(false);
   const [filter, setFilter] = useState<boolean>(false);
-
+  const [searchRazao, setSearchRazao] = useState<string>('');
+  const [searchCnpj, setSearchCnpj] = useState<string>('');
   const [page, setPage] = useState<number>(1);
-  const pageSize = 5;
   const [total, setTotal] = useState<number>(0);
-  const [totalPages, setTotalPages] = useState<number>(1);
+  const [searchClicked, setSearchClicked] = useState<boolean>(false);
+  const pageSize = 5;
 
   const router = useRouter();
   const isAdmin = useAdmin();
 
-  useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
+  // Determina o valor a ser enviado como search, priorizando CNPJ, depois razão social
+  const searchValue = searchCnpj.trim()
+    ? unmask(searchCnpj.trim())
+    : searchRazao.trim();
 
-    const fetchClientes = async () => {
-      setLoading(true);
+  // Busca de clientes, disparada somente quando searchClicked ou filtros forem limpos
+  const fetchClientes = async (opts?: {
+    resetPage?: boolean;
+    resetFilters?: boolean;
+  }) => {
+    if (opts?.resetPage) setPage(1);
 
-      try {
-        const params: Record<string, any> = {
-          page,
-          pageSize,
-          search,
-        };
+    setLoading(true);
+    try {
+      const params: Record<string, any> = {
+        page: opts?.resetPage ? 1 : page,
+        pageSize,
+        search: opts?.resetFilters ? '' : searchValue,
+      };
 
-        const response = await api.get<Pagination<Cliente[]>>(
-          '/api/externalWithAuth/cliente',
-          {
-            params,
-          }
-        );
+      const response = await api.get<Pagination<Cliente[]>>(
+        '/api/externalWithAuth/cliente',
+        {
+          params,
+        }
+      );
 
-        const data = Array.isArray(response.data?.data)
-          ? response.data.data
-          : [];
-        setClientes(data);
-        setTotal(data.length);
-        setTotalPages(response.data.totalPages);
-      } catch (_) {
-        setClientes([]);
-        setTotal(0);
-        setTotalPages(1);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const data = Array.isArray(response.data?.data) ? response.data.data : [];
+      setClientes(data);
+      setTotal(data.length);
+      setTotalPages(response.data.totalPages);
+    } catch (_) {
+      setClientes([]);
+      setTotal(0);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    // Debounce de 400ms na pesquisa/search
-    timeoutId = setTimeout(() => {
+  // Gatilho: buscar clientes ao clicar em buscar
+  const handleSearch = () => {
+    setSearchClicked(true);
+    fetchClientes({ resetPage: true });
+  };
+
+  // Gatilho: limpar filtros + buscar clientes sem filtro
+  const handleClear = async () => {
+    setSearchRazao('');
+    setSearchCnpj('');
+    setSearchClicked(false);
+    await fetchClientes({ resetPage: true, resetFilters: true });
+  };
+
+  // Dispara busca "inicial" só quando abre tela (primeira vez sem filtro)
+  React.useEffect(() => {
+    // Só busca inicial se nunca pesquisou
+    if (!searchClicked && clientes.length === 0) {
+      fetchClientes({ resetPage: true, resetFilters: true });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onlyProspects, pageSize]);
+
+  // Para fazer paginação após busca: só trocar a página sem reiniciar ou limpar filtro
+  React.useEffect(() => {
+    if (searchClicked) {
       fetchClientes();
-    }, 600);
-
-    return () => {
-      clearTimeout(timeoutId);
-    };
-  }, [search, onlyProspects, page, pageSize]);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   const dadosTabela = useMemo(() => normalizarTable(clientes), [clientes]);
 
@@ -149,24 +177,41 @@ const ClienteList: React.FC<{
 
   return (
     <Card noShadow>
-      <div className="flex justify-between itesm-center flex-wrap mb-2">
-        <h3 className="text-2xl font-bold text-primary">Lista de Clientes</h3>
-
-        <div className="flex gap-2 w-full  max-w-[500px]">
+      <h3 className="text-2xl font-bold text-primary">Lista de Clientes</h3>
+      <div className="flex justify-end items-center flex-wrap mb-2">
+        <div className="flex gap-2 w-full max-w-[600px]">
           <FormInput
-            name="buscar"
+            name="buscar-razao"
             type="text"
-            placeholder="Buscar CNPJ, Razão social e Nome Fantasia"
-            value={search || ''}
+            placeholder="Razão social ou Nome Fantasia"
+            value={searchRazao}
             inputProps={{
               classNameContainer: 'w-full',
             }}
-            onChange={(e: ChangeEvent<HTMLInputElement>) =>
-              setSearch(e.target.value)
-            }
+            onChange={e => setSearchRazao(e?.target?.value ?? e)}
           />
-          <PrimaryButton onClick={() => setFilter(!filter)} disabled={!search}>
+
+          <FormInput
+            name="buscar-cnpj"
+            placeholder="CNPJ"
+            value={searchCnpj}
+            maskProps={{ mask: '00.000.000/0000-00' }}
+            inputProps={{
+              classNameContainer: 'w-full',
+            }}
+            onChange={e => setSearchCnpj(e?.target?.value ?? e)}
+          />
+
+          <PrimaryButton onClick={handleSearch} disabled={!searchValue}>
             <span className="material-icons-outlined">search</span>
+          </PrimaryButton>
+
+          <PrimaryButton
+            variant="negative"
+            onClick={handleClear}
+            disabled={!searchRazao && !searchCnpj}
+          >
+            <span className="material-icons-outlined">delete</span>
           </PrimaryButton>
         </div>
         {/* <Modal

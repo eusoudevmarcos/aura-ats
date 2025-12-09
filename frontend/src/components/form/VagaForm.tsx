@@ -2,7 +2,7 @@
 import api from '@/axios';
 import ModalSuccess from '@/components/modal/ModalSuccess';
 import { zodResolver } from '@hookform/resolvers/zod';
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   FormProvider,
   useForm,
@@ -45,12 +45,6 @@ const VagaForm: React.FC<VagaFormProps> = ({
   isBtnView = true,
   showInput = true,
 }) => {
-  const [loading, setLoading] = useState(false);
-  const [habilidadesAllow, setHabilidadesAllow] = useState(false);
-  const [beneficiosAllow, setBeneficiosAllow] = useState(false);
-  const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
-
   const methods = useForm<VagaWithClienteInput>({
     resolver: zodResolver(vagaWithClienteSchema),
     mode: 'onChange',
@@ -70,6 +64,20 @@ const VagaForm: React.FC<VagaFormProps> = ({
     setValue,
     formState: { errors },
   } = methods;
+
+  const [loading, setLoading] = useState(false);
+  // const [habilidadesAllow, setHabilidadesAllow] = useState(false);
+  // const [beneficiosAllow, setBeneficiosAllow] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
+  const [errorLabel, setErrorLabel] = useState<string | null>(null); // Mudança: tipar como string | null
+  const errorLabelRef = useRef<HTMLParagraphElement>(null);
+
+  useEffect(() => {
+    if (errorLabel && errorLabelRef.current) {
+      errorLabelRef.current.focus();
+    }
+  }, [errorLabel]);
 
   const tipoSalario = useWatch({
     control,
@@ -91,16 +99,16 @@ const VagaForm: React.FC<VagaFormProps> = ({
   });
 
   const submitHandler = async (data: any) => {
+    setErrorLabel(null);
+
     if (onSubmit) onSubmit(data);
     delete data.cliente;
     const { tipoLocalTrabalho } = data;
     delete data.tipoLocalTrabalho;
 
-    // Ajuste para localização/remoto
     const payload: VagaInput = { ...data };
 
     if (tipoLocalTrabalho === 'REMOTO') {
-      // Se for remoto, não envia localizacao
       if ('localizacao' in payload) {
         delete payload.localizacao;
       }
@@ -121,7 +129,13 @@ const VagaForm: React.FC<VagaFormProps> = ({
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
-      console.log('Erro ao salvar vaga:', erro);
+      console.log(erro);
+      const message =
+        erro?.response?.data?.details?.message ||
+        erro?.response?.data?.message ||
+        erro?.data?.message ||
+        'Erro ao Salvar o Cliente, tente novamente ou contate o administrador';
+      setErrorLabel(message);
     } finally {
       setLoading(false);
     }
@@ -133,6 +147,17 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
   return (
     <FormProvider {...methods}>
+      {/* Bloco de erro geral acima do form, igual ClienteForm */}
+      {errorLabel && (
+        <p
+          ref={errorLabelRef}
+          tabIndex={-1}
+          className="bg-red-500 p-2 text-center text-white"
+          aria-live="assertive"
+        >
+          {errorLabel}
+        </p>
+      )}
       <form
         onSubmit={handleSubmit(submitHandler as any)}
         className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-x-1 space-y-2"
