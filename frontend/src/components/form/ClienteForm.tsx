@@ -154,16 +154,6 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
           </>
         </FormSelect>
 
-        <label className="block text-primary text-xl font-bold mb-2 border-t border-gray-200 pt-4">
-          E-mail de acesso ao sistema
-        </label>
-        <FormInput
-          name="email"
-          label="Email do cliente"
-          placeholder="exemplo@gmail.com"
-          inputProps={{ type: 'email', disabled: loading }}
-        />
-
         <div className="border-t border-gray-200 pt-4">
           <h3 className="block text-primary text-xl font-bold mb-2">Cliente</h3>
           <EmpresaForm namePrefix="empresa" disabledFields={loading} />
@@ -176,9 +166,19 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
             )}
         </div>
 
+        <label className="block text-primary text-xl font-bold mb-2 border-t border-gray-200 pt-4">
+          Contatos
+        </label>
+        <FormInput
+          name="email"
+          label="Adicione o E-mail de Acesso ao Sistema"
+          placeholder="exemplo@gmail.com"
+          inputProps={{ type: 'email', disabled: loading }}
+        />
+
         <FormArrayInput
           name="emails"
-          title="Adicione os E-mail´s"
+          title="Adicione os E-mail´s para entrar em contato"
           ValuesArrayString
           value={emails}
           onChange={handleEmailsChange}
@@ -198,7 +198,7 @@ const ClienteForm: React.FC<ClienteFormProps> = ({
 
         <FormArrayInput
           name="telefones"
-          title="Adicione os Telefones/Celulares"
+          title="Adicione os Telefones/Celulares para entrar em contato"
           ValuesArrayString
           value={telefones}
           onChange={handleTelefonesChange}

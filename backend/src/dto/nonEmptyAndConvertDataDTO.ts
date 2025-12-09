@@ -30,7 +30,20 @@ function filtrarValores(
   // Se for string parseável como data → converte
   if (typeof obj === "string") {
     const regexDataBR = /^\d{2}\/\d{2}\/\d{4}$/;
+    const regexDataISO = /^\d{4}-\d{2}-\d{2}$/; // '1998-09-01'
+
     if (regexDataBR.test(obj)) {
+      // "01/09/1998"
+      const parts = obj.split("/");
+      const day = parseInt(parts[0], 10);
+      const month = parseInt(parts[1], 10) - 1;
+      const year = parseInt(parts[2], 10);
+      const parsed = new Date(year, month, day);
+      if (!isNaN(parsed.getTime())) {
+        return parsed.toLocaleDateString(locale, dateOptions);
+      }
+    } else if (regexDataISO.test(obj)) {
+      // "1998-09-01"
       const parsed = new Date(obj);
       if (!isNaN(parsed.getTime())) {
         return parsed.toLocaleDateString(locale, dateOptions);

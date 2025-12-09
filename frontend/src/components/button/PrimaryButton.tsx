@@ -2,6 +2,7 @@ import React, { ButtonHTMLAttributes, useEffect, useState } from 'react';
 
 export type SimpleButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
+  variant?: 'primary' | 'secondary' | 'negative' | 'positive';
 };
 
 const PrimaryButton: React.FC<SimpleButtonProps> = ({
@@ -11,11 +12,12 @@ const PrimaryButton: React.FC<SimpleButtonProps> = ({
   className = '',
   onClick,
   type = 'button',
+  variant = 'primary',
   ...rest
 }) => {
   const [loading, setLoading] = useState<boolean>(loadingProp);
-
-  const newClass = `bg-primary text-white py-2 px-3 rounded-md text-sm flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed ${className}`;
+  const bg = `bg-${variant}`;
+  const newClass = `${bg} text-white py-2 px-3 rounded-md text-sm flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed ${className}`;
 
   // Sincroniza loading externo com interno
   useEffect(() => {

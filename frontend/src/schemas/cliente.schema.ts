@@ -9,7 +9,14 @@ export const clienteSchema = z.object({
   id: z.uuid().optional(),
   status: StatusClienteEnum,
   criarUsuarioSistema: z.boolean().optional(),
-  email: z.email().optional(), // E-mail de acesso ao sistema
+  email: z
+    .string()
+    .trim()
+    .optional()
+    .nullable()
+    .refine(val => !val || val === '' || z.email().safeParse(val).success, {
+      message: 'Formato de e-mail invalido',
+    }), // E-mail de acesso ao sistema
   usuarioSistema: z.object({ email: z.email('Email inválido') }).optional(),
 
   emails: z.array(z.string()).optional(),

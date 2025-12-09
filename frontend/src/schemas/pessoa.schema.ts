@@ -111,7 +111,7 @@ export const pessoaSchema = z.object({
   //   ])
   //   .optional(),
   // contatos: z.array(contatoSchema).optional(),
-  localizacoes: z.array(localizacaoSchema),
+  localizacoes: z.array(localizacaoSchema).optional(),
   // formacoes: z.array(formacaoSchema).optional(),
 });
 

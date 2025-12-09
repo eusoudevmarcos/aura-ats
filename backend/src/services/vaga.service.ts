@@ -446,7 +446,7 @@ export class VagaService {
 
       if (vagaExistente) {
         throw new Error(
-          `Já existe uma vaga com o título "${data.titulo}" para este cliente.`
+          `Já existe uma vaga com o título '${data.titulo}' para este cliente.`
         );
       }
     }

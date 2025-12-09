@@ -175,14 +175,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         onSuccess?.(response.data);
       }
     } catch (erro: any) {
-      alert(
-        `Erro ao cadastrar candidato. \n Código do erro:${
-          erro?.response?.data?.message ??
-          erro?.response?.data ??
-          'Erro ao salvar o candidato'
-        } `
-      );
-
       setTimeout(() => {
         const erroElem = document.getElementById('erro');
         if (erroElem) {

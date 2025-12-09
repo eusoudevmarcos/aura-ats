@@ -1,7 +1,7 @@
 // src/components/input/FormInput.tsx
 import { FormInputProps } from '@/type/formInput.type';
 import { getError } from '@/utils/getError';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
 import { Container } from './Container';
@@ -43,25 +43,65 @@ export function FormInput<T extends FieldValues>({
     otherInputProps?.className
   );
 
+  // IMPORTANT: Use useMemo to avoid mask input reset issue
+  const MemoInputElement = useMemo(() => {
+    return React.forwardRef<HTMLInputElement, InputElementProps>(
+      ({ maskProps, onChange, onKeyDown, onFocus, ...props }, ref) => {
+        if (maskProps?.mask) {
+          return (
+            <IMaskInput
+              inputRef={ref}
+              onAccept={onChange}
+              onFocus={onFocus}
+              onKeyDown={onKeyDown}
+              autoComplete="off"
+              {...maskProps}
+              {...props}
+            />
+          );
+        }
+        return (
+          <input
+            ref={ref}
+            onChange={e => onChange(e.target.value)}
+            onFocus={onFocus}
+            onKeyDown={onKeyDown}
+            autoComplete="off"
+            {...props}
+          />
+        );
+      }
+    );
+    // Mask config and name are enough to memoize
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [maskProps?.mask, name]);
+
   const renderInput = (field?: {
     value: any;
     onChange: (val: any) => void;
     onBlur: () => void;
     ref: any;
   }) => {
+    // IMaskInput expects onAccept for monodirectional state (onChange leads to clearing issue)
     const handleChange = (newValue: any) => {
-      // Atualiza react-hook-form (se existir)
-      field?.onChange?.(newValue);
+      // Fix: IMaskInput passes string directly as first argument (not in newValue.target.value)
+      const processedValue =
+        maskProps?.mask && typeof newValue === 'string'
+          ? newValue
+          : maskProps?.mask && newValue?.target
+          ? newValue.target.value
+          : newValue;
+
+      field?.onChange?.(processedValue);
 
       // Chama o onChange customizado
       if (onChange) {
         if (maskProps?.mask) {
-          // Chama direto com valor puro (IMask repassa value string)
-          (onChange as FormInputOnChange)(newValue);
+          (onChange as FormInputOnChange)(processedValue);
         } else {
           const syntheticEvent = {
-            target: { value: newValue, name: name.toString() },
-            currentTarget: { value: newValue, name: name.toString() },
+            target: { value: processedValue, name: name.toString() },
+            currentTarget: { value: processedValue, name: name.toString() },
           } as React.ChangeEvent<HTMLInputElement>;
           (onChange as FormInputOnChange)(syntheticEvent);
         }
@@ -75,7 +115,7 @@ export function FormInput<T extends FieldValues>({
     };
 
     return (
-      <InputElement
+      <MemoInputElement
         ref={field?.ref}
         id={id}
         type={type}
@@ -141,37 +181,6 @@ type InputElementProps = React.InputHTMLAttributes<HTMLInputElement> & {
   onChange: (value: any) => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
 };
-
-// Input com/sem máscara
-const InputElement = React.forwardRef<HTMLInputElement, InputElementProps>(
-  ({ maskProps, onChange, onKeyDown, onFocus, ...props }, ref) => {
-    if (maskProps?.mask) {
-      return (
-        <IMaskInput
-          inputRef={ref}
-          onChange={onChange}
-          onFocus={onFocus}
-          onKeyDown={onKeyDown}
-          autoComplete="off"
-          {...maskProps}
-          {...props}
-        />
-      );
-    }
-    return (
-      <input
-        ref={ref}
-        onChange={e => onChange(e.target.value)}
-        onFocus={onFocus}
-        onKeyDown={onKeyDown}
-        autoComplete="off"
-        {...props}
-      />
-    );
-  }
-);
-
-InputElement.displayName = 'InputElement';
 
 const ClearButton = ({ value, onClear }: { value: any; onClear: () => void }) =>
   value && String(value).trim() !== '' ? (
