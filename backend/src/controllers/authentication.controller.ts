@@ -17,7 +17,7 @@ export default class AuthenticationController {
       if (!username || !password) {
         return res
           .status(400)
-          .json({ error: "Email e senha são obrigatórios." });
+          .json({ error: "Email e senha s?o obrigat?rios." });
       }
 
       const usuarioSistema = await prisma.usuarioSistema.findUnique({
@@ -53,9 +53,9 @@ export default class AuthenticationController {
         await saveLog({
           type: "login",
           status: "error",
-          data: { message: "Funcionário não encontrado" },
+          data: { message: "Funcion?rio n?o encontrado" },
         });
-        return res.status(404).json({ error: "Dados não encontrados" });
+        return res.status(404).json({ error: "Dados n?o encontrados" });
       }
 
       const senhaCorreta = await bcrypt.compare(
@@ -70,7 +70,7 @@ export default class AuthenticationController {
           data: { message: "Senha incorreta" },
         });
 
-        return res.status(401).json({ error: "Credenciais inválidas" });
+        return res.status(401).json({ error: "Credenciais inv?lidas" });
       }
 
       const infoUser = {
@@ -91,7 +91,7 @@ export default class AuthenticationController {
         });
       }
 
-      // Antes de gerar novo token, verifica sessão existente ativa
+      // Antes de gerar novo token, verifica sess?o existente ativa
       const sessaoExistente = await prisma.sessao.findFirst({
         where: {
           usuarioSistemaId: usuarioSistema.id,
@@ -103,7 +103,7 @@ export default class AuthenticationController {
 
       if (sessaoExistente) {
         if (sessaoExistente.expiresAt > now) {
-          // Sessão ainda está válida, loga direto com o mesmo token
+          // Sess?o ainda est? v?lida, loga direto com o mesmo token
           const token = sessaoExistente.token;
 
           const isProduction = process.env.NODE_ENV === "production";
@@ -136,7 +136,7 @@ export default class AuthenticationController {
             token,
           });
         } else {
-          // Sessão expirada, apaga do banco antes de criar nova
+          // Sess?o expirada, apaga do banco antes de criar nova
           await prisma.sessao.delete({
             where: { token: sessaoExistente.token },
           });
@@ -208,8 +208,8 @@ export default class AuthenticationController {
         })
       );
 
-      // Além de limpar o cookie, apagar a sessão do backend
-      // Se token estiver presente nos cookies ou headers, remover a sessão do banco
+      // Al?m de limpar o cookie, apagar a sess?o do backend
+      // Se token estiver presente nos cookies ou headers, remover a sess?o do banco
       let token = "";
 
       if (req.cookies?.token) {
@@ -248,6 +248,6 @@ export default class AuthenticationController {
   async register(req: Request, res: Response) {
     return res
       .status(501)
-      .json({ message: "Registro de usuário não implementado para Prisma." });
+      .json({ message: "Registro de usu?rio n?o implementado para Prisma." });
   }
 }
