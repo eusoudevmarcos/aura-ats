@@ -414,11 +414,7 @@ const HeaderLadingPage: React.FC = () => {
   const handleLoginRedirect = () => {
     setIsMenuOpen(false);
     setIsServicesMobileOpen(false);
-    if (process.env.NODE_ENV === 'production') {
-      window.location.href = 'https://aura-ats-frontend.vercel.app/login';
-    } else {
-      window.location.href = 'http://localhost:3000/login';
-    }
+    window.location.href = process.env.NEXT_PUBLIC_NEXT_URL + '/login';
   };
 
   return (

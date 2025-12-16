@@ -216,4 +216,12 @@ export class ClienteService {
     }
     return clienteAtualizado;
   }
+
+  async delete(clienteId: string | undefined): Promise<boolean> {
+    if (!clienteId) return false;
+
+    return !!(await prisma.cliente.delete({
+      where: { id: clienteId },
+    }));
+  }
 }
