@@ -95,7 +95,7 @@ export default async function handler(
       case 'DELETE':
         externalResponse = await externalBackendApi.delete(
           urlToExternalBackend,
-          { headers }
+          { headers, data: req.body }
         );
         // if (externalPath) await invalidateGetCache(externalPath);
         break;

@@ -83,4 +83,17 @@ export class ClienteController {
       });
     }
   }
+
+  async delete(req: Request, res: Response) {
+    const { id } = req.body;
+    try {
+      const response = await this.service.delete(id);
+      return res.status(200).json(response);
+    } catch (error: any) {
+      return res.status(400).json({
+        error: "Erro ao buscar prospects",
+        message: error.message,
+      });
+    }
+  }
 }

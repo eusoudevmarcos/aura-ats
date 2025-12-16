@@ -93,8 +93,13 @@ const ClientePage: React.FC<{
     if (!cliente) return;
     if (confirm('Tem certeza que deseja excluir este cliente?')) {
       try {
-        await api.delete(`/api/cliente/${cliente.id}`);
-        router.push('/clientes');
+        const response = await api.delete(`/api/externalWithAuth/cliente`, {
+          data: { id: cliente.id },
+        });
+        console.log(response);
+        if (response.data) {
+          await router.push('/clientes');
+        }
       } catch {
         alert('Erro ao excluir cliente.');
       }

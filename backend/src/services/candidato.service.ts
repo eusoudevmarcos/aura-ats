@@ -94,17 +94,9 @@ export class CandidatoService {
     };
   }
 
-  async deleteCandidato(id: string): Promise<Candidato> {
-    return await prisma.$transaction(async (tx) => {
-      const candidato = await this.candidatoRepository.findByIdWithTransaction(
-        id,
-        tx
-      );
-      if (!candidato) {
-        throw new Error(`Candidato com ID ${id} não encontrado.`);
-      }
-      return await this.candidatoRepository.deleteWithTransaction(id, tx);
-    });
+  async deleteCandidato(id?: string): Promise<boolean> {
+    if (!id) return false;
+    return !!(await prisma.candidato.delete({ where: { id } }));
   }
 
   async save(candidatoData: any): Promise<Candidato> {

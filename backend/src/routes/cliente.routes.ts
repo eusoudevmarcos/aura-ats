@@ -16,4 +16,6 @@ router.get("/", authMiddleware, (req, res) => controller.getAll(req, res));
 
 router.get("/:id", authMiddleware, (req, res) => controller.findById(req, res));
 
+router.delete("/", authMiddleware, (req, res) => controller.delete(req, res));
+
 export default router;
