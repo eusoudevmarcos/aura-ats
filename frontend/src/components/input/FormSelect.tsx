@@ -11,6 +11,7 @@ export function FormSelect<T extends FieldValues>({
   selectProps,
   label,
   placeholder,
+  placeholderDisable = true,
   value,
   onChange,
   required,
@@ -83,7 +84,7 @@ export function FormSelect<T extends FieldValues>({
             {...otherSelectProps}
           >
             {placeholder && (
-              <option value="" disabled>
+              <option value="" disabled={placeholderDisable}>
                 {placeholder}
               </option>
             )}
@@ -105,7 +106,7 @@ export function FormSelect<T extends FieldValues>({
         {...otherSelectProps}
       >
         {placeholder && (
-          <option value="" disabled>
+          <option value="" disabled={placeholderDisable}>
             {placeholder}
           </option>
         )}

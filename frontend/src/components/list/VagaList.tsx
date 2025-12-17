@@ -1,10 +1,16 @@
 import { getVagas } from '@/axios/vaga.axios';
 import Card from '@/components/Card';
-import { VagaInput } from '@/schemas/vaga.schema';
+import {
+  CategoriaVagaEnum,
+  StatusVagaEnum,
+  VagaInput,
+} from '@/schemas/vaga.schema';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import Table, { TableColumn } from '../Table';
+import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
 
 export interface Localizacao {
   cidade: string;
@@ -43,18 +49,40 @@ interface VagaListProps {
 const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
   const [vagas, setVagas] = useState<VagaInput[]>(initialValues ?? []);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
+
+  // Valores que estão sendo digitados/selecionados nos inputs (mas ainda não pesquisados)
+  const [searchInput, setSearchInput] = useState('');
+  const [statusInput, setStatusInput] = useState('');
+  const [categoriaInput, setCategoriaInput] = useState('');
+
+  // Valores efetivamente utilizados na consulta (validados ao clicar no botão)
+  const [searchQuery, setSearchQuery] = useState('');
+  const [statusQuery, setStatusQuery] = useState('');
+  const [categoriaQuery, setCategoriaQuery] = useState('');
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
 
+  // Função para realizar a pesquisa só ao clicar no botão
+  const handleSearch = () => {
+    setSearchQuery(searchInput);
+    setStatusQuery(statusInput);
+    setCategoriaQuery(categoriaInput);
+    setPage(1);
+  };
+
+  // Buscar só quando searchQuery/statusQuery/categoriaQuery/paginar alterar (inputs NÃO fazem fetch)
   const fetchVagas = useCallback(async () => {
     setLoading(true);
     try {
       const result = await getVagas({
-        search,
+        search: searchQuery || '',
+        // status/categoria só enviados se preenchidos
+        ...(statusQuery ? { status: statusQuery } : {}),
+        ...(categoriaQuery ? { categoria: categoriaQuery } : {}),
         page,
         pageSize,
       });
@@ -68,42 +96,92 @@ const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
     } finally {
       setLoading(false);
     }
-  }, [search, page, pageSize]);
+    // eslint-disable-next-line
+  }, [searchQuery, statusQuery, categoriaQuery, page, pageSize]);
 
   useEffect(() => {
     if (initialValues) return;
     fetchVagas();
-  }, [fetchVagas]);
+    // eslint-disable-next-line
+  }, [searchQuery, statusQuery, categoriaQuery, page, pageSize]);
 
-  const filtered = search
+  // Aplicar filtro apenas se searchQuery (clique no botão)
+  const filtered = searchQuery
     ? vagas.filter(
         vaga =>
-          vaga.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-          vaga.descricao?.toLowerCase().includes(search.toLowerCase()) ||
-          vaga.localizacao?.cidade?.toLowerCase().includes(search.toLowerCase())
+          vaga.titulo?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          vaga.descricao?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          vaga.localizacao?.cidade
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
       )
     : vagas;
 
-  const tableData = search ? filtered : vagas;
+  const tableData = searchQuery ? filtered : vagas;
 
   return (
     <Card noShadow>
-      <div className="flex justify-between items-center flex-wrap mb-2">
-        <h2 className="text-2xl font-bold text-primary">Lista de Vagas</h2>
+      <h2 className="text-2xl font-bold text-primary">Lista de Vagas</h2>
+      <div className="flex justify-end items-end flex-wrap mb-2 gap-2">
         <FormInput
-          name="search"
+          name="Titulo"
+          label="Titulo"
           placeholder="Buscar por título, descrição ou cidade..."
-          value={search}
-          onChange={e => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          value={searchInput}
+          onChange={e => setSearchInput(e.target.value)}
           clear
           inputProps={{
             className:
               'flex-grow w-full max-w-[400px] px-3 py-2 rounded-lg border border-gray-200 outline-none',
+            disabled: loading,
           }}
         />
+
+        <FormSelect
+          name="Status"
+          label="Status"
+          value={statusInput}
+          onChange={e => setStatusInput(e.target.value)}
+          selectProps={{
+            className: 'p-2 border border-gray-300 rounded',
+            disabled: loading,
+          }}
+          placeholder="TODOS"
+          placeholderDisable={false}
+        >
+          {StatusVagaEnum.options.map(area => (
+            <option key={area} value={area}>
+              {area}
+            </option>
+          ))}
+        </FormSelect>
+
+        <FormSelect
+          name="Categoria"
+          label="Categoria"
+          value={categoriaInput}
+          onChange={e => setCategoriaInput(e.target.value)}
+          selectProps={{
+            className: 'p-2 border border-gray-300 rounded',
+            disabled: loading,
+          }}
+          placeholder="TODOS"
+          placeholderDisable={false}
+        >
+          {CategoriaVagaEnum.options.map(area => (
+            <option key={area} value={area}>
+              {area}
+            </option>
+          ))}
+        </FormSelect>
+
+        <PrimaryButton
+          onClick={handleSearch}
+          disabled={loading}
+          className="flex items-center gap-1"
+        >
+          <span className="material-icons-outlined">search</span>
+        </PrimaryButton>
       </div>
       <Table
         data={tableData}

@@ -1,6 +1,9 @@
 'use client';
 import React, { useState } from 'react';
 import ButtonCopy from './button/ButtonCopy';
+import TableLoadingSkeleton, {
+  TableMobileLoadingSkeleton,
+} from './global/loading/LoadingTable';
 
 export interface TableColumn<T = any> {
   label: string;
@@ -178,7 +181,10 @@ const Pagination: React.FC<PaginationProps> = ({
   };
 
   return (
-    <div className="flex flex-col-reverse justify-center items-center gap-2 mt-4">
+    <div className="flex justify-between items-center gap-2 mt-4">
+      <span className="text-primary text-sm text-center">
+        {total} registros
+      </span>
       <div className="flex items-center gap-2">
         <button
           className="px-1 py-0.5 rounded border text-primary border-primary disabled:opacity-50 disabled:hover:scale-100 disabled:cursor-not-allowed text-sm cursor-pointe flex hover:scale-105"
@@ -210,67 +216,11 @@ const Pagination: React.FC<PaginationProps> = ({
         </button>
       </div>
       <span className="text-primary text-sm text-center">
-        Página {page} de {totalPages} ({total} registros)
+        Página {page} de {totalPages}
       </span>
     </div>
   );
 };
-
-// Componente Loading para Desktop
-const DesktopLoadingState = ({ columns }: { columns: TableColumn[] }) => (
-  <tr>
-    <td colSpan={columns.length} style={{ height: '120px', padding: 0 }}>
-      <div className="flex justify-center items-center h-[120px] w-full">
-        <svg
-          className="animate-spin h-8 w-8 text-primary"
-          xmlns="http://www.w3.org/2000/svg"
-          fill="none"
-          viewBox="0 0 24 24"
-        >
-          <circle
-            className="opacity-25"
-            cx="12"
-            cy="12"
-            r="10"
-            stroke="currentColor"
-            strokeWidth="4"
-          ></circle>
-          <path
-            className="opacity-75"
-            fill="currentColor"
-            d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-          ></path>
-        </svg>
-      </div>
-    </td>
-  </tr>
-);
-
-// Componente Loading para Mobile
-const MobileLoadingState = () => (
-  <div className="flex justify-center items-center py-12">
-    <svg
-      className="animate-spin h-8 w-8 text-primary"
-      xmlns="http://www.w3.org/2000/svg"
-      fill="none"
-      viewBox="0 0 24 24"
-    >
-      <circle
-        className="opacity-25"
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="4"
-      ></circle>
-      <path
-        className="opacity-75"
-        fill="currentColor"
-        d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
-      ></path>
-    </svg>
-  </div>
-);
 
 // Componente Empty State para Desktop
 const DesktopEmptyState = ({
@@ -305,6 +255,19 @@ function Table<T>({
   emptyMessage = 'Nenhum resultado encontrado.',
   pagination,
 }: TableProps<T>) {
+  if (loading) {
+    return (
+      <>
+        <div className="hidden md:block overflow-x-auto w-full">
+          <TableLoadingSkeleton columns={columns.length} />
+        </div>
+        <div className="md:hidden">
+          <TableMobileLoadingSkeleton columns={columns.map(col => col.label)} />
+        </div>
+      </>
+    );
+  }
+
   return (
     <>
       <div className="hidden md:block overflow-x-auto w-full">
@@ -323,9 +286,7 @@ function Table<T>({
             </tr>
           </thead>
           <tbody>
-            {loading ? (
-              <DesktopLoadingState columns={columns} />
-            ) : !data || data.length === 0 ? (
+            {!data || data.length === 0 ? (
               <DesktopEmptyState
                 columns={columns}
                 emptyMessage={emptyMessage}
@@ -346,9 +307,7 @@ function Table<T>({
       </div>
 
       <div className="md:hidden">
-        {loading ? (
-          <MobileLoadingState />
-        ) : !data || data.length === 0 ? (
+        {!data || data.length === 0 ? (
           <MobileEmptyState emptyMessage={emptyMessage} />
         ) : (
           <div className="space-y-0">

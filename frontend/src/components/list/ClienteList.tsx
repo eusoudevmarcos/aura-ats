@@ -132,7 +132,6 @@ const ClienteList: React.FC<{
     await fetchClientes({ resetPage: true, resetFilters: true });
   };
 
-  // Dispara busca "inicial" só quando abre tela (primeira vez sem filtro)
   useEffect(() => {
     if (!searchClicked && clientes.length === 0) {
       fetchClientes({ resetPage: true, resetFilters: true });
@@ -170,7 +169,7 @@ const ClienteList: React.FC<{
   };
 
   return (
-    <Card noShadow>
+    <Card>
       <h3 className="text-2xl font-bold text-primary">Lista de Clientes</h3>
       <div className="flex justify-end items-center flex-wrap mb-2">
         <div className="flex gap-2 w-full max-w-[600px]">
@@ -181,6 +180,7 @@ const ClienteList: React.FC<{
             value={searchRazao}
             inputProps={{
               classNameContainer: 'w-full',
+              disabled: loading,
             }}
             onChange={e => setSearchRazao(e?.target?.value ?? e)}
           />
@@ -192,6 +192,7 @@ const ClienteList: React.FC<{
             maskProps={{ mask: '00.000.000/0000-00' }}
             inputProps={{
               classNameContainer: 'w-full',
+              disabled: loading,
             }}
             onChange={e => setSearchCnpj(e?.target?.value ?? e)}
           />
@@ -208,55 +209,6 @@ const ClienteList: React.FC<{
             <span className="material-icons-outlined">delete</span>
           </PrimaryButton>
         </div>
-        {/* <Modal
-          isOpen={filter}
-          title="FILTROS"
-          onClose={() => setFilter(!filter)}
-          backdropClose
-        >
-          <div className="flex gap-2">
-            <FormInput
-              label="Razão Social"
-              name="razaoSocial"
-              type="text"
-              placeholder="Buscar Razão Social"
-              value={search.razaoSocial || ''}
-              inputProps={{
-                classNameContainer: 'w-full max-w-[300px]',
-              }}
-              onChange={(e: ChangeEvent<HTMLInputElement>) =>
-                setSearch(prev => ({
-                  ...prev,
-                  razaoSocial: e.target.value || undefined,
-                }))
-              }
-            />
-
-            <FormSelect
-              label="Filtrar Status"
-              name="status"
-              placeholder="TUDO"
-              onChange={e =>
-                setSearch(prev => ({
-                  ...prev,
-                  status: e.target.value || undefined,
-                }))
-              }
-              selectProps={{
-                classNameContainer: 'max-w-[300px] w-full',
-                value: search.status || '',
-              }}
-            >
-              <>
-                {StatusClienteEnum.options.map(st => (
-                  <option key={st} value={st}>
-                    {st}
-                  </option>
-                ))}
-              </>
-            </FormSelect>
-          </div>
-        </Modal> */}
       </div>
 
       <Table
