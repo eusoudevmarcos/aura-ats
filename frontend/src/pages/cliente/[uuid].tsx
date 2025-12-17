@@ -1,26 +1,26 @@
 // pages/cliente/[uuid].tsx
 import api from '@/axios';
-import { getClienteById } from '@/axios/cliente.axios';
+import { getClienteById, getVagasClienteById } from '@/axios/cliente.axios';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card';
 import ClienteInfo from '@/components/cliente/ClienteInfo';
 import VagaForm from '@/components/form/VagaForm';
+import Loading from '@/components/global/loading/Loading';
 import { EditPenIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import VagaList from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
 import ModalClienteForm from '@/components/modal/ModalClienteForm';
 import { ModalPlanoCliente } from '@/components/modal/ModalPlanoCliente';
 import { ModalVagasCliente } from '@/components/modal/ModalVagasCliente';
 import { useAdmin } from '@/context/AuthContext';
-import useFetchWithPagination from '@/hook/useFetchWithPagination';
-import { ClienteWithEmpresaAndPlanosSchema } from '@/schemas/cliente.schema';
-import Link from 'next/link';
+import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
 const ITENS_POR_PAGINA = 6;
 
 const ClientePage: React.FC<{
-  initialValues?: ClienteWithEmpresaAndPlanosSchema;
+  initialValues?: ClienteWithEmpresaAndVagaInput;
 }> = ({ initialValues }) => {
   const router = useRouter();
   const { uuid } = router.query;
@@ -32,36 +32,15 @@ const ClientePage: React.FC<{
   const [showVagasForm, setShowVagasForm] = useState(false);
   const [modalPlanosCliente, setModalPlanosCliente] = useState(false);
   const [modalVagasCliente, setModalVagasCliente] = useState(false);
-  const [cliente, setCliente] =
-    useState<ClienteWithEmpresaAndPlanosSchema | null>(initialValues ?? null);
+  const [cliente, setCliente] = useState<ClienteWithEmpresaAndVagaInput | null>(
+    initialValues ?? null
+  );
 
   const [clienteCarregado, setClienteCarregado] = useState<boolean>(
     !!initialValues
   );
 
   const isAdmin = useAdmin();
-
-  const {
-    data: vagas,
-    // total: totalRecords,
-    // totalPages,
-    loading: isLoadingVagas,
-    // setPage,
-    // setPageSize,
-    // page,
-    // pageSize,
-    refetch: refetchVagas,
-  } = useFetchWithPagination(
-    `/api/externalWithAuth/vaga/cliente/${cliente?.id}`,
-    cliente && cliente.id ? { search: cliente.id } : {},
-    {
-      pageSize: 5,
-      page: 1,
-      dependencies: [cliente?.id],
-      manual: true,
-      requestOptions: {},
-    }
-  );
 
   useEffect(() => {
     if (!uuid || initialValues) {
@@ -75,6 +54,8 @@ const ClientePage: React.FC<{
       setErro(null);
       try {
         const cliente = await getClienteById(uuid as string);
+        const vagas = await getVagasClienteById(uuid as string);
+        cliente.vagas = vagas;
         setCliente(cliente);
         setClienteCarregado(true);
       } catch (_) {
@@ -110,32 +91,12 @@ const ClientePage: React.FC<{
     setPaginaAtual(1);
   }, [cliente]);
 
-  const totalPaginas = Math.ceil(vagas.length / ITENS_POR_PAGINA);
-
-  const vagasPaginadas = vagas.slice(
-    (paginaAtual - 1) * ITENS_POR_PAGINA,
-    paginaAtual * ITENS_POR_PAGINA
+  const totalPaginas = Math.ceil(
+    (cliente?.vagas?.length ?? 0) / ITENS_POR_PAGINA
   );
 
-  const handleProximaPagina = () => {
-    setPaginaAtual(prev => Math.min(prev + 1, totalPaginas));
-  };
-
-  const handlePaginaAnterior = () => {
-    setPaginaAtual(prev => Math.max(prev - 1, 1));
-  };
-
-  const handleIrParaPagina = (pagina: number) => {
-    setPaginaAtual(pagina);
-  };
-
   if (loading) {
-    return (
-      <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-        <span className="ml-4 text-primary text-lg">Carregando...</span>
-      </div>
-    );
+    return <Loading label="Carregando Cliente e Vagas..." />;
   }
 
   if (erro) {
@@ -217,109 +178,8 @@ const ClientePage: React.FC<{
         </PrimaryButton>
       </div>
 
-      <section className="flex gap-2 w-full flex-wrap items-center justify-center lg:justify-between">
-        {isLoadingVagas ? (
-          <div className="flex justify-center items-center w-full h-32">
-            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-            <span className="ml-4 text-primary text-lg">
-              Carregando vagas...
-            </span>
-          </div>
-        ) : vagas.length > 0 ? (
-          <>
-            {vagasPaginadas.map((vaga: any) => (
-              <Link
-                href={`/vaga/${vaga.id}`}
-                className="w-full lg:max-w-[330px]"
-                key={vaga.id}
-              >
-                <Card
-                  title={{
-                    className: 'text-xl text-center',
-                    label: vaga.titulo,
-                  }}
-                  classNameContainer="cursor-pointer shadow-sm border border-gray-200 hover:scale-105 hover:shadow-md text-sm px-6 py-4"
-                >
-                  <div className="flex flex-col justify-between gap-2 mt-2">
-                    <div className="text-sm">
-                      <span>Publicado:</span>
-                      <span className="text-secondary">
-                        {vaga.dataPublicacao}
-                      </span>
-                    </div>
-
-                    <div>
-                      <span className="font-medium">Status:</span>
-                      <span className="ml-1 text-secondary">{vaga.status}</span>
-                    </div>
-                  </div>
-
-                  <div>
-                    <span className="font-medium">Categoria:</span>
-                    <span className="ml-1 text-secondary">
-                      {vaga.categoria}
-                    </span>
-                  </div>
-
-                  <div>
-                    <span className="font-medium">Tipo de Salário:</span>
-                    <span className="ml-1 text-secondary">
-                      {vaga.tipoSalario}
-                    </span>
-                  </div>
-
-                  <div className="flex justify-between mt-4">
-                    <div className="flex items-center">
-                      <span className="material-icons-outlined">group</span>
-                      <span className="ml-1 text-secondary">
-                        {vaga._count.candidaturas}
-                      </span>
-                    </div>
-                  </div>
-                </Card>
-              </Link>
-            ))}
-
-            {/* Paginação */}
-            {totalPaginas > 1 && (
-              <div className="w-full flex justify-center mt-6">
-                <nav className="flex gap-2 items-center">
-                  <button
-                    className="px-2 py-1 rounded border border-gray-300 bg-white text-primary disabled:opacity-50"
-                    onClick={handlePaginaAnterior}
-                    disabled={paginaAtual === 1}
-                  >
-                    Anterior
-                  </button>
-                  {Array.from({ length: totalPaginas }, (_, idx) => (
-                    <button
-                      key={idx + 1}
-                      className={`px-3 py-1 rounded border border-gray-300 ${
-                        paginaAtual === idx + 1
-                          ? 'bg-primary text-white'
-                          : 'bg-white text-primary'
-                      }`}
-                      onClick={() => handleIrParaPagina(idx + 1)}
-                    >
-                      {idx + 1}
-                    </button>
-                  ))}
-                  <button
-                    className="px-2 py-1 rounded border border-gray-300 bg-white text-primary disabled:opacity-50"
-                    onClick={handleProximaPagina}
-                    disabled={paginaAtual === totalPaginas}
-                  >
-                    Próxima
-                  </button>
-                </nav>
-              </div>
-            )}
-          </>
-        ) : (
-          <span className="text-primary text-center">
-            Nenhuma vaga cadastrada para este cliente.
-          </span>
-        )}
+      <section className="mb-4">
+        <VagaList initialValues={cliente?.vagas} />
       </section>
 
       {/* Seção de Planos */}
@@ -360,7 +220,7 @@ const ClientePage: React.FC<{
             onSuccess={vaga => {
               setShowVagasForm(false);
               // Atualizar as vagas após cadastrar uma nova vaga
-              refetchVagas({ search: cliente.id });
+              // refetchVagas({ search: cliente.id });
             }}
             initialValues={{ cliente } as any}
             isBtnDelete={false}

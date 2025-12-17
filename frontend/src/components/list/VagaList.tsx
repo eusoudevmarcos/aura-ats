@@ -1,5 +1,6 @@
 import { getVagas } from '@/axios/vaga.axios';
 import Card from '@/components/Card';
+import { VagaInput } from '@/schemas/vaga.schema';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import Table, { TableColumn } from '../Table';
@@ -10,18 +11,8 @@ export interface Localizacao {
   uf: string;
 }
 
-export interface Vaga {
-  id: string;
-  titulo: string;
-  descricao: string;
-  dataPublicacao: string;
-  status: string;
-  categoria: string;
-  localizacao?: Localizacao;
-}
-
 // Define columns for the table
-const columns: TableColumn<Vaga>[] = [
+const columns: TableColumn<VagaInput>[] = [
   { label: 'Título', key: 'titulo' },
   {
     label: 'Data Publicação',
@@ -45,8 +36,12 @@ const columns: TableColumn<Vaga>[] = [
 
 const PAGE_SIZE = 5;
 
-const VagaList: React.FC = () => {
-  const [vagas, setVagas] = useState<Vaga[]>([]);
+interface VagaListProps {
+  initialValues?: VagaInput[];
+}
+
+const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
+  const [vagas, setVagas] = useState<VagaInput[]>(initialValues ?? []);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState('');
   const [page, setPage] = useState(1);
@@ -76,6 +71,7 @@ const VagaList: React.FC = () => {
   }, [search, page, pageSize]);
 
   useEffect(() => {
+    if (initialValues) return;
     fetchVagas();
   }, [fetchVagas]);
 
@@ -100,7 +96,7 @@ const VagaList: React.FC = () => {
           value={search}
           onChange={e => {
             setSearch(e.target.value);
-            setPage(1); // When searching, always reset to first page
+            setPage(1);
           }}
           clear
           inputProps={{
