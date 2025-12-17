@@ -112,6 +112,7 @@ export const vagaSchema = z.object({
   salario: z.string().optional(),
   descricao: z.string().min(20, 'minimo 20 caracteres'),
   localizacao: localizacaoSchema.optional(),
+  dataPublicacao: z.string(),
   // triagens: z.array(triagemSchema).max(4, 'Máximo de 4 triagens').optional(),
 });
 export type VagaInput = z.infer<typeof vagaSchema>;
