@@ -5,7 +5,7 @@ import { useAdmin } from '@/context/AuthContext';
 import { Pagination } from '@/type/pagination.type';
 import { unmask } from '@/utils/mask/unmask';
 import { useRouter } from 'next/router';
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import Table, { TableColumn } from '../Table';
@@ -133,20 +133,14 @@ const ClienteList: React.FC<{
   };
 
   // Dispara busca "inicial" só quando abre tela (primeira vez sem filtro)
-  React.useEffect(() => {
-    // Só busca inicial se nunca pesquisou
+  useEffect(() => {
     if (!searchClicked && clientes.length === 0) {
       fetchClientes({ resetPage: true, resetFilters: true });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onlyProspects, pageSize]);
 
-  // Para fazer paginação após busca: só trocar a página sem reiniciar ou limpar filtro
-  React.useEffect(() => {
-    if (searchClicked) {
-      fetchClientes();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    fetchClientes();
   }, [page]);
 
   const dadosTabela = useMemo(() => normalizarTable(clientes), [clientes]);
