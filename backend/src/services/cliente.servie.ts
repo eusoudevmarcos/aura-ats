@@ -163,12 +163,10 @@ export class ClienteService {
     const relations = {
       empresa: {
         include: {
-          // localizacoes: true,
           representantes: true,
           socios: true,
         },
       },
-      // planos: true,
       usuarioSistema: true,
     };
 

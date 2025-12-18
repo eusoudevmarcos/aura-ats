@@ -20,8 +20,8 @@ export class SessaoService {
     });
   }
 
-  async findByToken(token: string): Promise<Sessao | null> {
-    return await prisma.sessao.findUnique({
+  async findByToken(token: string): Promise<Sessao> {
+    return await prisma.sessao.findFirstOrThrow({
       where: { token },
       include: {
         usuarioSistema: {

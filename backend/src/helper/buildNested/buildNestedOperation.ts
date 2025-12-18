@@ -1,17 +1,42 @@
 type NestedData = Record<string, any>;
 
-/**
- * @summary
- * Este helper gera os inputs aninhados que o Prisma espera ao criar/atualizar relacionamentos:
- * - Arrays de objetos: transforma em { create?, update?, connect? } conforme o conteúdo de cada item.
- * - Objeto com id + outros campos: gera { update: { where: { id }, data: {...} } }
- * - Objeto somente com id: gera { connect: { id } }
- * - Objeto sem id: gera { create: {...} }
- *
- * O processamento é feito de forma recursiva em campos aninhados (arrays ou objetos), limitado por maxDepth.
- */
+export type BuildPolicy = {
+  /** Profundidade máxima de recursão */
+  maxDepth?: number;
+
+  /** Chaves completamente ignoradas */
+  ignoreKeys?: string[];
+
+  /** Chaves tratadas como JSON opaco (não recursivo) */
+  jsonKeys?: string[];
+
+  /** Limite de itens por array, por chave */
+  maxArrayLengthByKey?: Record<string, number>;
+
+  /**
+   * Decide dinamicamente se deve percorrer um nó
+   * Retornar false impede o build daquele ramo
+   */
+  shouldTraverse?: (params: {
+    key: string;
+    value: any;
+    depth: number;
+    parentOperation: "create" | "update";
+  }) => boolean;
+};
+
 export class BuildNestedOperation {
-  constructor(private maxDepth = 20, private debug = false) {}
+  private policy: Required<BuildPolicy>;
+
+  constructor(policy?: BuildPolicy, private debug = false) {
+    this.policy = {
+      maxDepth: policy?.maxDepth ?? 20,
+      ignoreKeys: policy?.ignoreKeys ?? [],
+      jsonKeys: policy?.jsonKeys ?? [],
+      maxArrayLengthByKey: policy?.maxArrayLengthByKey ?? {},
+      shouldTraverse: policy?.shouldTraverse ?? (() => true),
+    };
+  }
 
   public build(
     entityData: NestedData | NestedData[] | undefined,
@@ -22,50 +47,48 @@ export class BuildNestedOperation {
     const seen = _opts?._seen ?? new WeakSet<object>();
 
     if (!entityData) return undefined;
-    if (depth > this.maxDepth)
+
+    if (depth > this.policy.maxDepth) {
       throw new Error(
-        `buildNestedOperation: max depth ${this.maxDepth} excedido`
+        `BuildNestedOperation: maxDepth ${this.policy.maxDepth} excedido`
       );
-    // Arrays (primitivos ou de objetos)
+    }
+
+    /* ============================
+       ARRAYS
+    ============================ */
     if (Array.isArray(entityData)) {
-      // ✅ Array vazio
-      // - Em CREATE: não faz nada (mantém compatibilidade anterior, que retornava undefined)
-      // - Em UPDATE: interpreta como "remover todos os itens" -> deleteMany: {}
       if (entityData.length === 0) {
-        if (parentOperation === "update") {
-          return { deleteMany: {} };
-        }
-        return undefined;
+        return parentOperation === "update" ? { deleteMany: {} } : undefined;
       }
 
-      // Arrays de primitivos (string[], number[], boolean[], Date[])
-      if (this.isArrayOfPrimitives(entityData)) return entityData;
+      // Array de primitivos
+      if (this.isArrayOfPrimitives(entityData)) {
+        return entityData;
+      }
 
-      // Array de objetos (relacionamentos)
       const create: any[] = [];
       const update: any[] = [];
       const connect: any[] = [];
 
       for (const item of entityData) {
-        if (!item || typeof item !== "object")
-          throw new Error(
-            `buildNestedOperation: item inválido no array em depth=${depth}`
-          );
+        if (!item || typeof item !== "object") continue;
 
         if (item.id) {
           const hasOtherFields = Object.keys(item).some(
             (k) => k !== "id" && item[k] !== undefined
           );
+
           if (hasOtherFields) {
             update.push({
               where: { id: item.id },
-              data: this.processEntityData(item, depth + 1, seen),
+              data: this.processEntityData(item, depth + 1, seen, "update"),
             });
           } else {
             connect.push({ id: item.id });
           }
         } else {
-          create.push(this.processEntityData(item, depth + 1, seen));
+          create.push(this.processEntityData(item, depth + 1, seen, "create"));
         }
       }
 
@@ -73,19 +96,24 @@ export class BuildNestedOperation {
       if (create.length) result.create = create;
       if (update.length) result.update = update;
       if (connect.length) result.connect = connect;
+
       return Object.keys(result).length ? result : undefined;
     }
 
-    // Objeto simples
+    /* ============================
+       OBJECT
+    ============================ */
     if (typeof entityData === "object") {
-      if (seen.has(entityData))
-        throw new Error("buildNestedOperation: referência cíclica detectada");
+      if (seen.has(entityData)) {
+        throw new Error("BuildNestedOperation: referência cíclica detectada");
+      }
       seen.add(entityData);
 
       if (entityData.id) {
         const hasOtherFields = Object.keys(entityData).some(
           (k) => k !== "id" && entityData[k] !== undefined
         );
+
         if (hasOtherFields) {
           return {
             update: {
@@ -98,26 +126,27 @@ export class BuildNestedOperation {
               ),
             },
           };
-        } else {
-          return { connect: { id: entityData.id } };
         }
-      } else {
-        return {
-          create: this.processEntityData(entityData, depth + 1, seen, "create"),
-        };
+
+        return { connect: { id: entityData.id } };
       }
+
+      return {
+        create: this.processEntityData(entityData, depth + 1, seen, "create"),
+      };
     }
 
-    throw new Error(
-      `buildNestedOperation: padrão de dados inválido em depth=${depth}`
-    );
+    throw new Error(`BuildNestedOperation: tipo inválido em depth=${depth}`);
   }
 
+  /* ============================
+     PROCESS ENTITY DATA
+  ============================ */
   private processEntityData(
     obj: NestedData,
     depth: number,
     seen: WeakSet<object>,
-    parentOperation: "create" | "update" = "create"
+    parentOperation: "create" | "update"
   ): Record<string, any> {
     const result: Record<string, any> = {};
 
@@ -125,53 +154,73 @@ export class BuildNestedOperation {
       const value = obj[key];
       if (value === undefined) continue;
 
+      // 1️⃣ Ignorar chave
+      if (this.policy.ignoreKeys.includes(key)) continue;
+
+      // 2️⃣ JSON opaco
+      if (this.policy.jsonKeys.includes(key)) {
+        result[key] = value;
+        continue;
+      }
+
+      // 3️⃣ Callback de decisão
+      if (
+        !this.policy.shouldTraverse({
+          key,
+          value,
+          depth,
+          parentOperation,
+        })
+      ) {
+        if (this.debug) {
+          console.warn(`Traversal bloqueado em "${key}"`);
+        }
+        continue;
+      }
+
+      // 4️⃣ Primitivos
       if (this.isPrimitive(value)) {
         result[key] = value;
         continue;
       }
 
+      // 5️⃣ Array de primitivos
       if (Array.isArray(value) && this.isArrayOfPrimitives(value)) {
         result[key] = value;
         continue;
       }
 
-      if (Array.isArray(value) || typeof value === "object") {
-        const nested = this.build(
-          value,
-          { _depth: depth, _seen: seen },
-          parentOperation
-        );
-        if (!nested) continue;
-
-        // Se nested já é { create/update/connect }, mantém
-        if (nested.create || nested.update || nested.connect) {
-          result[key] = nested;
-        } else {
-          // Para objetos simples dentro de create/update
-          result[key] = nested;
+      // 6️⃣ Limite de array por chave
+      if (Array.isArray(value)) {
+        const max = this.policy.maxArrayLengthByKey[key];
+        if (max !== undefined && value.length > max) {
+          throw new Error(`Array "${key}" excede o limite de ${max} itens`);
         }
-        continue;
       }
 
-      throw new Error(
-        `processEntityData: valor inválido detectado na chave "${key}" em depth=${depth}`
+      // 7️⃣ Recursão
+      const nested = this.build(
+        value,
+        { _depth: depth, _seen: seen },
+        parentOperation
       );
+
+      if (nested !== undefined) {
+        result[key] = nested;
+      }
     }
 
     return result;
   }
 
+  /* ============================
+     HELPERS
+  ============================ */
   private isPrimitive(v: any) {
-    return (
-      v === null ||
-      ["string", "number", "boolean"].includes(typeof v) ||
-      v instanceof Date
-    );
+    return v === null || ["string", "number", "boolean"].includes(typeof v);
   }
 
   private isArrayOfPrimitives(arr: any[]): boolean {
-    // Não consideramos array vazio como "array de primitivos" para que
-    // relacionamentos Many[] possam ser tratados de forma especial no UPDATE.
     return arr.length > 0 && arr.every((item) => this.isPrimitive(item));
   }
 }

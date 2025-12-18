@@ -1,12 +1,13 @@
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { VagaSaveInput } from "../types/vaga.type";
+import { HistoricoAcaoInput, VagaSaveInput } from "../types/vaga.type";
 
 import { Prisma, Vaga } from "@prisma/client";
 import { buildVagaData } from "../helper/buildNested/vaga.build";
 import { buildWhere } from "../helper/buildWhere";
 import { normalizeData } from "../helper/normalize/vaga.normalize";
 import { Pagination } from "../types/pagination";
+import { SessaoService } from "./sessao.service";
 
 @injectable()
 export class VagaService {
@@ -130,6 +131,7 @@ export class VagaService {
       categoria: true,
       status: true,
       dataPublicacao: true,
+      historico: true,
       localizacao: {
         select: {
           uf: true,
@@ -267,26 +269,126 @@ export class VagaService {
     };
   }
 
-  async save(vagaData: VagaSaveInput): Promise<Vaga> {
-    const normalizedData = normalizeData(vagaData);
+  async buildHistorico(
+    vagaAtualizada: VagaSaveInput,
+    token: string
+  ): Promise<HistoricoAcaoInput | undefined> {
+    const VAGA_CAMPOS_SIMPLES: (keyof typeof vagaAtualizada)[] = [
+      "titulo",
+      "descricao",
+      "requisitos",
+      "responsabilidades",
+      "dataFechamento",
+      "categoria",
+      "status",
+      "tipoContrato",
+      "nivelExperiencia",
+      "areaCandidato",
+      "salario",
+      "tipoSalario",
+    ];
+
+    const camposAlterados = [];
+    const entidade = "VAGA";
+    const id = vagaAtualizada?.id || vagaAtualizada?.clienteId;
+    let vagaAtual = null;
+
+    let acao = "CRIACAO";
+
+    if (id && Object.keys(vagaAtualizada).length > 0) {
+      acao = "ATUALIZACAO";
+
+      // mapeia os campos que foram alterados
+      vagaAtual = await prisma.vaga.findUnique({
+        where: { id: vagaAtualizada.id },
+        select: VAGA_CAMPOS_SIMPLES.reduce((sel, key) => {
+          sel[key] = true;
+          return sel;
+        }, {} as Record<string, true>),
+      });
+
+      if (vagaAtual) {
+        for (const campo of VAGA_CAMPOS_SIMPLES) {
+          // Comparação aprimorada para campos de data e valores primitivos
+          const valorAtual = vagaAtual[campo];
+          const valorAtualizado = vagaAtualizada[campo];
+
+          let diferentes = false;
+          // Checa se os valores são datas ou strings de data
+          if (
+            (valorAtual instanceof Date || typeof valorAtual === "string") &&
+            (valorAtualizado instanceof Date ||
+              typeof valorAtualizado === "string") &&
+            campo.toLowerCase().includes("data")
+          ) {
+            // Converte strings para Date, se necessário
+            const d1 =
+              valorAtual instanceof Date ? valorAtual : new Date(valorAtual);
+            const d2 =
+              valorAtualizado instanceof Date
+                ? valorAtualizado
+                : new Date(valorAtualizado);
+            // Usa apenas parte de data (ignora hora)
+            diferentes =
+              isNaN(d1.getTime()) || isNaN(d2.getTime())
+                ? valorAtual !== valorAtualizado // fallback para strings inválidas
+                : d1.toISOString().slice(0, 10) !==
+                  d2.toISOString().slice(0, 10);
+          } else {
+            diferentes = valorAtual != valorAtualizado;
+          }
+          if (diferentes) {
+            camposAlterados.push(campo);
+          }
+        }
+      }
+    }
+    console.log(camposAlterados);
+    if (Array.isArray(camposAlterados) && camposAlterados.length === 0) {
+      return;
+    }
+
+    const sessaoService = new SessaoService();
+
+    const usuario = await sessaoService.findByToken(token);
+
+    return {
+      entidade: entidade,
+      usuarioId: usuario.usuarioSistemaId,
+      acao,
+      camposAlterados,
+      descricao: `${entidade} ${acao}`,
+      loteId: id,
+      dadosAnteriores: vagaAtual,
+      dadosNovos: vagaAtualizada,
+    };
+  }
+
+  async save(vagaData: VagaSaveInput, token: string): Promise<Vaga> {
+    let normalizedData = normalizeData(vagaData);
+
     if (!vagaData?.id) {
       await this.checkDuplicates(normalizedData);
     }
 
     // separar triagens para sincronizar manualmente e garantir no máximo 4 e sem duplicatas
-    const triagensInput = Array.isArray(normalizedData.triagens)
-      ? Array.from(
-          new Map(
-            normalizedData.triagens
-              .filter((t: any) => !!t && !!t.tipoTriagem)
-              .slice(0, 4)
-              .map((t: any) => [
-                t.tipoTriagem,
-                { tipoTriagem: t.tipoTriagem, ativa: t.ativa ?? true },
-              ])
-          ).values()
-        )
-      : [];
+    // const triagensInput = Array.isArray(normalizedData.triagens)
+    //   ? Array.from(
+    //       new Map(
+    //         normalizedData.triagens
+    //           .filter((t: any) => !!t && !!t.tipoTriagem)
+    //           .slice(0, 4)
+    //           .map((t: any) => [
+    //             t.tipoTriagem,
+    //             { tipoTriagem: t.tipoTriagem, ativa: t.ativa ?? true },
+    //           ])
+    //       ).values()
+    //     )
+    //   : [];
+    const historico = await this.buildHistorico(vagaData, token);
+
+    console.log(!!historico);
+    normalizedData.historico = historico ? [historico] : [];
 
     const vagaPayload = await buildVagaData({
       ...normalizedData,
@@ -305,6 +407,7 @@ export class VagaService {
           },
         },
       },
+      historico: true,
       triagens: true,
     };
 
@@ -323,14 +426,14 @@ export class VagaService {
     }
 
     // sincronizar triagens somente se houver entrada explícita
-    if (triagensInput.length) {
-      await this.syncTriagens(saved.id, triagensInput as any[]);
-      // recarregar vaga com triagens atualizadas
-      saved = (await prisma.vaga.findUnique({
-        where: { id: saved.id },
-        include: relationsShip,
-      })) as Vaga;
-    }
+    // if (triagensInput.length) {
+    //   await this.syncTriagens(saved.id, triagensInput as any[]);
+    //   // recarregar vaga com triagens atualizadas
+    //   saved = (await prisma.vaga.findUnique({
+    //     where: { id: saved.id },
+    //     include: relationsShip,
+    //   })) as Vaga;
+    // }
 
     return saved;
   }

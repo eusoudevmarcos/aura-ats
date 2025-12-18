@@ -30,6 +30,8 @@ model Vaga {
     localizacao   Localizacao? @relation(fields: [localizacaoId], references: [id])
     localizacaoId String?
 
+    historico HistoricoAcao[]
+
     @@index([localizacaoId])
     @@index([clienteId])
 }

@@ -33,6 +33,21 @@ export interface VagaAnexoInput {
   anexoId: string;
 }
 
+// Interface para entrada do histórico de ações da vaga (sem campos gerados pelo banco)
+export interface HistoricoAcaoInput {
+  entidade: string; // 'VAGA', etc.
+  usuarioId: string;
+  acao: string; // 'CRIACAO', 'ATUALIZACAO', etc.
+  camposAlterados?: string[];
+  descricao?: string;
+  loteId?: string;
+  origem?: string;
+  dadosAnteriores?: any;
+  dadosNovos?: any;
+  metadata?: any;
+  expiraEm?: Date;
+}
+
 // Localizacao de entrada (se for para criar/atualizar diretamente aninhado)
 // Note que Prisma.LocalizacaoCreateInput e Prisma.LocalizacaoUpdateInput são as melhores
 // fontes de verdade para o que o Prisma espera.
@@ -77,6 +92,8 @@ export interface VagaSaveInput {
 
   // Triagens da vaga (nested)
   triagens?: { id?: string; tipoTriagem: string; ativa?: boolean }[];
+
+  historico: HistoricoAcaoInput[];
 }
 
 // ===================== INTERFACES DE SAÍDA (Output DTOs - Se precisar de uma representação específica) =====================

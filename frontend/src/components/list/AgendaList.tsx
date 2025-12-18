@@ -143,7 +143,7 @@ const AgendaList: React.FC<{ noTitle?: boolean }> = ({ noTitle = false }) => {
         {!noTitle && (
           <h3 className="text-2xl font-bold text-primary">Lista de Agendas</h3>
         )}
-        <div className="flex gap-2 w-full max-w-[420px] justify-end">
+        <div className="flex gap-2 w-full justify-end">
           <FormInput
             name=""
             type="text"

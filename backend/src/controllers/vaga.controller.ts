@@ -11,8 +11,21 @@ export class VagaController {
   async save(req: Request, res: Response): Promise<Response> {
     try {
       const vagaData = req.body;
+      let token = "";
+      const authHeader = req.headers.authorization;
+      if (
+        authHeader &&
+        typeof authHeader === "string" &&
+        authHeader.startsWith("Bearer ")
+      ) {
+        token = authHeader.replace(/^Bearer\s+/i, "");
+      } else if (authHeader && typeof authHeader === "string") {
+        // fallback: just use the string if no Bearer prefix
+        token = authHeader;
+      }
       const newVaga = await this.service.save(
-        nonEmptyAndConvertDataDTO(vagaData)
+        nonEmptyAndConvertDataDTO(vagaData),
+        token
       );
       return res.status(201).json(newVaga);
     } catch (error: any) {

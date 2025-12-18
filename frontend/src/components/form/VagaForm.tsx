@@ -233,7 +233,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           name="status"
           register={register}
           errors={errors}
-          label="Status da Vaga"
+          label="Andamento da Vaga"
         >
           <>
             {StatusVagaEnum.options.map(stat => (
