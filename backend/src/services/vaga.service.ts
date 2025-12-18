@@ -92,76 +92,6 @@ export class VagaService {
     };
   }
 
-  async getAll({
-    page = 1,
-    pageSize = 10,
-    search = "",
-    clienteId,
-  }: Pagination & { clienteId?: string }) {
-    const skip = (page - 1) * pageSize;
-
-    // Monta o where base para pesquisa textual
-    let where = buildWhere<Prisma.VagaWhereInput>({
-      search,
-      fields: [
-        "titulo",
-        "cliente.empresa.cnpj",
-        "descricao",
-        "localizacao.cidade",
-        "localizacao.uf",
-      ],
-    });
-
-    if (clienteId) {
-      if (where.OR) {
-        where = {
-          AND: [{ cliente: { id: clienteId } }, { ...where }],
-        };
-      } else {
-        where = {
-          ...where,
-          cliente: { id: clienteId },
-        };
-      }
-    }
-
-    const select = {
-      id: true,
-      titulo: true,
-      categoria: true,
-      status: true,
-      dataPublicacao: true,
-      historico: true,
-      localizacao: {
-        select: {
-          uf: true,
-          cidade: true,
-        },
-      },
-    };
-
-    const [vagas, total] = await prisma.$transaction([
-      prisma.vaga.findMany({
-        skip,
-        take: pageSize,
-        orderBy: {
-          create_at: "desc",
-        },
-        where,
-        select,
-      }),
-      prisma.vaga.count({ where }),
-    ]);
-
-    return {
-      data: vagas,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
-  }
-
   async getAllByUsuario({
     page = 1,
     pageSize = 10,
@@ -209,6 +139,106 @@ export class VagaService {
             },
           },
         },
+      }),
+      prisma.vaga.count({ where }),
+    ]);
+
+    return {
+      data: vagas,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  async getHistoricoByVagaId(
+    vagaId: string,
+    { page = 1, pageSize = 10 }: { page?: number; pageSize?: number } = {}
+  ) {
+    const skip = (page - 1) * pageSize;
+
+    // Busca o total de registros de histórico para a vaga
+    const [historico, total] = await prisma.$transaction([
+      prisma.historicoAcao.findMany({
+        where: { entidadeId: vagaId },
+        skip,
+        take: pageSize,
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      prisma.historicoAcao.count({
+        where: { entidadeId: vagaId },
+      }),
+    ]);
+
+    return {
+      data: historico,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  async getAll({
+    page = 1,
+    pageSize = 10,
+    search = "",
+    clienteId,
+  }: Pagination & { clienteId?: string }) {
+    const skip = (page - 1) * pageSize;
+
+    // Monta o where base para pesquisa textual
+    let where = buildWhere<Prisma.VagaWhereInput>({
+      search,
+      fields: [
+        "titulo",
+        "cliente.empresa.cnpj",
+        "descricao",
+        "localizacao.cidade",
+        "localizacao.uf",
+      ],
+    });
+
+    if (clienteId) {
+      if (where.OR) {
+        where = {
+          AND: [{ cliente: { id: clienteId } }, { ...where }],
+        };
+      } else {
+        where = {
+          ...where,
+          cliente: { id: clienteId },
+        };
+      }
+    }
+
+    const select = {
+      id: true,
+      titulo: true,
+      categoria: true,
+      status: true,
+      dataPublicacao: true,
+      // historico: true,
+      localizacao: {
+        select: {
+          uf: true,
+          cidade: true,
+        },
+      },
+    };
+
+    const [vagas, total] = await prisma.$transaction([
+      prisma.vaga.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          create_at: "desc",
+        },
+        where,
+        select,
       }),
       prisma.vaga.count({ where }),
     ]);
@@ -387,7 +417,6 @@ export class VagaService {
     //   : [];
     const historico = await this.buildHistorico(vagaData, token);
 
-    console.log(!!historico);
     normalizedData.historico = historico ? [historico] : [];
 
     const vagaPayload = await buildVagaData({
