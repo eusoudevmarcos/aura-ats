@@ -100,10 +100,6 @@ export class DatastoneController {
             where: { cpf: input },
           });
         }
-        console.log("aqui");
-
-        console.log(candidato);
-        console.log(input);
 
         isSave = candidato || pessoa ? true : false;
       } else if (result.tipo === "CNPJ") {

@@ -1,4 +1,4 @@
-'// src/repository/vaga.repository.ts
+// src/repository/vaga.repository.ts
 import { Prisma, Vaga } from "@prisma/client";
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";

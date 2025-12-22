@@ -6,14 +6,17 @@ import {
   StatusVaga,
   TipoContrato,
 } from "@prisma/client";
+import { Pagination } from "./pagination";
 
 // --- ENUMS (já estão corretos) ---
 export { CategoriaVaga, NivelExperiencia, StatusVaga, TipoContrato };
 
-// ===================== INTERFACES DE ENTRADA (INPUT DTOs) =====================
-// Interfaces para dados que vêm do frontend ou são usados para criar/atualizar
+export interface VagaGetAllQuery extends Pagination {
+  status?: string;
+  categoria?: string;
+  [key: string]: any;
+}
 
-// Benefício de entrada (sem o ID do benefício, já que o Prisma irá gerá-lo na criação)
 export interface BeneficioInput {
   id?: string; // Opcional para updates
   nome: string;
@@ -110,6 +113,31 @@ export type VagaOutput = Prisma.VagaGetPayload<{
     // Inclua outras relações que você SEMPRE quer retornar
   };
 }>;
+
+// ===================== TIPOS PARA KANBAN =====================
+export interface KanbanCard {
+  id: string;
+  title: string;
+  description?: string;
+  label?: string;
+  draggable?: boolean;
+  metadata?: Record<string, any>;
+}
+
+export interface KanbanLane {
+  id: string;
+  title: string;
+  label: string;
+  cards: KanbanCard[];
+}
+
+export interface KanbanResponse {
+  lanes: KanbanLane[];
+  total?: number;
+  page?: number;
+  pageSize?: number;
+  totalPages?: number;
+}
 
 // Exemplo de como importar e usar
 // import { PrismaClient } from '@prisma/client';
