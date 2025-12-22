@@ -24,6 +24,11 @@ export class ClienteService {
         emails: true,
         telefones: true,
         status: true,
+        vagas: {
+          select: {
+            id: true,
+          },
+        },
         planos: {
           select: {
             id: true,
@@ -53,8 +58,6 @@ export class ClienteService {
             id: true,
             nomeFantasia: true,
             razaoSocial: true,
-            // contatos: true,
-            // localizacoes: true,
             representantes: {
               select: {
                 id: true,
@@ -76,6 +79,8 @@ export class ClienteService {
 
     if (!cliente) return null;
 
+    const vagasCount = cliente.vagas ? cliente.vagas.length : 0;
+
     // Buscar planos separadamente
     // const planos = await prisma.planoAssinatura.findMany({
     //   where: { clienteId: id },
@@ -86,6 +91,7 @@ export class ClienteService {
 
     return {
       ...cliente,
+      vagas: { _count: vagasCount },
       // planos,
     };
   }

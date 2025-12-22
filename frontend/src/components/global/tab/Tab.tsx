@@ -13,10 +13,12 @@ interface TabProps {
   className?: string;
   tabClassName?: string;
   children?: React.ReactNode;
+  tabsOptions?: Record<string, any>;
 }
 
 export const Tab: React.FC<TabProps> = ({
   tabs,
+  tabsOptions,
   value,
   onChange,
   className = '',
@@ -51,6 +53,13 @@ export const Tab: React.FC<TabProps> = ({
             disabled={tab.disabled}
           >
             {tab.label}
+            {tabsOptions &&
+              tabsOptions[tab.value] &&
+              tabsOptions[tab.value]['_count'] !== undefined && (
+                <span className="ml-2">
+                  ({tabsOptions[tab.value]['_count']})
+                </span>
+              )}
           </button>
         ))}
       </div>

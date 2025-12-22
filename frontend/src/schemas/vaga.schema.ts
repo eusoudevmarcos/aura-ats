@@ -161,6 +161,7 @@ export const KanbanVagaColumnSchema = z.object({
       hasMore: z.boolean(),
     })
   ),
+  _count: z.number().optional(),
   total: z.number(),
   page: z.number(),
   pageSize: z.number(),

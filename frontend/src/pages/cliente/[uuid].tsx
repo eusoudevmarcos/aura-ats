@@ -1,6 +1,6 @@
 // pages/cliente/[uuid].tsx
 import api from '@/axios';
-import { getClienteById, getVagasClienteById } from '@/axios/cliente.axios';
+import { getClienteById } from '@/axios/cliente.axios';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card';
 import ClienteInfo from '@/components/cliente/ClienteInfo';
@@ -61,8 +61,9 @@ const ClientePage: React.FC<{
       setErro(null);
       try {
         const cliente = await getClienteById(uuid as string);
-        const vagas = await getVagasClienteById(uuid as string);
-        cliente.vagas = vagas;
+
+        // const vagas = await getVagasClienteById(uuid as string);
+        // cliente.vagas = { ...vagas };
         setCliente(cliente);
         setClienteCarregado(true);
       } catch (_) {
@@ -136,7 +137,12 @@ const ClientePage: React.FC<{
       </section>
 
       <div className="flex gap-2 w-full justify-end">
-        <Tab tabs={TAB_OPCOES} value={tab} onChange={setTab} />
+        <Tab
+          tabs={TAB_OPCOES}
+          value={tab}
+          onChange={setTab}
+          tabsOptions={{ vagas: { _count: cliente?.vagas?._count ?? 0 } }}
+        />
       </div>
 
       {tab === 'vagas' && (
@@ -156,7 +162,7 @@ const ClientePage: React.FC<{
           </div>
 
           <section className="mb-4">
-            <VagaList initialValues={cliente?.vagas} />
+            <VagaList />
           </section>
         </>
       )}
