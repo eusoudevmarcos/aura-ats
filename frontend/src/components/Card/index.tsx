@@ -12,7 +12,7 @@ const Card: React.FC<{
   noShadow?: boolean;
 }> = ({ title, children, classNameContent, classNameContainer, noShadow }) => (
   <div
-    className={`bg-white rounded-lg px-4 py-2 w-full ${
+    className={`bg-white rounded-lg px-4 py-2 w-full relative ${
       classNameContainer ?? ''
     } ${!noShadow ? 'shadow-md' : ''}`}
   >
@@ -38,7 +38,9 @@ const Card: React.FC<{
         // title é string simples
         <h3 className="text-md font-bold text-primary">{title}</h3>
       ))}
-    <div className={`text-secondary ${classNameContent ?? ''}`}>{children}</div>
+    <div className={`text-secondary  ${classNameContent ?? ''}`}>
+      {children}
+    </div>
   </div>
 );
 

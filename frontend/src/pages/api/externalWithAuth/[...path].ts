@@ -88,6 +88,17 @@ export default async function handler(
         externalResponse = await externalBackendApi.put(
           urlToExternalBackend,
           req.body,
+          {
+            headers,
+            params: req.query,
+          }
+        );
+        // if (externalPath) await invalidateGetCache(externalPath);
+        break;
+      case 'PATCH':
+        externalResponse = await externalBackendApi.patch(
+          urlToExternalBackend,
+          req.body,
           { headers }
         );
         // if (externalPath) await invalidateGetCache(externalPath);

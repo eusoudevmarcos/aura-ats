@@ -127,8 +127,6 @@ export function FormArrayInput({
       backspaceTimerRefs.current[configName] = null;
     }
 
-    let firstBackspaceDown = true;
-
     const clearInput = () => {
       setNewItemValues(prev => ({
         ...prev,

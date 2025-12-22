@@ -95,14 +95,14 @@ const FuncionariosList: React.FC = () => {
 
   const router = useRouter();
 
-  // Busca para API apenas com filtros aplicados
+  // Busca para API apenas com filtros aplicados;
   const fetchFuncionarios = async (
     aplicarFiltros = false,
     pageOverride?: number
   ) => {
     setLoading(true);
     try {
-      let params: Record<string, any> = {
+      const params: Record<string, any> = {
         page: typeof pageOverride === 'number' ? pageOverride : page,
         pageSize,
       };

@@ -50,7 +50,6 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
   } = useFormContext();
 
   const fetchEspecialidades = async () => {
-    console.log('request');
     try {
       const response = await api.get<{ id: number; nome: string }[]>(
         '/api/externalWithAuth/candidato/especialidades'
@@ -126,7 +125,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
             },
           ]}
           renderChipContent={especialidade => {
-            let nomeEspecialidade =
+            const nomeEspecialidade =
               especialidadesFetch[especialidade.especialidadeId - 1]?.nome ??
               '';
 

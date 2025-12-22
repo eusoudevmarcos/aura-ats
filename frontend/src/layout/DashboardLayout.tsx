@@ -26,11 +26,11 @@ const DashboardLayout: React.FC<DashboardProps> = ({ children }) => {
         className={`flex-1 overflow-auto transition-all duration-300
           ${
             isSidebarCollapsed
-              ? 'md:pl-28 min-[1640px]:pl-0'
-              : 'md:pl-72 min-[1940px]:pl-0'
-          } pt-4 md:pr-4`}
+              ? 'md:pl-21 min-[1640px]:pl-0'
+              : 'md:pl-65 min-[1940px]:pl-0'
+          } pt-4 md:pr-0`}
       >
-        <main className="p-2 rounded-lg mt-18 mx-auto max-w-[1440px]">
+        <main className="p-2 rounded-lg mt-18">
           {typeof children === 'function'
             ? children({ activeSection }) ?? null
             : React.isValidElement(children)

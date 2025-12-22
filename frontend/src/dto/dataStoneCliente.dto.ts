@@ -206,7 +206,6 @@ export function convertDataStoneToClienteWithEmpresaInput(
         sexo: undefined,
         signo: undefined,
       })) ?? [];
-  console.log(representantes);
   // Normalização dos campos base de empresa (com campos obrigatórios do schema)
   const empresa = {
     cnpj: formatCnpj(data.cnpj),

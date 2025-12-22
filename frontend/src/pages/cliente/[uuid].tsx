@@ -6,7 +6,8 @@ import Card from '@/components/Card';
 import ClienteInfo from '@/components/cliente/ClienteInfo';
 import VagaForm from '@/components/form/VagaForm';
 import Loading from '@/components/global/loading/Loading';
-import { EditPenIcon, PlusIcon, TrashIcon } from '@/components/icons';
+import { Tab } from '@/components/global/tab/Tab';
+import { PlusIcon } from '@/components/icons';
 import VagaList from '@/components/list/VagaList';
 import Modal from '@/components/modal/Modal';
 import ModalClienteForm from '@/components/modal/ModalClienteForm';
@@ -17,7 +18,10 @@ import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
 import { useRouter } from 'next/router';
 import React, { useEffect, useState } from 'react';
 
-const ITENS_POR_PAGINA = 6;
+const TAB_OPCOES = [
+  { label: 'Sobre Cliente', value: 'cliente' },
+  { label: 'Ver Vagas', value: 'vagas' },
+];
 
 const ClientePage: React.FC<{
   initialValues?: ClienteWithEmpresaAndVagaInput;
@@ -39,6 +43,9 @@ const ClientePage: React.FC<{
   const [clienteCarregado, setClienteCarregado] = useState<boolean>(
     !!initialValues
   );
+
+  // Variável para controlar aba ativa do Tab
+  const [tab, setTab] = useState<string>('cliente');
 
   const isAdmin = useAdmin();
 
@@ -77,7 +84,6 @@ const ClientePage: React.FC<{
         const response = await api.delete(`/api/externalWithAuth/cliente`, {
           data: { id: cliente.id },
         });
-        console.log(response);
         if (response.data) {
           await router.push('/clientes');
         }
@@ -91,9 +97,10 @@ const ClientePage: React.FC<{
     setPaginaAtual(1);
   }, [cliente]);
 
-  const totalPaginas = Math.ceil(
-    (cliente?.vagas?.length ?? 0) / ITENS_POR_PAGINA
-  );
+  // Eventos que serão passados ao <ClienteInfo />
+  const handleEdit = () => setShowModalEdit(true);
+  const handleViewPlanos = () => setModalPlanosCliente(true);
+  // handler do delete já existe
 
   if (loading) {
     return <Loading label="Carregando Cliente e Vagas..." />;
@@ -112,75 +119,61 @@ const ClientePage: React.FC<{
   return (
     <div className="max-w-5xl mx-auto p-1">
       <section>
-        <h1 className="text-2xl font-bold text-center text-primary w-full">
-          CLIENTE
-        </h1>
-
+        {/* Botão Voltar e Tab de Cliente/Vagas (sem botões duplicados de ação) */}
         {!initialValues && (
-          <div className="flex mb-8 justify-between">
+          <div className="flex justify-between">
             <button
-              className="px-2 py-2 bg-primary text-white rounded shadow-md hover:scale-110"
+              className="px-2 py-2 text-primary text-white rounded hover:scale-110 cursor-pointer"
               onClick={() => router.back()}
             >
+              <span className="material-icons align-middle mr-2">
+                arrow_back
+              </span>
               Voltar
             </button>
-
-            {isAdmin && (
-              <div className="flex gap-2">
-                <button
-                  className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 flex items-center justify-center"
-                  onClick={() => setModalVagasCliente(true)}
-                >
-                  <span className="material-icons-outlined m-0 p-0">cases</span>
-                </button>
-                <button
-                  className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110 flex items-center justify-center"
-                  onClick={() => setModalPlanosCliente(true)}
-                >
-                  <span className="material-icons-outlined m-0 p-0">
-                    wallet
-                  </span>
-                </button>
-                <button
-                  className="px-2 py-2 bg-[#5f82f3] text-white rounded shadow-md hover:scale-110"
-                  onClick={() => setShowModalEdit(true)}
-                >
-                  <EditPenIcon />
-                </button>
-                <button
-                  className="px-2 py-2 bg-red-500 text-white rounded shadow-md hover:scale-110"
-                  onClick={handleTrash}
-                >
-                  <TrashIcon />
-                </button>
-              </div>
-            )}
           </div>
         )}
-
-        <Card>
-          <h3 className="text-lg text-primary font-bold">Dados do cliente</h3>
-          <ClienteInfo cliente={cliente} variant="full" />
-        </Card>
       </section>
 
-      <div className="flex justify-center mt-10 mb-4 relative">
-        <h3 className="text-2xl font-bold text-center text-primary w-full ">
-          VAGAS CADASTRADAS
-        </h3>
-
-        <PrimaryButton
-          className="float-right flex text-nowrap absolute right-0"
-          onClick={() => setShowVagasForm(true)}
-        >
-          <PlusIcon />
-          <p className="hidden md:block">Cadastrar Vaga</p>
-        </PrimaryButton>
+      <div className="flex gap-2 w-full justify-end">
+        <Tab tabs={TAB_OPCOES} value={tab} onChange={setTab} />
       </div>
 
-      <section className="mb-4">
-        <VagaList initialValues={cliente?.vagas} />
-      </section>
+      {tab === 'vagas' && (
+        <>
+          <div className="flex justify-center mt-10 mb-4 relative">
+            <h3 className="text-2xl font-bold text-center text-primary w-full ">
+              Vagas
+            </h3>
+
+            <PrimaryButton
+              className="float-right flex text-nowrap absolute right-0"
+              onClick={() => setShowVagasForm(true)}
+            >
+              <PlusIcon />
+              <p className="hidden md:block">Cadastrar Vaga</p>
+            </PrimaryButton>
+          </div>
+
+          <section className="mb-4">
+            <VagaList initialValues={cliente?.vagas} />
+          </section>
+        </>
+      )}
+
+      {tab === 'cliente' && (
+        <div className="flex flex-col items-center my-8">
+          <Card>
+            <ClienteInfo
+              cliente={cliente}
+              variant="full"
+              onEdit={handleEdit}
+              onDelete={handleTrash}
+              onPlanos={handleViewPlanos}
+            />
+          </Card>
+        </div>
+      )}
 
       {/* Seção de Planos */}
       {cliente?.planos && (

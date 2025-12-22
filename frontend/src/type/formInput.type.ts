@@ -5,12 +5,17 @@ import {
   Path,
   UseFormRegister,
 } from 'react-hook-form';
-import { IMaskInputProps } from 'react-imask';
+import { IMaskInputProps, ReactMaskProps } from 'react-imask';
 
 export type MaskProps = Omit<
-  IMaskInputProps<any>,
+  IMaskInputProps<HTMLInputElement> &
+    Partial<
+      ReactMaskProps<HTMLInputElement, IMaskInputProps<HTMLInputElement>>
+    >,
   'name' | 'value' | 'onChange' | 'onAccept' | 'ref' | 'inputRef'
->;
+> & {
+  blocks?: Record<string, any>;
+};
 
 type FormInputOnChange = (
   e: React.ChangeEvent<HTMLInputElement> | string
@@ -25,12 +30,11 @@ export type CommonProps<T extends FieldValues> = {
   name: Path<T>;
   errors?: FieldErrors<T>;
   inputProps?: InputProps;
-  // Tornar maskProps opcional e corrigir tipagem
+  // maskProps agora tipada para uso avançado do react-imask e aceita 'blocks'
   maskProps?: MaskProps;
   label?: React.ReactNode | string;
   placeholder?: string;
   type?: React.HTMLInputTypeAttribute;
-  // Corrigir tipagem do value para aceitar qualquer tipo de valor do form
   value?: any;
   onChange?: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onKeyDown?: (event: React.KeyboardEvent<HTMLInputElement>) => void;

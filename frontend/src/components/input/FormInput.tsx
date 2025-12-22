@@ -45,7 +45,7 @@ export function FormInput<T extends FieldValues>({
 
   // IMPORTANT: Use useMemo to avoid mask input reset issue
   const MemoInputElement = useMemo(() => {
-    return React.forwardRef<HTMLInputElement, InputElementProps>(
+    const Component = React.forwardRef<HTMLInputElement, InputElementProps>(
       ({ maskProps, onChange, onKeyDown, onFocus, ...props }, ref) => {
         if (maskProps?.mask) {
           return (
@@ -72,6 +72,8 @@ export function FormInput<T extends FieldValues>({
         );
       }
     );
+    Component.displayName = 'MemoInputElement';
+    return Component;
     // Mask config and name are enough to memoize
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maskProps?.mask, name]);
