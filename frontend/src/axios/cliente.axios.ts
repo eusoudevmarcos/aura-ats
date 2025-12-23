@@ -1,4 +1,4 @@
-import { KanbanClienteResponse } from '@/components/list/ClienteList';
+import { KanbanClienteResponse } from '@/components/list/ClienteListKanban';
 import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
 import { KanbanVagaResponse } from '@/schemas/vaga.schema';
 import api from '.';
