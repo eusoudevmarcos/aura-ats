@@ -19,14 +19,22 @@ function filtrarValores(
     return filtrado.length > 0 ? filtrado : undefined;
   }
 
+  const SQL_DATETIME_REGEX =
+    /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
+
   // Date
-  if (obj instanceof Date) {
-    return obj.toLocaleString(locale, {
-      year: "numeric",
-      month: "2-digit",
+  if (obj instanceof Date || SQL_DATETIME_REGEX.test(obj)) {
+    let date = obj;
+    if (SQL_DATETIME_REGEX.test(obj)) {
+      const iso = obj.replace(" ", "T");
+      date = new Date(iso);
+    }
+
+    return new Intl.DateTimeFormat("pt-BR", {
       day: "2-digit",
-      ...dateOptions,
-    });
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
   }
 
   // Prisma.Decimal

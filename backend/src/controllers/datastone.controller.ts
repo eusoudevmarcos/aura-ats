@@ -116,8 +116,12 @@ export class DatastoneController {
         cachedPayload.cliente = cliente;
       }
 
+      const cachedPayloadFormat = nonEmptyAndConvertDataDTO(cachedPayload);
+
       if (cachedPayload) {
-        res.status(200).json({ status: 200, cache: true, ...cachedPayload });
+        res
+          .status(200)
+          .json({ status: 200, cache: true, ...cachedPayloadFormat });
         return;
       }
 
