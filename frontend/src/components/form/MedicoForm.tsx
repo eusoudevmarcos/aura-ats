@@ -91,11 +91,11 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           fieldConfigs={[
             {
               name: 'rqe',
-              label: 'Número RQE do Médicoo',
+              label: 'Número RQE do Médico',
               required: true,
               placeholder: 'Adicione o RQE',
               inputProps: {
-                minLength: 4,
+                minLength: 3,
                 classNameContainer: 'w-full',
               },
               type: 'number',

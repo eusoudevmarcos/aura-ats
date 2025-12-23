@@ -71,7 +71,7 @@ export const medicoSchema = z.object({
   porcentagemRepasseMedico: z.string().optional().nullable(),
   porcentagemConsultas: z.string().optional().nullable(),
   porcentagemExames: z.string().optional().nullable(),
-  especialidades: z.array(EspecialidadeMedicoSchema),
+  especialidades: z.array(EspecialidadeMedicoSchema).optional(),
 });
 
 export const candidatoSchema = z

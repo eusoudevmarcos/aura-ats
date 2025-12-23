@@ -146,7 +146,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
       contatos: data.contatos.map(contato => contato),
     };
 
-    if (payload.medico) {
+    if (payload.medico?.especialidades) {
       payload.medico.especialidades = payload.medico.especialidades.map(
         especialidade => ({
           ...especialidade,
