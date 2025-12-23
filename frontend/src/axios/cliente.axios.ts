@@ -1,3 +1,4 @@
+import { KanbanClienteResponse } from '@/components/list/ClienteList';
 import { ClienteWithEmpresaAndVagaInput } from '@/schemas/cliente.schema';
 import { KanbanVagaResponse } from '@/schemas/vaga.schema';
 import api from '.';
@@ -16,6 +17,18 @@ export const getVagasClienteById = async (
   return response.data.data;
 };
 
+export const getCliente = async ({
+  page = 1,
+  pageSize = 5,
+  ...params
+}): Promise<KanbanClienteResponse> => {
+  const clientes = await api.get('/api/externalWithAuth/cliente', {
+    params: { page, pageSize, ...params },
+  });
+
+  return clientes.data;
+};
+
 export const saveCliente = async ({ payload }: any) => {
   const response = await api.post(
     '/api/externalWithAuth/cliente/save',
@@ -23,4 +36,24 @@ export const saveCliente = async ({ payload }: any) => {
   );
 
   return response;
+};
+
+/**
+ * Atualiza o status de uma vaga pelo ID
+ * @param {string} id - ID da vaga
+ * @param {string} status - Novo status
+ * @returns {Promise<any>}
+ */
+export const patchClienteStatus = async ({
+  id,
+  status,
+}: {
+  id: string;
+  status: string;
+}): Promise<any> => {
+  const response = await api.patch(`/api/externalWithAuth/cliente/status`, {
+    id,
+    status,
+  });
+  return response.data;
 };

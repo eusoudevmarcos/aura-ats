@@ -418,7 +418,7 @@ const VagaPage: React.FC = () => {
       </div>
 
       <section className="flex gap-2 w-full flex-wrap">
-        {vaga.candidatos &&
+        {vaga.candidatos ? (
           vaga.candidatos.map((candidato: any, idx: number) => {
             // Exclui o campo 'id' da listagem
             const { id, ...dadosCandidato } = candidato;
@@ -463,7 +463,10 @@ const VagaPage: React.FC = () => {
                 </Card>
               </Link>
             );
-          })}
+          })
+        ) : (
+          <p className="text-center w-full">Nenhum Candidato Vinculado</p>
+        )}
       </section>
 
       {/* Modal de Edição (Placeholder) */}

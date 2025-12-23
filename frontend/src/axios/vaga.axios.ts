@@ -67,11 +67,19 @@ export interface KanbanResponse {
   totalPages?: number;
 }
 
-export const getVagas = async ({
+export const getVagasKanban = async ({
   page = 1,
   pageSize = 5,
   ...params
 }): Promise<KanbanVagaResponse> => {
+  const vagasCliente = await api.get('/api/externalWithAuth/vaga/kanban', {
+    params: { page, pageSize, ...params },
+  });
+
+  return vagasCliente.data;
+};
+
+export const getVagas = async ({ page = 1, pageSize = 5, ...params }) => {
   const vagasCliente = await api.get('/api/externalWithAuth/vaga', {
     params: { page, pageSize, ...params },
   });

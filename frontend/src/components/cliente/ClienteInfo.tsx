@@ -3,14 +3,16 @@ import React, { useEffect, useRef, useState } from 'react';
 import { AdminGuard } from '../auth/AdminGuard';
 import { LabelController } from '../global/label/LabelController';
 import { LabelStatus } from '../global/label/LabelStatus';
+import LoadingClienteInfo from '../global/loading/LoadingClienteInfor';
 import { EditPenIcon, TrashIcon } from '../icons';
 
 interface ClienteInfoProps {
-  cliente: ClienteWithEmpresaAndPlanosSchema;
+  cliente?: ClienteWithEmpresaAndPlanosSchema | null;
   variant?: 'mini' | 'full';
   onEdit?: () => void;
   onDelete?: () => void;
   onPlanos?: () => void;
+  loading?: boolean;
 }
 
 const EmailLabel = ({
@@ -130,17 +132,6 @@ const ActionMenu: React.FC<{
           className="absolute right-2 top-6 mt-2 w-40 bg-white border border-gray-200 rounded shadow-lg flex flex-col animate-fadeIn z-20"
         >
           <button
-            title="Ver planos"
-            onClick={() => {
-              setShowMenu(false);
-              onPlanos && onPlanos();
-            }}
-            className="w-full flex items-center gap-2 px-4 py-3 text-sm hover:bg-blue-50 text-blue-700 bg-white border-0 cursor-pointer"
-          >
-            <span className="material-icons text-[16px]">wallet</span>
-            Planos do cliente
-          </button>
-          <button
             title="Editar"
             onClick={() => {
               setShowMenu(false);
@@ -174,20 +165,37 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
   onEdit,
   onDelete,
   onPlanos,
+  loading,
 }) => {
+  if (loading && !cliente) {
+    return <LoadingClienteInfo variant={variant} />;
+  }
+
+  if (!cliente) {
+    return (
+      <div className="py-6 text-center text-gray-500">
+        Nenhuma informação de cliente
+      </div>
+    );
+  }
+
+  const titulo = (
+    <h1 className="text-2xl font-bold text-center text-primary w-full">
+      Sobre Cliente
+    </h1>
+  );
+
   if (variant === 'mini') {
     return (
       <>
-        <h1 className="text-2xl font-bold text-center text-primary w-full">
-          CLIENTE
-        </h1>
+        {titulo}
         <ActionMenu onEdit={onEdit} onDelete={onDelete} onPlanos={onPlanos} />
         <div className="flex flex-col py-2">
           {cliente.status && <LabelStatus status={cliente.status} />}
           <LabelController
             label="CNPJ:"
             value={
-              cliente.empresa.cnpj
+              cliente.empresa?.cnpj
                 ? cliente.empresa.cnpj.replace(
                     /^(\d{2})(\d{3})(\d{3})(\d{4})(\d{2})$/,
                     '$1.$2.$3/$4-$5'
@@ -206,9 +214,7 @@ const ClienteInfo: React.FC<ClienteInfoProps> = ({
 
   return (
     <>
-      <h1 className="text-2xl font-bold text-center text-primary w-full">
-        CLIENTE
-      </h1>
+      {titulo}
       <div className="flex flex-col flex-wrap">
         <ActionMenu onEdit={onEdit} onDelete={onDelete} onPlanos={onPlanos} />
         <LabelStatus status={cliente.status} />

@@ -12,12 +12,9 @@ export default function Vagas() {
 
   return (
     <>
-      <div className="flex flex-row-reverse items-center w-full justify-between">
+      <div className="flex flex-row-reverse items-center w-full justify-between mb-2">
         <AdminGuard>
-          <PrimaryButton
-            className="float-right mt-4"
-            onClick={() => setShowVagasForm(true)}
-          >
+          <PrimaryButton onClick={() => setShowVagasForm(true)}>
             <PlusIcon />
             Cadastrar Vaga
           </PrimaryButton>

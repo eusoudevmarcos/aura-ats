@@ -32,7 +32,7 @@ export function FormSelect<T extends FieldValues>({
   const id = selectProps?.id || name.toString();
 
   const baseClass =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90 min-h-[42px]';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline border transition-all duration-200 disabled:opacity-90 min-h-[38px] text-sm!';
   const errorClass = errorMessage ? 'border-red-500' : '';
 
   const { classNameContainer, ...otherSelectProps } = selectProps || {};

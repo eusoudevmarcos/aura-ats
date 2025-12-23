@@ -239,7 +239,6 @@ const CandidatoList: React.FC = () => {
             value={searchAreaInput}
             onChange={e => setSearchAreaInput(e.target.value)}
             selectProps={{
-              className: 'p-2 border border-gray-300 rounded w-full',
               disabled: loading,
             }}
             placeholder="TODOS"
@@ -258,7 +257,6 @@ const CandidatoList: React.FC = () => {
             value={searchUfInput}
             onChange={e => setSearchUfInput(e.target.value)}
             selectProps={{
-              className: 'p-2 border border-gray-300 rounded w-full',
               disabled: loading,
             }}
             placeholder="TODOS"
@@ -274,7 +272,6 @@ const CandidatoList: React.FC = () => {
           <PrimaryButton
             onClick={handleSearch}
             disabled={!filtroTemValor || loading}
-            className="flex items-center gap-1"
           >
             <span className="material-icons-outlined">search</span>
           </PrimaryButton>

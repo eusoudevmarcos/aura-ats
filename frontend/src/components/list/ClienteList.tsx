@@ -170,7 +170,6 @@ const ClienteList: React.FC<{
 
   return (
     <Card>
-      <h3 className="text-2xl font-bold text-primary">Lista de Clientes</h3>
       <div className="flex justify-end items-center flex-wrap mb-2">
         <div className="flex gap-2 w-full max-w-[600px]">
           <FormInput
@@ -197,8 +196,13 @@ const ClienteList: React.FC<{
             onChange={e => setSearchCnpj(e?.target?.value ?? e)}
           />
 
-          <PrimaryButton onClick={handleSearch} disabled={!searchValue}>
-            <span className="material-icons-outlined">search</span>
+          <PrimaryButton
+            className="w-full md:w-auto"
+            onClick={handleSearch}
+            disabled={loading}
+          >
+            <span className="md:hidden text-sm!">Pesquisar</span>
+            <span className="material-icons-outlined text-sm!">search</span>
           </PrimaryButton>
 
           <PrimaryButton
@@ -206,7 +210,7 @@ const ClienteList: React.FC<{
             onClick={handleClear}
             disabled={!searchRazao && !searchCnpj}
           >
-            <span className="material-icons-outlined">delete</span>
+            <span className="material-icons-outlined text-sm!">delete</span>
           </PrimaryButton>
         </div>
       </div>
