@@ -1,5 +1,5 @@
-import { firestoreDB } from "./firebaseAdmin";
 import { FieldValue } from "firebase-admin/firestore";
+import { firestoreDB } from "./firebaseAdmin";
 
 export async function saveLog({
   type,

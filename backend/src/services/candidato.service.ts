@@ -113,7 +113,6 @@ export class CandidatoService {
       anexos: { include: { anexo: true } },
       medico: { include: { crm: true, especialidades: true } },
     };
-    console.log("SALVANDO CANDIDATO");
     let candidato: any;
 
     // Cria ou atualiza o candidato

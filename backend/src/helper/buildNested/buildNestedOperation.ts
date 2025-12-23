@@ -178,6 +178,12 @@ export class BuildNestedOperation {
         continue;
       }
 
+      // 4️⃣ Date
+      if (value instanceof Date) {
+        result[key] = value;
+        continue;
+      }
+
       // 4️⃣ Primitivos
       if (this.isPrimitive(value)) {
         result[key] = value;
@@ -217,7 +223,11 @@ export class BuildNestedOperation {
      HELPERS
   ============================ */
   private isPrimitive(v: any) {
-    return v === null || ["string", "number", "boolean"].includes(typeof v);
+    return (
+      v === null ||
+      v instanceof Date ||
+      ["string", "number", "boolean"].includes(typeof v)
+    );
   }
 
   private isArrayOfPrimitives(arr: any[]): boolean {

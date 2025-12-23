@@ -1,10 +1,11 @@
 import { convertAnyDateToPostgres } from "../../utils/convertDateToPostgres";
 
 export const normalizeCandidatoData = (data: any) => {
-  const dataNascimento =
-    data.pessoa.dataNascimento !== "" && data.pessoa.dataNascimento
-      ? convertAnyDateToPostgres(data.pessoa.dataNascimento)
-      : null;
+  let dataNascimento = null;
+
+  if (data.pessoa.dataNascimento) {
+    dataNascimento = convertAnyDateToPostgres(data.pessoa.dataNascimento);
+  }
 
   if (data?.medico) {
     if (Array.isArray(data.medico?.crm) && data.medico?.crm?.length > 0) {
@@ -48,6 +49,5 @@ export const normalizeCandidatoData = (data: any) => {
         }
       : undefined,
   };
-
   return newData;
 };
