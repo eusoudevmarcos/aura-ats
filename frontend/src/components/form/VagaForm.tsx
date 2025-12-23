@@ -50,8 +50,8 @@ const VagaForm: React.FC<VagaFormProps> = ({
     mode: 'onChange',
     defaultValues: {
       ...initialValues,
-      tipoSalario: 'A COMBINAR',
-      categoria: 'SAUDE',
+      tipoSalario: initialValues?.tipoSalario ?? 'A COMBINAR',
+      categoria: initialValues?.categoria ?? 'SAUDE',
       status: initialValues?.status ?? 'ABERTA',
       tipoLocalTrabalho: initialValues?.tipoLocalTrabalho || 'PRESENCIAL',
     },
@@ -209,7 +209,25 @@ const VagaForm: React.FC<VagaFormProps> = ({
             name="salario"
             register={register}
             label="Salário"
-            inputProps={{ type: 'number', step: '0.01' }}
+            maskProps={{
+              mask: 'R$ num',
+              blocks: {
+                num: {
+                  mask: Number,
+                  thousandsSeparator: '.',
+                  padFractionalZeros: true,
+                  scale: 2,
+                  radix: ',',
+                  mapToRadix: ['.'],
+                  signed: false,
+                },
+              },
+            }}
+            inputProps={{
+              inputMode: 'decimal',
+              pattern: '^R\\$ ([0-9]{1,3}(\\.[0-9]{3})*|[0-9]+)(,[0-9]{2})?$',
+              placeholder: 'R$ 0,00',
+            }}
           />
         )}
 
@@ -233,7 +251,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
           name="status"
           register={register}
           errors={errors}
-          label="Status da Vaga"
+          label="Andamento da Vaga"
         >
           <>
             {StatusVagaEnum.options.map(stat => (

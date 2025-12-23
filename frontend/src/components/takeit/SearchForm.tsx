@@ -37,15 +37,15 @@ const validateCNPJ = (cnpj: string): boolean => {
   const cnpjRaw = cnpj.replace(/[^\d]+/g, '');
   if (cnpjRaw.length !== 14) return false;
   if (/^(\d)\1+$/.test(cnpjRaw)) return false;
-  let t = cnpjRaw.length - 2,
-    d = cnpjRaw.substring(t),
-    d1 = parseInt(d.charAt(0)),
-    d2 = parseInt(d.charAt(1));
-  let calc = (x: number) => {
-    let n = cnpjRaw.substring(0, x),
-      y = x - 7,
-      s = 0,
-      r = 0;
+  const t = cnpjRaw.length - 2;
+  const d = cnpjRaw.substring(t);
+  const d1 = parseInt(d.charAt(0));
+  const d2 = parseInt(d.charAt(1));
+  const calc = (x: number) => {
+    const n = cnpjRaw.substring(0, x);
+    let s = 0;
+    let r = 0;
+    let y = x - 7;
     for (let i = x; i >= 1; i--) {
       s += parseInt(n.charAt(x - i)) * y--;
       if (y < 2) y = 9;

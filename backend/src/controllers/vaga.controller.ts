@@ -2,7 +2,9 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
+import paginationBuild from "../helper/buildNested/paginationBuild";
 import { VagaService } from "../services/vaga.service";
+import { VagaGetAllQuery } from "../types/vaga.type";
 
 @injectable()
 export class VagaController {
@@ -11,8 +13,21 @@ export class VagaController {
   async save(req: Request, res: Response): Promise<Response> {
     try {
       const vagaData = req.body;
+      let token = "";
+      const authHeader = req.headers.authorization;
+      if (
+        authHeader &&
+        typeof authHeader === "string" &&
+        authHeader.startsWith("Bearer ")
+      ) {
+        token = authHeader.replace(/^Bearer\s+/i, "");
+      } else if (authHeader && typeof authHeader === "string") {
+        // fallback: just use the string if no Bearer prefix
+        token = authHeader;
+      }
       const newVaga = await this.service.save(
-        nonEmptyAndConvertDataDTO(vagaData)
+        nonEmptyAndConvertDataDTO(vagaData),
+        token
       );
       return res.status(201).json(newVaga);
     } catch (error: any) {
@@ -21,31 +36,56 @@ export class VagaController {
     }
   }
 
-  async getAll(req: Request, res: Response): Promise<Response> {
-    try {
-      const tipoUusuario = req.user?.tipo;
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-      const pageSize = req.query.pageSize
-        ? parseInt(req.query.pageSize as string, 10)
-        : 10;
-      const search = req.query.search as string;
+  // Tipagem para os parâmetros de query aceitos
 
-      if (tipoUusuario === "CLIENTE_ATS" && req.user?.uid) {
+  async getAll(
+    req: Request<{}, {}, {}, VagaGetAllQuery>,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const serviceQuery = paginationBuild(req.query);
+      const tipoUsuario = (req as any).user?.tipo;
+
+      if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
         const vagas = await this.service.getAllByUsuario({
-          page,
-          pageSize,
-          search,
-          usuarioId: req.user?.uid,
+          ...serviceQuery,
+          usuarioId: (req as any).user?.uid,
         });
 
         return res.status(200).json(vagas);
       }
 
-      const vagas = await this.service.getAll({
-        page,
-        pageSize,
-        search,
-      });
+      const vagas = await this.service.getAll(serviceQuery);
+
+      return res.status(200).json(vagas);
+    } catch (error: any) {
+      console.log("Error fetching vagas:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async getAllKanban(
+    req: Request<{}, {}, {}, VagaGetAllQuery>,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const serviceQuery = paginationBuild(req.query);
+      const tipoUsuario = (req as any).user?.tipo;
+
+      // TODO: Precisa ser ajustado para visualização do cliente
+      if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
+        const vagas = await this.service.getAllByUsuario({
+          ...serviceQuery,
+          usuarioId: (req as any).user?.uid,
+        });
+
+        return res.status(200).json(vagas);
+      }
+
+      const vagas = await this.service.getAll(serviceQuery);
+
       return res.status(200).json(vagas);
     } catch (error: any) {
       console.log("Error fetching vagas:", error);
@@ -140,6 +180,48 @@ export class VagaController {
       return res.status(204).send();
     } catch (error: any) {
       console.log("Error deleting vaga:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async getHistoricoByVagaId(req: Request, res: Response): Promise<Response> {
+    const { id } = req.params;
+    try {
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const pageSize = req.query.pageSize
+        ? parseInt(req.query.pageSize as string, 10)
+        : 10;
+
+      // Busca o histórico e a vaga
+      const [historico, vaga] = await Promise.all([
+        this.service.getHistoricoByVagaId(id, { page, pageSize }),
+        this.service.getById(id),
+      ]);
+
+      return res.status(200).json({
+        vaga: nonEmptyAndConvertDataDTO(vaga),
+        historico: nonEmptyAndConvertDataDTO(historico),
+      });
+    } catch (error: any) {
+      console.log("Error fetching historico by vaga ID:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
+  async updateStatus(req: Request, res: Response): Promise<Response> {
+    try {
+      const { status, id } = req.body;
+      if (!status || !id) throw new Error("id e status são obrigatorio");
+
+      const statusAtualizado = await this.service.updateStatus(id, status);
+
+      return res.status(200).json(statusAtualizado);
+    } catch (error: any) {
+      console.log("Error fetching historico by vaga ID:", error);
       return res
         .status(500)
         .json({ message: "Internal server error", error: error.message });

@@ -128,6 +128,51 @@ export const vagaWithClienteSchema = vagaSchema.extend({
 });
 export type VagaWithClienteInput = z.infer<typeof vagaWithClienteSchema>;
 
+export const KanbanVagaCardMetadataSchema = z.object({
+  categoria: z.string(),
+  dataPublicacao: z.string(),
+  totalCandidaturas: z.number(),
+});
+export type KanbanVagaCardMetadata = z.infer<
+  typeof KanbanVagaCardMetadataSchema
+>;
+
+export const KanbanVagaCardSchema = z.object({
+  id: z.string(),
+  title: z.string(),
+  description: z.string(),
+  label: z.string(),
+  draggable: z.boolean(),
+  metadata: KanbanVagaCardMetadataSchema,
+});
+export type KanbanVagaCard = z.infer<typeof KanbanVagaCardSchema>;
+
+export const KanbanVagaColumnSchema = z.object({
+  lanes: z.array(
+    z.object({
+      id: z.string(),
+      title: z.string(),
+      label: z.string(),
+      cards: z.array(KanbanVagaCardSchema),
+      page: z.number(),
+      pageSize: z.number(),
+      total: z.number(),
+      totalPages: z.number(),
+      hasMore: z.boolean(),
+    })
+  ),
+  _count: z.number().optional(),
+  total: z.number(),
+  page: z.number(),
+  pageSize: z.number(),
+  totalPages: z.number(),
+});
+export type KanbanVagaColumn = z.infer<typeof KanbanVagaColumnSchema>;
+
+/** Lista KanbanVaga do cliente (Quadro por status de vaga) */
+export const KanbanVagaResponseSchema = KanbanVagaColumnSchema;
+export type KanbanVagaResponse = z.infer<typeof KanbanVagaResponseSchema>;
+
 // VAGA + Cliente + PROFISSIONAIS
 // export const vagaWithClienteAndCandidatosSchema = vagaSchema.extend({
 //   cliente: z

@@ -280,7 +280,9 @@ export default function ViewPersonPage(): React.ReactElement {
                         </Link>
                       </span>
                     }
-                    value={`(${phone.ddd})${phone.number}`}
+                    value={`(${phone.ddd})${phone.number} - ${
+                      phone.whatsapp_datetime ?? 'Sem Data'
+                    }`}
                   />
                 </div>
               ))}

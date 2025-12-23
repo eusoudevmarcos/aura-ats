@@ -35,6 +35,7 @@ const VagaPage: React.FC = () => {
     setError(null);
     try {
       const res = await api.get(`/api/external/vaga/${id}`);
+      res.data.tipoSalario = res.data.tipoSalario.toUpperCase();
       setVaga(res.data);
     } catch (_) {
       setError('Vaga não encontrada ou erro ao buscar dados.');
@@ -142,11 +143,20 @@ const VagaPage: React.FC = () => {
           <LabelStatus status={vaga.status}></LabelStatus>
 
           <div className="flex items-center">
-            <span className="font-medium text-primary">Salário:</span>
+            <span className="font-medium text-primary">Tipo Salário:</span>
             <p className="ml-2 text-secondary inline-block">
               {vaga.tipoSalario && vaga.tipoSalario}
             </p>
           </div>
+
+          {vaga?.salario && (
+            <div className="flex items-center">
+              <span className="font-medium text-primary">Salário:</span>
+              <p className="ml-2 text-secondary inline-block">
+                R$ {vaga.salario}
+              </p>
+            </div>
+          )}
           <div className="flex items-center">
             <span className="font-medium text-primary">Data Publicação:</span>
             <p className="ml-2 text-secondary inline-block">
@@ -157,17 +167,17 @@ const VagaPage: React.FC = () => {
             <div className="flex">
               <span className="font-medium text-primary">Data Fechamento:</span>
               <p className="ml-2 text-secondary inline-block">
-                {formatDate(vaga.dataFechamento)}
+                {vaga.dataFechamento}
               </p>
             </div>
           )}
 
-          <div className="flex">
+          <div className="flex flex-col">
             <span className="font-medium text-primary">Descrição:</span>
             <p className="ml-2 text-secondary inline-block">{vaga.descricao}</p>
           </div>
           {vaga.requisitos && (
-            <div className="flex items-center">
+            <div className="flex flex-col">
               <span className="font-medium text-primary">Requisitos:</span>
               <p className="ml-2 text-secondary inline-block">
                 {vaga.requisitos}
@@ -175,7 +185,7 @@ const VagaPage: React.FC = () => {
             </div>
           )}
           {vaga.responsabilidades && (
-            <div className="flex items-center">
+            <div className="flex flex-col">
               <span className="font-medium text-primary">
                 Responsabilidades:
               </span>
@@ -408,7 +418,7 @@ const VagaPage: React.FC = () => {
       </div>
 
       <section className="flex gap-2 w-full flex-wrap">
-        {vaga.candidatos &&
+        {vaga.candidatos ? (
           vaga.candidatos.map((candidato: any, idx: number) => {
             // Exclui o campo 'id' da listagem
             const { id, ...dadosCandidato } = candidato;
@@ -453,7 +463,10 @@ const VagaPage: React.FC = () => {
                 </Card>
               </Link>
             );
-          })}
+          })
+        ) : (
+          <p className="text-center w-full">Nenhum Candidato Vinculado</p>
+        )}
       </section>
 
       {/* Modal de Edição (Placeholder) */}

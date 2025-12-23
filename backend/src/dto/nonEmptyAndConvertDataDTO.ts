@@ -1,3 +1,6 @@
+import { Prisma } from "@prisma/client";
+import { formatDecimal } from "../utils/formatCurrencyBRL";
+
 type LocaleOptions = {
   locale?: string;
   dateOptions?: Intl.DateTimeFormatOptions;
@@ -7,64 +10,88 @@ function filtrarValores(
   obj: any,
   { locale = "pt-BR", dateOptions }: LocaleOptions = {}
 ): any {
-  // Se for array → processa cada item recursivamente
+  // Array → recursivo
   if (Array.isArray(obj)) {
     const filtrado = obj
       .map((item) => filtrarValores(item, { locale, dateOptions }))
       .filter((item) => item !== undefined);
+
     return filtrado.length > 0 ? filtrado : undefined;
   }
 
-  // Se for Date → converte
-  if (obj instanceof Date) {
-    return obj.toLocaleString(locale, {
-      ...{
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-      },
-      ...dateOptions,
-    });
+  const SQL_DATETIME_REGEX =
+    /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01]) (?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d$/;
+
+  // Date
+  if (obj instanceof Date || SQL_DATETIME_REGEX.test(obj)) {
+    let date = obj;
+    if (SQL_DATETIME_REGEX.test(obj)) {
+      const iso = obj.replace(" ", "T");
+      date = new Date(iso);
+    }
+
+    return new Intl.DateTimeFormat("pt-BR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    }).format(date);
   }
 
-  // Se for string parseável como data → converte
+  // Prisma.Decimal
+  if (obj instanceof Prisma.Decimal) {
+    return formatDecimal(obj);
+  }
+
+  // String (data ISO ou BR)
   if (typeof obj === "string") {
     const regexDataBR = /^\d{2}\/\d{2}\/\d{4}$/;
-    const regexDataISO = /^\d{4}-\d{2}-\d{2}$/; // '1998-09-01'
+    const regexDataISO = /^\d{4}-\d{2}-\d{2}$/;
 
     if (regexDataBR.test(obj)) {
-      // "01/09/1998"
-      const parts = obj.split("/");
-      const day = parseInt(parts[0], 10);
-      const month = parseInt(parts[1], 10) - 1;
-      const year = parseInt(parts[2], 10);
-      const parsed = new Date(year, month, day);
+      const [day, month, year] = obj.split("/").map(Number);
+      const parsed = new Date(year, month - 1, day);
       if (!isNaN(parsed.getTime())) {
         return parsed.toLocaleDateString(locale, dateOptions);
       }
-    } else if (regexDataISO.test(obj)) {
-      // "1998-09-01"
+    }
+
+    if (regexDataISO.test(obj)) {
       const parsed = new Date(obj);
       if (!isNaN(parsed.getTime())) {
         return parsed.toLocaleDateString(locale, dateOptions);
       }
     }
-    return obj; // string comum, mantém
+
+    return obj;
   }
 
-  // Se for objeto → processa recursivamente
+  // Object → recursivo com regra por chave
   if (obj !== null && typeof obj === "object") {
     const novoObj: any = {};
-    Object.keys(obj).forEach((key) => {
-      const valorFiltrado = filtrarValores(obj[key], { locale, dateOptions });
+
+    Object.entries(obj).forEach(([key, value]) => {
+      let valorFiltrado;
+
+      // Regra específica para salário
+      // if (key.toLowerCase().includes("salario")) {
+      //   valorFiltrado = formatCurrencyBRL(value as any);
+      // } else
+
+      if (value instanceof Prisma.Decimal) {
+        valorFiltrado = formatDecimal(value);
+      } else {
+        valorFiltrado = filtrarValores(value, { locale, dateOptions });
+      }
+
       if (valorFiltrado !== null && valorFiltrado !== undefined) {
         novoObj[key] = valorFiltrado;
       }
     });
+
     return Object.keys(novoObj).length > 0 ? novoObj : undefined;
   }
 
-  // Se for valor primitivo válido
+  // Primitivos válidos
   if (obj !== null && obj !== undefined) {
     return obj;
   }
@@ -76,6 +103,5 @@ export default function nonEmptyAndConvertDataDTO(
   usuarioSistema: any,
   options: LocaleOptions = {}
 ) {
-  const resultado = filtrarValores(usuarioSistema, options);
-  return resultado || {};
+  return filtrarValores(usuarioSistema, options) || {};
 }

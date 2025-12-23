@@ -11,7 +11,6 @@ export default async function getAvailableTimes(date: string) {
   if (accessToken) {
     headers['Authorization'] = `Bearer ${accessToken}`;
   }
-  console.log(accessToken);
 
   const res = await fetch(`/api/google/available-times?date=${date}`, {
     method: 'GET',

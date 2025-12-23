@@ -61,7 +61,7 @@ async function startServer() {
   if (process.env.NODE_ENV === "development") {
     app.use((req, res, next) => {
       // console.clear();
-      const { method, url, headers, body, query } = req;
+      const { method, url, headers, body, query, params } = req;
       const timestamp = new Date().toISOString();
 
       // Códigos de escape ANSI para cores
@@ -77,9 +77,14 @@ async function startServer() {
         console.log(`${red}${headers.authorization || headers.cookie}${reset}`);
       }
 
-      console.log(`- Query Params: ${JSON.stringify(query)}`);
+      if (Object.keys(query).length > 0) {
+        console.log(`  Query: ${cyan}${JSON.stringify(query)}`);
+      }
       if (Object.keys(body).length > 0) {
-        console.log(`  Body: ${JSON.stringify(body)}`);
+        console.log(`  Body: ${cyan}${JSON.stringify(body)}`);
+      }
+      if (Object.keys(params).length > 0) {
+        console.log(`  Params: ${cyan}${JSON.stringify(params)}`);
       }
       console.log(
         "-----------------------------------------------------------"

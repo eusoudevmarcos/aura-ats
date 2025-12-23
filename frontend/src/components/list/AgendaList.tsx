@@ -5,6 +5,8 @@ import { Pagination } from '@/type/pagination.type';
 import { useRouter } from 'next/router';
 import React, { useEffect, useMemo, useState } from 'react';
 import Table, { TableColumn } from '../Table';
+import { PrimaryButton } from '../button/PrimaryButton';
+import { FormInput } from '../input/FormInput';
 
 interface Localizacao {
   cidade?: string;
@@ -45,6 +47,8 @@ function normalizarTable(agendas: AgendaVaga[]) {
 
 const AgendaList: React.FC<{ noTitle?: boolean }> = ({ noTitle = false }) => {
   const [search, setSearch] = useState('');
+  const [searchClicked, setSearchClicked] = useState(false);
+  const [searchInput, setSearchInput] = useState('');
   const [agendas, setAgendas] = useState<AgendaVaga[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
@@ -56,7 +60,23 @@ const AgendaList: React.FC<{ noTitle?: boolean }> = ({ noTitle = false }) => {
 
   const router = useRouter();
 
+  // Handler para pesquisar agendas
+  const handleSearch = () => {
+    setPage(1);
+    setSearch(searchInput);
+    setSearchClicked(true);
+  };
+
+  // Handler para limpar pesquisa
+  const handleClear = async () => {
+    setSearchInput('');
+    setSearch('');
+    setSearchClicked(false);
+    setPage(1);
+  };
+
   useEffect(() => {
+    // Busca agendas toda vez que os filtros mudam
     const fetchAgendas = async () => {
       setLoading(true);
       try {
@@ -84,8 +104,15 @@ const AgendaList: React.FC<{ noTitle?: boolean }> = ({ noTitle = false }) => {
         setLoading(false);
       }
     };
-    fetchAgendas();
-  }, [page, pageSize, search]);
+
+    // Auto-carrega agendas só uma vez se não tem pesquisa nem click
+    if (!searchClicked && agendas.length === 0 && search === '') {
+      fetchAgendas();
+    } else if (searchClicked || search !== '') {
+      fetchAgendas();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page, pageSize, search, searchClicked]);
 
   const dadosTabela = useMemo(() => normalizarTable(agendas), [agendas]);
 
@@ -116,14 +143,33 @@ const AgendaList: React.FC<{ noTitle?: boolean }> = ({ noTitle = false }) => {
         {!noTitle && (
           <h3 className="text-2xl font-bold text-primary">Lista de Agendas</h3>
         )}
-
-        <input
-          type="text"
-          placeholder="Buscar agenda..."
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          className="grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none"
-        />
+        <div className="flex gap-2 w-full justify-end">
+          <FormInput
+            name=""
+            type="text"
+            placeholder="Buscar agenda..."
+            value={searchInput}
+            onChange={e => setSearchInput(e.target.value)}
+            inputProps={{
+              className:
+                'grow w-full max-w-[300px] px-3 py-2 rounded-lg border border-gray-200 outline-none',
+              disabled: loading,
+            }}
+          />
+          <PrimaryButton
+            onClick={handleSearch}
+            disabled={loading || !searchInput.trim()}
+          >
+            <span className="material-icons-outlined">search</span>
+          </PrimaryButton>
+          <PrimaryButton
+            variant="negative"
+            onClick={handleClear}
+            disabled={!searchInput && !search}
+          >
+            <span className="material-icons-outlined">delete</span>
+          </PrimaryButton>
+        </div>
       </div>
       <Table
         columns={columns}

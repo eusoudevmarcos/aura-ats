@@ -22,6 +22,7 @@ export type CommonSelectProps<T extends FieldValues> = {
   onChange?: React.ChangeEventHandler<HTMLSelectElement>;
   required?: boolean;
   children: React.ReactNode;
+  placeholderDisable?: boolean;
 };
 
 export type ControlledSelectProps<T extends FieldValues> =

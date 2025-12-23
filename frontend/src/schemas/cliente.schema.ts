@@ -2,7 +2,7 @@ import { z } from 'zod';
 import { empresaSchema } from './empresa.schema';
 import { planoAssinadoSchema } from './plano.schema';
 import { StatusClienteEnum } from './statusClienteEnum.schema';
-import { vagaSchema } from './vaga.schema';
+import { KanbanVagaResponseSchema, vagaSchema } from './vaga.schema';
 
 // Cliente
 export const clienteSchema = z.object({
@@ -56,7 +56,7 @@ export type ClienteWithEmpresaAndPlanosSchema = z.infer<
 export const clienteWithEmpresaAndVagaSchema = clienteSchema.extend({
   empresaId: z.uuid().optional(),
   empresa: empresaSchema,
-  vagas: z.array(z.lazy(() => vagaSchema)).optional(),
+  vagas: z.lazy(() => KanbanVagaResponseSchema).optional(),
   vagaId: z.uuid(),
   usuarioSistema: z.object({ email: z.string() }).optional(),
   planos: z.array(planoAssinadoSchema).optional(), // Planos com detalhes

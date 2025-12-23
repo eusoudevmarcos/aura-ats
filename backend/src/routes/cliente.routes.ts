@@ -14,7 +14,15 @@ router.put("/save/:id", authMiddleware, (req, res) =>
 
 router.get("/", authMiddleware, (req, res) => controller.getAll(req, res));
 
+router.get("/kanban", authMiddleware, (req, res) =>
+  controller.getAllKanban(req, res)
+);
+
 router.get("/:id", authMiddleware, (req, res) => controller.findById(req, res));
+
+router.patch("/status", authMiddleware, (req, res) =>
+  controller.updateStatus(req, res)
+);
 
 router.delete("/", authMiddleware, (req, res) => controller.delete(req, res));
 

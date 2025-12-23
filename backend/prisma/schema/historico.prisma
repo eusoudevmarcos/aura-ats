@@ -1,0 +1,79 @@
+enum EntidadeHistorico {
+  VAGA
+  CANDIDATO
+  CLIENTE
+  CANDIDATURA
+  USUARIO
+  PROCESSO_SELETIVO
+}
+
+enum CategoriaAcao {
+  CRIACAO
+  ATUALIZACAO
+  EXCLUSAO
+  RELACAO
+  STATUS
+  SISTEMA
+  INTEGRACAO
+  CANDIDATO_ADICIONADO
+  CANDIDATO_REMOVIDO
+  CANDIDATO_PROXIMA_ETAPA
+}
+
+enum SeveridadeAcao {
+  INFO
+  BAIXA
+  MEDIA
+  ALTA
+  CRITICA
+}
+
+model HistoricoAcao {
+  id              String            @id @default(uuid(7))
+  entidade        EntidadeHistorico
+  usuarioId       String?
+  acao            CategoriaAcao
+  camposAlterados String[]
+  descricao       String?            @db.Text
+  loteId          String?
+  origem          String?
+  dadosAnteriores Json?
+  dadosNovos      Json?
+  metadata        Json?
+  createdAt       DateTime          @default(now()) @map("created_at")
+  expiraEm        DateTime?         @map("expira_em")
+  
+  vaga            Vaga?             @relation(fields: [entidadeId], references: [id], onDelete: NoAction, map: "historico_vaga_fk")
+  entidadeId      String
+  
+  @@index([entidade, entidadeId, createdAt(sort: Desc)], name: "idx_entidade_id_data")
+  @@index([acao, createdAt(sort: Desc)], name: "idx_acao_data")
+  @@index([usuarioId, createdAt(sort: Desc)], name: "idx_usuario_data")
+  @@index([loteId], name: "idx_lote")
+  @@index([expiraEm], name: "idx_expiracao")
+  
+  @@map("historicos_acoes")
+}
+
+// model HistoricoAcao {
+//   id            String      @id @default(uuid(7))
+//   entidade      String      // Nome da entidade, ex: "Vaga", "Candidato", "Cliente"
+//   entidadeId    String      // ID da entidade relacionada (pode ser vagaId, candidatoId, clienteId, etc)
+//   acao          String      // Ex: "criada", "atualizada", "finalizada", "candidato_adicionado", ...
+//   descricao     String?     // Detalhes textuais da ação (ex: "Título da vaga alterado de 'A' para 'B'")
+//   status        String?     // status opcional como "success", "error", etc
+//   dadosAnteriores Json?     // JSON opcional com snapshot dos dados antes da alteração
+//   dadosNovos      Json?     // JSON opcional com snapshot dos dados após a alteração
+//   usuarioId     String?     // ID do usuário que realizou a ação (se aplicável)
+
+//   createdAt     DateTime    @default(now())
+
+//   // Relação opcional para Vaga, permite salvar o histórico específico para vagas
+//   vaga          Vaga?       @relation(fields: [entidadeId], references: [id], onDelete: NoAction, map: "HistoricoAcao_vaga")
+//   // Em implementações futuras pode-se criar relations semelhantes para Candidato, Cliente, etc.
+
+//   @@index([entidade, entidadeId])
+//   @@index([acao])
+//   @@index([usuarioId])
+//   @@map("historicos_acoes")
+// }

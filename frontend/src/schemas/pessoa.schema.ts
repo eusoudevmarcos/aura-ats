@@ -23,7 +23,7 @@ export type SignoEnum = z.infer<typeof SignoEnum>;
 
 export const pessoaSchema = z.object({
   id: z.string().nullable().optional(),
-  nome: z.string('Nome é obrigatória').min(1, 'Nome é obrigatório'),
+  nome: z.string('Nome é obrigatória').min(1, 'Nome é obrigatório').optional(),
   cpf: z
     .string()
     .refine(

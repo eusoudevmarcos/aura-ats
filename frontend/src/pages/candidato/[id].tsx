@@ -287,8 +287,8 @@ const CandidatoPage: React.FC = () => {
                 <span className="font-medium text-primary">RQE:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
-                    {candidato?.medico?.especialidades.map(especialidade => (
-                      <span>
+                    {candidato?.medico?.especialidades.map((especialidade, idx) => (
+                      <span key={especialidade.rqe || especialidade.especialidadeId || idx}>
                         {especialidade.rqe} - {especialidade.especialidadeId}
                       </span>
                     ))}
@@ -302,8 +302,8 @@ const CandidatoPage: React.FC = () => {
                 <div>
                   <span className="font-medium text-primary">CRM:</span>
                   <span className="text-secondary ml-2 bg-[#ede9fe] rounded-full text-black py-1 px-2 text-sm">
-                    {candidato.medico.crm.map((crm: any) => (
-                      <AdminGuard key={crm} typeText>
+                    {candidato.medico.crm.map((crm: any, idx: number) => (
+                      <AdminGuard key={crm.numero + crm.ufCrm + crm.dataInscricao || idx} typeText>
                         {crm.numero +
                           '/' +
                           crm.ufCrm +
@@ -322,9 +322,12 @@ const CandidatoPage: React.FC = () => {
               {candidato.emails && candidato.emails.length > 0 ? (
                 <div className="mb-2">
                   <span className="font-medium text-primary">Emails:</span>
-                  {candidato.emails.map((email: string) => (
-                    <span className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm">
-                      <AdminGuard key={email} typeText>
+                  {candidato.emails.map((email: string, idx: number) => (
+                    <span
+                      className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm"
+                      key={email || idx}
+                    >
+                      <AdminGuard typeText>
                         {email || '-'}
                       </AdminGuard>
                     </span>
@@ -339,9 +342,12 @@ const CandidatoPage: React.FC = () => {
               {candidato.contatos && candidato.contatos.length > 0 && (
                 <div>
                   <span className="font-medium text-primary">Contatos:</span>
-                  {candidato.contatos.map((contato: string) => (
-                    <span className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm">
-                      <AdminGuard key={contato} typeText>
+                  {candidato.contatos.map((contato: string, idx: number) => (
+                    <span
+                      className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm"
+                      key={contato || idx}
+                    >
+                      <AdminGuard typeText>
                         {contato || '-'}
                       </AdminGuard>
                     </span>

@@ -50,7 +50,6 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
   } = useFormContext();
 
   const fetchEspecialidades = async () => {
-    console.log('request');
     try {
       const response = await api.get<{ id: number; nome: string }[]>(
         '/api/externalWithAuth/candidato/especialidades'
@@ -92,11 +91,11 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
           fieldConfigs={[
             {
               name: 'rqe',
-              label: 'Número RQE do Médicoo',
+              label: 'Número RQE do Médico',
               required: true,
               placeholder: 'Adicione o RQE',
               inputProps: {
-                minLength: 4,
+                minLength: 3,
                 classNameContainer: 'w-full',
               },
               type: 'number',
@@ -126,7 +125,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
             },
           ]}
           renderChipContent={especialidade => {
-            let nomeEspecialidade =
+            const nomeEspecialidade =
               especialidadesFetch[especialidade.especialidadeId - 1]?.nome ??
               '';
 

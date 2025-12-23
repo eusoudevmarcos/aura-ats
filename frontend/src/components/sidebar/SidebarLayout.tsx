@@ -1,3 +1,4 @@
+import logo from '@/assets/auralogoh.svg';
 import { onLogout, useUser } from '@/context/AuthContext';
 import { getFirstLetter } from '@/utils/getFirstLetter';
 import Image from 'next/image';
@@ -166,7 +167,6 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
   // useEffect(() => {
   //   setCollapsed(true);
   // }, [router.pathname]);
-  console.log(router.pathname.split('/')[1]);
   useEffect(() => {
     onToggleSidebar(collapsed);
   }, [collapsed, onToggleSidebar]);
@@ -183,11 +183,24 @@ const SidebarLayout: React.FC<SidebarProps> = ({ onToggleSidebar }) => {
       >
         <button
           onClick={() => setCollapsed(!collapsed)}
-          className={`cursor-pointer absolute ${
-            collapsed ? 'right-[-28px]' : 'right-[-20px]'
-          } top-12 -translate-y-1/2 bg-white p-2 rounded-full shadow-md z-30 border border-gray-200`}
+          className={`cursor-pointer flex  w-full  items-center  bg-white p-2 ${
+            collapsed ? 'justify-center' : 'justify-between'
+          }`}
         >
-          {collapsed ? <ListIcon /> : <ListClosedIcon />}
+          {!collapsed && (
+            <div style={{ width: 100, height: 50, position: 'relative' }}>
+              <Image
+                fill
+                src={logo}
+                alt="Logo Aura"
+                style={{ objectFit: 'cover', borderRadius: 6 }}
+                sizes="70px"
+              />
+            </div>
+          )}
+          <span className="material-icons-outlined h-6">
+            {collapsed ? 'menu' : 'chevron_left'}
+          </span>
         </button>
         {/* Navegação */}
         <nav className="grow flex flex-col gap-2 overflow-y-auto custom-scrollbar">

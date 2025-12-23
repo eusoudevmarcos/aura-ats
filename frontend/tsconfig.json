@@ -16,7 +16,7 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -35,6 +35,7 @@
     "**/*.tsx",
     ".next/types/**/*.ts",
     "types/**/*.d.ts",
+    "src/types/**/*.d.ts",
     ".next/dev/types/**/*.ts"
   ],
   "exclude": [

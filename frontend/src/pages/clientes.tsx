@@ -11,15 +11,16 @@ export default function Clientes() {
 
   return (
     <>
-      <ClienteList key={refreshKey} />
+      <div className="flex flex-row-reverse items-center w-full justify-between mb-2">
+        <PrimaryButton onClick={() => setShowClientForm(true)}>
+          <PlusIcon />
+          Cadastrar Cliente
+        </PrimaryButton>
 
-      <PrimaryButton
-        className="float-right mt-4"
-        onClick={() => setShowClientForm(true)}
-      >
-        <PlusIcon />
-        Cadastrar Cliente
-      </PrimaryButton>
+        <h2 className="text-2xl font-bold text-primary">Lista de Clientes</h2>
+      </div>
+
+      <ClienteList key={refreshKey} />
 
       <Modal
         title="Cadastrar Cliente"

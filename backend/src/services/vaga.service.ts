@@ -1,12 +1,18 @@
 import { injectable } from "tsyringe";
 import prisma from "../lib/prisma";
-import { VagaSaveInput } from "../types/vaga.type";
+import {
+  HistoricoAcaoInput,
+  KanbanResponse,
+  VagaGetAllQuery,
+  VagaSaveInput,
+} from "../types/vaga.type";
 
-import { Prisma, Vaga } from "@prisma/client";
+import { Prisma, StatusVaga, Vaga } from "@prisma/client";
 import { buildVagaData } from "../helper/buildNested/vaga.build";
 import { buildWhere } from "../helper/buildWhere";
 import { normalizeData } from "../helper/normalize/vaga.normalize";
 import { Pagination } from "../types/pagination";
+import { SessaoService } from "./sessao.service";
 
 @injectable()
 export class VagaService {
@@ -91,75 +97,6 @@ export class VagaService {
     };
   }
 
-  async getAll({
-    page = 1,
-    pageSize = 10,
-    search = "",
-    clienteId,
-  }: Pagination & { clienteId?: string }) {
-    const skip = (page - 1) * pageSize;
-
-    // Monta o where base para pesquisa textual
-    let where = buildWhere<Prisma.VagaWhereInput>({
-      search,
-      fields: [
-        "titulo",
-        "cliente.empresa.cnpj",
-        "descricao",
-        "localizacao.cidade",
-        "localizacao.uf",
-      ],
-    });
-
-    if (clienteId) {
-      if (where.OR) {
-        where = {
-          AND: [{ cliente: { id: clienteId } }, { ...where }],
-        };
-      } else {
-        where = {
-          ...where,
-          cliente: { id: clienteId },
-        };
-      }
-    }
-
-    const select = {
-      id: true,
-      titulo: true,
-      categoria: true,
-      status: true,
-      dataPublicacao: true,
-      localizacao: {
-        select: {
-          uf: true,
-          cidade: true,
-        },
-      },
-    };
-
-    const [vagas, total] = await prisma.$transaction([
-      prisma.vaga.findMany({
-        skip,
-        take: pageSize,
-        orderBy: {
-          create_at: "desc",
-        },
-        where,
-        select,
-      }),
-      prisma.vaga.count({ where }),
-    ]);
-
-    return {
-      data: vagas,
-      total,
-      page,
-      pageSize,
-      totalPages: Math.ceil(total / pageSize),
-    };
-  }
-
   async getAllByUsuario({
     page = 1,
     pageSize = 10,
@@ -220,6 +157,254 @@ export class VagaService {
     };
   }
 
+  async getHistoricoByVagaId(
+    vagaId: string,
+    { page = 1, pageSize = 10 }: { page?: number; pageSize?: number } = {}
+  ) {
+    const skip = (page - 1) * pageSize;
+
+    // Busca o total de registros de histórico para a vaga
+    const [historico, total] = await prisma.$transaction([
+      prisma.historicoAcao.findMany({
+        where: { entidadeId: vagaId },
+        skip,
+        take: pageSize,
+        orderBy: {
+          createdAt: "desc",
+        },
+      }),
+      prisma.historicoAcao.count({
+        where: { entidadeId: vagaId },
+      }),
+    ]);
+
+    return {
+      data: historico,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  async getAll({
+    page = 1,
+    pageSize = 10,
+    clienteId,
+    ...rest
+  }: VagaGetAllQuery & {
+    clienteId?: string;
+    lanesPagination?: Partial<
+      Record<StatusVaga, { page: number; pageSize: number }>
+    >;
+  }) {
+    const skip = (page - 1) * pageSize;
+
+    let baseWhere = buildWhere<Prisma.VagaWhereInput>({
+      titulo: { search: rest.titulo },
+      descricao: { search: rest.descricao },
+      status: { search: rest.status, enum: true },
+      categoria: { search: rest.categoria, enum: true },
+      "cliente.empresa.cnpj": { search: rest.cnpj },
+      "localizacao.cidade": { search: rest.cidade },
+      "localizacao.uf": { search: rest.uf },
+    });
+
+    if (clienteId) {
+      if (baseWhere.OR) {
+        baseWhere = {
+          AND: [{ cliente: { id: clienteId } }, { ...baseWhere }],
+        };
+      } else {
+        baseWhere = {
+          ...baseWhere,
+          cliente: { id: clienteId },
+        };
+      }
+    }
+
+    const [vagas, total] = await prisma.$transaction([
+      prisma.vaga.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          create_at: "desc",
+        },
+        where: baseWhere,
+        include: {
+          beneficios: true,
+          habilidades: true,
+          anexos: true,
+          localizacao: true,
+        },
+      }),
+      prisma.vaga.count(),
+    ]);
+
+    return {
+      data: vagas,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
+  /**
+   *
+   * @param {VagaGetAllQuery & { clienteId?: string, lanesPagination?: Record<StatusVaga, {page:number, pageSize:number}> }} params
+   */
+  async getAllKanban({
+    page = 1,
+    pageSize = 10, // ignora para uso global, usa pageSize por lane (default 5)
+    clienteId,
+    lanesPagination = {}, // Novo: pagination individual por status
+    ...rest
+  }: VagaGetAllQuery & {
+    clienteId?: string;
+    lanesPagination?: Partial<
+      Record<StatusVaga, { page: number; pageSize: number }>
+    >;
+  }): Promise<KanbanResponse> {
+    const allStatuses: StatusVaga[] = [
+      "ALINHAMENTO",
+      "ABERTA",
+      "DIVULGACAO",
+      "TRIAGEM_DE_CURRICULO",
+      "CONCUIDA",
+      "GARANTIA",
+      "PAUSADA",
+      "ENCERRADA",
+      "ARQUIVADA",
+    ];
+
+    // Construção de filtro base (sem status!?)
+    let baseWhere = buildWhere<Prisma.VagaWhereInput>({
+      titulo: { search: rest.titulo },
+      descricao: { search: rest.descricao },
+      status: undefined, // status handled per lane
+      categoria: { search: rest.categoria, enum: true },
+      "cliente.empresa.cnpj": { search: rest.cnpj },
+      "localizacao.cidade": { search: rest.cidade },
+      "localizacao.uf": { search: rest.uf },
+    });
+
+    if (clienteId) {
+      if (baseWhere.OR) {
+        baseWhere = {
+          AND: [{ cliente: { id: clienteId } }, { ...baseWhere }],
+        };
+      } else {
+        baseWhere = {
+          ...baseWhere,
+          cliente: { id: clienteId },
+        };
+      }
+    }
+
+    const select = {
+      id: true,
+      titulo: true,
+      descricao: true,
+      categoria: true,
+      status: true,
+      dataPublicacao: true,
+      localizacao: {
+        select: {
+          uf: true,
+          cidade: true,
+        },
+      },
+      _count: {
+        select: {
+          candidaturas: true,
+        },
+      },
+    };
+
+    // Monta para cada status uma consulta paginada
+    // lanesPagination pode informar paging customizado para lanes
+    const lanesQueries = allStatuses.map((status) => {
+      const lanePaging = lanesPagination[status] || { page: 1, pageSize: 5 };
+      const skip = (lanePaging.page - 1) * lanePaging.pageSize;
+      const laneWhere = {
+        ...baseWhere,
+        status: status,
+      };
+      return {
+        status,
+        findMany: prisma.vaga.findMany({
+          where: laneWhere,
+          orderBy: { create_at: "desc" },
+          skip,
+          take: lanePaging.pageSize,
+          select,
+        }),
+        count: prisma.vaga.count({
+          where: laneWhere,
+        }),
+        paging: lanePaging,
+      };
+    });
+
+    // Executa todas as consultas em paralelo com transaction
+    const transactionCalls = [
+      ...lanesQueries.flatMap(({ findMany, count }) => [findMany, count]),
+    ];
+
+    const results = await prisma.$transaction(transactionCalls);
+
+    // Monta lanes com dados e paginação individual
+    const lanes = allStatuses.map((status, idx) => {
+      const laneQuery = lanesQueries[idx];
+      const vagasDoStatus = results[idx * 2] as any[];
+      const totalStatus = results[idx * 2 + 1] as number;
+      const paging = laneQuery.paging;
+
+      const cards = vagasDoStatus.map((vaga) => ({
+        id: vaga.id,
+        title: vaga.titulo,
+        description: vaga.descricao || undefined,
+        label: vaga.localizacao
+          ? `${vaga.localizacao.cidade} - ${vaga.localizacao.uf}`
+          : undefined,
+        draggable: true,
+        metadata: {
+          categoria: vaga.categoria,
+          dataPublicacao: vaga.dataPublicacao,
+          totalCandidaturas: vaga._count.candidaturas,
+        },
+      }));
+
+      const label = `${
+        (paging.page - 1) * paging.pageSize + cards.length
+      }/${totalStatus}`;
+
+      return {
+        id: status,
+        title: status,
+        label,
+        cards,
+        page: paging.page,
+        pageSize: paging.pageSize,
+        total: totalStatus,
+        totalPages: Math.ceil(totalStatus / paging.pageSize),
+        hasMore: paging.page * paging.pageSize < totalStatus,
+      };
+    });
+
+    // total global = soma dos totais por status
+    const total = lanes.reduce((acc, lane) => acc + lane.total, 0);
+
+    return {
+      lanes,
+      total,
+      page: 1,
+      pageSize: 5, // por lane, padrão
+      totalPages: 1, // não faz sentido global
+    };
+  }
+
   async getById(id: string) {
     const vaga = await prisma.vaga.findUnique({
       where: { id },
@@ -267,26 +452,124 @@ export class VagaService {
     };
   }
 
-  async save(vagaData: VagaSaveInput): Promise<Vaga> {
-    const normalizedData = normalizeData(vagaData);
+  async buildHistorico(
+    vagaAtualizada: VagaSaveInput,
+    token: string
+  ): Promise<HistoricoAcaoInput | undefined> {
+    const VAGA_CAMPOS_SIMPLES: (keyof typeof vagaAtualizada)[] = [
+      "titulo",
+      "descricao",
+      "requisitos",
+      "responsabilidades",
+      "dataFechamento",
+      "categoria",
+      "status",
+      "tipoContrato",
+      "nivelExperiencia",
+      "areaCandidato",
+      "salario",
+      "tipoSalario",
+    ];
+
+    const camposAlterados = [];
+    const entidade = "VAGA";
+    const id = vagaAtualizada?.id || vagaAtualizada?.clienteId;
+    let vagaAtual = null;
+
+    let acao = "CRIACAO";
+
+    if (id && Object.keys(vagaAtualizada).length > 0) {
+      acao = "ATUALIZACAO";
+
+      // mapeia os campos que foram alterados
+      vagaAtual = await prisma.vaga.findUnique({
+        where: { id: vagaAtualizada.id },
+        select: VAGA_CAMPOS_SIMPLES.reduce((sel, key) => {
+          sel[key] = true;
+          return sel;
+        }, {} as Record<string, true>),
+      });
+
+      if (vagaAtual) {
+        for (const campo of VAGA_CAMPOS_SIMPLES) {
+          // Comparação aprimorada para campos de data e valores primitivos
+          const valorAtual = vagaAtual[campo];
+          const valorAtualizado = vagaAtualizada[campo];
+
+          let diferentes = false;
+          // Checa se os valores são datas ou strings de data
+          if (
+            (valorAtual instanceof Date || typeof valorAtual === "string") &&
+            (valorAtualizado instanceof Date ||
+              typeof valorAtualizado === "string") &&
+            campo.toLowerCase().includes("data")
+          ) {
+            // Converte strings para Date, se necessário
+            const d1 =
+              valorAtual instanceof Date ? valorAtual : new Date(valorAtual);
+            const d2 =
+              valorAtualizado instanceof Date
+                ? valorAtualizado
+                : new Date(valorAtualizado);
+            // Usa apenas parte de data (ignora hora)
+            diferentes =
+              isNaN(d1.getTime()) || isNaN(d2.getTime())
+                ? valorAtual !== valorAtualizado // fallback para strings inválidas
+                : d1.toISOString().slice(0, 10) !==
+                  d2.toISOString().slice(0, 10);
+          } else {
+            diferentes = valorAtual != valorAtualizado;
+          }
+          if (diferentes) {
+            camposAlterados.push(campo);
+          }
+        }
+      }
+    }
+    if (Array.isArray(camposAlterados) && camposAlterados.length === 0) {
+      return;
+    }
+
+    const sessaoService = new SessaoService();
+
+    const usuario = await sessaoService.findByToken(token);
+
+    return {
+      entidade: entidade,
+      usuarioId: usuario.usuarioSistemaId,
+      acao,
+      camposAlterados,
+      descricao: `${entidade} ${acao}`,
+      loteId: id,
+      dadosAnteriores: vagaAtual,
+      dadosNovos: vagaAtualizada,
+    };
+  }
+
+  async save(vagaData: VagaSaveInput, token: string): Promise<Vaga> {
+    let normalizedData = normalizeData(vagaData);
+
     if (!vagaData?.id) {
       await this.checkDuplicates(normalizedData);
     }
 
     // separar triagens para sincronizar manualmente e garantir no máximo 4 e sem duplicatas
-    const triagensInput = Array.isArray(normalizedData.triagens)
-      ? Array.from(
-          new Map(
-            normalizedData.triagens
-              .filter((t: any) => !!t && !!t.tipoTriagem)
-              .slice(0, 4)
-              .map((t: any) => [
-                t.tipoTriagem,
-                { tipoTriagem: t.tipoTriagem, ativa: t.ativa ?? true },
-              ])
-          ).values()
-        )
-      : [];
+    // const triagensInput = Array.isArray(normalizedData.triagens)
+    //   ? Array.from(
+    //       new Map(
+    //         normalizedData.triagens
+    //           .filter((t: any) => !!t && !!t.tipoTriagem)
+    //           .slice(0, 4)
+    //           .map((t: any) => [
+    //             t.tipoTriagem,
+    //             { tipoTriagem: t.tipoTriagem, ativa: t.ativa ?? true },
+    //           ])
+    //       ).values()
+    //     )
+    //   : [];
+    const historico = await this.buildHistorico(vagaData, token);
+
+    normalizedData.historico = historico ? [historico] : [];
 
     const vagaPayload = await buildVagaData({
       ...normalizedData,
@@ -305,6 +588,7 @@ export class VagaService {
           },
         },
       },
+      historico: true,
       triagens: true,
     };
 
@@ -323,16 +607,26 @@ export class VagaService {
     }
 
     // sincronizar triagens somente se houver entrada explícita
-    if (triagensInput.length) {
-      await this.syncTriagens(saved.id, triagensInput as any[]);
-      // recarregar vaga com triagens atualizadas
-      saved = (await prisma.vaga.findUnique({
-        where: { id: saved.id },
-        include: relationsShip,
-      })) as Vaga;
-    }
+    // if (triagensInput.length) {
+    //   await this.syncTriagens(saved.id, triagensInput as any[]);
+    //   // recarregar vaga com triagens atualizadas
+    //   saved = (await prisma.vaga.findUnique({
+    //     where: { id: saved.id },
+    //     include: relationsShip,
+    //   })) as Vaga;
+    // }
 
     return saved;
+  }
+
+  async updateStatus(vagaId: string, status: StatusVaga): Promise<boolean> {
+    const statusAtualizado = await prisma.vaga.update({
+      where: { id: vagaId },
+      data: {
+        status,
+      },
+    });
+    return statusAtualizado ? true : false;
   }
 
   async delete(id: string) {

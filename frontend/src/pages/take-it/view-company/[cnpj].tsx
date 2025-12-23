@@ -42,7 +42,6 @@ const ViewCompanyPage: React.FC = () => {
       const data = await searchApi(cnpjValue, 'companies', 'CNPJ');
       if (data?.data?.length && data?.data[0]) {
         setCompany(data.data[0]);
-        console.log(data);
         if (data?.cache) {
           setCache(data.cache);
         }
@@ -96,7 +95,6 @@ const ViewCompanyPage: React.FC = () => {
   const handleOpenModalCliente = () => setShowModalCliente(true);
   const handleCloseModalCliente = () => setShowModalCliente(false);
   const handleClienteSalvo = (cliente: any) => {
-    console.log(cliente);
     setShowModalCliente(false);
     setClienteSalvo(true);
     setClienteId(cliente?.id || cliente?._id || null);

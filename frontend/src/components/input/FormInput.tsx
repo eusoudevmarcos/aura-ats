@@ -45,7 +45,7 @@ export function FormInput<T extends FieldValues>({
 
   // IMPORTANT: Use useMemo to avoid mask input reset issue
   const MemoInputElement = useMemo(() => {
-    return React.forwardRef<HTMLInputElement, InputElementProps>(
+    const Component = React.forwardRef<HTMLInputElement, InputElementProps>(
       ({ maskProps, onChange, onKeyDown, onFocus, ...props }, ref) => {
         if (maskProps?.mask) {
           return (
@@ -72,6 +72,8 @@ export function FormInput<T extends FieldValues>({
         );
       }
     );
+    Component.displayName = 'MemoInputElement';
+    return Component;
     // Mask config and name are enough to memoize
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maskProps?.mask, name]);
@@ -199,7 +201,7 @@ function buildInputClasses(
   customClassName?: string
 ) {
   const base =
-    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90 focus:border-primary placeholder:text-md min-h-[42px]';
+    'shadow appearance-none border rounded py-2 px-3 text-gray-700 w-full leading-tight focus:outline-none focus:shadow-outline transition-all duration-200 disabled:opacity-90 focus:border-primary placeholder:text-md min-h-[38px]';
   const errorClass = errorMessage ? 'border-red-500' : '';
   return [base, errorClass, customClassName].filter(Boolean).join(' ');
 }

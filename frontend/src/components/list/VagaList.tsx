@@ -1,10 +1,17 @@
 import { getVagas } from '@/axios/vaga.axios';
 import Card from '@/components/Card';
-import { VagaInput } from '@/schemas/vaga.schema';
+import {
+  CategoriaVagaEnum,
+  StatusVagaEnum,
+  VagaInput,
+} from '@/schemas/vaga.schema';
+import { UF_MODEL } from '@/utils/UF';
 import { useRouter } from 'next/router';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import Table, { TableColumn } from '../Table';
+import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
 
 export interface Localizacao {
   cidade: string;
@@ -22,7 +29,7 @@ const columns: TableColumn<VagaInput>[] = [
         ? new Date(row.dataPublicacao).toLocaleDateString('pt-BR')
         : 'N/A',
   },
-  { label: 'Status', key: 'status' },
+  { label: 'Andamento da Vaga', key: 'status' },
   { label: 'Categoria', key: 'categoria' },
   {
     label: 'Localização',
@@ -38,26 +45,57 @@ const PAGE_SIZE = 5;
 
 interface VagaListProps {
   initialValues?: VagaInput[];
+  loadingProp?: boolean;
 }
 
 const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
   const [vagas, setVagas] = useState<VagaInput[]>(initialValues ?? []);
   const [loading, setLoading] = useState(false);
-  const [search, setSearch] = useState('');
+
+  // Valores que estão sendo digitados/selecionados nos inputs (mas ainda não pesquisados)
+  const [tituloInput, setTituloInput] = useState('');
+  const [statusInput, setStatusInput] = useState('');
+  const [categoriaInput, setCategoriaInput] = useState('');
+  const [ufInput, setUfInput] = useState('');
+  const [cidadeInput, setCidadeInput] = useState('');
+  const [categoriaQuery, setCategoriaQuery] = useState('');
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(PAGE_SIZE);
   const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const router = useRouter();
+  const { uuid } = router.query;
 
-  const fetchVagas = useCallback(async () => {
+  // Função para realizar a pesquisa só ao clicar no botão
+  const handleSearch = () => {
+    fetchVagas();
+    setPage(1);
+  };
+
+  const handleClear = async () => {
+    setTituloInput('');
+    setStatusInput('');
+    setCategoriaInput('');
+    setUfInput('');
+    await fetchVagas();
+    setPage(1);
+  };
+
+  const fetchVagas = async () => {
     setLoading(true);
     try {
-      const result = await getVagas({
-        search,
+      const params = {
+        ...(tituloInput ? { titulo: tituloInput } : {}),
+        ...(statusInput ? { status: statusInput } : {}),
+        ...(categoriaQuery ? { categoria: categoriaQuery } : {}),
+        ...(ufInput ? { uf: ufInput } : {}),
+        ...(cidadeInput ? { cidade: cidadeInput } : {}),
+        ...(uuid ? { clienteId: uuid } : {}),
         page,
         pageSize,
-      });
+      };
+      const result = await getVagas(params);
       setVagas(Array.isArray(result.data) ? result.data : []);
       setTotal(result.total ?? 0);
       setTotalPages(result.totalPages ?? 1);
@@ -68,42 +106,104 @@ const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
     } finally {
       setLoading(false);
     }
-  }, [search, page, pageSize]);
+  };
 
   useEffect(() => {
     if (initialValues) return;
     fetchVagas();
-  }, [fetchVagas]);
+  }, [page, pageSize]);
 
-  const filtered = search
-    ? vagas.filter(
-        vaga =>
-          vaga.titulo?.toLowerCase().includes(search.toLowerCase()) ||
-          vaga.descricao?.toLowerCase().includes(search.toLowerCase()) ||
-          vaga.localizacao?.cidade?.toLowerCase().includes(search.toLowerCase())
-      )
-    : vagas;
-
-  const tableData = search ? filtered : vagas;
+  const tableData = vagas;
 
   return (
     <Card noShadow>
-      <div className="flex justify-between items-center flex-wrap mb-2">
-        <h2 className="text-2xl font-bold text-primary">Lista de Vagas</h2>
+      <div className="flex justify-end items-end flex-wrap mb-2 gap-2">
         <FormInput
-          name="search"
-          placeholder="Buscar por título, descrição ou cidade..."
-          value={search}
-          onChange={e => {
-            setSearch(e.target.value);
-            setPage(1);
-          }}
+          name="Titulo"
+          label="Titulo"
+          placeholder="Buscar por título"
+          value={tituloInput}
+          onChange={e => setTituloInput(e.target.value)}
           clear
           inputProps={{
-            className:
-              'flex-grow w-full max-w-[400px] px-3 py-2 rounded-lg border border-gray-200 outline-none',
+            disabled: loading,
+            classNameContainer: 'w-full md:w-auto',
           }}
         />
+
+        <FormSelect
+          name="Status"
+          label="Andamento da vaga"
+          value={statusInput}
+          onChange={e => setStatusInput(e.target.value)}
+          selectProps={{
+            disabled: loading,
+            classNameContainer: 'w-full md:w-auto',
+          }}
+          placeholder="TODOS"
+          placeholderDisable={false}
+        >
+          {StatusVagaEnum.options.map(area => (
+            <option key={area} value={area}>
+              {area}
+            </option>
+          ))}
+        </FormSelect>
+
+        <FormSelect
+          name="Categoria"
+          label="Categoria"
+          value={categoriaInput}
+          onChange={e => setCategoriaInput(e.target.value)}
+          selectProps={{
+            disabled: loading,
+            classNameContainer: 'w-full md:w-auto',
+          }}
+          placeholder="TODOS"
+          placeholderDisable={false}
+        >
+          {CategoriaVagaEnum.options.map(area => (
+            <option key={area} value={area}>
+              {area}
+            </option>
+          ))}
+        </FormSelect>
+
+        <FormSelect
+          name=""
+          label="UF"
+          value={ufInput}
+          onChange={e => setUfInput(e.target.value)}
+          selectProps={{
+            disabled: loading,
+            classNameContainer: 'w-full md:w-auto',
+          }}
+          placeholder="TODOS"
+          placeholderDisable={false}
+        >
+          {UF_MODEL.map(uf => (
+            <option key={uf.value} value={uf.value}>
+              {uf.label}
+            </option>
+          ))}
+        </FormSelect>
+
+        <PrimaryButton
+          className="w-full md:w-auto"
+          onClick={handleSearch}
+          disabled={loading}
+        >
+          <span className="md:hidden text-sm!">Pesquisar</span>
+          <span className="material-icons-outlined text-sm!">search</span>
+        </PrimaryButton>
+
+        <PrimaryButton
+          variant="negative"
+          onClick={handleClear}
+          disabled={!tituloInput && !statusInput && !ufInput && !categoriaInput}
+        >
+          <span className="material-icons-outlined text-sm!">delete</span>
+        </PrimaryButton>
       </div>
       <Table
         data={tableData}

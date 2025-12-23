@@ -8,22 +8,23 @@ import { useState } from 'react';
 
 export default function Vagas() {
   const [showVagasForm, setShowVagasForm] = useState(false);
-  const [refreshKey, setRefreshKey] = useState(0); // chave para forçar atualização
+  const [refreshKey, setRefreshKey] = useState(0);
 
   return (
     <>
+      <div className="flex flex-row-reverse items-center w-full justify-between mb-2">
+        <AdminGuard>
+          <PrimaryButton onClick={() => setShowVagasForm(true)}>
+            <PlusIcon />
+            Cadastrar Vaga
+          </PrimaryButton>
+        </AdminGuard>
+
+        <h2 className="text-2xl font-bold text-primary">Lista de Vagas</h2>
+      </div>
+
       <VagaList key={refreshKey} />
 
-      <AdminGuard>
-        <PrimaryButton
-          className="float-right mt-4"
-          onClick={() => setShowVagasForm(true)}
-        >
-          <PlusIcon />
-          Cadastrar Vaga
-        </PrimaryButton>
-      </AdminGuard>
-      
       {showVagasForm && (
         <Modal
           isOpen={showVagasForm}

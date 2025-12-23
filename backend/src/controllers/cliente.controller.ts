@@ -64,6 +64,36 @@ export class ClienteController {
     }
   }
 
+  async getAllKanban(req: Request, res: Response) {
+    try {
+      // paginação
+      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
+      const pageSize = req.query.pageSize
+        ? parseInt(req.query.pageSize as string, 10)
+        : 10;
+      const search = req.query.search as string;
+
+      // Monta objeto de query para serviço
+      const serviceQuery: any = {
+        page,
+        pageSize,
+        search,
+        ...req.query, // para extensibilidade futura de filtros extras
+      };
+
+      // Busca paginada de clientes
+      const clientes = await this.service.getAll(serviceQuery);
+
+      // returns 200 and DTO-normalized data if desired
+      return res.status(200).json(nonEmptyAndConvertDataDTO(clientes));
+    } catch (error: any) {
+      console.log("Error fetching clientes:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
   async getAllProspects(req: Request, res: Response) {
     const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
     const pageSize = req.query.pageSize
@@ -94,6 +124,22 @@ export class ClienteController {
         error: "Erro ao buscar prospects",
         message: error.message,
       });
+    }
+  }
+
+  async updateStatus(req: Request, res: Response): Promise<Response> {
+    try {
+      const { status, id } = req.body;
+      if (!status || !id) throw new Error("id e status são obrigatorio");
+
+      const statusAtualizado = await this.service.updateStatus(id, status);
+
+      return res.status(200).json(statusAtualizado);
+    } catch (error: any) {
+      console.log("Error fetching historico by vaga ID:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
     }
   }
 }
