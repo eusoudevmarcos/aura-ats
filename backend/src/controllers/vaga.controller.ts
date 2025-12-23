@@ -66,6 +66,35 @@ export class VagaController {
     }
   }
 
+  async getAllKanban(
+    req: Request<{}, {}, {}, VagaGetAllQuery>,
+    res: Response
+  ): Promise<Response> {
+    try {
+      const serviceQuery = paginationBuild(req.query);
+      const tipoUsuario = (req as any).user?.tipo;
+
+      // TODO: Precisa ser ajustado para visualização do cliente
+      if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
+        const vagas = await this.service.getAllByUsuario({
+          ...serviceQuery,
+          usuarioId: (req as any).user?.uid,
+        });
+
+        return res.status(200).json(vagas);
+      }
+
+      const vagas = await this.service.getAll(serviceQuery);
+
+      return res.status(200).json(vagas);
+    } catch (error: any) {
+      console.log("Error fetching vagas:", error);
+      return res
+        .status(500)
+        .json({ message: "Internal server error", error: error.message });
+    }
+  }
+
   async getAllByClienteId(req: Request, res: Response): Promise<Response> {
     try {
       const clienteId = req.params.clienteId;

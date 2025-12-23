@@ -187,11 +187,74 @@ export class VagaService {
     };
   }
 
+  async getAll({
+    page = 1,
+    pageSize = 10,
+    clienteId,
+    ...rest
+  }: VagaGetAllQuery & {
+    clienteId?: string;
+    lanesPagination?: Partial<
+      Record<StatusVaga, { page: number; pageSize: number }>
+    >;
+  }) {
+    const skip = (page - 1) * pageSize;
+
+    let baseWhere = buildWhere<Prisma.VagaWhereInput>({
+      titulo: { search: rest.titulo },
+      descricao: { search: rest.descricao },
+      status: { search: rest.status, enum: true },
+      categoria: { search: rest.categoria, enum: true },
+      "cliente.empresa.cnpj": { search: rest.cnpj },
+      "localizacao.cidade": { search: rest.cidade },
+      "localizacao.uf": { search: rest.uf },
+    });
+
+    if (clienteId) {
+      if (baseWhere.OR) {
+        baseWhere = {
+          AND: [{ cliente: { id: clienteId } }, { ...baseWhere }],
+        };
+      } else {
+        baseWhere = {
+          ...baseWhere,
+          cliente: { id: clienteId },
+        };
+      }
+    }
+
+    const [vagas, total] = await prisma.$transaction([
+      prisma.vaga.findMany({
+        skip,
+        take: pageSize,
+        orderBy: {
+          create_at: "desc",
+        },
+        where: baseWhere,
+        include: {
+          beneficios: true,
+          habilidades: true,
+          anexos: true,
+          localizacao: true,
+        },
+      }),
+      prisma.vaga.count(),
+    ]);
+
+    return {
+      data: vagas,
+      total,
+      page,
+      pageSize,
+      totalPages: Math.ceil(total / pageSize),
+    };
+  }
+
   /**
    *
    * @param {VagaGetAllQuery & { clienteId?: string, lanesPagination?: Record<StatusVaga, {page:number, pageSize:number}> }} params
    */
-  async getAll({
+  async getAllKanban({
     page = 1,
     pageSize = 10, // ignora para uso global, usa pageSize por lane (default 5)
     clienteId,

@@ -17,6 +17,9 @@ router.get("/candidato/:candidatoId", authMiddleware, (req, res) =>
   vagaController.getAllByCandidatoId(req, res)
 );
 router.get("/", authMiddleware, (req, res) => vagaController.getAll(req, res));
+router.get("/kanban", authMiddleware, (req, res) =>
+  vagaController.getAllKanban(req, res)
+);
 router.post("/", authMiddleware, (req, res) => vagaController.save(req, res));
 router.post("/vincular-candidatos/:id", authMiddleware, (req, res) =>
   vagaController.vincularCandidato(req, res)
