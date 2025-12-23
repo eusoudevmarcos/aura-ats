@@ -38,6 +38,6 @@ export default function candidatoBuild(
   if (rest.medico) {
     newCandidato.medico = buildNestedOperation.build(rest.medico);
   }
-
+  console.log(newCandidato);
   return newCandidato;
 }

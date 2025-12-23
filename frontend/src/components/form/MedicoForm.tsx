@@ -92,20 +92,18 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
             {
               name: 'rqe',
               label: 'Número RQE do Médico',
-              required: true,
               placeholder: 'Adicione o RQE',
               inputProps: {
-                minLength: 3,
                 classNameContainer: 'w-full',
               },
               type: 'number',
               maskProps: { mask: /^\d*$/ },
             },
             {
+              name: 'especialidadeId',
               component: 'select',
               label: 'Especilidade do Médico',
               required: true,
-              name: 'especialidadeId',
               placeholder: 'Adicione a Especilidade',
               selectOptions: (
                 <>
@@ -131,7 +129,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
 
             return (
               <span>
-                {nomeEspecialidade} - RQE {especialidade.rqe}
+                {nomeEspecialidade} - RQE {especialidade.rqe ?? 'N/A'}
               </span>
             );
           }}

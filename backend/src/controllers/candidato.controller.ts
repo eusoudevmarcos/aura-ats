@@ -2,6 +2,7 @@
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
+import { saveLog } from "../lib/logger";
 import { CandidatoService } from "../services/candidato.service";
 
 @injectable()
@@ -16,6 +17,11 @@ export class CandidatoController {
       const newCandidato = await this.candidatoService.save(candidatoData);
       return res.status(201).json(nonEmptyAndConvertDataDTO(newCandidato));
     } catch (error: any) {
+      await saveLog({
+        type: "CADASTRO CANDIDATO",
+        status: "error",
+        data: error,
+      });
       return res.status(400).json({ message: error.message });
     }
   }

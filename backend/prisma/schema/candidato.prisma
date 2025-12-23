@@ -33,7 +33,6 @@ model Crm {
 model Medico {
     id  String  @id @default(uuid(7))
     crm Crm[] // Sigla do estado na frente
-    rqe String?
 
     especialidades EspecialidadeMedico[]
 
@@ -54,7 +53,7 @@ model Medico {
 
 model EspecialidadeMedico {
     id  String @id @default(uuid(7))
-    rqe String
+    rqe String?
 
     especialidade   Especialidade @relation(fields: [especialidadeId], references: [id])
     especialidadeId Int
