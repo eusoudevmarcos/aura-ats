@@ -8,6 +8,10 @@
   - [Gerar token](#gerar-token)
   - [Firebase](#firebase)
   - [Data Stone API](#data-stone-api)
+- [Docker](#docker)
+  - [Instalação](#instalacao)
+  - [Docker Compose - Subir e Descer containers](#docker-compose---subir-e-descer-containers)
+  - [Arquivos de configuração](#arquivos-de-configuracao)
 
 ## Prisma
 
@@ -48,3 +52,48 @@ Após adicionar o arquivo, confira no `.env` se a variável `FIREBASE_ADMIN_SDK_
 ### Data Stone API
 
 Para acesso às credenciais do Data Stone, contate algum administrador.
+
+---
+
+## Docker
+
+### Instalação
+
+Para rodar o backend e o banco de dados em containers, é necessário ter o Docker e o Docker Compose instalados em sua máquina.
+
+- [Instale o Docker Desktop](https://docs.docker.com/get-docker/) (Windows ou Mac)
+- Ou siga as instruções oficiais para instalar no [Linux](https://docs.docker.com/engine/install/)
+
+Após a instalação, verifique se está tudo funcionando com:
+```bash
+docker -v
+docker compose version
+```
+
+### Docker Compose - Subir e Descer containers
+
+Utilize o Docker Compose para orquestrar os containers do banco de dados (PostgreSQL) e da aplicação backend. Os comandos mais comuns são:
+
+Para **baixar** (parar e remover todos os containers, volumes e rede declarados no docker-compose):
+
+```bash
+docker compose down -v
+```
+
+Para **subir** (criar e iniciar containers em modo detached):
+
+```bash
+docker compose up -d
+```
+
+Esses comandos devem ser executados na raiz da pasta `backend`.
+
+### Arquivos de configuração
+
+- **@backend/Dockerfile**  
+  Esse arquivo define a construção da imagem do container do backend. Ele especifica a base (Node.js), as etapas de instalação de dependências, configurações para o Prisma Client, cópia de arquivos, e o comando para rodar a aplicação em ambiente de desenvolvimento.
+
+- **@backend/docker-compose.yml**  
+  Orquestra múltiplos containers necessários para rodar o sistema em desenvolvimento. Inclui a configuração do banco de dados PostgreSQL com persistência (volume `pgdata`), variáveis de ambiente, mapeamento de portas e dependências, além do serviço do backend que depende do banco.
+
+> Com esses arquivos e comandos, você poderá facilmente rodar toda a stack do projeto em containers Docker padronizados.

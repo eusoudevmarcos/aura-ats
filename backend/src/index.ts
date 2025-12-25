@@ -21,7 +21,7 @@ import triagemRoutes from "./routes/triagem.routes";
 import userRoutes from "./routes/user.routes";
 import vagaRoutes from "./routes/vaga.routes";
 
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 const allowedOrigins = [
   "http://localhost:3000", // frontend local
