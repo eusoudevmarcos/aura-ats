@@ -1,17 +1,20 @@
 services:
   postgres:
-    image: postgres:17
+    image: postgres:18
     container_name: aura-db
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: aura
-      POSTGRES_PASSWORD: auradb124
-      POSTGRES_DB: auraDB
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+      PGHOST: ${PGHOST}
     ports:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
-      #- ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+      # - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
 
 volumes:
   pgdata:
