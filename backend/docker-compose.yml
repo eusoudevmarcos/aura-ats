@@ -15,6 +15,20 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       # - ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
+  backend:
+    build: .
+    container_name: aura-backend
+    restart: always
+    depends_on:
+      - postgres
+    environment:
+      DATABASE_URL: ${DIRECT_URL}
+      NODE_ENV: development
+    ports:
+      - "3000:3000"
+    volumes:
+      - .:/app
+    command: npm run dev
 
 volumes:
   pgdata:
