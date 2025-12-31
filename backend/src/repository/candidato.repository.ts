@@ -206,7 +206,22 @@ export class CandidatoRepository {
             },
           },
           medico: {
-            include: { crm: true, especialidades: true },
+            include: {
+              crm: true,
+              especialidades: {
+                select: {
+                  rqe: true,
+                  especialidade: {
+                    select: {
+                      nome: true,
+                      id: true,
+                      sigla: true,
+                    },
+                  },
+                  id: true,
+                },
+              },
+            },
           },
         },
         orderBy: {

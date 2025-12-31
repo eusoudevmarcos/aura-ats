@@ -6,7 +6,6 @@ import "reflect-metadata";
 
 dotenv.config();
 
-import { ambienteMiddleware } from "./middleware/ambienteMiddleware";
 import agendaRoute from "./routes/agenda.routes";
 import authenticationRoutes from "./routes/authentication.routes";
 import billingRoutes from "./routes/billing.routes";
@@ -14,6 +13,7 @@ import candidatoRoutes from "./routes/candidato.routes";
 import clienteRoutes from "./routes/cliente.routes";
 import datastoneRoutes from "./routes/datastone.routes";
 import emailRoutes from "./routes/email.routes";
+import especilidadeRoutes from "./routes/especialidade.routes";
 import funcionarioRoutes from "./routes/funcionario.routes";
 import sessaoRoutes from "./routes/sessao.routes";
 import tarefaRoutes from "./routes/tarefa.routes";
@@ -32,7 +32,7 @@ const allowedOrigins = [
 ];
 
 async function startServer() {
-  await ambienteMiddleware();
+  // await ambienteMiddleware();
 
   const app = express();
 
@@ -113,6 +113,7 @@ async function startServer() {
   app.use("/api/tarefa", tarefaRoutes);
   app.use("/api/sessao", sessaoRoutes);
   app.use("/api/email", emailRoutes);
+  app.use("/api/especialidade", especilidadeRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);

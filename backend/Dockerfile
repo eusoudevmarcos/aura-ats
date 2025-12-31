@@ -11,8 +11,7 @@ COPY prisma.config.ts ./
 COPY prisma ./prisma
 
 # Define DATABASE_URL só para o build
-ARG DATABASE_URL
-ENV DATABASE_URL=${DATABASE_URL}
+ENV DATABASE_URL="postgresql://fake:fake@localhost:5432/fake"
 
 # 3. Gera o Prisma Client no ambiente Linux
 RUN npx prisma generate

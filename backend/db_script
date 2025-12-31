@@ -7,13 +7,20 @@
 // -----------RESTORE BANCO------------
 psql "DIRECT_URL" -f backup-public.sql
 
-// ---------------DUMP-----------------
+// ---------------DUMP TODO BANCO-----------------
 pg_dump --format=plain --schema=public --no-owner \
   --dbname="DIRECT_URL" \
   -f backup-render.sql
+
+
+// --------------DUMP SO DOS DADOS---------------
+pg_dump --data-only --disable-triggers {BANCO_URL} > backup-data.sql
 
 // -----------ACESSAR PSQL DOCKER------
 docker exec -it aura-db psql -U aura -d auraDB
 
 
+psql "%DIRECT_URL%" --set ON_ERROR_STOP=off  -f backup-render.sql
 
+pg_dump --clean --if-exists 
+  aura_ats > backup-clean.sql
