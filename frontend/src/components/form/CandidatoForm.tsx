@@ -2,7 +2,7 @@ import api from '@/axios';
 import LocalizacaoForm from '@/components/form/LocalizacaoForm';
 import PessoaForm from '@/components/form/PessoaForm';
 import ModalSuccess from '@/components/modal/ModalSuccess';
-import { CandidatoInput, candidatoSchema } from '@/schemas/candidato.schema';
+import { candidatoSchema, CandidatoType } from '@/schemas/candidato.schema';
 import { zodResolver } from '@hookform/resolvers/zod';
 import React, { useEffect, useState } from 'react';
 import { FormProvider, useForm, UseFormReturn } from 'react-hook-form';
@@ -11,16 +11,12 @@ import { PrimaryButton } from '../button/PrimaryButton';
 import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
 import toBase64 from '@/utils/files/toBase64';
 import { FormArrayInput } from '../input/FormArrayInput';
-import { FormInput } from '../input/FormInput';
-import { FormSelect } from '../input/FormSelect';
-import FileUploadForm from './FileUploadForm';
-import MedicoForm from './MedicoForm';
 
 type CandidatoFormProps = {
-  formContexto?: UseFormReturn<CandidatoInput>;
-  onSubmit?: (data: CandidatoInput) => void;
+  formContexto?: UseFormReturn<CandidatoType>;
+  onSubmit?: (data: CandidatoType) => void;
   onSuccess?: (data: any) => void;
-  initialValues?: Partial<CandidatoInput>;
+  initialValues?: Partial<CandidatoType>;
   disableSuccessModal?: boolean;
 };
 
@@ -74,7 +70,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
         },
       };
 
-  const methods = useForm<CandidatoInput>({
+  const methods = useForm<CandidatoType>({
     resolver: zodResolver(candidatoSchema),
     mode: 'onChange',
     defaultValues: defaultValues,
@@ -115,7 +111,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
     setValue('links', newArray, { shouldValidate: true });
   };
 
-  const submitHandler = async (data: CandidatoInput) => {
+  const submitHandler = async (data: CandidatoType) => {
     if (onSubmit) onSubmit(data);
 
     if (data.anexos && data.anexos.length > 0) {
@@ -143,16 +139,23 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
 
     const payload = {
       ...data,
-      contatos: data.contatos.map(contato => contato),
+      contatos: data.contatos.map((contato: any) => contato),
     };
 
     if (payload.medico?.especialidades) {
       payload.medico.especialidades = payload.medico.especialidades.map(
-        especialidade => ({
-          ...especialidade,
-          especialidadeId: +especialidade.especialidadeId,
+        (_: any) => ({
+          especialidade: {
+            id: _.especialidade.id,
+            nome: _.especialidade.nome,
+            sigla: _.especialidade.sigla,
+          },
+          id: _.id,
+          rqe: _.rqe ?? null,
         })
       );
+    }
+
     }
 
     setLoading(true);

@@ -109,5 +109,17 @@ export const getNavItems = (user: any) => {
     });
   }
 
+  if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
+    navItems.push({
+      icon: (
+        <span className="material-icons-outlined w-5 h-5 text-inherit">
+          dashboard_2_gear
+        </span>
+      ),
+      label: 'Especilidades',
+      href: `/especialidade/list`,
+    });
+  }
+
   return navItems;
 };

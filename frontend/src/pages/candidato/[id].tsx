@@ -250,17 +250,6 @@ const CandidatoPage: React.FC = () => {
               </div>
             )}
 
-            {candidato?.medico?.especialidadesEnfermidades && (
-              <div className="flex flex-col">
-                <span className="font-medium text-primary">
-                  Especilidade e Enfermidades:
-                </span>
-                <span className="text-secondary ml-2 wrap-break-word">
-                  {candidato.medico.especialidadesEnfermidades || '-'}
-                </span>
-              </div>
-            )}
-
             {candidato?.medico?.quadroSocietario !== null &&
               candidato?.medico?.quadroSocietario !== undefined && (
                 <div>
@@ -287,9 +276,9 @@ const CandidatoPage: React.FC = () => {
                 <span className="font-medium text-primary">RQE:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
-                    {candidato?.medico?.especialidades.map((especialidade, idx) => (
-                      <span key={especialidade.rqe || especialidade.especialidadeId || idx}>
-                        {especialidade.rqe} - {especialidade.especialidadeId}
+                    {candidato?.medico?.especialidades.map(_ => (
+                      <span key={_.especialidade?.nome || rqe}>
+                        {rqe} - {especialidade?.nome ?? 'Sem Especilidade'}
                       </span>
                     ))}
                   </AdminGuard>
@@ -303,7 +292,10 @@ const CandidatoPage: React.FC = () => {
                   <span className="font-medium text-primary">CRM:</span>
                   <span className="text-secondary ml-2 bg-[#ede9fe] rounded-full text-black py-1 px-2 text-sm">
                     {candidato.medico.crm.map((crm: any, idx: number) => (
-                      <AdminGuard key={crm.numero + crm.ufCrm + crm.dataInscricao || idx} typeText>
+                      <AdminGuard
+                        key={crm.numero + crm.ufCrm + crm.dataInscricao || idx}
+                        typeText
+                      >
                         {crm.numero +
                           '/' +
                           crm.ufCrm +
@@ -327,9 +319,7 @@ const CandidatoPage: React.FC = () => {
                       className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm"
                       key={email || idx}
                     >
-                      <AdminGuard typeText>
-                        {email || '-'}
-                      </AdminGuard>
+                      <AdminGuard typeText>{email || '-'}</AdminGuard>
                     </span>
                   ))}
                 </div>
@@ -347,9 +337,7 @@ const CandidatoPage: React.FC = () => {
                       className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm"
                       key={contato || idx}
                     >
-                      <AdminGuard typeText>
-                        {contato || '-'}
-                      </AdminGuard>
+                      <AdminGuard typeText>{contato || '-'}</AdminGuard>
                     </span>
                   ))}
                 </div>
