@@ -11,11 +11,15 @@ import { PrimaryButton } from '../button/PrimaryButton';
 import { AreaCandidatoEnum } from '@/schemas/candidato.schema';
 import toBase64 from '@/utils/files/toBase64';
 import { FormArrayInput } from '../input/FormArrayInput';
+import { FormInput } from '../input/FormInput';
+import { FormSelect } from '../input/FormSelect';
+import FileUploadForm from './FileUploadForm';
+import MedicoForm from './MedicoForm';
 
 type CandidatoFormProps = {
   formContexto?: UseFormReturn<CandidatoType>;
-  onSubmit?: (data: CandidatoType) => void;
-  onSuccess?: (data: any) => void;
+  onSubmit?: (data: CandidatoType) => any;
+  onSuccess?: (data: any) => any;
   initialValues?: Partial<CandidatoType>;
   disableSuccessModal?: boolean;
 };
@@ -54,7 +58,7 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
               especialidades:
                 initialValues.medico?.especialidades?.map(especilidade => ({
                   ...especilidade,
-                  especialidadeId: String(especilidade.especialidadeId),
+                  especialidadeId: String(especilidade.especialidade.id),
                 })) || [],
             }
           : {
@@ -154,8 +158,6 @@ const CandidatoForm: React.FC<CandidatoFormProps> = ({
           rqe: _.rqe ?? null,
         })
       );
-    }
-
     }
 
     setLoading(true);

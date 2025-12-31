@@ -10,7 +10,7 @@ import ModalCandidatoForm from '@/components/modal/ModalCandidatoForm';
 import ModalPdfViewer from '@/components/modal/ModalPdfViewer';
 import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
-import { CandidatoInput } from '@/schemas/candidato.schema';
+import { CandidatoType } from '@/schemas/candidato.schema';
 import { SessionProvider } from 'next-auth/react';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
@@ -20,7 +20,7 @@ const CandidatoPage: React.FC = () => {
   const router = useRouter();
   const { id } = router.query;
 
-  const [candidato, setCandidato] = useState<CandidatoInput | null>(null);
+  const [candidato, setCandidato] = useState<CandidatoType | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [showModalEdit, setShowModalEdit] = useState(false);
@@ -277,8 +277,8 @@ const CandidatoPage: React.FC = () => {
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
                     {candidato?.medico?.especialidades.map(_ => (
-                      <span key={_.especialidade?.nome || rqe}>
-                        {rqe} - {especialidade?.nome ?? 'Sem Especilidade'}
+                      <span key={_.especialidade?.nome || _.rqe}>
+                        {_.rqe} - {_?.especialidade.nome ?? 'Sem Especilidade'}
                       </span>
                     ))}
                   </AdminGuard>
