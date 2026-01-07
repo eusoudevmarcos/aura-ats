@@ -1,45 +1,78 @@
 // pages/agenda/[id].tsx
 import api from '@/axios';
 import Card from '@/components/Card';
-import { AgendaForm } from '@/components/form/AgendaForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
-import Modal from '@/components/modal/Modal';
 import { useCliente } from '@/context/AuthContext';
-import { SessionProvider } from 'next-auth/react';
+import dynamic from 'next/dynamic';
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 
-const AgendaPage: React.FC = () => {
+// Dynamic imports para componentes pesados
+const AgendaForm = dynamic(
+  () => import('@/components/form/AgendaForm').then(mod => ({ default: mod.AgendaForm })),
+  {
+    loading: () => (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-primary">Carregando formulário...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const Modal = dynamic(
+  () => import('@/components/modal/Modal'),
+  {
+    ssr: false,
+  }
+);
+
+import { SessionProviderWrapper } from '@/components/providers/SessionProviderWrapper';
+
+interface AgendaPageProps {
+  initialAgenda?: any;
+  initialError?: string | null;
+}
+
+const AgendaPage: React.FC<AgendaPageProps> = ({
+  initialAgenda,
+  initialError,
+}) => {
   const router = useRouter();
   const { id } = router.query;
   const isCliente = useCliente();
 
-  const [agenda, setAgenda] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
+  const [agenda, setAgenda] = useState<any | null>(initialAgenda || null);
+  const [loading, setLoading] = useState(!initialAgenda);
+  const [erro, setErro] = useState<string | null>(initialError || null);
   const [showModalEdit, setShowModalEdit] = useState(false);
 
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchAgenda = async () => {
-      setLoading(true);
-      setErro(null);
-      try {
-        const res = await api.get(`/api/externalWithAuth/agenda/${id}`);
-        setAgenda(res.data);
-      } catch (_) {
-        setErro('Agenda não encontrada ou erro ao buscar dados.');
-        setAgenda(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchAgenda();
+  const fetchAgenda = useCallback(async () => {
+    if (!id || typeof id !== 'string') return;
+    setLoading(true);
+    setErro(null);
+    try {
+      const res = await api.get(`/api/externalWithAuth/agenda/${id}`);
+      setAgenda(res.data);
+    } catch (_) {
+      setErro('Agenda não encontrada ou erro ao buscar dados.');
+      setAgenda(null);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
 
-  const handleTrash = async () => {
+  useEffect(() => {
+    // Só busca se não tiver dados iniciais do SSR
+    if (!initialAgenda) {
+      fetchAgenda();
+    }
+  }, [fetchAgenda, initialAgenda]);
+
+  const handleTrash = useCallback(async () => {
     if (!agenda) return;
     if (confirm('Tem certeza que deseja excluir esta agenda?')) {
       try {
@@ -49,7 +82,7 @@ const AgendaPage: React.FC = () => {
         alert('Erro ao excluir agenda.');
       }
     }
-  };
+  }, [agenda, router]);
 
   if (loading) {
     return (
@@ -260,7 +293,7 @@ const AgendaPage: React.FC = () => {
       </section>
 
       {/* Modal de edição pode ser implementado futuramente */}
-      <SessionProvider>
+      <SessionProviderWrapper>
         <Modal
           isOpen={showModalEdit}
           onClose={() => setShowModalEdit(false)}
@@ -268,9 +301,40 @@ const AgendaPage: React.FC = () => {
         >
           <AgendaForm onSuccess={() => {}} initialValues={agenda} />
         </Modal>
-      </SessionProvider>
+      </SessionProviderWrapper>
     </div>
   );
 };
 
 export default AgendaPage;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params!;
+
+  try {
+    // Criar instância de API para servidor
+    const serverApi = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_NEXT_URL || 'http://localhost:3000',
+      withCredentials: true,
+      headers: context.req.headers.cookie
+        ? { Cookie: context.req.headers.cookie }
+        : {},
+    });
+
+    const res = await serverApi.get(`/api/externalWithAuth/agenda/${id}`);
+
+    return {
+      props: {
+        initialAgenda: res.data,
+        initialError: null,
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        initialAgenda: null,
+        initialError: 'Agenda não encontrada ou erro ao buscar dados.',
+      },
+    };
+  }
+};

@@ -65,7 +65,7 @@ export const getNavItems = (user: any) => {
     navItems.push({
       icon: <span className="material-icons-outlined">task</span>,
       label: 'Taferas',
-      href: '/tarefas',
+      href: '/kanban',
     });
   }
 

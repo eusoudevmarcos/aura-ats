@@ -36,12 +36,12 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
   {
     label: 'Especialidade',
     key: 'especialidade.nome',
-    render: row => row.medico.especialidades?.[0]?.especialidade?.nome || '-',
+    render: row => row.medico?.especialidades?.[0]?.especialidade?.nome || '-',
   },
   {
     label: 'RQE',
     key: 'rqe',
-    render: row => row.medico.especialidades?.[0]?.rqe || '-',
+    render: row => row.medico?.especialidades?.[0]?.rqe || '-',
   },
   {
     label: 'UF/Cidade',

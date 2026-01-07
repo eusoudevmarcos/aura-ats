@@ -9,7 +9,6 @@ type FormacaoFormProps = {
 
 const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = '' }) => {
   const {
-    register,
     control,
     formState: { errors },
   } = useFormContext();
@@ -30,7 +29,7 @@ const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = '' }) => {
           </h4>
           <FormInput
             name={`${namePrefix}formacoes.${index}.dataConclusaoMedicina`}
-            register={register}
+            control={control}
             label="Data Conclusão Medicina"
             placeholder="00/00/0000"
             errors={errors}
@@ -38,7 +37,7 @@ const FormacaoForm: React.FC<FormacaoFormProps> = ({ namePrefix = '' }) => {
           />
           <FormInput
             name={`${namePrefix}formacoes.${index}.dataConclusaoResidencia`}
-            register={register}
+            control={control}
             label="Data Conclusão Residência"
             placeholder="00/00/0000"
             errors={errors}

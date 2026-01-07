@@ -44,3 +44,13 @@
     opacity: 1;
   }
 }
+
+/* Animação de fade-out para exclusão de itens */
+.delete-animating {
+  opacity: 0 !important;
+  transform: scale(0.95) !important;
+  transition: opacity 1s ease-out, transform 1s ease-out !important;
+  pointer-events: none !important;
+  overflow: hidden !important;
+  border: none !important;
+}
