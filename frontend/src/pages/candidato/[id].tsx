@@ -3,26 +3,71 @@ import api from '@/axios';
 import { AdminGuard } from '@/components/auth/AdminGuard';
 import ButtonCopy from '@/components/button/ButtonCopy';
 import Card from '@/components/Card';
-import { AgendaForm } from '@/components/form/AgendaForm';
 import { EditPenIcon, TrashIcon } from '@/components/icons';
-import Modal from '@/components/modal/Modal';
-import ModalCandidatoForm from '@/components/modal/ModalCandidatoForm';
-import ModalPdfViewer from '@/components/modal/ModalPdfViewer';
 import { useAdmin } from '@/context/AuthContext';
 import useFetchWithPagination from '@/hook/useFetchWithPagination';
-import { CandidatoInput } from '@/schemas/candidato.schema';
-import { SessionProvider } from 'next-auth/react';
+import { CandidatoType } from '@/schemas/candidato.schema';
+import dynamic from 'next/dynamic';
+import { GetServerSideProps } from 'next';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import axios from 'axios';
 
-const CandidatoPage: React.FC = () => {
+// Dynamic imports para componentes pesados
+const AgendaForm = dynamic(
+  () => import('@/components/form/AgendaForm').then(mod => ({ default: mod.AgendaForm })),
+  {
+    loading: () => (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-primary">Carregando formulário...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const Modal = dynamic(
+  () => import('@/components/modal/Modal'),
+  {
+    ssr: false,
+  }
+);
+
+const ModalCandidatoForm = dynamic(
+  () => import('@/components/modal/ModalCandidatoForm'),
+  {
+    ssr: false,
+  }
+);
+
+const ModalPdfViewer = dynamic(
+  () => import('@/components/modal/ModalPdfViewer'),
+  {
+    ssr: false,
+  }
+);
+
+import { SessionProviderWrapper } from '@/components/providers/SessionProviderWrapper';
+
+interface CandidatoPageProps {
+  initialCandidato?: CandidatoType | null;
+  initialError?: string | null;
+}
+
+const CandidatoPage: React.FC<CandidatoPageProps> = ({
+  initialCandidato,
+  initialError,
+}) => {
   const router = useRouter();
   const { id } = router.query;
 
-  const [candidato, setCandidato] = useState<CandidatoInput | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [erro, setErro] = useState<string | null>(null);
+  const [candidato, setCandidato] = useState<CandidatoType | null>(
+    initialCandidato || null
+  );
+  const [loading, setLoading] = useState(!initialCandidato);
+  const [erro, setErro] = useState<string | null>(initialError || null);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalAgendaEdit, setShowModalAgendaEdit] = useState(false);
   const [showModalPdf, setShowModalPdf] = useState(false);
@@ -53,33 +98,35 @@ const CandidatoPage: React.FC = () => {
     }
   );
 
-  useEffect(() => {
-    if (!id) return;
-
-    const fetchCandidato = async () => {
-      setLoading(true);
-      setErro(null);
-      try {
-        const res = await api.get(`/api/externalWithAuth/candidato/${id}`);
-        setCandidato(res.data);
-      } catch (_) {
-        setErro('Candidato não encontrado ou erro ao buscar dados.');
-        setCandidato(null);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCandidato();
+  const fetchCandidato = useCallback(async () => {
+    if (!id || typeof id !== 'string') return;
+    setLoading(true);
+    setErro(null);
+    try {
+      const res = await api.get(`/api/externalWithAuth/candidato/${id}`);
+      setCandidato(res.data);
+    } catch (_) {
+      setErro('Candidato não encontrado ou erro ao buscar dados.');
+      setCandidato(null);
+    } finally {
+      setLoading(false);
+    }
   }, [id]);
+
+  useEffect(() => {
+    // Só busca se não tiver dados iniciais do SSR
+    if (!initialCandidato) {
+      fetchCandidato();
+    }
+  }, [fetchCandidato, initialCandidato]);
 
   useEffect(() => {
     if (candidato && candidato.id) {
       refetchVagas({ search: candidato.id });
     }
-  }, [candidato]);
+  }, [candidato, refetchVagas]);
 
-  const handleTrash = async () => {
+  const handleTrash = useCallback(async () => {
     if (!candidato) return;
     if (confirm('Tem certeza que deseja excluir este candidato?')) {
       try {
@@ -91,7 +138,7 @@ const CandidatoPage: React.FC = () => {
         alert('Erro ao excluir candidato.');
       }
     }
-  };
+  }, [candidato, router]);
 
   if (loading) {
     return (
@@ -250,17 +297,6 @@ const CandidatoPage: React.FC = () => {
               </div>
             )}
 
-            {candidato?.medico?.especialidadesEnfermidades && (
-              <div className="flex flex-col">
-                <span className="font-medium text-primary">
-                  Especilidade e Enfermidades:
-                </span>
-                <span className="text-secondary ml-2 wrap-break-word">
-                  {candidato.medico.especialidadesEnfermidades || '-'}
-                </span>
-              </div>
-            )}
-
             {candidato?.medico?.quadroSocietario !== null &&
               candidato?.medico?.quadroSocietario !== undefined && (
                 <div>
@@ -287,9 +323,9 @@ const CandidatoPage: React.FC = () => {
                 <span className="font-medium text-primary">RQE:</span>
                 <span className="text-secondary ml-2">
                   <AdminGuard typeText>
-                    {candidato?.medico?.especialidades.map((especialidade, idx) => (
-                      <span key={especialidade.rqe || especialidade.especialidadeId || idx}>
-                        {especialidade.rqe} - {especialidade.especialidadeId}
+                    {candidato?.medico?.especialidades.map(_ => (
+                      <span key={_.especialidade?.nome || _.rqe}>
+                        {_.rqe} - {_?.especialidade.nome ?? 'Sem Especilidade'}
                       </span>
                     ))}
                   </AdminGuard>
@@ -303,7 +339,10 @@ const CandidatoPage: React.FC = () => {
                   <span className="font-medium text-primary">CRM:</span>
                   <span className="text-secondary ml-2 bg-[#ede9fe] rounded-full text-black py-1 px-2 text-sm">
                     {candidato.medico.crm.map((crm: any, idx: number) => (
-                      <AdminGuard key={crm.numero + crm.ufCrm + crm.dataInscricao || idx} typeText>
+                      <AdminGuard
+                        key={crm.numero + crm.ufCrm + crm.dataInscricao || idx}
+                        typeText
+                      >
                         {crm.numero +
                           '/' +
                           crm.ufCrm +
@@ -327,9 +366,7 @@ const CandidatoPage: React.FC = () => {
                       className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm"
                       key={email || idx}
                     >
-                      <AdminGuard typeText>
-                        {email || '-'}
-                      </AdminGuard>
+                      <AdminGuard typeText>{email || '-'}</AdminGuard>
                     </span>
                   ))}
                 </div>
@@ -347,9 +384,7 @@ const CandidatoPage: React.FC = () => {
                       className="bg-[#ede9fe] ml-2 rounded-full text-black! py-1 px-2 text-sm"
                       key={contato || idx}
                     >
-                      <AdminGuard typeText>
-                        {contato || '-'}
-                      </AdminGuard>
+                      <AdminGuard typeText>{contato || '-'}</AdminGuard>
                     </span>
                   ))}
                 </div>
@@ -757,7 +792,7 @@ const CandidatoPage: React.FC = () => {
         }}
       />
 
-      <SessionProvider>
+      <SessionProviderWrapper>
         <Modal
           isOpen={showModalAgendaEdit}
           onClose={() => setShowModalAgendaEdit(false)}
@@ -774,7 +809,7 @@ const CandidatoPage: React.FC = () => {
             }}
           />
         </Modal>
-      </SessionProvider>
+      </SessionProviderWrapper>
 
       <ModalPdfViewer
         isOpen={showModalPdf}
@@ -791,3 +826,34 @@ const CandidatoPage: React.FC = () => {
 };
 
 export default CandidatoPage;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params!;
+
+  try {
+    // Criar instância de API para servidor
+    const serverApi = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_NEXT_URL || 'http://localhost:3000',
+      withCredentials: true,
+      headers: context.req.headers.cookie
+        ? { Cookie: context.req.headers.cookie }
+        : {},
+    });
+
+    const res = await serverApi.get(`/api/externalWithAuth/candidato/${id}`);
+
+    return {
+      props: {
+        initialCandidato: res.data,
+        initialError: null,
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        initialCandidato: null,
+        initialError: 'Candidato não encontrado ou erro ao buscar dados.',
+      },
+    };
+  }
+};

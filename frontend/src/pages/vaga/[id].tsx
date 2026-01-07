@@ -3,26 +3,86 @@ import api from '@/axios'; // Certifique-se que o caminho está correto
 import { AdminGuard } from '@/components/auth/AdminGuard';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
 import Card from '@/components/Card'; // Certifique-se que o caminho está correto
-import CandidatoForm from '@/components/form/CandidatoForm';
-import VagaForm from '@/components/form/VagaForm';
 import { LabelStatus } from '@/components/global/label/LabelStatus';
 import { EditPenIcon, TrashIcon } from '@/components/icons'; // Certifique-se que o caminho está correto
-import Modal from '@/components/modal/Modal'; // Certifique-se que o caminho está correto
-import ModalConfirmation from '@/components/modal/ModalConfirmation';
-import ModalDelete from '@/components/modal/ModalDelete';
-import CandidatoSearch from '@/components/search/CandidatoSearch';
-import Tabs from '@/components/utils/Tabs';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import axios from 'axios';
 
-const VagaPage: React.FC = () => {
+// Dynamic imports para componentes pesados
+const VagaForm = dynamic(
+  () => import('@/components/form/VagaForm'),
+  {
+    loading: () => (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-primary">Carregando formulário...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const CandidatoForm = dynamic(
+  () => import('@/components/form/CandidatoForm'),
+  {
+    ssr: false,
+  }
+);
+
+const Modal = dynamic(
+  () => import('@/components/modal/Modal'),
+  {
+    ssr: false,
+  }
+);
+
+const ModalConfirmation = dynamic(
+  () => import('@/components/modal/ModalConfirmation'),
+  {
+    ssr: false,
+  }
+);
+
+const ModalDelete = dynamic(
+  () => import('@/components/modal/ModalDelete'),
+  {
+    ssr: false,
+  }
+);
+
+const CandidatoSearch = dynamic(
+  () => import('@/components/search/CandidatoSearch'),
+  {
+    ssr: false,
+  }
+);
+
+const Tabs = dynamic(
+  () => import('@/components/utils/Tabs'),
+  {
+    ssr: false,
+  }
+);
+
+interface VagaPageProps {
+  initialVaga?: any;
+  initialError?: string | null;
+}
+
+const VagaPage: React.FC<VagaPageProps> = ({
+  initialVaga,
+  initialError,
+}) => {
   const router = useRouter();
   const { id } = router.query; // 'uuid' será o ID da vaga
 
-  const [vaga, setVaga] = useState<any | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [vaga, setVaga] = useState<any | null>(initialVaga || null);
+  const [loading, setLoading] = useState(!initialVaga);
+  const [error, setError] = useState<string | null>(initialError || null);
   const [showModalEdit, setShowModalEdit] = useState(false);
   const [showModalCandidato, setShowModalCandidato] = useState(false);
   const [showModalConfirmationDelete, setShowModalConfirmationDelete] =
@@ -30,7 +90,8 @@ const VagaPage: React.FC = () => {
   const [showModalDeleteSucess, setShowModalDeleteSucess] = useState(false);
   const [currentTab, setCurrentTab] = useState('');
 
-  const fetchVaga = async () => {
+  const fetchVaga = useCallback(async () => {
+    if (!id) return;
     setLoading(true);
     setError(null);
     try {
@@ -43,15 +104,16 @@ const VagaPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  useEffect(() => {
-    if (!id) return;
-
-    fetchVaga();
   }, [id]);
 
-  const handleDelete = async () => {
+  useEffect(() => {
+    // Só busca se não tiver dados iniciais do SSR
+    if (!initialVaga) {
+      fetchVaga();
+    }
+  }, [fetchVaga, initialVaga]);
+
+  const handleDelete = useCallback(async () => {
     if (!vaga) return;
     try {
       await api.delete(`/api/externalWithAuth/vaga/${vaga.id}`);
@@ -60,20 +122,20 @@ const VagaPage: React.FC = () => {
       console.log(error);
       alert('Erro ao excluir vaga.');
     }
-  };
+  }, [vaga]);
 
-  const formatCurrency = (value: number | null | undefined): string => {
+  const formatCurrency = useCallback((value: number | null | undefined): string => {
     if (value === null || value === undefined) return 'N/A';
     return new Intl.NumberFormat('pt-BR', {
       style: 'currency',
       currency: 'BRL',
     }).format(value);
-  };
+  }, []);
 
-  const formatDate = (date: string | Date | null | undefined): string => {
+  const formatDate = useCallback((date: string | Date | null | undefined): string => {
     if (!date) return 'N/A';
     return new Date(date).toLocaleDateString('pt-BR');
-  };
+  }, []);
 
   if (loading) {
     return (
@@ -93,6 +155,22 @@ const VagaPage: React.FC = () => {
   }
 
   if (!vaga) return null;
+
+  // Valores formatados memoizados
+  const formattedSalario = useMemo(
+    () => (vaga?.salario ? formatCurrency(vaga.salario) : null),
+    [vaga?.salario, formatCurrency]
+  );
+
+  const formattedDataPublicacao = useMemo(
+    () => (vaga?.dataPublicacao ? formatDate(vaga.dataPublicacao) : null),
+    [vaga?.dataPublicacao, formatDate]
+  );
+
+  const formattedDataFechamento = useMemo(
+    () => (vaga?.dataFechamento ? formatDate(vaga.dataFechamento) : null),
+    [vaga?.dataFechamento, formatDate]
+  );
 
   return (
     <div className="max-w-5xl mx-auto p-6">
@@ -149,25 +227,25 @@ const VagaPage: React.FC = () => {
             </p>
           </div>
 
-          {vaga?.salario && (
+          {formattedSalario && (
             <div className="flex items-center">
               <span className="font-medium text-primary">Salário:</span>
               <p className="ml-2 text-secondary inline-block">
-                R$ {vaga.salario}
+                {formattedSalario}
               </p>
             </div>
           )}
           <div className="flex items-center">
             <span className="font-medium text-primary">Data Publicação:</span>
             <p className="ml-2 text-secondary inline-block">
-              {vaga.dataPublicacao}
+              {formattedDataPublicacao || 'N/A'}
             </p>
           </div>
-          {vaga.dataFechamento && (
+          {formattedDataFechamento && (
             <div className="flex">
               <span className="font-medium text-primary">Data Fechamento:</span>
               <p className="ml-2 text-secondary inline-block">
-                {vaga.dataFechamento}
+                {formattedDataFechamento}
               </p>
             </div>
           )}
@@ -506,3 +584,39 @@ const VagaPage: React.FC = () => {
 };
 
 export default VagaPage;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params!;
+
+  try {
+    // Criar instância de API para servidor
+    const serverApi = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_NEXT_URL || 'http://localhost:3000',
+      withCredentials: true,
+      headers: context.req.headers.cookie
+        ? { Cookie: context.req.headers.cookie }
+        : {},
+    });
+
+    const res = await serverApi.get(`/api/external/vaga/${id}`);
+
+    // Processar tipoSalario
+    if (res.data && res.data.tipoSalario) {
+      res.data.tipoSalario = res.data.tipoSalario.toUpperCase();
+    }
+
+    return {
+      props: {
+        initialVaga: res.data,
+        initialError: null,
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        initialVaga: null,
+        initialError: 'Vaga não encontrada ou erro ao buscar dados.',
+      },
+    };
+  }
+};

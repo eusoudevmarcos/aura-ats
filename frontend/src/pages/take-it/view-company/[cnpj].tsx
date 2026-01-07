@@ -1,8 +1,6 @@
 import { searchApi } from '@/axios/searchApi';
-import ClienteForm from '@/components/form/ClienteForm';
 import { SearchIcon } from '@/components/icons';
-import Modal from '@/components/modal/Modal';
-import Card from '@/components/takeit/Card';
+import { DataCard } from '@/components/takeit/DataCard';
 import { Info } from '@/components/takeit/Info';
 import {
   convertDataStoneToClienteWithEmpresaInput,
@@ -11,9 +9,31 @@ import {
 import { exportToCSV, exportToPDF, mostrarValor } from '@/utils/exportCSV';
 import { handleZeroLeft } from '@/utils/helper/helperCPF';
 import { mask } from '@/utils/mask/mask';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// Dynamic imports para componentes pesados
+const ClienteForm = dynamic(
+  () => import('@/components/form/ClienteForm'),
+  {
+    loading: () => (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-primary">Carregando formulário...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const Modal = dynamic(
+  () => import('@/components/modal/Modal'),
+  {
+    ssr: false,
+  }
+);
 
 const ViewCompanyPage: React.FC = () => {
   const router = useRouter();
@@ -33,7 +53,7 @@ const ViewCompanyPage: React.FC = () => {
   const cardRef = useRef<HTMLDivElement>(null);
 
   // Busca empresa e verifica se já é cliente
-  const fetchCompany = async (cnpjValue: string) => {
+  const fetchCompany = useCallback(async (cnpjValue: string) => {
     setLoading(true);
     setError(null);
     setCompany(null);
@@ -58,13 +78,13 @@ const ViewCompanyPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (cnpj) {
       fetchCompany(String(cnpj));
     }
-  }, [cnpj]);
+  }, [cnpj, fetchCompany]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -81,7 +101,7 @@ const ViewCompanyPage: React.FC = () => {
   }, [showExportDropdown]);
 
   // Exportação
-  const handleExport = async (type: 'csv' | 'pdf') => {
+  const handleExport = useCallback(async (type: 'csv' | 'pdf') => {
     setShowExportDropdown(false);
     if (!company) return;
     if (type === 'csv') {
@@ -89,16 +109,16 @@ const ViewCompanyPage: React.FC = () => {
     } else if (type === 'pdf') {
       await exportToPDF(cardRef as React.RefObject<HTMLDivElement>);
     }
-  };
+  }, [company]);
 
   // Modal Cliente
-  const handleOpenModalCliente = () => setShowModalCliente(true);
-  const handleCloseModalCliente = () => setShowModalCliente(false);
-  const handleClienteSalvo = (cliente: any) => {
+  const handleOpenModalCliente = useCallback(() => setShowModalCliente(true), []);
+  const handleCloseModalCliente = useCallback(() => setShowModalCliente(false), []);
+  const handleClienteSalvo = useCallback((cliente: any) => {
     setShowModalCliente(false);
     setClienteSalvo(true);
     setClienteId(cliente?.id || cliente?._id || null);
-  };
+  }, []);
 
   // Render
   if (loading) {
@@ -115,8 +135,11 @@ const ViewCompanyPage: React.FC = () => {
     );
   }
 
-  // Conversão correta dos dados para o DTO para uso no formulário
-  const initialFormValues = convertDataStoneToClienteWithEmpresaInput(company);
+  // Conversão correta dos dados para o DTO para uso no formulário - memoizado
+  const initialFormValues = useMemo(
+    () => convertDataStoneToClienteWithEmpresaInput(company),
+    [company]
+  );
 
   return (
     <div className="px-4 py-2 mb-30">
@@ -231,11 +254,9 @@ const ViewCompanyPage: React.FC = () => {
         id="card"
         ref={cardRef}
       >
-        <Card
+        <DataCard
           className="md:col-start-1 md:col-end-3 "
-          title={
-            <strong className="text-primary text-lg">Dados da Empresa</strong>
-          }
+          title="Dados da Empresa"
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-1">
             <Info label="CNPJ" value={mask(handleZeroLeft(company.cnpj))} />
@@ -262,15 +283,9 @@ const ViewCompanyPage: React.FC = () => {
             />
             <Info label="Tipo Jurídico" value={company.juridical_type} />
           </div>
-        </Card>
+        </DataCard>
         {/* Telefones Celulares */}
-        <Card
-          title={
-            <strong className="text-primary text-lg">
-              Telefones Celulares
-            </strong>
-          }
-        >
+        <DataCard title="Telefones Celulares">
           {company.mobile_phones && company.mobile_phones.length > 0 ? (
             <div className="space-y-1 flex flex-wrap gap-2">
               {company.mobile_phones.map((phone, idx) => (
@@ -293,13 +308,9 @@ const ViewCompanyPage: React.FC = () => {
           ) : (
             <div className="text-primary">Nenhum celular cadastrado.</div>
           )}
-        </Card>
+        </DataCard>
         {/* Telefones Fixos */}
-        <Card
-          title={
-            <strong className="text-primary text-lg">Telefones Fixos</strong>
-          }
-        >
+        <DataCard title="Telefones Fixos">
           {company.land_lines && company.land_lines.length > 0 ? (
             <div className="space-y-1 flex flex-wrap gap-2">
               {company.land_lines.map((phone, idx) => (
@@ -319,9 +330,9 @@ const ViewCompanyPage: React.FC = () => {
           ) : (
             <div className="text-primary">Nenhum telefone fixo cadastrado.</div>
           )}
-        </Card>
+        </DataCard>
         {/* E-mails da Empresa */}
-        <Card title={<strong className="text-primary text-lg">E-mails</strong>}>
+        <DataCard title="E-mails">
           {company.emails && company.emails.length > 0 ? (
             <div className="space-y-1 flex flex-wrap gap-1">
               {company.emails.map((email, idx) => (
@@ -335,15 +346,9 @@ const ViewCompanyPage: React.FC = () => {
           ) : (
             <div className="text-primary">Nenhum e-mail cadastrado.</div>
           )}
-        </Card>
+        </DataCard>
         {/* Simples Nacional / SIMEI */}
-        <Card
-          title={
-            <strong className="text-primary text-lg">
-              Simples Nacional / SIMEI
-            </strong>
-          }
-        >
+        <DataCard title="Simples Nacional / SIMEI">
           <div className="flex flex-wrap justify-between gap-x-10">
             <Info
               label="Status Simples"
@@ -362,11 +367,9 @@ const ViewCompanyPage: React.FC = () => {
               value={company.simple_simei?.dt_option_simei}
             />
           </div>
-        </Card>
+        </DataCard>
         {/* Endereços */}
-        <Card
-          title={<strong className="text-primary text-lg">Endereços</strong>}
-        >
+        <DataCard title="Endereços">
           {company.addresses && company.addresses.length > 0 ? (
             <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.addresses.map((addr, idx) => (
@@ -403,16 +406,10 @@ const ViewCompanyPage: React.FC = () => {
           ) : (
             <div className="text-primary">Nenhum endereço cadastrado.</div>
           )}
-        </Card>
+        </DataCard>
 
         {/* Sócios/Representantes */}
-        <Card
-          title={
-            <strong className="text-primary text-lg">
-              Sócios / Pessoas Relacionadas
-            </strong>
-          }
-        >
+        <DataCard title="Sócios / Pessoas Relacionadas">
           {company.related_persons && company.related_persons.length > 0 ? (
             <div className="space-y-1">
               {company.related_persons.map((person, idx) => (
@@ -450,10 +447,10 @@ const ViewCompanyPage: React.FC = () => {
               Nenhum sócio/pessoa relacionada cadastrada.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* Filiais */}
-        <Card title={<strong className="text-primary text-lg">Filiais</strong>}>
+        <DataCard title="Filiais">
           {company.branch_offices && company.branch_offices.length > 0 ? (
             <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.branch_offices.map((branch, idx) => (
@@ -491,15 +488,9 @@ const ViewCompanyPage: React.FC = () => {
           ) : (
             <div className="text-primary">Nenhuma filial cadastrada.</div>
           )}
-        </Card>
+        </DataCard>
         {/* Empresas Relacionadas */}
-        <Card
-          title={
-            <strong className="text-primary text-lg">
-              Empresas Relacionadas
-            </strong>
-          }
-        >
+        <DataCard title="Empresas Relacionadas">
           {company.related_companies && company.related_companies.length > 0 ? (
             <div className="bg-gray-100 p-2 rounded-xl space-y-2">
               {company.related_companies.map((rel, idx) => (
@@ -538,7 +529,7 @@ const ViewCompanyPage: React.FC = () => {
               Nenhuma empresa relacionada cadastrada.
             </div>
           )}
-        </Card>
+        </DataCard>
       </div>
     </div>
   );

@@ -1,4 +1,4 @@
-import { CandidatoInput } from '@/schemas/candidato.schema';
+import { CandidatoType } from '@/schemas/candidato.schema';
 
 /**
  * Interface para os dados recebidos da API DataStone
@@ -184,7 +184,7 @@ function formatCnpj(cnpj: number): string {
  */
 export function convertDataStoneToCandidatoDTO(
   dataStoneData: DataStoneApiResponse
-): Partial<CandidatoInput> {
+): Partial<CandidatoType> {
   // Mapeia endereços para localizações
   const localizacoes =
     dataStoneData.addresses
@@ -256,8 +256,8 @@ export function convertDataStoneToCandidatoDTO(
     })();
   }
 
-  // Constrói o DTO (alinhado ao CandidatoInput)
-  const dto: Partial<CandidatoInput> = {
+  // Constrói o DTO (alinhado ao CandidatoType)
+  const dto: Partial<CandidatoType> = {
     areaCandidato: 'OUTRO',
     emails,
     contatos,

@@ -1,90 +1,58 @@
-import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import { Controller, Get, Post, Delete, Param, Body, QueryParam } from "routing-controllers";
 import { toUsuarioDTO } from "../dto/funcionario.dto";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { UsuarioSistemaService } from "../services/usuarioSistema.service";
+import { Authorized } from "../decorators/Authorized";
 
 @injectable()
+@Controller("/funcionario")
 export class FuncionarioController {
   constructor(
     @inject(UsuarioSistemaService) private service: UsuarioSistemaService
   ) {}
 
-  async getAll(req: Request, res: Response) {
-    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-    const pageSize = req.query.pageSize
-      ? parseInt(req.query.pageSize as string, 10)
-      : 10;
-
-    try {
-      const funcionario = await this.service.getAll(page, pageSize);
-      return res.status(200).json(funcionario);
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao buscar funcionários",
-        message: error.message,
-      });
-    }
+  @Get("/")
+  @Authorized()
+  async getAll(
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10
+  ) {
+    const funcionario = await this.service.getAll(page, pageSize);
+    return funcionario;
   }
 
-  async getById(req: Request, res: Response) {
-    try {
-      const funcionario = await this.service.getById(req.params.uid as string);
-      return res.status(200).json(toUsuarioDTO(funcionario));
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao buscar funcionários",
-        message: error.message,
-      });
-    }
+  @Get("/:uid")
+  @Authorized()
+  async getById(@Param("uid") uid: string) {
+    const funcionario = await this.service.getById(uid);
+    return toUsuarioDTO(funcionario);
   }
 
-  async save(req: Request, res: Response) {
-    try {
-      const funcionario = await this.service.save(req.body);
-      return res.status(201).json(nonEmptyAndConvertDataDTO(funcionario));
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao criar funcionário",
-        message: error.message,
-      });
-    }
+  @Post("/save")
+  async save(@Body() body: any) {
+    const funcionario = await this.service.save(body);
+    return nonEmptyAndConvertDataDTO(funcionario);
   }
 
-  async createPessoa(req: Request, res: Response) {
-    try {
-      const funcionario = await this.service.save(req.body);
-      return res.status(201).json(funcionario);
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao criar funcionário",
-        message: error.message,
-      });
-    }
+  @Post("/create/pessoa")
+  async createPessoa(@Body() body: any) {
+    const funcionario = await this.service.save(body);
+    return funcionario;
   }
 
-  async createEmpresa(req: Request, res: Response) {
-    try {
-      const funcionario = await this.service.save(req.body);
-      return res.status(201).json(funcionario);
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao criar funcionário",
-        message: error.message,
-      });
-    }
+  @Post("/create/empresa")
+  @Authorized()
+  async createEmpresa(@Body() body: any) {
+    const funcionario = await this.service.save(body);
+    return funcionario;
   }
 
-  async delete(req: Request, res: Response) {
-    try {
-      const { id } = req.body;
-      await this.service.delete(id);
-      return res.status(200).json("Usuario do sistema deletado com sucesso");
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao criar funcionário",
-        message: error.message,
-      });
-    }
+  @Delete("/delete")
+  @Authorized()
+  async delete(@Body() body: { id: string }) {
+    const { id } = body;
+    await this.service.delete(id);
+    return { message: "Usuario do sistema deletado com sucesso" };
   }
 }

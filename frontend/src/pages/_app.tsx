@@ -1,5 +1,6 @@
 // frontend/pages/_app.tsx
 import DashboardLayout from '@/layout/DashboardLayout';
+import KanbanLayout from '@/layout/KanbanLayout';
 import MainLayout from '@/layout/MainLayout';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import type { AppProps } from 'next/app';
@@ -79,57 +80,67 @@ function App({ Component, pageProps }: AppProps) {
 
   if (router.pathname == '/dashboard/cliente') {
     return (
-      <AuthProvider>
-        <SpeedInsights />
-        <DashboardLayout>
-          <LoadingWrapper>
-            <Component {...pageProps} />
-          </LoadingWrapper>
-        </DashboardLayout>
-      </AuthProvider>
+      <>
+        <AuthProvider>
+          <SpeedInsights />
+          <DashboardLayout>
+            <LoadingWrapper>
+              <Component {...pageProps} />
+            </LoadingWrapper>
+          </DashboardLayout>
+        </AuthProvider>
+      </>
     );
   }
 
   return (
     <>
-      <Head>
-        <title>Aura ATS</title>
-        <link rel="icon" href="/favicon.ico" />
-        <meta
-          name="description"
-          content="Aura: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade."
-        />
-      </Head>
+        <Head>
+          <title>Aura ATS</title>
+          <link rel="icon" href="/favicon.ico" />
+          <meta
+            name="description"
+            content="Aura: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade."
+          />
+        </Head>
 
-      {router.pathname === '/' ? (
-        <>
-          <SpeedInsights />
-          <MainLayout>
+        {router.pathname === '/' ? (
+          <>
+            <SpeedInsights />
+            <MainLayout>
+              <LoadingWrapper>
+                <Component {...pageProps} />
+              </LoadingWrapper>
+            </MainLayout>
+          </>
+        ) : isPublic || isAlwaysPublicPath(router.pathname) ? (
+          <>
+            <SpeedInsights />
             <LoadingWrapper>
               <Component {...pageProps} />
             </LoadingWrapper>
-          </MainLayout>
-        </>
-      ) : isPublic || isAlwaysPublicPath(router.pathname) ? (
-        <>
-          <SpeedInsights />
-          <LoadingWrapper>
-            <Component {...pageProps} />
-          </LoadingWrapper>
-        </>
-      ) : (
-        <AuthProvider>
-          {/* <ScreenshotGuard forceDev={false} durationMs={0} /> */}
-          <SpeedInsights />
-          <DashboardLayout>
-            {dashboardProps => (
-              <LoadingWrapper>
-                <Component {...pageProps} {...dashboardProps} />
-              </LoadingWrapper>
+          </>
+        ) : (
+          <AuthProvider>
+            {/* <ScreenshotGuard forceDev={false} durationMs={0} /> */}
+            <SpeedInsights />
+            {router.pathname.startsWith('/kanban') ? (
+              <KanbanLayout>
+                <LoadingWrapper>
+                  <Component {...pageProps} />
+                </LoadingWrapper>
+              </KanbanLayout>
+            ) : (
+              <DashboardLayout>
+                {dashboardProps => (
+                  <LoadingWrapper>
+                    <Component {...pageProps} {...dashboardProps} />
+                  </LoadingWrapper>
+                )}
+              </DashboardLayout>
             )}
-          </DashboardLayout>
-        </AuthProvider>
-      )}
+          </AuthProvider>
+        )}
     </>
   );
 }

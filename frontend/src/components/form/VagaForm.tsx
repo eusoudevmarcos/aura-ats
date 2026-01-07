@@ -58,7 +58,6 @@ const VagaForm: React.FC<VagaFormProps> = ({
   });
 
   const {
-    register,
     control,
     handleSubmit,
     setValue,
@@ -184,7 +183,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormInput
           name="titulo"
-          register={register}
+          control={control}
           label="Título da Vaga"
           placeholder="Ex: Medico residente"
           errors={errors}
@@ -193,7 +192,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormSelect
           name="tipoSalario"
-          register={register}
+          control={control}
           label="Tipo de salário"
           placeholder="Selecione o tipo de salário"
         >
@@ -207,7 +206,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
         {tipoSalario !== 'A COMBINAR' && (
           <FormInput
             name="salario"
-            register={register}
+            control={control}
             label="Salário"
             maskProps={{
               mask: 'R$ num',
@@ -233,7 +232,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormSelect
           name="categoria"
-          register={register}
+          control={control}
           errors={errors}
           label="Categoria da Vaga"
           placeholder="Selecione o categoria"
@@ -249,7 +248,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormSelect
           name="status"
-          register={register}
+          control={control}
           errors={errors}
           label="Andamento da Vaga"
         >
@@ -264,7 +263,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormSelect
           name="tipoContrato"
-          register={register}
+          control={control}
           label="Tipo de Contrato"
           placeholder="Selecione o tipo de contratação"
         >
@@ -280,7 +279,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
         {categoria !== 'SAUDE' && (
           <FormSelect
             name="nivelExperiencia"
-            register={register}
+            control={control}
             errors={errors}
             label="Nível de Experiência"
             placeholder="Selecione o nível de experiência"
@@ -297,6 +296,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormTextarea
           name="descricao"
+          control={control}
           label="Descrição da Vaga"
           placeholder="Ex: Medico residente com mais de 5 anos de experiência"
           errors={errors}
@@ -305,7 +305,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         {/* <FormTextarea
           name="requisitos"
-          register={register}
+          control={control}
           label="Requisitos (Opcional)"
           placeholder="Ex: 5 anos de experiência, ter RQN."
           errors={errors}
@@ -314,7 +314,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
 
         <FormTextarea
           name="responsabilidades"
-          register={register}
+          control={control}
           label="Responsabilidades (Opcional)"
           placeholder="Ex: Atuar como médico em clinicas locais."
           errors={errors}
@@ -331,7 +331,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
               <input
                 type="radio"
                 value="PRESENCIAL"
-                {...register('tipoLocalTrabalho')}
+                name="tipoLocalTrabalho"
                 checked={tipoLocalTrabalhoWatch === 'PRESENCIAL'}
                 className="form-radio text-primary focus:ring-primary"
                 onChange={() => setValue('tipoLocalTrabalho', 'PRESENCIAL')}
@@ -342,7 +342,7 @@ const VagaForm: React.FC<VagaFormProps> = ({
               <input
                 type="radio"
                 value="REMOTO"
-                {...register('tipoLocalTrabalho')}
+                name="tipoLocalTrabalho"
                 checked={tipoLocalTrabalhoWatch === 'REMOTO'}
                 className="form-radio text-primary focus:ring-primary"
                 onChange={() => setValue('tipoLocalTrabalho', 'REMOTO')}

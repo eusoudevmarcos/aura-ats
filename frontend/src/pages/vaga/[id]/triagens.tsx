@@ -1,7 +1,9 @@
 import api from '@/axios';
 import Card from '@/components/Card';
+import axios from 'axios';
+import { GetServerSideProps } from 'next';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 type Triagem = {
   id: string;
@@ -11,16 +13,24 @@ type Triagem = {
   update_at: string;
 };
 
-const TriagensDaVagaPage: React.FC = () => {
+interface TriagensDaVagaPageProps {
+  initialTriagens?: Triagem[];
+  initialError?: string | null;
+}
+
+const TriagensDaVagaPage: React.FC<TriagensDaVagaPageProps> = ({
+  initialTriagens,
+  initialError,
+}) => {
   const router = useRouter();
   const { id } = router.query;
 
-  const [triagens, setTriagens] = useState<Triagem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [triagens, setTriagens] = useState<Triagem[]>(initialTriagens || []);
+  const [loading, setLoading] = useState(!initialTriagens);
+  const [error, setError] = useState<string | null>(initialError || null);
 
-  const fetchTriagens = async () => {
-    if (!id) return;
+  const fetchTriagens = useCallback(async () => {
+    if (!id || typeof id !== 'string') return;
     setLoading(true);
     setError(null);
     try {
@@ -34,12 +44,14 @@ const TriagensDaVagaPage: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [id]);
 
   useEffect(() => {
-    fetchTriagens();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [id]);
+    // Só busca se não tiver dados iniciais do SSR
+    if (!initialTriagens) {
+      fetchTriagens();
+    }
+  }, [fetchTriagens, initialTriagens]);
 
   return (
     <div className="max-w-4xl mx-auto p-6">
@@ -97,3 +109,38 @@ const TriagensDaVagaPage: React.FC = () => {
 };
 
 export default TriagensDaVagaPage;
+
+export const getServerSideProps: GetServerSideProps = async (context) => {
+  const { id } = context.params!;
+
+  try {
+    // Criar instância de API para servidor
+    const serverApi = axios.create({
+      baseURL: process.env.NEXT_PUBLIC_NEXT_URL || 'http://localhost:3000',
+      withCredentials: true,
+      headers: context.req.headers.cookie
+        ? { Cookie: context.req.headers.cookie }
+        : {},
+    });
+
+    const res = await serverApi.get(`/api/externalWithAuth/triagem`, {
+      params: { vagaId: id },
+    });
+
+    const payload = res.data?.data || res.data?.items || res.data || [];
+
+    return {
+      props: {
+        initialTriagens: payload,
+        initialError: null,
+      },
+    };
+  } catch (error) {
+    return {
+      props: {
+        initialTriagens: [],
+        initialError: 'Erro ao carregar triagens.',
+      },
+    };
+  }
+};

@@ -1,7 +1,7 @@
 // src/components/input/FormInput.tsx
 import { FormInputProps } from '@/type/formInput.type';
 import { getError } from '@/utils/getError';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Controller, FieldValues, useFormContext } from 'react-hook-form';
 import { IMaskInput } from 'react-imask';
 import { Container } from './Container';
@@ -18,7 +18,7 @@ export function FormInput<T extends FieldValues>({
   label,
   placeholder,
   type = 'text',
-  value,
+  value: valueProp,
   onChange,
   onFocus,
   onKeyDown,
@@ -26,6 +26,7 @@ export function FormInput<T extends FieldValues>({
   errors: externalErrors,
   noControl = false,
   clear = false,
+  ...rest
 }: FormInputProps<T>) {
   const formContext = useFormContext<T>();
   const control = externalControl || formContext?.control;
@@ -35,18 +36,53 @@ export function FormInput<T extends FieldValues>({
 
   const setValue = formContext?.setValue;
   const watch = formContext?.watch;
-  const watchValue = watch ? watch(name) : value;
+  const formValue = watch ? watch(name) : undefined;
 
-  const { classNameContainer, ...otherInputProps } = inputProps || {};
+  // Estado interno para fallback quando não está em modo controlado
+  const [internalValue, setInternalValue] = useState<string>(valueProp ?? '');
+
+  // Garantir sempre a fonte de valor correta no input
+  let inputValue = '';
+  if (control && !noControl) {
+    inputValue = formValue ?? '';
+  } else if (typeof valueProp !== 'undefined') {
+    inputValue = valueProp;
+  } else {
+    inputValue = internalValue;
+  }
+
+  const {
+    classNameContainer,
+    required: inputRequired,
+    ...otherInputProps
+  } = inputProps || {};
+
   const inputClassName = buildInputClasses(
     errorMessage ?? null,
     otherInputProps?.className
   );
 
-  // IMPORTANT: Use useMemo to avoid mask input reset issue
+  let isRequired = false;
+  if (typeof inputRequired !== 'undefined') {
+    isRequired = inputRequired === true;
+  } else if (
+    errors &&
+    name in errors &&
+    errors[name] &&
+    errors[name]?.type === 'required'
+  ) {
+    isRequired = true;
+  } else if (typeof rest.required !== 'undefined') {
+    isRequired = rest.required === true;
+  }
+
+  // Memo input for mask/normal
   const MemoInputElement = useMemo(() => {
     const Component = React.forwardRef<HTMLInputElement, InputElementProps>(
-      ({ maskProps, onChange, onKeyDown, onFocus, ...props }, ref) => {
+      (
+        { maskProps, onChange, onKeyDown, onFocus, required, ...props },
+        ref
+      ) => {
         if (maskProps?.mask) {
           return (
             <IMaskInput
@@ -54,7 +90,9 @@ export function FormInput<T extends FieldValues>({
               onAccept={onChange}
               onFocus={onFocus}
               onKeyDown={onKeyDown}
+              required={required}
               autoComplete="off"
+              name={props.name}
               {...maskProps}
               {...props}
             />
@@ -67,6 +105,8 @@ export function FormInput<T extends FieldValues>({
             onFocus={onFocus}
             onKeyDown={onKeyDown}
             autoComplete="off"
+            required={required}
+            name={props.name}
             {...props}
           />
         );
@@ -74,19 +114,19 @@ export function FormInput<T extends FieldValues>({
     );
     Component.displayName = 'MemoInputElement';
     return Component;
-    // Mask config and name are enough to memoize
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [maskProps?.mask, name]);
 
+  // Função para renderizar o input
   const renderInput = (field?: {
     value: any;
     onChange: (val: any) => void;
     onBlur: () => void;
     ref: any;
+    name?: string;
   }) => {
-    // IMaskInput expects onAccept for monodirectional state (onChange leads to clearing issue)
+    // Handler para mudança
     const handleChange = (newValue: any) => {
-      // Fix: IMaskInput passes string directly as first argument (not in newValue.target.value)
       const processedValue =
         maskProps?.mask && typeof newValue === 'string'
           ? newValue
@@ -94,9 +134,12 @@ export function FormInput<T extends FieldValues>({
           ? newValue.target.value
           : newValue;
 
-      field?.onChange?.(processedValue);
+      if (field?.onChange) {
+        field.onChange(processedValue);
+      } else {
+        setInternalValue(processedValue);
+      }
 
-      // Chama o onChange customizado
       if (onChange) {
         if (maskProps?.mask) {
           (onChange as FormInputOnChange)(processedValue);
@@ -123,15 +166,41 @@ export function FormInput<T extends FieldValues>({
         type={type}
         className={inputClassName}
         placeholder={placeholder}
-        value={field ? field.value ?? '' : value ?? ''}
+        value={field ? field.value ?? '' : inputValue ?? ''}
         onChange={handleChange}
         onBlur={field?.onBlur}
         onFocus={handleFocus}
         onKeyDown={onKeyDown}
         maskProps={maskProps}
+        required={isRequired}
+        name={name.toString()}
         {...otherInputProps}
       />
     );
+  };
+
+  // Função para limpar
+  const handleClear = () => {
+    if (setValue && control && !noControl) {
+      setValue(name, '' as any, {
+        shouldDirty: true,
+        shouldValidate: true,
+      });
+    }
+    if (!control || noControl) {
+      setInternalValue('');
+    }
+    if (onChange) {
+      if (maskProps?.mask) {
+        (onChange as FormInputOnChange)('' as any);
+      } else {
+        const syntheticEvent = {
+          target: { value: '', name: name.toString() },
+          currentTarget: { value: '', name: name.toString() },
+        } as React.ChangeEvent<HTMLInputElement>;
+        (onChange as FormInputOnChange)(syntheticEvent);
+      }
+    }
   };
 
   return (
@@ -144,33 +213,16 @@ export function FormInput<T extends FieldValues>({
             render={({ field }) => renderInput(field)}
           />
         ) : (
-          renderInput()
+          renderInput({
+            value: inputValue,
+            onChange: setInternalValue,
+            onBlur: () => {},
+            ref: undefined,
+            name: name.toString(),
+          })
         )}
 
-        {clear && (
-          <ClearButton
-            value={watchValue ?? value}
-            onClear={() => {
-              if (setValue) {
-                setValue(name, '' as any, {
-                  shouldDirty: true,
-                  shouldValidate: true,
-                });
-              }
-              if (onChange) {
-                if (maskProps?.mask) {
-                  (onChange as FormInputOnChange)('' as any);
-                } else {
-                  const syntheticEvent = {
-                    target: { value: '', name: name.toString() },
-                    currentTarget: { value: '', name: name.toString() },
-                  } as React.ChangeEvent<HTMLInputElement>;
-                  (onChange as FormInputOnChange)(syntheticEvent);
-                }
-              }
-            }}
-          />
-        )}
+        {clear && <ClearButton value={inputValue} onClear={handleClear} />}
         {/* Mensagem de erro flutuante em formato de balão */}
         <ErrorMessage message={errorMessage ?? null} />
       </div>
@@ -182,6 +234,7 @@ type InputElementProps = React.InputHTMLAttributes<HTMLInputElement> & {
   maskProps?: any;
   onChange: (value: any) => void;
   onFocus?: (e: React.FocusEvent<HTMLInputElement>) => void;
+  required?: boolean;
 };
 
 const ClearButton = ({ value, onClear }: { value: any; onClear: () => void }) =>

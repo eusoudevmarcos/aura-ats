@@ -7,7 +7,7 @@ interface InfoProps {
   hideIfEmpty?: boolean;
 }
 
-export function Info({ label, value, hideIfEmpty = false }: InfoProps) {
+const InfoComponent: React.FC<InfoProps> = ({ label, value, hideIfEmpty = false }) => {
   if (
     hideIfEmpty &&
     (value === undefined ||
@@ -29,4 +29,6 @@ export function Info({ label, value, hideIfEmpty = false }: InfoProps) {
       {mostrarValor(value)}
     </p>
   );
-}
+};
+
+export const Info = React.memo<InfoProps>(InfoComponent);

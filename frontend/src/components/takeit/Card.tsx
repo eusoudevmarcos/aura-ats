@@ -6,7 +6,7 @@ interface CardProps {
   className?: string;
 }
 
-const Card: React.FC<CardProps> = ({ title, children, className = '' }) => {
+const CardComponent: React.FC<CardProps> = ({ title, children, className = '' }) => {
   return (
     <div className={`bg-white rounded-xl shadow-md p-4 min-h-28 ${className}`}>
       {typeof title == 'string' ? (
@@ -21,5 +21,7 @@ const Card: React.FC<CardProps> = ({ title, children, className = '' }) => {
     </div>
   );
 };
+
+const Card = React.memo<CardProps>(CardComponent);
 
 export default Card;

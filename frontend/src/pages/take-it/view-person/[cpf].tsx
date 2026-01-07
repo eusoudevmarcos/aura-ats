@@ -1,16 +1,36 @@
 import api from '@/axios';
-import CandidatoForm from '@/components/form/CandidatoForm';
 import { SearchIcon, WhatsAppIcon } from '@/components/icons';
-import Modal from '@/components/modal/Modal';
-import Card from '@/components/takeit/Card';
+import { DataCard } from '@/components/takeit/DataCard';
 import { Info } from '@/components/takeit/Info';
 import { convertDataStoneToCandidatoDTO } from '@/dto/dataStoneCandidato.dto';
 import { handleZeroLeft } from '@/utils/helper/helperCPF';
 import { mask } from '@/utils/mask/mask';
 import { unmask } from '@/utils/mask/unmask';
+import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+
+// Dynamic imports para componentes pesados
+const CandidatoForm = dynamic(
+  () => import('@/components/form/CandidatoForm'),
+  {
+    loading: () => (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-primary">Carregando formulário...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const Modal = dynamic(
+  () => import('@/components/modal/Modal'),
+  {
+    ssr: false,
+  }
+);
 
 export default function ViewPersonPage(): React.ReactElement {
   const router = useRouter();
@@ -28,7 +48,7 @@ export default function ViewPersonPage(): React.ReactElement {
   const [cache, setCache] = useState(false);
 
   // Função para buscar dados da pessoa pelo CPF
-  const fetchPersonData = async (cpf: string) => {
+  const fetchPersonData = useCallback(async (cpf: string) => {
     setLoading(true);
     setError(null);
     setData(null);
@@ -81,13 +101,13 @@ export default function ViewPersonPage(): React.ReactElement {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     if (cpf) {
       fetchPersonData(cpf as string);
     }
-  }, [cpf]);
+  }, [cpf, fetchPersonData]);
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
@@ -126,6 +146,12 @@ export default function ViewPersonPage(): React.ReactElement {
       </div>
     );
   }
+
+  // Conversão de dados memoizada
+  const convertedData = useMemo(
+    () => convertDataStoneToCandidatoDTO(data),
+    [data]
+  );
 
   return (
     <div className="px-4 py-2 mb-30">
@@ -175,12 +201,8 @@ export default function ViewPersonPage(): React.ReactElement {
         ref={cardRef}
       >
         {/* Dados Pessoais */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">
-              Dados do Profissional
-            </span>
-          }
+        <DataCard
+          title="Dados do Profissional"
           className="col-span-2"
         >
           <div className="grid gap-1 sm:grid-cols-2">
@@ -247,16 +269,10 @@ export default function ViewPersonPage(): React.ReactElement {
             />
             <Info label="Signo" value={data.sign || '-'} />
           </div>
-        </Card>
+        </DataCard>
 
         {/* Telefones Celulares */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">
-              Telefones Celulares
-            </span>
-          }
-        >
+        <DataCard title="Telefones Celulares">
           {data.mobile_phones && data.mobile_phones.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {data.mobile_phones.map((phone: any, idx: any) => (
@@ -292,16 +308,10 @@ export default function ViewPersonPage(): React.ReactElement {
               Nenhum celular cadastrado.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* Telefones Fixos */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">
-              Telefones Fixos
-            </span>
-          }
-        >
+        <DataCard title="Telefones Fixos">
           {data.land_lines && data.land_lines.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {data.land_lines.map((phone: any, idx: any) => (
@@ -318,14 +328,10 @@ export default function ViewPersonPage(): React.ReactElement {
               Nenhum telefone fixo cadastrado.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* E-mails */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">E-mails</span>
-          }
-        >
+        <DataCard title="E-mails">
           {data.emails && data.emails.length > 0 ? (
             <div className="flex flex-wrap gap-2">
               {data.emails.map((email: any, idx: any) => (
@@ -342,16 +348,10 @@ export default function ViewPersonPage(): React.ReactElement {
               Nenhum e-mail cadastrado.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* Profissão e Renda */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">
-              Profissão e Renda
-            </span>
-          }
-        >
+        <DataCard title="Profissão e Renda">
           <div className="flex flex-col">
             <Info
               label="CBO"
@@ -361,16 +361,10 @@ export default function ViewPersonPage(): React.ReactElement {
             />
             <Info label="Renda Estimada" value={data.estimated_income} />
           </div>
-        </Card>
+        </DataCard>
 
         {/* Empresas Relacionadas */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">
-              Empresas Relacionadas
-            </span>
-          }
-        >
+        <DataCard title="Empresas Relacionadas">
           {data.related_companies && data.related_companies.length > 0 ? (
             <div className="flex flex-col gap-2">
               {data.related_companies.map((company: any, idx: any) => (
@@ -409,14 +403,10 @@ export default function ViewPersonPage(): React.ReactElement {
               Nenhuma empresa relacionada cadastrada.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* Endereços */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">Endereços</span>
-          }
-        >
+        <DataCard title="Endereços">
           {data.addresses && data.addresses.length > 0 ? (
             <div className="flex flex-col gap-2">
               {data.addresses.map((addr: any, idx: any) => (
@@ -449,14 +439,10 @@ export default function ViewPersonPage(): React.ReactElement {
               Nenhum endereço cadastrado.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* Familiares */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">Familiares</span>
-          }
-        >
+        <DataCard title="Familiares">
           {data.family_datas && data.family_datas.length > 0 ? (
             <div className="flex flex-col gap-2">
               {data.family_datas.map((fam: any, idx: any) => (
@@ -477,16 +463,10 @@ export default function ViewPersonPage(): React.ReactElement {
               Nenhum familiar cadastrado.
             </div>
           )}
-        </Card>
+        </DataCard>
 
         {/* PEP */}
-        <Card
-          title={
-            <span className="font-bold text-primary text-lg">
-              Pessoa Politicamente Exposta (PEP)
-            </span>
-          }
-        >
+        <DataCard title="Pessoa Politicamente Exposta (PEP)">
           <div className="flex flex-col gap-2">
             <Info
               label="PEP"
@@ -500,7 +480,7 @@ export default function ViewPersonPage(): React.ReactElement {
             />
             {data.pep && <Info label="Tipo de PEP" value={data.pep_type} />}
           </div>
-        </Card>
+        </DataCard>
       </div>
 
       <Modal
@@ -509,7 +489,7 @@ export default function ViewPersonPage(): React.ReactElement {
         title="Editar Candidato"
       >
         <CandidatoForm
-          initialValues={convertDataStoneToCandidatoDTO(data)}
+          initialValues={convertedData}
           onSuccess={candidato => {
             setShowModalEdit(prev => !prev);
             setIsSave(true);

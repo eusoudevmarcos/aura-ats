@@ -1,16 +1,16 @@
 // Importe os enums e modelos relacionados do seu Prisma Client
 // Certifique-se de que o seu @prisma/client está gerado e acessível.
 
-import { AreaCandidatoEnum } from "@/schemas/candidato.schema";
-import { Cliente } from "./cliente.type";
-import { CandidaturaVaga } from "./candidaturaVaga.type";
-import { Agenda } from "./agenda.type";
+import { AreaCandidato } from '@/dto/dataStoneCandidato.dto';
+import { Agenda } from './agenda.type';
+import { CandidaturaVaga } from './candidaturaVaga.type';
+import { Cliente } from './cliente.type';
 
 export type VagaInput = {
   id?: string;
   titulo: string;
   descricao: string;
-  areaCandidato: AreaCandidatoEnum;
+  areaCandidato: AreaCandidato;
   clienteId: string;
   agendaId: string;
   candidaturaVaga?: CandidaturaVaga[];
@@ -22,7 +22,7 @@ export type Vaga = {
   descricao: string;
   create_at: Date;
   update_at: Date;
-  areaCandidato: AreaCandidatoEnum;
+  areaCandidato: AreaCandidato;
   clienteId: string;
   cliente: Cliente;
   agendaId: string;

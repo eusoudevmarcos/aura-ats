@@ -1,10 +1,36 @@
 import { AdminGuard } from '@/components/auth/AdminGuard';
 import { PrimaryButton } from '@/components/button/PrimaryButton';
-import VagaForm from '@/components/form/VagaForm';
 import { PlusIcon } from '@/components/icons';
-import VagaList from '@/components/list/VagaList';
-import Modal from '@/components/modal/Modal';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
+
+// Dynamic imports para componentes pesados
+const VagaForm = dynamic(
+  () => import('@/components/form/VagaForm'),
+  {
+    loading: () => (
+      <div className="flex justify-center p-4">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        <span className="ml-2 text-primary">Carregando formulário...</span>
+      </div>
+    ),
+    ssr: false,
+  }
+);
+
+const VagaList = dynamic(
+  () => import('@/components/list/VagaList'),
+  {
+    ssr: false,
+  }
+);
+
+const Modal = dynamic(
+  () => import('@/components/modal/Modal'),
+  {
+    ssr: false,
+  }
+);
 
 export default function Vagas() {
   const [showVagasForm, setShowVagasForm] = useState(false);

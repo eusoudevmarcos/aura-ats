@@ -81,7 +81,7 @@ export default function ConvidadosTable({
       render: (_: any, index: number) => (
         <PrimaryButton
           onClick={() => handleRemove(index)}
-          className="!bg-red-500 !hover:bg-red-800 text-white"
+          className="bg-red-500! !hover:bg-red-800 text-white"
           disabled={!!initialValues}
         >
           <span className="material-icons-outlined">delete</span>

@@ -1,13 +1,22 @@
 import api from '@/axios';
 import { getCliente, patchClienteStatus } from '@/axios/cliente.axios';
+import { TrelloBoardWrapper } from '@/components/kanban/TrelloBoardWrapper';
 import { StatusClienteEnumInput } from '@/schemas/statusClienteEnum.schema';
 import { unmask } from '@/utils/mask/unmask';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Board, { Lane } from 'react-trello';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
 import { CardKanbanClientes } from '../kanban/CardKanbanClientes';
+
+// Tipo Lane compatível com react-trello
+interface Lane {
+  id: string;
+  title: string;
+  label?: string;
+  cards: any[];
+  [key: string]: any;
+}
 
 interface EmpresaContato {
   telefone?: string;
@@ -260,7 +269,7 @@ const ClienteList: React.FC<{
             }}
             className="board-horizontal-scroll draggable-x"
           >
-            <Board
+            <TrelloBoardWrapper
               data={kanbanData}
               style={{
                 minHeight: '10vh',
@@ -280,7 +289,7 @@ const ClienteList: React.FC<{
               }}
               onCardMoveAcrossLanes={handleCardMove}
               components={{
-                Card: props => (
+                Card: (props: any) => (
                   <CardKanbanClientes
                     {...props}
                     onEdit={_id => {

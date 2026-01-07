@@ -20,6 +20,34 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Variáveis de Ambiente
+
+Antes de iniciar o projeto, crie um arquivo `.env` na raiz com as seguintes variáveis (ajuste os valores conforme sua configuração):
+
+```env
+UPSTASH_REDIS_REST_URL=
+NEXTAUTH_SECRET=
+NEXT_PUBLIC_NEXT_URL=
+NEXT_PUBLIC_API_URL=
+GOOGLE_REDIRECT_URL=
+GOOGLE_CLIENT_SECRET=
+GOOGLE_CLIENT_ID=
+NEXT_PUBLIC_FIREBASE_APP_ID=
+NUXT_PUBLIC_JWT_SECRET=
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
+NEXT_PUBLIC_FIREBASE_API_KEY=
+```
+
+**Observação:**
+
+- Algumas variáveis como `NEXT_PUBLIC_NEXT_URL` estão listadas duas vezes, utilize apenas uma instância no seu arquivo `.env`.
+- Preencha cada variável com o valor correto de acordo com suas credenciais e configurações do projeto.
+
+---
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

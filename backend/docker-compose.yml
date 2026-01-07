@@ -1,17 +1,17 @@
 services:
-  postgres:
-    image: postgres:17
-    container_name: aura-db
+  backend:
+    build:
+      context: .
+      args:
+        DATABASE_URL: ${DATABASE_URL}
+    container_name: aura-backend
     restart: always
+    env_file:
+      - .env
     environment:
-      POSTGRES_USER: aura
-      POSTGRES_PASSWORD: auradb124
-      POSTGRES_DB: auraDB
+      DATABASE_URL: ${DATABASE_URL}
     ports:
-      - "5432:5432"
+      - "3001:3001"
     volumes:
-      - pgdata:/var/lib/postgresql/data
-      #- ./sql/init.sql:/docker-entrypoint-initdb.d/init.sql
-
-volumes:
-  pgdata:
+      - .:/app
+    command: npm run dev

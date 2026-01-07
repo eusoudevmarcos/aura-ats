@@ -6,7 +6,7 @@ import {
 } from '@/schemas/vaga.schema';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import Board from 'react-trello';
+import { TrelloBoardWrapper } from '@/components/kanban/TrelloBoardWrapper';
 import { PrimaryButton } from '../button/PrimaryButton';
 import VagaForm from '../form/VagaForm';
 import { FormInput } from '../input/FormInput';
@@ -393,7 +393,7 @@ const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
             }}
             className="board-horizontal-scroll draggable-x"
           >
-            <Board
+            <TrelloBoardWrapper
               data={kanbanData}
               style={{
                 minHeight: '10vh',

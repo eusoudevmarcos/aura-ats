@@ -22,8 +22,8 @@ export type CandidatoWithRelations = Candidato & {
   medico: {
     rqe: string;
     crm: [];
+    especialidades?: { rqe: string; especialidade: Especialidade }[];
   };
-  especialidade?: Especialidade | null;
 };
 
 const columns: TableColumn<CandidatoWithRelations>[] = [
@@ -36,12 +36,12 @@ const columns: TableColumn<CandidatoWithRelations>[] = [
   {
     label: 'Especialidade',
     key: 'especialidade.nome',
-    render: row => row.especialidade?.nome || '-',
+    render: row => row.medico?.especialidades?.[0]?.especialidade?.nome || '-',
   },
   {
     label: 'RQE',
     key: 'rqe',
-    render: row => row.medico?.rqe || '-',
+    render: row => row.medico?.especialidades?.[0]?.rqe || '-',
   },
   {
     label: 'UF/Cidade',

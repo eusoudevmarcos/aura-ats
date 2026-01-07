@@ -1,69 +1,62 @@
-import { Request, Response } from "express";
+import { Controller, Get, Post, Put, Delete, Param, Body } from "routing-controllers";
 import { getAuth } from "firebase-admin/auth";
 import { firestoreDB } from "../lib/firebaseAdmin";
+import { Authorized } from "../decorators/Authorized";
 
+@Controller("/users")
 export default class UserController {
-  async create(req: Request, res: Response) {
-    try {
-      const { email, password, name, role } = req.body;
+  @Post("/")
+  @Authorized()
+  async create(@Body() body: { email: string; password: string; name: string; role: string }) {
+    const { email, password, name, role } = body;
 
-      const userRecord = await getAuth().createUser({
-        email,
-        password,
-        displayName: name,
-      });
-      await firestoreDB
-        .collection("users")
-        .doc(userRecord.uid)
-        .set({ email, name, role });
+    const userRecord = await getAuth().createUser({
+      email,
+      password,
+      displayName: name,
+    });
+    await firestoreDB
+      .collection("users")
+      .doc(userRecord.uid)
+      .set({ email, name, role });
 
-      res.status(201).json({ uid: userRecord.uid });
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao criar usuário", details: error });
-    }
+    return { uid: userRecord.uid };
   }
 
-  async getAll(req: Request, res: Response) {
-    try {
-      const snapshot = await firestoreDB.collection("users").get();
-      const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      res.json(users);
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao buscar usuários" });
-    }
+  @Get("/")
+  @Authorized()
+  async getAll() {
+    const snapshot = await firestoreDB.collection("users").get();
+    const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+    return users;
   }
 
-  async getOne(req: Request, res: Response) {
-    try {
-      const doc = await firestoreDB
-        .collection("users")
-        .doc(req.params.id)
-        .get();
-      if (!doc.exists)
-        return res.status(404).json({ error: "Usuário não encontrado" });
-
-      res.json({ id: doc.id, ...doc.data() });
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao buscar usuário" });
+  @Get("/:id")
+  @Authorized()
+  async getOne(@Param("id") id: string) {
+    const doc = await firestoreDB
+      .collection("users")
+      .doc(id)
+      .get();
+    if (!doc.exists) {
+      throw new Error("Usuário não encontrado");
     }
+
+    return { id: doc.id, ...doc.data() };
   }
 
-  async update(req: Request, res: Response) {
-    try {
-      await firestoreDB.collection("users").doc(req.params.id).update(req.body);
-      res.json({ message: "Usuário atualizado com sucesso" });
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao atualizar usuário" });
-    }
+  @Put("/:id")
+  @Authorized()
+  async update(@Param("id") id: string, @Body() body: any) {
+    await firestoreDB.collection("users").doc(id).update(body);
+    return { message: "Usuário atualizado com sucesso" };
   }
 
-  async delete(req: Request, res: Response) {
-    try {
-      await getAuth().deleteUser(req.params.id);
-      await firestoreDB.collection("users").doc(req.params.id).delete();
-      res.json({ message: "Usuário deletado" });
-    } catch (error) {
-      res.status(500).json({ error: "Erro ao deletar usuário" });
-    }
+  @Delete("/:id")
+  @Authorized()
+  async delete(@Param("id") id: string) {
+    await getAuth().deleteUser(id);
+    await firestoreDB.collection("users").doc(id).delete();
+    return { message: "Usuário deletado" };
   }
 }
