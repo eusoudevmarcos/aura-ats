@@ -1,141 +1,117 @@
 // src/controllers/candidato.controller.ts
 import { Request, Response } from "express";
 import { inject, injectable } from "tsyringe";
+import { Controller, Get, Post, Delete, Param, Body, QueryParam, Req, Res } from "routing-controllers";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { saveLog } from "../lib/logger";
 import { CandidatoService } from "../services/candidato.service";
+import { Authorized } from "../decorators/Authorized";
 
 @injectable()
+@Controller("/candidato")
 export class CandidatoController {
   constructor(
     @inject(CandidatoService) private candidatoService: CandidatoService
   ) {}
 
-  async saveCandidato(req: Request, res: Response): Promise<Response> {
+  @Post("/")
+  @Authorized()
+  async saveCandidato(@Body() candidatoData: any) {
     try {
-      const candidatoData = req.body;
       const newCandidato = await this.candidatoService.save(candidatoData);
-      return res.status(201).json(nonEmptyAndConvertDataDTO(newCandidato));
+      return nonEmptyAndConvertDataDTO(newCandidato);
     } catch (error: any) {
       await saveLog({
         type: "CADASTRO CANDIDATO",
         status: "error",
         data: error,
       });
-      return res.status(400).json({ message: error.message });
+      throw error;
     }
   }
 
-  // async updateCandidato(req: Request, res: Response): Promise<Response> {
-  //   try {
-  //     const { id } = req.params;
-  //     const candidatoData = { ...req.body, id };
-  //     const updatedCandidato = await this.candidatoService.save(candidatoData);
-  //     return res.status(200).json(updatedCandidato);
-  //   } catch (error: any) {
-  //     console.log("Erro ao atualizar candidato:", error.message);
-  //     return res.status(400).json({ message: error.message });
-  //   }
-  // }
-
-  async getCandidatoById(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      const clienteId = (req as any).user?.clienteId; // ID do cliente logado
-      const candidato = await this.candidatoService.getCandidatoById(
-        id,
-        clienteId
-      );
-      if (!candidato) {
-        return res.status(404).json({ message: "Candidato não encontrado." });
-      }
-      return res.status(200).json(nonEmptyAndConvertDataDTO(candidato));
-    } catch (error: any) {
-      console.log("Erro ao buscar candidato por ID:", error.message);
-      return res.status(500).json({ message: "Erro interno do servidor." });
-    }
+  @Get("/especialidades")
+  @Authorized()
+  async getEspecialidades() {
+    const especialidades = await this.candidatoService.getEspecialidades();
+    return especialidades;
   }
 
-  async getAllCandidatos(req: Request, res: Response): Promise<Response> {
-    try {
-      const page = parseInt(req.query.page as string) || 1;
-      const pageSize = parseInt(req.query.pageSize as string) || 10;
-      const result = await this.candidatoService.getAllCandidatos(
-        page,
-        pageSize
-      );
-      return res.status(200).json(result);
-    } catch (error: any) {
-      console.log("Erro ao listar candidatos:", error.message);
-      return res.status(500).json({ message: "Erro interno do servidor." });
-    }
+  @Get("/anexo/:anexoId/download")
+  @Authorized()
+  async downloadAnexo(@Param("anexoId") anexoId: string, @Res() res: Response): Promise<void> {
+    const filePath = await this.candidatoService.getFilePathForDownload(
+      anexoId
+    );
+
+    const path = require("path");
+    const fs = require("fs");
+
+    const fileName = path.basename(filePath);
+    const fileStream = fs.createReadStream(filePath);
+
+    // Determina o content-type baseado na extensão
+    const ext = path.extname(fileName).toLowerCase();
+    const contentTypes: { [key: string]: string } = {
+      ".pdf": "application/pdf",
+      ".doc": "application/msword",
+      ".docx":
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+      ".xls": "application/vnd.ms-excel",
+      ".xlsx":
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      ".jpg": "image/jpeg",
+      ".jpeg": "image/jpeg",
+      ".png": "image/png",
+      ".txt": "text/plain",
+    };
+
+    const contentType = contentTypes[ext] || "application/octet-stream";
+
+    // Para PDFs, usar inline para visualização; para outros, attachment para download
+    const disposition =
+      ext === ".pdf"
+        ? `inline; filename="${encodeURIComponent(fileName)}"`
+        : `attachment; filename="${encodeURIComponent(fileName)}"`;
+
+    res.setHeader("Content-Type", contentType);
+    res.setHeader("Content-Disposition", disposition);
+
+    fileStream.pipe(res);
   }
 
-  async deleteCandidato(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.body;
-      await this.candidatoService.deleteCandidato(id);
-      return res.status(204).send();
-    } catch (error: any) {
-      console.log("Erro ao deletar candidato:", error.message);
-      return res.status(400).json({ message: error.message });
-    }
+  @Get("/")
+  @Authorized()
+  async getAllCandidatos(
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10
+  ) {
+    const result = await this.candidatoService.getAllCandidatos(
+      page,
+      pageSize
+    );
+    return result;
   }
 
-  async getEspecialidades(_: Request, res: Response) {
-    try {
-      const especialidades = await this.candidatoService.getEspecialidades();
-      return res.status(200).send(especialidades);
-    } catch (error: any) {
-      console.log("Erro ao consultar especialidades:", error.message);
-      return res.status(400).json({ message: error.message });
+  @Get("/:id")
+  @Authorized()
+  async getCandidatoById(@Param("id") id: string, @Req() req: Request) {
+    const clienteId = (req as any).user?.clienteId;
+    const candidato = await this.candidatoService.getCandidatoById(
+      id,
+      clienteId
+    );
+    if (!candidato) {
+      throw new Error("Candidato não encontrado.");
     }
+    return nonEmptyAndConvertDataDTO(candidato);
   }
 
-  async downloadAnexo(req: Request, res: Response): Promise<Response | void> {
-    try {
-      const { anexoId } = req.params;
-      const filePath = await this.candidatoService.getFilePathForDownload(
-        anexoId
-      );
-
-      const path = require("path");
-      const fs = require("fs");
-
-      const fileName = path.basename(filePath);
-      const fileStream = fs.createReadStream(filePath);
-
-      // Determina o content-type baseado na extensão
-      const ext = path.extname(fileName).toLowerCase();
-      const contentTypes: { [key: string]: string } = {
-        ".pdf": "application/pdf",
-        ".doc": "application/msword",
-        ".docx":
-          "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        ".xls": "application/vnd.ms-excel",
-        ".xlsx":
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        ".jpg": "image/jpeg",
-        ".jpeg": "image/jpeg",
-        ".png": "image/png",
-        ".txt": "text/plain",
-      };
-
-      const contentType = contentTypes[ext] || "application/octet-stream";
-
-      // Para PDFs, usar inline para visualização; para outros, attachment para download
-      const disposition =
-        ext === ".pdf"
-          ? `inline; filename="${encodeURIComponent(fileName)}"`
-          : `attachment; filename="${encodeURIComponent(fileName)}"`;
-
-      res.setHeader("Content-Type", contentType);
-      res.setHeader("Content-Disposition", disposition);
-
-      fileStream.pipe(res);
-    } catch (error: any) {
-      console.log("Erro ao fazer download do anexo:", error.message);
-      return res.status(404).json({ message: error.message });
-    }
+  @Delete("/")
+  @Authorized()
+  async deleteCandidato(@Body() body: { id: string }) {
+    const { id } = body;
+    await this.candidatoService.deleteCandidato(id);
+    return { message: "Candidato deletado com sucesso" };
   }
 }

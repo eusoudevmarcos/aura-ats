@@ -1,145 +1,105 @@
-import { Request, Response } from "express";
+import { Request } from "express";
 import { inject, injectable } from "tsyringe";
+import { Controller, Get, Post, Put, Delete, Patch, Param, Body, QueryParam, Req } from "routing-controllers";
+import { StatusCliente } from "@prisma/client";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { ClienteService } from "../services/cliente.servie";
+import { Authorized } from "../decorators/Authorized";
 
 @injectable()
+@Controller("/cliente")
 export class ClienteController {
   constructor(@inject(ClienteService) private service: ClienteService) {}
 
-  async save(req: Request, res: Response) {
-    try {
-      const response = await this.service.save(req.body);
-      return res.status(201).json(nonEmptyAndConvertDataDTO(response));
-    } catch (error: any) {
-      console.log(error);
-      return res
-        .status(500)
-        .json({ message: error?.message || "Erro ao salvar cliente", error });
-    }
+  @Post("/save")
+  @Authorized()
+  async save(@Body() body: any) {
+    const response = await this.service.save(body);
+    return nonEmptyAndConvertDataDTO(response);
   }
 
-  async findById(req: Request, res: Response) {
-    try {
-      const { id } = req.params;
-      const cliente = await this.service.getClienteById(id);
-
-      if (!cliente) {
-        return res.status(404).json({ message: "Cliente não encontrado" });
-      }
-
-      const { planos, ...rest } = cliente;
-
-      const planosUpdate = planos.map((planoAssinado: any) => ({
-        ...planoAssinado,
-        porcentagemMinima: Number(planoAssinado.porcentagemMinima.toString()),
-      }));
-
-      return res
-        .status(200)
-        .json(nonEmptyAndConvertDataDTO({ ...rest, planos: planosUpdate }));
-    } catch (error) {
-      console.log(error);
-      return res.status(500).json({ message: "Erro ao buscar cliente", error });
-    }
+  @Put("/save/:id")
+  @Authorized()
+  async update(@Param("id") id: string, @Body() body: any) {
+    const response = await this.service.save({ ...body, id });
+    return nonEmptyAndConvertDataDTO(response);
   }
 
-  async getAll(req: Request, res: Response) {
-    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-    const pageSize = req.query.pageSize
-      ? parseInt(req.query.pageSize as string, 10)
-      : 10;
-
-    const search = req.query.search;
-
-    try {
-      const clientes = await this.service.getAll({ page, pageSize, search });
-
-      return res.status(200).json(clientes);
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao buscar cliente",
-        message: error.message,
-      });
-    }
+  @Get("/")
+  @Authorized()
+  async getAll(
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10,
+    @QueryParam("search", { required: false }) search: any
+  ) {
+    const clientes = await this.service.getAll({ page, pageSize, search });
+    return clientes;
   }
 
-  async getAllKanban(req: Request, res: Response) {
-    try {
-      // paginação
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-      const pageSize = req.query.pageSize
-        ? parseInt(req.query.pageSize as string, 10)
-        : 10;
-      const search = req.query.search as string;
+  @Get("/kanban")
+  @Authorized()
+  async getAllKanban(
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10,
+    @QueryParam("search", { required: false }) search: string = "",
+    @Req() req: Request
+  ) {
+    const serviceQuery: any = {
+      page,
+      pageSize,
+      search,
+      ...(req.query as any),
+    };
 
-      // Monta objeto de query para serviço
-      const serviceQuery: any = {
-        page,
-        pageSize,
-        search,
-        ...req.query, // para extensibilidade futura de filtros extras
-      };
-
-      // Busca paginada de clientes
-      const clientes = await this.service.getAll(serviceQuery);
-
-      // returns 200 and DTO-normalized data if desired
-      return res.status(200).json(nonEmptyAndConvertDataDTO(clientes));
-    } catch (error: any) {
-      console.log("Error fetching clientes:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+    const clientes = await this.service.getAll(serviceQuery);
+    return nonEmptyAndConvertDataDTO(clientes);
   }
 
-  async getAllProspects(req: Request, res: Response) {
-    const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-    const pageSize = req.query.pageSize
-      ? parseInt(req.query.pageSize as string, 10)
-      : 10;
-    let search = req.query.search;
-    search = { status: "PROSPECT" };
+  @Get("/:id")
+  @Authorized()
+  async findById(@Param("id") id: string) {
+    const cliente = await this.service.getClienteById(id);
 
-    try {
-      const clientes = await this.service.getAll({ page, pageSize, search });
-
-      return res.status(200).json(clientes);
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao buscar prospects",
-        message: error.message,
-      });
+    if (!cliente) {
+      throw new Error("Cliente não encontrado");
     }
+
+    const { planos, ...rest } = cliente;
+
+    const planosUpdate = planos.map((planoAssinado: any) => ({
+      ...planoAssinado,
+      porcentagemMinima: Number(planoAssinado.porcentagemMinima.toString()),
+    }));
+
+    return nonEmptyAndConvertDataDTO({ ...rest, planos: planosUpdate });
   }
 
-  async delete(req: Request, res: Response) {
-    const { id } = req.body;
-    try {
-      const response = await this.service.delete(id);
-      return res.status(200).json(response);
-    } catch (error: any) {
-      return res.status(400).json({
-        error: "Erro ao buscar prospects",
-        message: error.message,
-      });
-    }
+  @Get("/prospects")
+  @Authorized()
+  async getAllProspects(
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10
+  ) {
+    const search = { status: "PROSPECT" };
+    const clientes = await this.service.getAll({ page, pageSize, search });
+    return clientes;
   }
 
-  async updateStatus(req: Request, res: Response): Promise<Response> {
-    try {
-      const { status, id } = req.body;
-      if (!status || !id) throw new Error("id e status são obrigatorio");
+  @Delete("/")
+  @Authorized()
+  async delete(@Body() body: { id: string }) {
+    const { id } = body;
+    const response = await this.service.delete(id);
+    return response;
+  }
 
-      const statusAtualizado = await this.service.updateStatus(id, status);
+  @Patch("/status")
+  @Authorized()
+  async updateStatus(@Body() body: { status: string; id: string }) {
+    const { status, id } = body;
+    if (!status || !id) throw new Error("id e status são obrigatorio");
 
-      return res.status(200).json(statusAtualizado);
-    } catch (error: any) {
-      console.log("Error fetching historico by vaga ID:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+    const statusAtualizado = await this.service.updateStatus(id, status as StatusCliente);
+    return statusAtualizado;
   }
 }

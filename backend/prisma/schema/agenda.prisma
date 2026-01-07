@@ -27,6 +27,7 @@ model Agenda {
     usuarioSistemaId String
 
     deletedAt DateTime?
+    vinculos  VinculoCard[] @relation("AgendaVinculoCard")
 
     @@index([etapaAtualId])
     @@index([localizacaoId])

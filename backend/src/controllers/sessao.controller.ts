@@ -1,145 +1,105 @@
-import { Request, Response } from "express";
+import { Request } from "express";
 import { inject, injectable } from "tsyringe";
+import { Controller, Get, Delete, Param, Req } from "routing-controllers";
 import { SessaoService } from "../services/sessao.service";
+import { Authorized } from "../decorators/Authorized";
 
 @injectable()
+@Controller("/sessao")
 export class SessaoController {
   constructor(@inject(SessaoService) private service: SessaoService) {}
 
-  async getCurrentSession(req: Request, res: Response) {
-    try {
-      const token = this.extractToken(req);
+  @Get("/current")
+  @Authorized()
+  async getCurrentSession(@Req() req: Request) {
+    const token = this.extractToken(req);
 
-      if (!token) {
-        return res.status(401).json({ message: "Token não fornecido" });
-      }
-
-      const sessao = await this.service.findByToken(token);
-
-      if (!sessao) {
-        return res.status(404).json({ message: "Sessão não encontrada" });
-      }
-
-      if (sessao.expiresAt <= new Date()) {
-        return res.status(401).json({ message: "Sessão expirada" });
-      }
-
-      return res.status(200).json({
-        id: sessao.id,
-        userId: sessao.usuarioSistemaId,
-        expiresAt: sessao.expiresAt,
-        usuarioSistema: (sessao as any).usuarioSistema,
-      });
-    } catch (error: any) {
-      console.log("Erro ao buscar sessão atual:", error);
-      return res.status(500).json({
-        message: error?.message || "Erro ao buscar sessão atual",
-        error,
-      });
+    if (!token) {
+      throw new Error("Token não fornecido");
     }
+
+    const sessao = await this.service.findByToken(token);
+
+    if (!sessao) {
+      throw new Error("Sessão não encontrada");
+    }
+
+    if (sessao.expiresAt <= new Date()) {
+      throw new Error("Sessão expirada");
+    }
+
+    return {
+      id: sessao.id,
+      userId: sessao.usuarioSistemaId,
+      expiresAt: sessao.expiresAt,
+      usuarioSistema: (sessao as any).usuarioSistema,
+    };
   }
 
-  async getUserId(req: Request, res: Response) {
-    try {
-      const token = this.extractToken(req);
+  @Get("/user-id")
+  @Authorized()
+  async getUserId(@Req() req: Request) {
+    const token = this.extractToken(req);
 
-      if (!token) {
-        return res.status(401).json({ message: "Token não fornecido" });
-      }
-
-      const userId = await this.service.getUserIdFromToken(token);
-
-      if (!userId) {
-        return res
-          .status(404)
-          .json({ message: "Usuário não encontrado na sessão" });
-      }
-
-      return res.status(200).json({ userId });
-    } catch (error: any) {
-      console.log("Erro ao buscar ID do usuário:", error);
-      return res.status(500).json({
-        message: error?.message || "Erro ao buscar ID do usuário",
-        error,
-      });
+    if (!token) {
+      throw new Error("Token não fornecido");
     }
+
+    const userId = await this.service.getUserIdFromToken(token);
+
+    if (!userId) {
+      throw new Error("Usuário não encontrado na sessão");
+    }
+
+    return { userId };
   }
 
-  async validateSession(req: Request, res: Response) {
-    try {
-      const token = this.extractToken(req);
+  @Get("/validate")
+  @Authorized()
+  async validateSession(@Req() req: Request) {
+    const token = this.extractToken(req);
 
-      if (!token) {
-        return res.status(401).json({ message: "Token não fornecido" });
-      }
-
-      const isValid = await this.service.isValid(token);
-
-      return res.status(200).json({ valid: isValid });
-    } catch (error: any) {
-      console.log("Erro ao validar sessão:", error);
-      return res.status(500).json({
-        message: error?.message || "Erro ao validar sessão",
-        error,
-      });
+    if (!token) {
+      throw new Error("Token não fornecido");
     }
+
+    const isValid = await this.service.isValid(token);
+
+    return { valid: isValid };
   }
 
-  async deleteSession(req: Request, res: Response) {
-    try {
-      const token = this.extractToken(req);
+  @Delete("/")
+  @Authorized()
+  async deleteSession(@Req() req: Request) {
+    const token = this.extractToken(req);
 
-      if (!token) {
-        return res.status(400).json({ message: "Token não fornecido" });
-      }
-
-      await this.service.delete(token);
-
-      return res.status(204).send();
-    } catch (error: any) {
-      console.log("Erro ao deletar sessão:", error);
-      return res.status(500).json({
-        message: error?.message || "Erro ao deletar sessão",
-        error,
-      });
+    if (!token) {
+      throw new Error("Token não fornecido");
     }
+
+    await this.service.delete(token);
+
+    return { message: "Sessão deletada com sucesso" };
   }
 
-  async deleteAllUserSessions(req: Request, res: Response) {
-    try {
-      const { userId } = req.params;
-
-      if (!userId) {
-        return res.status(400).json({ message: "ID do usuário é obrigatório" });
-      }
-
-      await this.service.deleteByUserId(userId);
-
-      return res.status(204).send();
-    } catch (error: any) {
-      console.log("Erro ao deletar todas as sessões do usuário:", error);
-      return res.status(500).json({
-        message:
-          error?.message || "Erro ao deletar todas as sessões do usuário",
-        error,
-      });
+  @Delete("/user/:userId")
+  @Authorized()
+  async deleteAllUserSessions(@Param("userId") userId: string) {
+    if (!userId) {
+      throw new Error("ID do usuário é obrigatório");
     }
+
+    await this.service.deleteByUserId(userId);
+
+    return { message: "Sessões deletadas com sucesso" };
   }
 
-  async cleanupExpiredSessions(req: Request, res: Response) {
-    try {
-      await this.service.deleteExpired();
+  @Delete("/cleanup")
+  @Authorized()
+  async cleanupExpiredSessions() {
+    await this.service.deleteExpired();
 
-      return res
-        .status(200)
-        .json({ message: "Sessões expiradas removidas com sucesso" });
-    } catch (error: any) {
-      console.log("Erro ao limpar sessões expiradas:", error);
-      return res.status(500).json({
-        message: error?.message || "Erro ao limpar sessões expiradas",
-        error,
-      });
-    }
+    return { message: "Sessões expiradas removidas com sucesso" };
   }
 
   private extractToken(req: Request): string | null {
