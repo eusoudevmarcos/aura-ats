@@ -10,6 +10,11 @@ export async function saveLog({
   status: "success" | "error" | "warning";
   data: any;
 }) {
+  // Se Firebase não estiver configurado, apenas retorna silenciosamente
+  if (!firestoreDB) {
+    return;
+  }
+
   const logEntry = {
     type,
     status,
