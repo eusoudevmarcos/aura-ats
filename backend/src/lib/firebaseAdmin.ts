@@ -1,68 +1,101 @@
 import { cert, getApps, initializeApp } from "firebase-admin/app";
-import { getFirestore } from "firebase-admin/firestore";
+import { Firestore, getFirestore } from "firebase-admin/firestore";
 import fs from "fs";
 import path from "path";
 
-// O FIREBASE_ADMIN_SDK_PATH deve ser APENAS o nome do arquivo, ex: "firebase-admin.json"
-const sdkFileName = process.env.FIREBASE_ADMIN_SDK_PATH;
+/**
+ * Busca arquivo de credenciais Firebase no root do backend.
+ * Procura por arquivos que contenham "firebase-adminsdk" no nome (case-insensitive).
+ * 
+ * @returns Caminho do arquivo encontrado ou null se não encontrar
+ */
+function findFirebaseCredentialsFile(): string | null {
+  // Resolve o root do backend (em produção está em dist/src/lib, precisa subir 2 níveis)
+  const backendRoot =
+    process.env.NODE_ENV === "production"
+      ? path.resolve(__dirname, "../../../")
+      : path.resolve(__dirname, "../../");
 
-if (!sdkFileName) {
-  throw new Error(
-    "A variável de ambiente FIREBASE_ADMIN_SDK_PATH não está definida."
-  );
+  if (!fs.existsSync(backendRoot)) {
+    return null;
+  }
+
+  try {
+    const files = fs.readdirSync(backendRoot);
+    const firebaseFile = files.find((file) =>
+      file.toLowerCase().includes("firebase-adminsdk") && file.endsWith(".json")
+    );
+
+    if (firebaseFile) {
+      return path.resolve(backendRoot, firebaseFile);
+    }
+  } catch (err) {
+    console.warn("Erro ao buscar arquivo Firebase:", (err as Error).message);
+  }
+
+  return null;
 }
 
 /**
- * Ajusta o caminho corretamente para desenvolvimento e produção.
- *
- * - Em dev:           /backend/src/public/etc/secrets/<arquivo>
- * - Em produção:      /opt/render/project/src/backend/src/public/etc/secrets/<arquivo>
- *
- * No Render, a pasta de trabalho é /opt/render/project/src/backend/dist,
- * mas os arquivos estáticos NÃO são transpilados, então 'src/public/etc/secrets'
- * existe em tempo de execução na raiz do projeto (mesmo após o build do TypeScript).
- *
- * Em produção, o __dirname será algo como "/opt/render/project/src/backend/dist/src/lib"
- * e precisamos subir alguns níveis até a raiz DO PROJETO e ACESSAR 'src/public/etc/secrets'
+ * Valida se o arquivo JSON contém os campos necessários para Firebase Admin SDK
  */
-
-// resolve até a raiz do projeto (em produção está em dist/src/lib, precisa subir 3 níveis)
-const projectRoot =
-  process.env.NODE_ENV === "production"
-    ? path.resolve(__dirname, "../../../../")
-    : path.resolve(__dirname, "../..");
-
-// Caminho correto (mantém src/public/etc/secrets em ambos ambientes)
-const credFilePath = path.resolve(
-  projectRoot,
-  "src/public/etc/secrets",
-  sdkFileName
-);
-
-console.log("Usando SDK Firebase Admin JSON:", credFilePath);
-
-if (!fs.existsSync(credFilePath)) {
-  throw new Error(
-    `Arquivo de credencial Firebase não encontrado em: ${credFilePath}`
-  );
+function validateFirebaseCredentials(serviceAccount: Record<string, any>): boolean {
+  const requiredFields = ["type", "project_id", "private_key_id", "private_key", "client_email"];
+  return requiredFields.every((field) => field in serviceAccount);
 }
 
-let serviceAccount: Record<string, any>;
-try {
-  const raw = fs.readFileSync(credFilePath, "utf-8");
-  serviceAccount = JSON.parse(raw);
-} catch (err) {
-  throw new Error(
-    "Erro ao ler ou parsear o arquivo de credencial Firebase: " +
+/**
+ * Inicializa o Firebase Admin SDK se o arquivo de credenciais for encontrado.
+ * Se não encontrar, retorna null (Firebase é opcional).
+ */
+function initializeFirebase(): Firestore | null {
+  const credFilePath = findFirebaseCredentialsFile();
+
+  if (!credFilePath) {
+    console.warn(
+      "Firebase Admin SDK: Arquivo de credenciais não encontrado no root do backend. " +
+      "A aplicação continuará funcionando, mas funcionalidades do Firebase estarão desabilitadas."
+    );
+    return null;
+  }
+
+  console.log("Firebase Admin SDK: Usando credenciais de:", credFilePath);
+
+  let serviceAccount: Record<string, any>;
+  try {
+    const raw = fs.readFileSync(credFilePath, "utf-8");
+    serviceAccount = JSON.parse(raw);
+  } catch (err) {
+    console.error(
+      "Firebase Admin SDK: Erro ao ler ou parsear o arquivo de credenciais:",
       (err as Error).message
-  );
+    );
+    return null;
+  }
+
+  if (!validateFirebaseCredentials(serviceAccount)) {
+    console.error(
+      "Firebase Admin SDK: Arquivo de credenciais inválido. Campos obrigatórios ausentes."
+    );
+    return null;
+  }
+
+  try {
+    if (!getApps().length) {
+      initializeApp({
+        credential: cert(serviceAccount),
+      });
+    }
+    return getFirestore();
+  } catch (err) {
+    console.error(
+      "Firebase Admin SDK: Erro ao inicializar Firebase:",
+      (err as Error).message
+    );
+    return null;
+  }
 }
 
-if (!getApps().length) {
-  initializeApp({
-    credential: cert(serviceAccount),
-  });
-}
-
-const firestoreDB = getFirestore();
+const firestoreDB = initializeFirebase();
 export { firestoreDB };
+
