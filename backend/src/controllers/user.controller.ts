@@ -3,7 +3,19 @@ import { getAuth } from "firebase-admin/auth";
 import { firestoreDB } from "../lib/firebaseAdmin";
 
 export default class UserController {
+  private checkFirebaseAvailable(res: Response): boolean {
+    if (!firestoreDB) {
+      res.status(503).json({
+        error: "Firebase não está configurado. Configure o arquivo de credenciais no root do backend.",
+      });
+      return false;
+    }
+    return true;
+  }
+
   async create(req: Request, res: Response) {
+    if (!this.checkFirebaseAvailable(res)) return;
+
     try {
       const { email, password, name, role } = req.body;
 
@@ -12,7 +24,7 @@ export default class UserController {
         password,
         displayName: name,
       });
-      await firestoreDB
+      await firestoreDB!
         .collection("users")
         .doc(userRecord.uid)
         .set({ email, name, role });
@@ -24,8 +36,10 @@ export default class UserController {
   }
 
   async getAll(req: Request, res: Response) {
+    if (!this.checkFirebaseAvailable(res)) return;
+
     try {
-      const snapshot = await firestoreDB.collection("users").get();
+      const snapshot = await firestoreDB!.collection("users").get();
       const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
       res.json(users);
     } catch (error) {
@@ -34,8 +48,10 @@ export default class UserController {
   }
 
   async getOne(req: Request, res: Response) {
+    if (!this.checkFirebaseAvailable(res)) return;
+
     try {
-      const doc = await firestoreDB
+      const doc = await firestoreDB!
         .collection("users")
         .doc(req.params.id)
         .get();
@@ -49,8 +65,10 @@ export default class UserController {
   }
 
   async update(req: Request, res: Response) {
+    if (!this.checkFirebaseAvailable(res)) return;
+
     try {
-      await firestoreDB.collection("users").doc(req.params.id).update(req.body);
+      await firestoreDB!.collection("users").doc(req.params.id).update(req.body);
       res.json({ message: "Usuário atualizado com sucesso" });
     } catch (error) {
       res.status(500).json({ error: "Erro ao atualizar usuário" });
@@ -58,9 +76,11 @@ export default class UserController {
   }
 
   async delete(req: Request, res: Response) {
+    if (!this.checkFirebaseAvailable(res)) return;
+
     try {
       await getAuth().deleteUser(req.params.id);
-      await firestoreDB.collection("users").doc(req.params.id).delete();
+      await firestoreDB!.collection("users").doc(req.params.id).delete();
       res.json({ message: "Usuário deletado" });
     } catch (error) {
       res.status(500).json({ error: "Erro ao deletar usuário" });

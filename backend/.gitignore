@@ -5,6 +5,7 @@ src/public/
 
 # Ignorar arquivos de configuração do Firebase Admin SDK
 firebase-adminsdk.json
+*firebase-adminsdk*.json
 
 # Ignorar arquivos de variáveis de ambiente
 .env*
@@ -25,7 +26,7 @@ build/
 # Ignorar arquivos do sistema operacional (opcional)
 .DS_Store
 
-# firebase
+# firebase (padrão global)
 **/*firebase-adminsdk*.json
 
 # Prisma
