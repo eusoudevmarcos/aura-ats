@@ -1,8 +1,8 @@
 import { Request } from "express";
+import { Body, Controller, Delete, Get, Param, Post, Put, QueryParam, Req } from "routing-controllers";
 import { inject, injectable } from "tsyringe";
-import { Controller, Get, Post, Put, Delete, Param, Body, QueryParam, Req } from "routing-controllers";
-import { BillingService } from "../services/billing.service";
 import { Authorized } from "../decorators/Authorized";
+import { BillingService } from "../services/billing.service";
 
 @injectable()
 @Controller("/planos")
