@@ -159,6 +159,8 @@ export const etiquetaQuadroSchema = z.object({
   atualizadoEm: dateSchema,
 });
 
+export type EtiquetaQuadro = z.infer<typeof etiquetaQuadroSchema>;
+
 export const cardKanbanDataSchema = z.object({
   id: z.string(),
   cardKanbanId: z.string(),

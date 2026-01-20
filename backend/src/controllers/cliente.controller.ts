@@ -69,10 +69,10 @@ export class ClienteController {
   @Get("/kanban")
   @Authorized()
   async getAllKanban(
+    @Req() req: Request,
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search?: string,
-    @Req() req: Request
+    @QueryParam("search", { required: false }) search?: string
   ) {
     const normalizedSearch = this.normalizeSearch(search);
 

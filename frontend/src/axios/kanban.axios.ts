@@ -56,7 +56,8 @@ function validateResponse<T>(
   const result = schema.safeParse(data);
   if (!result.success) {
     // Formatar erros do Zod de forma mais legível
-    const errors = result.error.errors.map(err => ({
+    // ZodError usa 'issues' ao invés de 'errors'
+    const errors = result.error.issues.map(err => ({
       path: err.path.join('.'),
       message: err.message,
       code: err.code,
@@ -591,29 +592,31 @@ export const buscarUsuariosSistema = async (
       params: { search, limit },
     }
   );
-  return z
-    .array(
-      usuarioSistemaSchema.extend({
-        funcionario: z
-          .object({
-            pessoa: z.object({
-              id: z.string(),
-              nome: z.string(),
-            }),
-          })
-          .nullable()
-          .optional(),
-        cliente: z
-          .object({
-            empresa: z.object({
-              id: z.string(),
-              razaoSocial: z.string(),
-              nomeFantasia: z.string().nullable(),
-            }),
-          })
-          .nullable()
-          .optional(),
+  // Criar um schema específico para a resposta da API de busca de usuários
+  // que inclui campos adicionais (id em pessoa e empresa)
+  const usuarioSistemaBuscaSchema = z.object({
+    id: z.string(),
+    email: z.string(),
+    funcionario: z
+      .object({
+        pessoa: z.object({
+          id: z.string(),
+          nome: z.string(),
+        }),
       })
-    )
-    .parse(response.data);
+      .nullable()
+      .optional(),
+    cliente: z
+      .object({
+        empresa: z.object({
+          id: z.string(),
+          razaoSocial: z.string(),
+          nomeFantasia: z.string().nullable(),
+        }),
+      })
+      .nullable()
+      .optional(),
+  });
+  
+  return z.array(usuarioSistemaBuscaSchema).parse(response.data);
 };
