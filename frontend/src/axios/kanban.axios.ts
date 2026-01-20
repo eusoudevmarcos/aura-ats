@@ -3,7 +3,13 @@ import {
   candidatoAutocompleteSchema,
   CardKanban,
   CardKanbanInput,
+  cardKanbanDataSchema,
   cardKanbanSchema,
+  cardEtiquetaSchema,
+  checklistCardSchema,
+  checklistItemSchema,
+  ChecklistCard,
+  ChecklistItem,
   ClienteAutocomplete,
   clienteAutocompleteSchema,
   ColunaKanban,
@@ -20,6 +26,8 @@ import {
   espacoTrabalhoComQuadrosSchema,
   EspacoTrabalhoInput,
   espacoTrabalhoSchema,
+  etiquetaQuadroSchema,
+  EtiquetaQuadro,
   MoverCardInput,
   QuadroCompleto,
   quadroCompletoSchema,
@@ -27,6 +35,8 @@ import {
   QuadroKanbanInput,
   quadroKanbanSchema,
   TipoEntidadeEnum,
+  UsuarioSistema,
+  usuarioSistemaSchema,
   VagaAutocomplete,
   vagaAutocompleteSchema,
   VincularEntidadeInput,
@@ -45,12 +55,27 @@ function validateResponse<T>(
 ): T {
   const result = schema.safeParse(data);
   if (!result.success) {
-    console.log(`${errorMessage}:`, result.error.format());
+    // Formatar erros do Zod de forma mais legível
+    const errors = result.error.errors.map(err => ({
+      path: err.path.join('.'),
+      message: err.message,
+      code: err.code,
+      expected: (err as any).expected,
+      received: (err as any).received,
+    }));
+    
+    console.error(`${errorMessage}:`, errors);
+    
+    // Criar mensagem de erro mais descritiva
+    const errorMessages = errors.map(
+      err => `${err.path}: ${err.message}`
+    ).join('; ');
+    
     throw createKanbanError(
-      `${errorMessage}: ${result.error.message}`,
+      `${errorMessage}: ${errorMessages}`,
       KanbanErrorCode.VALIDATION_ERROR,
       undefined,
-      result.error.format()
+      errors
     );
   }
   return result.data;
@@ -268,6 +293,187 @@ export const deletarCardKanban = async (id: string): Promise<void> => {
   });
 };
 
+// ===================== ETIQUETAS =====================
+
+export const listarEtiquetasDoQuadro = async (
+  quadroId: string
+): Promise<EtiquetaQuadro[]> => {
+  const response = await api.get(
+    `/api/externalWithAuth/kanban/quadro/${quadroId}/etiquetas`
+  );
+  return z.array(etiquetaQuadroSchema).parse(response.data);
+};
+
+export const criarEtiquetaQuadro = async (
+  quadroId: string,
+  data: { nome: string; cor: string; ordem?: number }
+): Promise<EtiquetaQuadro> => {
+  const response = await api.post(
+    `/api/externalWithAuth/kanban/quadro/${quadroId}/etiqueta`,
+    data
+  );
+  return etiquetaQuadroSchema.parse(response.data);
+};
+
+export const atualizarEtiquetaQuadro = async (
+  id: string,
+  data: Partial<{ nome: string; cor: string; ordem?: number }>
+): Promise<EtiquetaQuadro> => {
+  const response = await api.put(
+    `/api/externalWithAuth/kanban/etiqueta/${id}`,
+    data
+  );
+  return etiquetaQuadroSchema.parse(response.data);
+};
+
+export const deletarEtiquetaQuadro = async (id: string): Promise<void> => {
+  await api.delete(`/api/externalWithAuth/kanban/etiqueta/${id}`, {
+    data: { id },
+  });
+};
+
+export const atualizarEtiquetasDoCard = async (
+  cardId: string,
+  etiquetaIds: string[]
+): Promise<CardKanban> => {
+  const response = await api.put(
+    `/api/externalWithAuth/kanban/card/${cardId}/etiquetas`,
+    { etiquetaIds }
+  );
+  // O backend retorna o card com apenas as etiquetas; fazemos parse parcial e mesclamos depois se necessário
+  return validateResponse(
+    response.data,
+    cardKanbanSchema.extend({
+      etiquetas: z.array(cardEtiquetaSchema).optional(),
+    }),
+    'Erro ao atualizar etiquetas do card'
+  );
+};
+
+// ===================== DATAS DO CARD =====================
+
+export const upsertCardData = async (
+  cardId: string,
+  data: {
+    dataInicio?: string | Date;
+    dataEntrega?: string | Date;
+    recorrencia?: string;
+    lembreteMinutosAntes?: number | null;
+  }
+): Promise<z.infer<typeof cardKanbanDataSchema>> => {
+  const response = await api.put(
+    `/api/externalWithAuth/kanban/card/${cardId}/datas`,
+    data
+  );
+  return cardKanbanDataSchema.parse(response.data);
+};
+
+export const obterCardData = async (
+  cardId: string
+): Promise<z.infer<typeof cardKanbanDataSchema> | null> => {
+  const response = await api.get(
+    `/api/externalWithAuth/kanban/card/${cardId}/datas`
+  );
+  if (!response.data) return null;
+  return cardKanbanDataSchema.parse(response.data);
+};
+
+// ===================== CHECKLIST =====================
+
+export const criarChecklist = async (
+  cardId: string,
+  data: { titulo: string; ordem?: number }
+): Promise<ChecklistCard> => {
+  const response = await api.post(
+    `/api/externalWithAuth/kanban/card/${cardId}/checklist`,
+    data
+  );
+  return checklistCardSchema.parse(response.data);
+};
+
+export const atualizarChecklist = async (
+  id: string,
+  data: Partial<{ titulo: string; ordem?: number }>
+): Promise<ChecklistCard> => {
+  const response = await api.put(
+    `/api/externalWithAuth/kanban/checklist/${id}`,
+    data
+  );
+  return checklistCardSchema.parse(response.data);
+};
+
+export const deletarChecklist = async (id: string): Promise<void> => {
+  await api.delete(`/api/externalWithAuth/kanban/checklist/${id}`, {
+    data: { id },
+  });
+};
+
+export const criarChecklistItem = async (
+  checklistId: string,
+  data: { descricao: string; concluido?: boolean; ordem?: number }
+): Promise<ChecklistItem> => {
+  const response = await api.post(
+    `/api/externalWithAuth/kanban/checklist/${checklistId}/item`,
+    data
+  );
+  return checklistItemSchema.parse(response.data);
+};
+
+export const atualizarChecklistItem = async (
+  id: string,
+  data: Partial<{ descricao: string; concluido?: boolean; ordem?: number }>
+): Promise<ChecklistItem> => {
+  const response = await api.put(
+    `/api/externalWithAuth/kanban/checklist-item/${id}`,
+    data
+  );
+  return checklistItemSchema.parse(response.data);
+};
+
+export const deletarChecklistItem = async (id: string): Promise<void> => {
+  await api.delete(`/api/externalWithAuth/kanban/checklist-item/${id}`, {
+    data: { id },
+  });
+};
+
+export const toggleChecklistCompleto = async (
+  cardId: string,
+  completo: boolean
+): Promise<CardKanban> => {
+  const response = await api.put(
+    `/api/externalWithAuth/kanban/card/${cardId}/checklist-completo`,
+    { completo }
+  );
+  return validateResponse(
+    response.data,
+    cardKanbanSchema,
+    'Erro ao atualizar status de checklist do card'
+  );
+};
+
+// ===================== MEMBROS DO CARD =====================
+
+export const adicionarMembroAoCard = async (
+  cardId: string,
+  usuarioSistemaId: string
+): Promise<void> => {
+  await api.post(`/api/externalWithAuth/kanban/card/${cardId}/membro`, {
+    usuarioSistemaId,
+  });
+};
+
+export const removerMembroDoCard = async (
+  cardId: string,
+  usuarioSistemaId: string
+): Promise<void> => {
+  await api.delete(
+    `/api/externalWithAuth/kanban/card/${cardId}/membro/${usuarioSistemaId}`,
+    {
+      data: { cardId, usuarioSistemaId },
+    }
+  );
+};
+
 // ===================== VÍNCULOS =====================
 export const vincularEntidade = async (
   data: VincularEntidadeInput
@@ -371,4 +577,43 @@ export const deletarComentarioCard = async (id: string): Promise<void> => {
   await api.delete(`/api/externalWithAuth/kanban/comentario/${id}`, {
     data: { id },
   });
+};
+
+// ===================== BUSCA DE USUÁRIOS DO SISTEMA =====================
+
+export const buscarUsuariosSistema = async (
+  search: string = '',
+  limit: number = 10
+): Promise<UsuarioSistema[]> => {
+  const response = await api.get(
+    `/api/externalWithAuth/kanban/usuarios-sistema`,
+    {
+      params: { search, limit },
+    }
+  );
+  return z
+    .array(
+      usuarioSistemaSchema.extend({
+        funcionario: z
+          .object({
+            pessoa: z.object({
+              id: z.string(),
+              nome: z.string(),
+            }),
+          })
+          .nullable()
+          .optional(),
+        cliente: z
+          .object({
+            empresa: z.object({
+              id: z.string(),
+              razaoSocial: z.string(),
+              nomeFantasia: z.string().nullable(),
+            }),
+          })
+          .nullable()
+          .optional(),
+      })
+    )
+    .parse(response.data);
 };

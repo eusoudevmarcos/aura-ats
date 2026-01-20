@@ -9,6 +9,14 @@ export const TipoEntidadeEnum = z.enum([
 ]);
 export type TipoEntidadeEnum = z.infer<typeof TipoEntidadeEnum>;
 
+export const RecorrenciaCardEnum = z.enum([
+  'NENHUMA',
+  'DIARIA',
+  'SEMANAL',
+  'MENSAL',
+]);
+export type RecorrenciaCardEnum = z.infer<typeof RecorrenciaCardEnum>;
+
 // ===================== HELPER PARA DATAS =====================
 // Aceita tanto string ISO quanto Date object
 const dateSchema = z
@@ -111,6 +119,102 @@ export const vinculoCardSchema = z.object({
     .optional(),
 });
 
+// ===================== USUARIO SISTEMA =====================
+export const usuarioSistemaSchema = z
+  .object({
+    id: z.string(),
+    email: z.string(),
+    funcionario: z
+      .object({
+        pessoa: z.object({
+          nome: z.string(),
+        }),
+      })
+      .nullable()
+      .optional(),
+    cliente: z
+      .object({
+        empresa: z.object({
+          razaoSocial: z.string(),
+          nomeFantasia: z.string().nullable(),
+        }),
+      })
+      .nullable()
+      .optional(),
+  })
+  .nullable()
+  .optional();
+
+export type UsuarioSistema = z.infer<typeof usuarioSistemaSchema>;
+
+// ===================== ETIQUETAS / DATAS / CHECKLIST / MEMBROS =====================
+
+export const etiquetaQuadroSchema = z.object({
+  id: z.string(),
+  quadroKanbanId: z.string(),
+  nome: z.string(),
+  cor: z.string(),
+  ordem: z.number().nullable().optional(),
+  criadoEm: dateSchema,
+  atualizadoEm: dateSchema,
+});
+
+export const cardKanbanDataSchema = z.object({
+  id: z.string(),
+  cardKanbanId: z.string(),
+  dataInicio: dateSchema.nullable().optional(),
+  dataEntrega: dateSchema.nullable().optional(),
+  recorrencia: RecorrenciaCardEnum,
+  lembreteMinutosAntes: z.number().nullable().optional(),
+  criadoEm: dateSchema,
+  atualizadoEm: dateSchema,
+});
+
+export const checklistItemSchema = z.object({
+  id: z.string(),
+  checklistCardId: z.string(),
+  descricao: z.string(),
+  concluido: z.boolean(),
+  ordem: z.number(),
+  criadoEm: dateSchema,
+  atualizadoEm: dateSchema,
+});
+
+export const checklistCardSchema = z.object({
+  id: z.string(),
+  cardKanbanId: z.string(),
+  titulo: z.string(),
+  ordem: z.number(),
+  itens: z.array(checklistItemSchema),
+  criadoEm: dateSchema,
+  atualizadoEm: dateSchema,
+});
+
+export type ChecklistItem = z.infer<typeof checklistItemSchema>;
+export type ChecklistCard = z.infer<typeof checklistCardSchema>;
+
+export const membroCardSchema = z.object({
+  id: z.string(),
+  cardKanbanId: z.string(),
+  usuarioSistemaId: z.string(),
+  usuarioSistema: z
+    .object({
+      id: z.string(),
+      email: z.string(),
+    })
+    .nullable()
+    .optional(),
+  criadoEm: dateSchema,
+});
+
+export const cardEtiquetaSchema = z.object({
+  id: z.string(),
+  cardKanbanId: z.string(),
+  etiquetaQuadroId: z.string(),
+  etiqueta: etiquetaQuadroSchema.optional().nullable(),
+  criadoEm: dateSchema,
+});
+
 export const cardKanbanSchema = z.object({
   id: z.string(),
   titulo: z.string(),
@@ -120,6 +224,13 @@ export const cardKanbanSchema = z.object({
   criadoEm: dateSchema,
   atualizadoEm: dateSchema,
   vinculos: z.array(vinculoCardSchema).optional(),
+  datas: cardKanbanDataSchema.optional().nullable(),
+  etiquetas: z.array(cardEtiquetaSchema).optional(),
+  checklists: z.array(checklistCardSchema).optional(),
+  membros: z.array(membroCardSchema).optional(),
+  checklistCompleto: z.boolean().optional(),
+  usuarioSistemaId: z.string().nullable().optional(),
+  usuarioSistema: usuarioSistemaSchema.nullable().optional(),
 });
 
 export type CardKanban = z.infer<typeof cardKanbanSchema>;
@@ -178,6 +289,7 @@ export const quadroCompletoSchema = quadroKanbanSchema.extend({
       cards: z.array(cardKanbanSchema),
     })
   ),
+  etiquetas: z.array(etiquetaQuadroSchema).optional(),
 });
 
 export type QuadroCompleto = z.infer<typeof quadroCompletoSchema>;
@@ -263,34 +375,6 @@ export type CompromissoAutocomplete = z.infer<
   typeof compromissoAutocompleteSchema
 >;
 export type EntidadeAutocomplete = z.infer<typeof entidadeAutocompleteSchema>;
-
-// ===================== USUARIO SISTEMA =====================
-export const usuarioSistemaSchema = z
-  .object({
-    id: z.string(),
-    email: z.string(),
-    funcionario: z
-      .object({
-        pessoa: z.object({
-          nome: z.string(),
-        }),
-      })
-      .nullable()
-      .optional(),
-    cliente: z
-      .object({
-        empresa: z.object({
-          razaoSocial: z.string(),
-          nomeFantasia: z.string().nullable(),
-        }),
-      })
-      .nullable()
-      .optional(),
-  })
-  .nullable()
-  .optional();
-
-export type UsuarioSistema = z.infer<typeof usuarioSistemaSchema>;
 
 // ===================== COMENTÁRIOS =====================
 export const comentarioCardSchema = z.object({

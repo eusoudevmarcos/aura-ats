@@ -1,4 +1,4 @@
-import { TipoEntidade } from "@prisma/client";
+import { RecorrenciaCard, TipoEntidade } from "@prisma/client";
 import { Pagination } from "./pagination";
 
 export interface EspacoTrabalhoInput {
@@ -23,6 +23,17 @@ export interface CardKanbanInput {
   colunaKanbanId: string;
 }
 
+export interface EtiquetaQuadroInput {
+  nome: string;
+  cor: string;
+  ordem?: number;
+  quadroKanbanId: string;
+}
+
+export interface CardEtiquetasInput {
+  etiquetaIds: string[];
+}
+
 export interface MoverCardInput {
   cardId: string;
   novaColunaId: string;
@@ -45,6 +56,29 @@ export interface VincularEntidadeInput {
 export interface ComentarioCardInput {
   cardKanbanId: string;
   conteudo: string;
+}
+
+export interface CardKanbanDataInput {
+  dataInicio?: string | Date;
+  dataEntrega?: string | Date;
+  recorrencia?: RecorrenciaCard;
+  lembreteMinutosAntes?: number | null;
+}
+
+export interface ChecklistCardInput {
+  titulo: string;
+  ordem?: number;
+}
+
+export interface ChecklistItemInput {
+  descricao: string;
+  concluido?: boolean;
+  ordem?: number;
+}
+
+export interface MembroCardInput {
+  cardId: string;
+  usuarioSistemaId: string;
 }
 
 export interface KanbanGetAllQuery extends Pagination {

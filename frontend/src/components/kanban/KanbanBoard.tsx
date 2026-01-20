@@ -120,9 +120,9 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
       if (!sourceColumn) return;
 
-      // Ordenar cards por ordem antes de processar
+      // Ordenar cards por ordem descendente (maior ordem primeiro = último adicionado no topo)
       const sortedSourceCards = [...sourceColumn.cards].sort(
-        (a, b) => a.ordem - b.ordem
+        (a, b) => b.ordem - a.ordem
       );
       const sourceIndex = sortedSourceCards.findIndex(c => c.id === cardId);
 
@@ -142,7 +142,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
         // Ordenar cards da coluna de destino
         const sortedTargetCards = [...targetColumn.cards].sort(
-          (a, b) => a.ordem - b.ordem
+          (a, b) => b.ordem - a.ordem // Ordenação descendente
         );
 
         // Adicionar no final da coluna de destino
@@ -169,7 +169,7 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
         // Ordenar cards da coluna de destino
         const sortedTargetCards = [...targetColumn.cards].sort(
-          (a, b) => a.ordem - b.ordem
+          (a, b) => b.ordem - a.ordem // Ordenação descendente
         );
         const targetCardIndex = sortedTargetCards.findIndex(
           c => c.id === over.id
@@ -251,6 +251,15 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     }
   }, [quadro, columnIds, moveCardContext, moveColumnContext]);
 
+  // Ordenar colunas por ordem - memoizado (sempre chama o hook)
+  const sortedColumns = useMemo(
+    () =>
+      quadro?.colunas
+        ? [...quadro.colunas].sort((a, b) => a.ordem - b.ordem)
+        : [],
+    [quadro?.colunas]
+  );
+
   if (loading || !quadro) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -258,12 +267,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
       </div>
     );
   }
-
-  // Ordenar colunas por ordem - memoizado
-  const sortedColumns = useMemo(
-    () => [...quadro.colunas].sort((a, b) => a.ordem - b.ordem),
-    [quadro.colunas]
-  );
 
   return (
     <DndContext

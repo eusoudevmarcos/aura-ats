@@ -23,6 +23,30 @@ import { VagaGetAllQuery } from "../types/vaga.type";
 export class VagaController {
   constructor(@inject(VagaService) private service: VagaService) {}
 
+  /**
+   * Normaliza parâmetros de busca vindos da query string.
+   */
+  private normalizeSearch(search: any): any {
+    if (search === undefined || search === null) return undefined;
+    if (typeof search !== "string") return search;
+
+    const trimmed = search.trim();
+    if (!trimmed) return undefined;
+
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    }
+
+    return trimmed;
+  }
+
   @Post("/")
   @Authorized()
   async save(@Body() vagaData: any, @Req() req: Request) {
@@ -102,14 +126,16 @@ export class VagaController {
     @Param("clienteId") clienteId: string,
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search: string = ""
+    @QueryParam("search", { required: false }) search?: string
   ) {
     if (!clienteId) throw new Error("ID do cliente é obrigatorio");
+
+    const normalizedSearch = this.normalizeSearch(search);
 
     const vagas = await this.service.getAllByCliente(clienteId, {
       page,
       pageSize,
-      search,
+      search: normalizedSearch,
     });
     return nonEmptyAndConvertDataDTO(vagas);
   }
@@ -120,14 +146,16 @@ export class VagaController {
     @Param("candidatoId") candidatoId: string,
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search: string = ""
+    @QueryParam("search", { required: false }) search?: string
   ) {
     if (!candidatoId) throw new Error("ID do candidato é obrigatorio");
+
+    const normalizedSearch = this.normalizeSearch(search);
 
     const vagas = await this.service.getAllByCandidato(candidatoId, {
       page,
       pageSize,
-      search,
+      search: normalizedSearch,
     });
     return nonEmptyAndConvertDataDTO(vagas);
   }

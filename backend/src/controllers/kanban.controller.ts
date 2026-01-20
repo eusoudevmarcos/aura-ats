@@ -1,23 +1,55 @@
 import { Request } from "express";
+import { Body, Controller, Delete, Get, Param, Post, Put, QueryParam, Req } from "routing-controllers";
 import { inject, injectable } from "tsyringe";
-import { Controller, Get, Post, Put, Delete, Param, Body, QueryParam, Req } from "routing-controllers";
+import { Authorized } from "../decorators/Authorized";
 import { KanbanService } from "../services/kanban.service";
 import {
+  CardEtiquetasInput,
+  CardKanbanDataInput,
   CardKanbanInput,
+  ChecklistCardInput,
+  ChecklistItemInput,
   ColunaKanbanInput,
   ComentarioCardInput,
   EspacoTrabalhoInput,
+  EtiquetaQuadroInput,
+  MembroCardInput,
   MoverCardInput,
   MoverColunaInput,
   QuadroKanbanInput,
   VincularEntidadeInput,
 } from "../types/kanban.type";
-import { Authorized } from "../decorators/Authorized";
 
 @injectable()
 @Controller("/kanban")
 export class KanbanController {
   constructor(@inject(KanbanService) private service: KanbanService) {}
+
+  /**
+   * Normaliza parâmetros de busca vindos da query string.
+   * - Converte strings vazias em undefined
+   * - Se vier um JSON stringificado válido, faz o parse
+   */
+  private normalizeSearch(search: any): any {
+    if (search === undefined || search === null) return undefined;
+    if (typeof search !== "string") return search;
+
+    const trimmed = search.trim();
+    if (!trimmed) return undefined;
+
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    }
+
+    return trimmed;
+  }
 
   /**
    * Extrai o token do request (headers ou cookies)
@@ -197,6 +229,165 @@ export class KanbanController {
     return { message: "Card deletado com sucesso" };
   }
 
+  // ===================== ETIQUETAS =====================
+
+  @Post("/quadro/:id/etiqueta")
+  @Authorized()
+  async criarEtiquetaQuadro(
+    @Param("id") quadroId: string,
+    @Body() data: Omit<EtiquetaQuadroInput, "quadroKanbanId">
+  ) {
+    const etiqueta = await this.service.criarEtiquetaQuadro(quadroId, data);
+    return etiqueta;
+  }
+
+  @Get("/quadro/:id/etiquetas")
+  @Authorized()
+  async listarEtiquetasDoQuadro(@Param("id") quadroId: string) {
+    const etiquetas = await this.service.listarEtiquetasDoQuadro(quadroId);
+    return etiquetas;
+  }
+
+  @Put("/etiqueta/:id")
+  @Authorized()
+  async atualizarEtiquetaQuadro(
+    @Param("id") id: string,
+    @Body() data: Partial<Omit<EtiquetaQuadroInput, "quadroKanbanId">>
+  ) {
+    const etiqueta = await this.service.atualizarEtiquetaQuadro(id, data);
+    return etiqueta;
+  }
+
+  @Delete("/etiqueta/:id")
+  @Authorized()
+  async deletarEtiquetaQuadro(@Param("id") id: string) {
+    await this.service.deletarEtiquetaQuadro(id);
+    return { message: "Etiqueta deletada com sucesso" };
+  }
+
+  @Put("/card/:id/etiquetas")
+  @Authorized()
+  async atualizarEtiquetasDoCard(
+    @Param("id") cardId: string,
+    @Body() data: CardEtiquetasInput
+  ) {
+    const card = await this.service.atualizarEtiquetasDoCard(cardId, data);
+    return card;
+  }
+
+  // ===================== DATAS DO CARD =====================
+
+  @Put("/card/:id/datas")
+  @Authorized()
+  async upsertCardData(
+    @Param("id") cardId: string,
+    @Body() data: CardKanbanDataInput
+  ) {
+    const result = await this.service.upsertCardData(cardId, data);
+    return result;
+  }
+
+  @Get("/card/:id/datas")
+  @Authorized()
+  async obterCardData(@Param("id") cardId: string) {
+    const result = await this.service.obterCardData(cardId);
+    return result;
+  }
+
+  // ===================== CHECKLIST =====================
+
+  @Post("/card/:cardId/checklist")
+  @Authorized()
+  async criarChecklist(
+    @Param("cardId") cardId: string,
+    @Body() data: ChecklistCardInput
+  ) {
+    const checklist = await this.service.criarChecklist(cardId, data);
+    return checklist;
+  }
+
+  @Put("/checklist/:id")
+  @Authorized()
+  async atualizarChecklist(
+    @Param("id") id: string,
+    @Body() data: Partial<ChecklistCardInput>
+  ) {
+    const checklist = await this.service.atualizarChecklist(id, data);
+    return checklist;
+  }
+
+  @Delete("/checklist/:id")
+  @Authorized()
+  async deletarChecklist(@Param("id") id: string) {
+    await this.service.deletarChecklist(id);
+    return { message: "Checklist deletado com sucesso" };
+  }
+
+  @Post("/checklist/:checklistId/item")
+  @Authorized()
+  async criarChecklistItem(
+    @Param("checklistId") checklistId: string,
+    @Body() data: ChecklistItemInput
+  ) {
+    const item = await this.service.criarChecklistItem(checklistId, data);
+    return item;
+  }
+
+  @Put("/checklist-item/:id")
+  @Authorized()
+  async atualizarChecklistItem(
+    @Param("id") id: string,
+    @Body() data: Partial<ChecklistItemInput>
+  ) {
+    const item = await this.service.atualizarChecklistItem(id, data);
+    return item;
+  }
+
+  @Delete("/checklist-item/:id")
+  @Authorized()
+  async deletarChecklistItem(@Param("id") id: string) {
+    await this.service.deletarChecklistItem(id);
+    return { message: "Item de checklist deletado com sucesso" };
+  }
+
+  @Put("/card/:id/checklist-completo")
+  @Authorized()
+  async toggleChecklistCompleto(
+    @Param("id") cardId: string,
+    @Body() body: { completo: boolean }
+  ) {
+    const card = await this.service.toggleChecklistCompleto(
+      cardId,
+      body.completo
+    );
+    return card;
+  }
+
+  // ===================== MEMBROS DO CARD =====================
+
+  @Post("/card/:cardId/membro")
+  @Authorized()
+  async adicionarMembroAoCard(
+    @Param("cardId") cardId: string,
+    @Body() body: Omit<MembroCardInput, "cardId">
+  ) {
+    const membro = await this.service.adicionarMembroAoCard({
+      cardId,
+      usuarioSistemaId: body.usuarioSistemaId,
+    });
+    return membro;
+  }
+
+  @Delete("/card/:cardId/membro/:usuarioId")
+  @Authorized()
+  async removerMembroDoCard(
+    @Param("cardId") cardId: string,
+    @Param("usuarioId") usuarioId: string
+  ) {
+    await this.service.removerMembroDoCard(cardId, usuarioId);
+    return { message: "Membro removido com sucesso" };
+  }
+
   // ===================== VÍNCULOS =====================
 
   @Post("/vinculo")
@@ -226,12 +417,14 @@ export class KanbanController {
   @Authorized()
   async buscarEntidadesParaAutocomplete(
     @Param("tipo") tipo: string,
-    @QueryParam("search", { required: false }) search: string = "",
+    @QueryParam("search", { required: false }) search?: string,
     @QueryParam("limit", { required: false }) limit: number = 10
   ) {
+    const normalizedSearch = this.normalizeSearch(search);
+
     const entidades = await this.service.buscarEntidadesParaAutocomplete(
       tipo as any,
-      search,
+      normalizedSearch ?? "",
       limit
     );
     return entidades;
@@ -274,5 +467,21 @@ export class KanbanController {
   async deletarComentarioCard(@Param("id") id: string) {
     await this.service.deletarComentarioCard(id);
     return { message: "Comentário deletado com sucesso" };
+  }
+
+  // ===================== BUSCA DE USUÁRIOS DO SISTEMA =====================
+
+  @Get("/usuarios-sistema")
+  @Authorized()
+  async buscarUsuariosSistema(
+    @QueryParam("search", { required: false }) search?: string,
+    @QueryParam("limit", { required: false }) limit: number = 10
+  ) {
+    const normalizedSearch = this.normalizeSearch(search);
+    const usuarios = await this.service.buscarUsuariosSistema(
+      normalizedSearch ?? "",
+      limit
+    );
+    return usuarios;
   }
 }

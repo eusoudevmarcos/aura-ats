@@ -11,6 +11,30 @@ import { Authorized } from "../decorators/Authorized";
 export class ClienteController {
   constructor(@inject(ClienteService) private service: ClienteService) {}
 
+  /**
+   * Normaliza parâmetros de busca vindos da query string.
+   */
+  private normalizeSearch(search: any): any {
+    if (search === undefined || search === null) return undefined;
+    if (typeof search !== "string") return search;
+
+    const trimmed = search.trim();
+    if (!trimmed) return undefined;
+
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    }
+
+    return trimmed;
+  }
+
   @Post("/save")
   @Authorized()
   async save(@Body() body: any) {
@@ -30,9 +54,15 @@ export class ClienteController {
   async getAll(
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search: any
+    @QueryParam("search", { required: false }) search?: string
   ) {
-    const clientes = await this.service.getAll({ page, pageSize, search });
+    const normalizedSearch = this.normalizeSearch(search);
+
+    const clientes = await this.service.getAll({
+      page,
+      pageSize,
+      search: normalizedSearch,
+    });
     return clientes;
   }
 
@@ -41,13 +71,15 @@ export class ClienteController {
   async getAllKanban(
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search: string = "",
+    @QueryParam("search", { required: false }) search?: string,
     @Req() req: Request
   ) {
+    const normalizedSearch = this.normalizeSearch(search);
+
     const serviceQuery: any = {
       page,
       pageSize,
-      search,
+      search: normalizedSearch,
       ...(req.query as any),
     };
 

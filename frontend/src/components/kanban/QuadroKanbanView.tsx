@@ -23,7 +23,7 @@ import {
 } from '@/schemas/kanban.schema';
 import dynamic from 'next/dynamic';
 import { useRouter } from 'next/router';
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 
 // Dynamic imports para modais pesados
 const CardFormModal = dynamic(
@@ -106,12 +106,14 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
       } else {
         await criarCardKanban(data);
       }
+      // Fazer refresh para garantir que o card apareça
       await refreshAfterMutation();
-      setShowCardModal(false);
+      // Limpar estados após sucesso (o modal será fechado pelo CardFormModal via onClose)
       setSelectedCard(null);
       setSelectedColumnId('');
     } catch (error) {
       console.log('Erro ao salvar card:', error);
+      // Em caso de erro, manter o modal aberto para o usuário poder tentar novamente
       throw error;
     } finally {
       setIsSavingCard(false);
@@ -257,6 +259,22 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
     setCardToView(card);
   }, []);
 
+  // Sincronizar cardToView com o card atualizado do contexto quando o quadro mudar
+  useEffect(() => {
+    if (cardToView && quadro) {
+      // Encontrar o card atualizado no contexto
+      const updatedCard = quadro.colunas
+        .flatMap(col => col.cards)
+        .find(c => c.id === cardToView.id);
+      
+      if (updatedCard) {
+        // Atualizar o cardToView com o card atualizado do contexto
+        // Isso garante que mudanças no checklist sejam refletidas na modal
+        setCardToView(updatedCard);
+      }
+    }
+  }, [quadro]);
+
   return (
     <div className="w-full h-full p-6">
       <div className="mb-6 flex justify-between items-center">
@@ -289,23 +307,21 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
       />
 
       {/* Modal criar/editar card */}
-      {showCardModal && (
-        <CardFormModal
-          isOpen={showCardModal}
-          onClose={() => {
-            setShowCardModal(false);
-            setSelectedCard(null);
-            setSelectedColumnId('');
-          }}
-          onSubmit={handleSaveCard}
-          initialValues={selectedCard || undefined}
-          columnId={selectedColumnId}
-          title={selectedCard ? 'Editar Card' : 'Novo Card'}
-          onDelete={async () =>
-            await handleDeleteCardFromModal(selectedCard?.id || '')
-          }
-        />
-      )}
+      <CardFormModal
+        isOpen={showCardModal}
+        onClose={() => {
+          setShowCardModal(false);
+          setSelectedCard(null);
+          setSelectedColumnId('');
+        }}
+        onSubmit={handleSaveCard}
+        initialValues={selectedCard || undefined}
+        columnId={selectedColumnId}
+        title={selectedCard ? 'Editar Card' : 'Novo Card'}
+        onDelete={async () =>
+          await handleDeleteCardFromModal(selectedCard?.id || '')
+        }
+      />
 
       {/* Modal deletar card */}
       {showDeleteModal && cardToDelete && (

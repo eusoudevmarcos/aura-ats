@@ -9,7 +9,7 @@
     "build": "npm run db:generate && tsc && cpx \"src/public/**/*\" dist/public",
     "build:dev": "npm run db:generate && tsc && cpx \"src/public/**/*\" dist/public",
     "start": "cross-env NODE_ENV=production node dist/src/index.js",
-    "seed-script": "tsx prisma/seed.ts",
+    "seed-script": "tsx prisma/seed/index.ts",
     "seed": "npm run seed-script",
     "migrate:dev": "npx prisma migrate dev",
     "migrate:dev-create-only": "npx prisma migrate dev --create-only",

@@ -3,10 +3,16 @@ import { Request } from "express";
 import { inject, injectable } from "tsyringe";
 import prisma from "../lib/prisma";
 import {
+  CardEtiquetasInput,
+  CardKanbanDataInput,
   CardKanbanInput,
+  ChecklistCardInput,
+  ChecklistItemInput,
   ColunaKanbanInput,
   ComentarioCardInput,
   EspacoTrabalhoInput,
+  EtiquetaQuadroInput,
+  MembroCardInput,
   MoverCardInput,
   MoverColunaInput,
   QuadroKanbanInput,
@@ -49,10 +55,65 @@ type EspacoTrabalhoWithQuadrosAndColunas = Prisma.EspacoTrabalhoGetPayload<{
 
 type QuadroCompleto = Prisma.QuadroKanbanGetPayload<{
   include: {
+    usuarioSistema: {
+      select: {
+        id: true;
+        email: true;
+      };
+    };
+    etiquetas: true;
     colunas: {
       include: {
         cards: {
           include: {
+            usuarioSistema: {
+              select: {
+                id: true;
+                email: true;
+                funcionario: {
+                  include: {
+                    pessoa: {
+                      select: {
+                        id: true;
+                        nome: true;
+                      };
+                    };
+                  };
+                };
+                cliente: {
+                  include: {
+                    empresa: {
+                      select: {
+                        id: true;
+                        razaoSocial: true;
+                        nomeFantasia: true;
+                      };
+                    };
+                  };
+                };
+              };
+            };
+            datas: true;
+            etiquetas: {
+              include: {
+                etiqueta: true;
+              };
+            };
+            checklists: {
+              include: {
+                itens: true;
+              };
+            };
+            membros: {
+              include: {
+                usuarioSistema: {
+                  select: {
+                    id: true;
+                    email: true;
+                  };
+                };
+              };
+            };
             vinculos: {
               include: {
                 vaga: {
@@ -88,6 +149,16 @@ type QuadroCompleto = Prisma.QuadroKanbanGetPayload<{
                     id: true;
                     titulo: true;
                     dataHora: true;
+                  };
+                };
+              };
+            };
+            comentarios: {
+              include: {
+                usuarioSistema: {
+                  select: {
+                    id: true;
+                    email: true;
                   };
                 };
               };
@@ -424,32 +495,14 @@ export class KanbanService {
           select: {
             id: true,
             email: true,
-            funcionario: {
-              include: {
-                pessoa: {
-                  select: {
-                    nome: true,
-                  },
-                },
-              },
-            },
-            cliente: {
-              include: {
-                empresa: {
-                  select: {
-                    razaoSocial: true,
-                    nomeFantasia: true,
-                  },
-                },
-              },
-            },
           },
         },
+        etiquetas: true,
         colunas: {
           orderBy: { ordem: "asc" },
           include: {
             cards: {
-              orderBy: { ordem: "asc" },
+              orderBy: { ordem: "desc" }, // Ordenação descendente: maior ordem primeiro (último adicionado no topo)
               include: {
                 usuarioSistema: {
                   select: {
@@ -459,6 +512,7 @@ export class KanbanService {
                       include: {
                         pessoa: {
                           select: {
+                            id: true,
                             nome: true,
                           },
                         },
@@ -468,10 +522,32 @@ export class KanbanService {
                       include: {
                         empresa: {
                           select: {
+                            id: true,
                             razaoSocial: true,
                             nomeFantasia: true,
                           },
                         },
+                      },
+                    },
+                  },
+                },
+                datas: true,
+                etiquetas: {
+                  include: {
+                    etiqueta: true,
+                  },
+                },
+                checklists: {
+                  include: {
+                    itens: true,
+                  },
+                },
+                membros: {
+                  include: {
+                    usuarioSistema: {
+                      select: {
+                        id: true,
+                        email: true,
                       },
                     },
                   },
@@ -521,25 +597,6 @@ export class KanbanService {
                       select: {
                         id: true,
                         email: true,
-                        funcionario: {
-                          include: {
-                            pessoa: {
-                              select: {
-                                nome: true,
-                              },
-                            },
-                          },
-                        },
-                        cliente: {
-                          include: {
-                            empresa: {
-                              select: {
-                                razaoSocial: true,
-                                nomeFantasia: true,
-                              },
-                            },
-                          },
-                        },
                       },
                     },
                   },
@@ -618,17 +675,21 @@ export class KanbanService {
    * Cria um novo card Kanban
    */
   async criarCardKanban(data: CardKanbanInput, token: string | null) {
-    // Se não fornecer ordem, busca a última ordem e adiciona 1000
+    // Se não fornecer ordem, busca a maior ordem (primeiro card) e adiciona 1000
+    // Isso faz com que novos cards apareçam no topo (ordem descendente)
     let ordem = data.ordem;
     if (ordem === undefined) {
-      const ultimoCard = await prisma.cardKanban.findFirst({
+      const primeiroCard = await prisma.cardKanban.findFirst({
         where: { colunaKanbanId: data.colunaKanbanId },
-        orderBy: { ordem: "desc" },
+        orderBy: { ordem: "desc" }, // Busca o card com maior ordem (que está no topo)
       });
-      ordem = ultimoCard ? ultimoCard.ordem + 1000 : 1000;
+      ordem = primeiroCard ? primeiroCard.ordem + 1000 : 1000;
     }
 
     const usuarioSistemaId = await this.getUsuarioSistemaIdFromToken(token);
+    if (!usuarioSistemaId) {
+      console.warn("Aviso: usuarioSistemaId não foi obtido do token ao criar card. Card será criado sem criador associado.");
+    }
     return await prisma.cardKanban.create({
       data: {
         titulo: data.titulo,
@@ -669,6 +730,7 @@ export class KanbanService {
 
   /**
    * Move um card e calcula a nova ordem (Lógica de Ponto Médio)
+   * Cards são ordenados em ordem descendente (maior ordem primeiro = último adicionado no topo)
    */
   async moverCard(data: MoverCardInput) {
     const { cardId, novaColunaId, ordemSuperior, ordemInferior, novaPosicao } =
@@ -677,36 +739,37 @@ export class KanbanService {
     let novaOrdem: number;
 
     if (novaPosicao !== undefined) {
-      // Se forneceu a posição, busca os cards da coluna e calcula a ordem
+      // Se forneceu a posição, busca os cards da coluna ordenados por desc (maior primeiro)
       const cards = await prisma.cardKanban.findMany({
         where: { colunaKanbanId: novaColunaId },
-        orderBy: { ordem: "asc" },
+        orderBy: { ordem: "desc" }, // Ordenação descendente para manter consistência
       });
 
       if (cards.length === 0) {
         novaOrdem = 1000;
       } else if (novaPosicao === 0) {
-        // Primeiro da lista
-        novaOrdem = cards[0].ordem / 2;
+        // Primeiro da lista (topo) - precisa de ordem maior que o primeiro atual
+        novaOrdem = cards[0].ordem + 1000;
       } else if (novaPosicao >= cards.length) {
-        // Último da lista
-        novaOrdem = cards[cards.length - 1].ordem + 1000;
+        // Último da lista (final) - precisa de ordem menor que o último atual
+        novaOrdem = Math.max(0, cards[cards.length - 1].ordem - 1000);
       } else {
         // Entre dois cards
-        const cardAnterior = cards[novaPosicao - 1];
-        const cardPosterior = cards[novaPosicao];
+        const cardAnterior = cards[novaPosicao - 1]; // Card acima (maior ordem)
+        const cardPosterior = cards[novaPosicao]; // Card abaixo (menor ordem)
         novaOrdem = (cardAnterior.ordem + cardPosterior.ordem) / 2;
       }
     } else if (ordemSuperior !== undefined && ordemInferior !== undefined) {
       // Usa a lógica de ponto médio
+      // ordemSuperior é maior (card acima), ordemInferior é menor (card abaixo)
       novaOrdem = (ordemSuperior + ordemInferior) / 2;
     } else {
-      // Se não forneceu nada, coloca no final
-      const ultimoCard = await prisma.cardKanban.findFirst({
+      // Se não forneceu nada, coloca no topo (maior ordem)
+      const primeiroCard = await prisma.cardKanban.findFirst({
         where: { colunaKanbanId: novaColunaId },
-        orderBy: { ordem: "desc" },
+        orderBy: { ordem: "desc" }, // Busca o card com maior ordem (topo)
       });
-      novaOrdem = ultimoCard ? ultimoCard.ordem + 1000 : 1000;
+      novaOrdem = primeiroCard ? primeiroCard.ordem + 1000 : 1000;
     }
 
     return await prisma.cardKanban.update({
@@ -784,6 +847,335 @@ export class KanbanService {
   async deletarCardKanban(id: string) {
     return await prisma.cardKanban.delete({
       where: { id },
+    });
+  }
+
+  // ===================== ETIQUETAS =====================
+
+  async criarEtiquetaQuadro(
+    quadroKanbanId: string,
+    data: Omit<EtiquetaQuadroInput, "quadroKanbanId">
+  ) {
+    return await prisma.etiquetaQuadro.create({
+      data: {
+        quadroKanbanId,
+        nome: data.nome,
+        cor: data.cor,
+        ordem: data.ordem,
+      },
+    });
+  }
+
+  async listarEtiquetasDoQuadro(quadroKanbanId: string) {
+    return await prisma.etiquetaQuadro.findMany({
+      where: { quadroKanbanId },
+      orderBy: { ordem: "asc" },
+    });
+  }
+
+  async atualizarEtiquetaQuadro(
+    id: string,
+    data: Partial<Omit<EtiquetaQuadroInput, "quadroKanbanId">>
+  ) {
+    return await prisma.etiquetaQuadro.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deletarEtiquetaQuadro(id: string) {
+    return await prisma.etiquetaQuadro.delete({
+      where: { id },
+    });
+  }
+
+  async atualizarEtiquetasDoCard(
+    cardId: string,
+    payload: CardEtiquetasInput
+  ) {
+    const { etiquetaIds } = payload;
+
+    return await prisma.$transaction(async (tx) => {
+      // Limpa todas as etiquetas atuais do card
+      await tx.cardEtiqueta.deleteMany({
+        where: { cardKanbanId: cardId },
+      });
+
+      if (!etiquetaIds || etiquetaIds.length === 0) {
+        return tx.cardKanban.findUnique({
+          where: { id: cardId },
+          include: {
+            etiquetas: {
+              include: { etiqueta: true },
+            },
+          },
+        });
+      }
+
+      // Cria novas ligações
+      await tx.cardEtiqueta.createMany({
+        data: etiquetaIds.map((etiquetaId) => ({
+          cardKanbanId: cardId,
+          etiquetaQuadroId: etiquetaId,
+        })),
+        skipDuplicates: true,
+      });
+
+      return tx.cardKanban.findUnique({
+        where: { id: cardId },
+        include: {
+          etiquetas: {
+            include: { etiqueta: true },
+          },
+        },
+      });
+    });
+  }
+
+  // ===================== DATAS DO CARD =====================
+
+  async upsertCardData(cardId: string, data: CardKanbanDataInput) {
+    const { dataInicio, dataEntrega, recorrencia, lembreteMinutosAntes } = data;
+
+    return await prisma.cardKanbanData.upsert({
+      where: { cardKanbanId: cardId },
+      create: {
+        cardKanbanId: cardId,
+        dataInicio: dataInicio ? new Date(dataInicio) : null,
+        dataEntrega: dataEntrega ? new Date(dataEntrega) : null,
+        recorrencia: recorrencia ?? undefined,
+        lembreteMinutosAntes: lembreteMinutosAntes ?? null,
+      },
+      update: {
+        dataInicio: dataInicio ? new Date(dataInicio) : null,
+        dataEntrega: dataEntrega ? new Date(dataEntrega) : null,
+        recorrencia: recorrencia ?? undefined,
+        lembreteMinutosAntes: lembreteMinutosAntes ?? null,
+      },
+    });
+  }
+
+  async obterCardData(cardId: string) {
+    return await prisma.cardKanbanData.findUnique({
+      where: { cardKanbanId: cardId },
+    });
+  }
+
+  // ===================== CHECKLIST =====================
+
+  async criarChecklist(cardId: string, data: ChecklistCardInput) {
+    let ordem = data.ordem;
+
+    if (ordem === undefined) {
+      const ultimoChecklist = await prisma.checklistCard.findFirst({
+        where: { cardKanbanId: cardId },
+        orderBy: { ordem: "desc" },
+      });
+      ordem = ultimoChecklist ? ultimoChecklist.ordem + 1000 : 1000;
+    }
+
+    return await prisma.checklistCard.create({
+      data: {
+        cardKanbanId: cardId,
+        titulo: data.titulo,
+        ordem,
+      },
+      include: {
+        itens: true,
+      },
+    });
+  }
+
+  async atualizarChecklist(id: string, data: Partial<ChecklistCardInput>) {
+    return await prisma.checklistCard.update({
+      where: { id },
+      data,
+      include: {
+        itens: true,
+      },
+    });
+  }
+
+  async deletarChecklist(id: string) {
+    return await prisma.checklistCard.delete({
+      where: { id },
+    });
+  }
+
+  async criarChecklistItem(
+    checklistId: string,
+    data: ChecklistItemInput
+  ) {
+    let ordem = data.ordem;
+
+    if (ordem === undefined) {
+      const ultimoItem = await prisma.checklistItem.findFirst({
+        where: { checklistCardId: checklistId },
+        orderBy: { ordem: "desc" },
+      });
+      ordem = ultimoItem ? ultimoItem.ordem + 1000 : 1000;
+    }
+
+    return await prisma.checklistItem.create({
+      data: {
+        checklistCardId: checklistId,
+        descricao: data.descricao,
+        concluido: data.concluido ?? false,
+        ordem,
+      },
+    });
+  }
+
+  async atualizarChecklistItem(
+    id: string,
+    data: Partial<ChecklistItemInput>
+  ) {
+    return await prisma.checklistItem.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deletarChecklistItem(id: string) {
+    return await prisma.checklistItem.delete({
+      where: { id },
+    });
+  }
+
+  async toggleChecklistCompleto(cardId: string, completo: boolean) {
+    return await prisma.cardKanban.update({
+      where: { id: cardId },
+      data: {
+        checklistCompleto: completo,
+      },
+    });
+  }
+
+  // ===================== MEMBROS DO CARD =====================
+
+  async adicionarMembroAoCard(data: MembroCardInput) {
+    const { cardId, usuarioSistemaId } = data;
+
+    const usuarioExiste = await prisma.usuarioSistema.findUnique({
+      where: { id: usuarioSistemaId },
+    });
+
+    if (!usuarioExiste) {
+      throw new Error("Usuário do sistema não encontrado");
+    }
+
+    return await prisma.membroCard.create({
+      data: {
+        cardKanbanId: cardId,
+        usuarioSistemaId,
+      },
+      include: {
+        usuarioSistema: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  async removerMembroDoCard(cardId: string, usuarioSistemaId: string) {
+    return await prisma.membroCard.delete({
+      where: {
+        cardKanbanId_usuarioSistemaId: {
+          cardKanbanId: cardId,
+          usuarioSistemaId,
+        },
+      },
+    });
+  }
+
+  async listarMembrosDoCard(cardId: string) {
+    return await prisma.membroCard.findMany({
+      where: { cardKanbanId: cardId },
+      include: {
+        usuarioSistema: {
+          select: {
+            id: true,
+            email: true,
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Busca usuários do sistema para autocomplete (membros)
+   */
+  async buscarUsuariosSistema(search: string = "", limit: number = 10) {
+    return await prisma.usuarioSistema.findMany({
+      where: {
+        OR: [
+          {
+            email: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            funcionario: {
+              pessoa: {
+                nome: {
+                  contains: search,
+                  mode: "insensitive",
+                },
+              },
+            },
+          },
+          {
+            cliente: {
+              empresa: {
+                OR: [
+                  {
+                    razaoSocial: {
+                      contains: search,
+                      mode: "insensitive",
+                    },
+                  },
+                  {
+                    nomeFantasia: {
+                      contains: search,
+                      mode: "insensitive",
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        ],
+      },
+      take: limit,
+      select: {
+        id: true,
+        email: true,
+        funcionario: {
+          include: {
+            pessoa: {
+              select: {
+                id: true,
+                nome: true,
+              },
+            },
+          },
+        },
+        cliente: {
+          include: {
+            empresa: {
+              select: {
+                id: true,
+                razaoSocial: true,
+                nomeFantasia: true,
+              },
+            },
+          },
+        },
+      },
     });
   }
 

@@ -1,11 +1,10 @@
-import { PrismaClient } from "@prisma/client";
 import * as dotenv from "dotenv";
-import { BeneficiosSeed } from "./seed/beneficios";
-import { EspecialidadesSeed } from "./seed/especialidades";
+import prisma from "../../src/lib/prisma";
+import { BeneficiosSeed } from "./beneficios";
+import { EspecialidadesSeed } from "./especialidades";
 
 dotenv.config({ path: ".env" });
 
-const prisma = new PrismaClient();
 async function upsertEspecialidades() {
   for (const especialidade of EspecialidadesSeed) {
     await prisma.especialidade.upsert({
@@ -49,8 +48,8 @@ async function createPlanos(planoList: any[], tipoDesc: string) {
           plano.limitePesquisas !== undefined
             ? plano.limitePesquisas
             : plano.limiteUso !== undefined
-            ? plano.limiteUso
-            : undefined,
+              ? plano.limiteUso
+              : undefined,
       },
     });
     console.log(`✅ Plano ${plano.categoria} - ${plano.nome} adicionado`);

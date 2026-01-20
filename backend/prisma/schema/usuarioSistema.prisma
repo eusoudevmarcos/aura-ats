@@ -20,4 +20,5 @@ model UsuarioSistema {
     comentariosCard ComentarioCard[]
 
     @@unique([email])
+    membroCards MembroCard[]
 }

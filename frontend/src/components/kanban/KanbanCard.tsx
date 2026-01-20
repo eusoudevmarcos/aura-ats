@@ -1,8 +1,14 @@
 import { CardKanban, VinculoCard } from '@/schemas/kanban.schema';
+import { useKanban } from '@/context/KanbanContext';
+import { getUsuarioNome } from '@/utils/kanban';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import React from 'react';
-import { FiMoreVertical } from 'react-icons/fi';
+import {
+  FiCalendar,
+  FiMoreVertical,
+  FiUser,
+} from 'react-icons/fi';
 
 interface KanbanCardProps {
   card: CardKanban;
@@ -21,6 +27,16 @@ const KanbanCardComponent: React.FC<KanbanCardProps> = ({
   renderVinculos,
   isItemAnimating,
 }) => {
+  const { toggleCardChecklistCompleto } = useKanban();
+  const [localChecklistCompleto, setLocalChecklistCompleto] = React.useState<boolean>(
+    card.checklistCompleto || false
+  );
+
+  // Sincronizar estado local quando o card prop mudar
+  React.useEffect(() => {
+    setLocalChecklistCompleto(card.checklistCompleto || false);
+  }, [card.checklistCompleto]);
+
   const {
     attributes,
     listeners,
@@ -133,7 +149,67 @@ const KanbanCardComponent: React.FC<KanbanCardProps> = ({
         </div>
       )}
 
-      <h3 className="font-semibold text-gray-800 mb-2 pr-8">{card.titulo}</h3>
+      <div className="flex items-center gap-2 mb-2 pr-8">
+        <input
+          type="checkbox"
+          checked={localChecklistCompleto}
+          onChange={async (e) => {
+            e.stopPropagation();
+            const novoEstado = !localChecklistCompleto;
+            setLocalChecklistCompleto(novoEstado);
+            try {
+              await toggleCardChecklistCompleto(card.id, novoEstado);
+            } catch (error) {
+              setLocalChecklistCompleto(!novoEstado);
+              console.log('Erro ao atualizar status do card:', error);
+            }
+          }}
+          onClick={(e) => e.stopPropagation()}
+          className="h-4 w-4 cursor-pointer rounded border-gray-300 text-green-600 focus:ring-2 focus:ring-green-500 flex-shrink-0"
+        />
+        <h3 className="font-semibold text-gray-800 flex-1">{card.titulo}</h3>
+      </div>
+
+      {/* Indicadores visuais: apenas data de entrega e criador */}
+      <div className="mb-2 flex flex-wrap items-center gap-2">
+        {/* Data de entrega */}
+        {card.datas?.dataEntrega && (() => {
+          const dataEntrega = new Date(card.datas.dataEntrega);
+          const hoje = new Date();
+          hoje.setHours(0, 0, 0, 0);
+          dataEntrega.setHours(0, 0, 0, 0);
+          const isAtrasado = dataEntrega < hoje;
+          return (
+            <span
+              className={`inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-xs ${
+                isAtrasado
+                  ? 'bg-red-100 text-red-700'
+                  : 'bg-gray-100 text-gray-700'
+              }`}
+              title={`Data de entrega: ${dataEntrega.toLocaleDateString('pt-BR')}`}
+            >
+              <FiCalendar className="h-3 w-3" />
+              {dataEntrega.toLocaleDateString('pt-BR', {
+                day: '2-digit',
+                month: '2-digit',
+              })}
+            </span>
+          );
+        })()}
+
+        {/* Criador do card */}
+        {card.usuarioSistema && (
+          <span
+            className="inline-flex items-center gap-1 rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-700"
+            title={`Criado por: ${getUsuarioNome(card.usuarioSistema)}`}
+          >
+            <FiUser className="h-3 w-3" />
+            <span className="truncate max-w-[100px]">
+              {getUsuarioNome(card.usuarioSistema)}
+            </span>
+          </span>
+        )}
+      </div>
 
       {card.descricao && (
         <p className="text-sm text-gray-600 mb-2 line-clamp-2">
@@ -168,7 +244,10 @@ export const KanbanCard = React.memo<KanbanCardProps>(
       prevProps.card.id === nextProps.card.id &&
       prevProps.card.titulo === nextProps.card.titulo &&
       prevProps.card.descricao === nextProps.card.descricao &&
-      prevProps.card.vinculos?.length === nextProps.card.vinculos?.length
+      prevProps.card.vinculos?.length === nextProps.card.vinculos?.length &&
+      prevProps.card.datas?.dataEntrega === nextProps.card.datas?.dataEntrega &&
+      prevProps.card.usuarioSistemaId === nextProps.card.usuarioSistemaId &&
+      prevProps.card.checklistCompleto === nextProps.card.checklistCompleto
     );
   }
 );

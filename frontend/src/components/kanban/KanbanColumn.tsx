@@ -72,7 +72,7 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
   };
 
   const sortedCards = useMemo(
-    () => [...(column.cards || [])].sort((a, b) => a.ordem - b.ordem),
+    () => [...(column.cards || [])].sort((a, b) => b.ordem - a.ordem), // Ordenação descendente: maior ordem primeiro (último adicionado no topo)
     [column.cards]
   );
   const isAnimating = useMemo(

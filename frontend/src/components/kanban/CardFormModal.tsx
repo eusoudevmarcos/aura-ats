@@ -62,6 +62,11 @@ export const CardFormModal: React.FC<CardFormModalProps> = ({
               colunaKanbanId: columnId,
             }
       );
+    } else {
+      // Limpar formulário quando o modal fechar
+      reset({
+        colunaKanbanId: columnId,
+      });
     }
   }, [isOpen, initialValues, columnId, reset]);
 
@@ -69,9 +74,12 @@ export const CardFormModal: React.FC<CardFormModalProps> = ({
     try {
       await onSubmit(data);
       reset();
+      // Fechar o modal após sucesso
       onClose();
     } catch (error) {
       console.log('Erro ao salvar card:', error);
+      // Em caso de erro, não fechar o modal para o usuário poder tentar novamente
+      throw error; // Re-lançar o erro para o react-hook-form tratar
     }
   };
 

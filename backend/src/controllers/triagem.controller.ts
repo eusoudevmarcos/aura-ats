@@ -9,6 +9,30 @@ import { Authorized } from "../decorators/Authorized";
 export class TriagemController {
   constructor(@inject(TriagemService) private service: TriagemService) {}
 
+  /**
+   * Normaliza parâmetros de busca vindos da query string.
+   */
+  private normalizeSearch(search: any): any {
+    if (search === undefined || search === null) return undefined;
+    if (typeof search !== "string") return search;
+
+    const trimmed = search.trim();
+    if (!trimmed) return undefined;
+
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return trimmed;
+      }
+    }
+
+    return trimmed;
+  }
+
   @Post("/save")
   @Authorized()
   async save(@Body() body: any) {
@@ -32,9 +56,15 @@ export class TriagemController {
   async getAll(
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search: any
+    @QueryParam("search", { required: false }) search?: string
   ) {
-    const triagens = await this.service.getAll({ page, pageSize, search });
+    const normalizedSearch = this.normalizeSearch(search);
+
+    const triagens = await this.service.getAll({
+      page,
+      pageSize,
+      search: normalizedSearch,
+    });
     return triagens;
   }
 
@@ -44,12 +74,14 @@ export class TriagemController {
     @Param("vagaId") vagaId: string,
     @QueryParam("page", { required: false }) page: number = 1,
     @QueryParam("pageSize", { required: false }) pageSize: number = 10,
-    @QueryParam("search", { required: false }) search: any
+    @QueryParam("search", { required: false }) search?: string
   ) {
+    const normalizedSearch = this.normalizeSearch(search);
+
     const triagens = await this.service.getAllByVagaId({
       page,
       pageSize,
-      search,
+      search: normalizedSearch,
       vagaId,
     });
     return triagens;

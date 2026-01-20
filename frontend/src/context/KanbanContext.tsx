@@ -1,4 +1,11 @@
-import { obterQuadroCompleto, moverCard, moverColuna } from '@/axios/kanban.axios';
+import {
+  atualizarEtiquetasDoCard,
+  moverCard,
+  moverColuna,
+  obterQuadroCompleto,
+  toggleChecklistCompleto,
+  upsertCardData,
+} from '@/axios/kanban.axios';
 import {
   CardKanban,
   CardKanbanInput,
@@ -14,6 +21,17 @@ interface KanbanContextType {
   loading: boolean;
   error: string | null;
   fetchQuadro: (id: string) => Promise<void>;
+  updateCardLabels: (cardId: string, etiquetaIds: string[]) => Promise<void>;
+  updateCardDates: (
+    cardId: string,
+    data: {
+      dataInicio?: string | Date;
+      dataEntrega?: string | Date;
+      recorrencia?: string;
+      lembreteMinutosAntes?: number | null;
+    }
+  ) => Promise<void>;
+  toggleCardChecklistCompleto: (cardId: string, completo: boolean) => Promise<void>;
   moveCard: (
     cardId: string,
     sourceColumnId: string,
@@ -93,12 +111,12 @@ export const KanbanProvider: React.FC<KanbanProviderProps> = ({
       const card = sourceColumn.cards.find(c => c.id === cardId);
       if (!card) return;
 
-      // Ordenar cards antes de processar
+      // Ordenar cards por ordem descendente (maior ordem primeiro = último adicionado no topo)
       const sortedSourceCards = [...sourceColumn.cards].sort(
-        (a, b) => a.ordem - b.ordem
+        (a, b) => b.ordem - a.ordem
       );
       const sortedTargetCards = [...targetColumn.cards].sort(
-        (a, b) => a.ordem - b.ordem
+        (a, b) => b.ordem - a.ordem
       );
 
       // Se é a mesma coluna, usar arrayMove e atualizar apenas uma vez
@@ -256,15 +274,59 @@ export const KanbanProvider: React.FC<KanbanProviderProps> = ({
 
   const refreshAfterMutation = useCallback(async () => {
     if (quadroId) {
-      await fetchQuadro(quadroId);
+      try {
+        // Não setar loading para true aqui para não bloquear a UI
+        const data = await obterQuadroCompleto(quadroId);
+        setQuadro(data);
+      } catch (err: any) {
+        console.log('Erro ao atualizar quadro após mutação:', err);
+        setError(err.message || 'Erro ao atualizar quadro');
+        // Em caso de erro, tentar fazer um fetch completo
+        await fetchQuadro(quadroId);
+      }
     }
   }, [quadroId, fetchQuadro]);
+
+  const updateCardLabels = useCallback(
+    async (cardId: string, etiquetaIds: string[]) => {
+      await atualizarEtiquetasDoCard(cardId, etiquetaIds);
+      await refreshAfterMutation();
+    },
+    [refreshAfterMutation]
+  );
+
+  const updateCardDates = useCallback(
+    async (
+      cardId: string,
+      data: {
+        dataInicio?: string | Date;
+        dataEntrega?: string | Date;
+        recorrencia?: string;
+        lembreteMinutosAntes?: number | null;
+      }
+    ) => {
+      await upsertCardData(cardId, data);
+      await refreshAfterMutation();
+    },
+    [refreshAfterMutation]
+  );
+
+  const toggleCardChecklistCompleto = useCallback(
+    async (cardId: string, completo: boolean) => {
+      await toggleChecklistCompleto(cardId, completo);
+      await refreshAfterMutation();
+    },
+    [refreshAfterMutation]
+  );
 
   const value: KanbanContextType = {
     quadro,
     loading,
     error,
     fetchQuadro,
+    updateCardLabels,
+    updateCardDates,
+    toggleCardChecklistCompleto,
     moveCard: moveCardHandler,
     moveColumn: moveColumnHandler,
     refreshQuadro,
