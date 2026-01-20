@@ -65,7 +65,7 @@ export const getNavItems = (user: any) => {
     navItems.push({
       icon: <span className="material-icons-outlined">task</span>,
       label: 'Taferas',
-      href: '/tarefas',
+      href: '/kanban',
     });
   }
 
@@ -106,6 +106,18 @@ export const getNavItems = (user: any) => {
       icon: <EmployeesIcon className="w-5 h-5 text-inherit" />,
       label: 'Usuarios do sistema',
       href: `/funcionarios`,
+    });
+  }
+
+  if (user?.tipo === TipoUsuarioEnum.enum.ADMIN_SISTEMA) {
+    navItems.push({
+      icon: (
+        <span className="material-icons-outlined w-5 h-5 text-inherit">
+          dashboard_2_gear
+        </span>
+      ),
+      label: 'Especilidades',
+      href: `/especialidade/list`,
     });
   }
 

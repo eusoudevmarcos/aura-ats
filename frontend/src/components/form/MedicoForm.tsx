@@ -1,5 +1,5 @@
 import api from '@/axios';
-import { EspecialidadeMedicoInput } from '@/schemas/candidato.schema';
+import { EspecialidadeMedicoType } from '@/schemas/candidato.schema';
 import { UF_MODEL } from '@/utils/UF';
 import { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
@@ -72,7 +72,7 @@ const MedicoForm = ({ namePrefix = 'medico' }: MedicoFormProps) => {
     setValue(crmName, newArray, { shouldValidate: true });
   };
 
-  const handleEspecilidadeChange = (newArray: EspecialidadeMedicoInput[]) => {
+  const handleEspecilidadeChange = (newArray: EspecialidadeMedicoType[]) => {
     setValue('medico.especialidades', newArray, { shouldValidate: true });
   };
 

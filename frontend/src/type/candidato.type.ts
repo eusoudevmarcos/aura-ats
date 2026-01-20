@@ -1,14 +1,14 @@
-import { AreaCandidatoEnum } from "@/schemas/candidato.schema";
-import { Pessoa } from "./pessoa.type";
-import { Especialidade } from "./especialidade.type";
-import { Vaga } from "./vaga.type";
+import { AreaCandidato } from '@/dto/dataStoneCandidato.dto';
+import { Especialidade } from './especialidade.type';
+import { Pessoa } from './pessoa.type';
+import { Vaga } from './vaga.type';
 
 export type CandidatoInput = {
   id?: string;
-  areaCandidato: AreaCandidatoEnum;
+  areaCandidato: AreaCandidato;
   pessoa:
     | { id: string }
-    | Omit<Pessoa, "id" | "createdAt" | "updatedAt" | "empresaRepresentadaId">;
+    | Omit<Pessoa, 'id' | 'createdAt' | 'updatedAt' | 'empresaRepresentadaId'>;
   crm?: string | null;
   corem?: string | null;
   rqe?: string | null;
@@ -28,7 +28,7 @@ export type CandidatoInput = {
 
 export type Candidato = {
   id: string;
-  areaCandidato: AreaCandidatoEnum;
+  areaCandidato: AreaCandidato;
   pessoaId: string;
   pessoa: Pessoa;
   crm: string | null;

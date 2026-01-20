@@ -14,5 +14,11 @@ model UsuarioSistema {
     clienteId String?  @unique
     cliente   Cliente? @relation(fields: [clienteId], references: [id])
 
+    espacosTrabalho EspacoTrabalho[]
+    quadrosKanban   QuadroKanban[]
+    cardsKanban     CardKanban[]
+    comentariosCard ComentarioCard[]
+
     @@unique([email])
+    membroCards MembroCard[]
 }

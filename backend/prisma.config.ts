@@ -10,7 +10,7 @@ export default defineConfig({
   // migrations + seeds
   migrations: {
     path: "prisma/migrations",
-    seed: "node prisma/seed.js", // ajuste conforme seu seed
+    // seed: "node prisma/seed/index.ts", // ajuste conforme seu seed
   },
 
   // URL do banco (use seu DIRECT_URL para operações que precisam conexão direta)

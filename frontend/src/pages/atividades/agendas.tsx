@@ -1,7 +1,15 @@
-import AgendaList from '@/components/list/AgendaList';
 import AtividadeLayout from '@/layout/AtividadesLayout';
-import { SessionProvider } from 'next-auth/react';
+import { SessionProviderWrapper } from '@/components/providers/SessionProviderWrapper';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
+
+// Dynamic import para AgendaList
+const AgendaList = dynamic(
+  () => import('@/components/list/AgendaList'),
+  {
+    ssr: false,
+  }
+);
 
 export default function Agendas() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -18,9 +26,9 @@ export default function Agendas() {
 
   return (
     <AtividadeLayout>
-      <SessionProvider>
+      <SessionProviderWrapper>
         <AgendaList noTitle />
-      </SessionProvider>
+      </SessionProviderWrapper>
     </AtividadeLayout>
   );
 }

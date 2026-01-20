@@ -52,7 +52,26 @@ export class CandidatoService {
       },
     });
 
-    // Se um cliente está consultando, debita um uso do plano
+    if (candidato && candidato.medico?.especialidades?.length) {
+      const especialidadeIds = candidato.medico.especialidades.map(
+        (e) => e.especialidadeId
+      );
+      const especialidades = await prisma.especialidade.findMany({
+        where: { id: { in: especialidadeIds } },
+      });
+      candidato.medico.especialidades = candidato.medico.especialidades.map(
+        (espMedico) => {
+          const especialidadeDetalhe = especialidades.find(
+            (e) => e.id === espMedico.especialidadeId
+          );
+          return {
+            ...espMedico,
+            especialidade: especialidadeDetalhe || null,
+          };
+        }
+      );
+    }
+
     if (candidato && clienteId) {
       try {
         await this.billingService.debitarUsoCliente(

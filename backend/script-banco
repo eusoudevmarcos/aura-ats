@@ -1,8 +1,0 @@
-
-// Este é usado
-pg_dump --format=plain --schema=public --no-owner --dbname="postgresql://postgres.qkurfnucxuumojexmfpz:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9@aws-1-sa-east-1.pooler.supabase.com:5432/postgres" -f backup-public.sql
-
-
-
-// SUBIR BANCO
-psql "postgresql://aura_prod_user:ZRCwtuQ77h6hH40yYqXlqkZgrvoYBuED@dpg-d4s8i5ali9vc73devbc0-a.oregon-postgres.render.com/aura_prod" -f backup-public.sql

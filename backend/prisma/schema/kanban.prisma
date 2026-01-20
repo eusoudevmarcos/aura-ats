@@ -1,0 +1,213 @@
+model EspacoTrabalho {
+    id               String          @id @default(cuid())
+    nome             String
+    quadros          QuadroKanban[]
+    usuarioSistemaId String?
+    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id])
+    criadoEm         DateTime        @default(now())
+    atualizadoEm     DateTime        @updatedAt
+
+    @@index([usuarioSistemaId])
+}
+
+model QuadroKanban {
+    id               String          @id @default(cuid())
+    titulo           String
+    espacoTrabalhoId String
+    espacoTrabalho   EspacoTrabalho  @relation(fields: [espacoTrabalhoId], references: [id], onDelete: Cascade)
+    colunas          ColunaKanban[]
+    etiquetas        EtiquetaQuadro[]
+    usuarioSistemaId String?
+    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id])
+    criadoEm         DateTime        @default(now())
+    atualizadoEm     DateTime        @updatedAt
+
+    @@index([espacoTrabalhoId])
+    @@index([usuarioSistemaId])
+}
+
+model ColunaKanban {
+    id             String       @id @default(cuid())
+    titulo         String
+    ordem          Float // Uso de Float para flexibilidade total de ordenação
+    quadroKanbanId String
+    quadro         QuadroKanban @relation(fields: [quadroKanbanId], references: [id], onDelete: Cascade)
+    cards          CardKanban[]
+    criadoEm       DateTime     @default(now())
+    atualizadoEm   DateTime     @updatedAt
+
+    @@index([quadroKanbanId])
+}
+
+model CardKanban {
+    id               String           @id @default(cuid())
+    titulo           String
+    descricao        String?          @db.Text
+    ordem            Float            // Uso de Float para evitar re-indexação massiva
+    colunaKanbanId   String
+    coluna           ColunaKanban     @relation(fields: [colunaKanbanId], references: [id], onDelete: Cascade)
+
+    // Vínculos estruturados (campos isolados)
+    vinculos          VinculoCard[]
+    comentarios       ComentarioCard[]
+    usuarioSistemaId  String?
+    usuarioSistema    UsuarioSistema?   @relation(fields: [usuarioSistemaId], references: [id])
+
+    // Novos relacionamentos
+    etiquetas         CardEtiqueta[]
+    datas             CardKanbanData?
+    checklists        ChecklistCard[]
+    membros           MembroCard[]
+    checklistCompleto Boolean          @default(false)
+
+    criadoEm         DateTime          @default(now())
+    atualizadoEm     DateTime          @updatedAt
+
+    @@index([colunaKanbanId])
+    @@index([usuarioSistemaId])
+}
+
+model VinculoCard {
+    id           String     @id @default(cuid())
+    cardKanbanId String
+    card         CardKanban @relation(fields: [cardKanbanId], references: [id], onDelete: Cascade)
+
+    // Polimorfismo controlado para as entidades do sistema
+    tipoEntidade TipoEntidade // Enum: VAGA, CANDIDATO, CLIENTE, COMPROMISSO
+
+    vagaId String?
+    vaga   Vaga?   @relation(fields: [vagaId], references: [id], onDelete: Cascade)
+
+    candidatoId String?
+    candidato   Candidato? @relation(fields: [candidatoId], references: [id], onDelete: Cascade)
+
+    clienteId String?
+    cliente   Cliente? @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+
+    compromissoId String?
+    compromisso   Agenda? @relation("AgendaVinculoCard", fields: [compromissoId], references: [id], onDelete: Cascade)
+
+    criadoEm DateTime @default(now())
+
+    @@index([cardKanbanId])
+    @@index([vagaId])
+    @@index([candidatoId])
+    @@index([clienteId])
+    @@index([compromissoId])
+}
+
+model ComentarioCard {
+    id               String          @id @default(cuid())
+    cardKanbanId     String
+    card             CardKanban      @relation(fields: [cardKanbanId], references: [id], onDelete: Cascade)
+    conteudo         String          @db.Text
+    usuarioSistemaId String?
+    usuarioSistema   UsuarioSistema? @relation(fields: [usuarioSistemaId], references: [id])
+    criadoEm         DateTime        @default(now())
+    atualizadoEm     DateTime        @updatedAt
+
+    @@index([cardKanbanId])
+    @@index([usuarioSistemaId])
+}
+
+model EtiquetaQuadro {
+    id             String       @id @default(cuid())
+    quadroKanbanId String
+    quadro         QuadroKanban @relation(fields: [quadroKanbanId], references: [id], onDelete: Cascade)
+
+    nome   String
+    cor    String
+    ordem  Float?
+    cards  CardEtiqueta[]
+
+    criadoEm       DateTime @default(now())
+    atualizadoEm   DateTime @updatedAt
+
+    @@index([quadroKanbanId])
+}
+
+model CardEtiqueta {
+    id              String         @id @default(cuid())
+    cardKanbanId    String
+    card            CardKanban     @relation(fields: [cardKanbanId], references: [id], onDelete: Cascade)
+    etiquetaQuadroId String
+    etiqueta        EtiquetaQuadro @relation(fields: [etiquetaQuadroId], references: [id], onDelete: Cascade)
+
+    criadoEm DateTime @default(now())
+
+    @@unique([cardKanbanId, etiquetaQuadroId])
+    @@index([cardKanbanId])
+    @@index([etiquetaQuadroId])
+}
+
+model CardKanbanData {
+    id                  String          @id @default(cuid())
+    cardKanbanId        String          @unique
+    card                CardKanban      @relation(fields: [cardKanbanId], references: [id], onDelete: Cascade)
+
+    dataInicio          DateTime?
+    dataEntrega         DateTime?
+    recorrencia         RecorrenciaCard @default(NENHUMA)
+    lembreteMinutosAntes Int?
+
+    criadoEm           DateTime @default(now())
+    atualizadoEm       DateTime @updatedAt
+}
+
+model ChecklistCard {
+    id           String        @id @default(cuid())
+    cardKanbanId String
+    card         CardKanban    @relation(fields: [cardKanbanId], references: [id], onDelete: Cascade)
+
+    titulo       String
+    ordem        Float
+    itens        ChecklistItem[]
+
+    criadoEm     DateTime @default(now())
+    atualizadoEm DateTime @updatedAt
+
+    @@index([cardKanbanId])
+}
+
+model ChecklistItem {
+    id             String         @id @default(cuid())
+    checklistCardId String
+    checklist      ChecklistCard  @relation(fields: [checklistCardId], references: [id], onDelete: Cascade)
+
+    descricao      String
+    concluido      Boolean        @default(false)
+    ordem          Float
+
+    criadoEm       DateTime @default(now())
+    atualizadoEm   DateTime @updatedAt
+
+    @@index([checklistCardId])
+}
+
+model MembroCard {
+    id               String          @id @default(cuid())
+    cardKanbanId     String
+    card             CardKanban      @relation(fields: [cardKanbanId], references: [id], onDelete: Cascade)
+    usuarioSistemaId String
+    usuarioSistema   UsuarioSistema  @relation(fields: [usuarioSistemaId], references: [id])
+
+    criadoEm         DateTime @default(now())
+
+    @@unique([cardKanbanId, usuarioSistemaId])
+    @@index([cardKanbanId])
+    @@index([usuarioSistemaId])
+}
+
+enum TipoEntidade {
+    VAGA
+    CANDIDATO
+    CLIENTE
+    COMPROMISSO
+}
+
+enum RecorrenciaCard {
+    NENHUMA
+    DIARIA
+    SEMANAL
+    MENSAL
+}

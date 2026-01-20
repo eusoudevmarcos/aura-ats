@@ -1,131 +1,88 @@
-import { Request, Response } from "express";
+import { Request } from "express";
+import { Body, Controller, Delete, Get, Param, Post, Put, QueryParam, Req } from "routing-controllers";
 import { inject, injectable } from "tsyringe";
+import { Authorized } from "../decorators/Authorized";
 import { BillingService } from "../services/billing.service";
 
 @injectable()
+@Controller("/planos")
 export class BillingController {
   constructor(@inject(BillingService) private billingService: BillingService) {}
 
-  // Cria assinatura para plano mensal
-  async createAssinaturaMensal(req: Request, res: Response): Promise<Response> {
-    try {
-      const data = req.body;
-      const result = await this.billingService.createAssinaturaMensal(data);
-      return res.status(201).json(result);
-    } catch (error: any) {
-      console.log("Erro ao criar assinatura mensal:", error.message);
-      return res.status(400).json({ message: error.message });
+  @Post("/assinatura-mensal")
+  async createAssinaturaMensal(@Body() data: any) {
+    const result = await this.billingService.createAssinaturaMensal(data);
+    return result;
+  }
+
+  @Post("/plano-por-uso")
+  async createPlanoPorUso(@Body() data: any) {
+    const result = await this.billingService.createPlanoPorUso(data);
+    return result;
+  }
+
+  @Get("/plano-assinatura/:id")
+  async getByIdPlanoAssinatura(@Param("id") id: string) {
+    const planoAssinatura = await this.billingService.getByIdPlanoAssinatura(
+      id
+    );
+    if (!planoAssinatura) {
+      throw new Error("Assinatura/Plano não encontrado.");
+    }
+    return planoAssinatura;
+  }
+
+  @Get("/")
+  async getAllPlanos(
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 12
+  ) {
+    const result = await this.billingService.getAll(page, pageSize);
+    return result;
+  }
+
+  @Put("/planos/:id")
+  async updatePlano(@Param("id") id: string, @Body() data: any) {
+    const updatedPlano = await this.billingService.update(id, data);
+    return updatedPlano;
+  }
+
+  @Delete("/planos/:id")
+  async deletePlano(@Param("id") id: string) {
+    await this.billingService.delete(id);
+    return { message: "Plano deletado com sucesso" };
+  }
+
+  @Post("/debitar-uso")
+  @Authorized()
+  async debitarUsoCliente(@Body() body: { acao: string }, @Req() req: Request) {
+    const clienteId = (req as any).user?.clienteId;
+    if (!clienteId) {
+      throw new Error("Cliente não identificado");
+    }
+
+    const { acao } = body;
+    const sucesso = await this.billingService.debitarUsoCliente(
+      clienteId,
+      acao
+    );
+
+    if (sucesso) {
+      return { message: "Uso debitado com sucesso" };
+    } else {
+      throw new Error("Não foi possível debitar o uso");
     }
   }
 
-  // Cria compra para plano por uso (plano único)
-  async createPlanoPorUso(req: Request, res: Response): Promise<Response> {
-    try {
-      const data = req.body;
-      const result = await this.billingService.createPlanoPorUso(data);
-      return res.status(201).json(result);
-    } catch (error: any) {
-      console.log("Erro ao criar compra de plano por uso:", error.message);
-      return res.status(400).json({ message: error.message });
+  @Get("/planos-usuario")
+  @Authorized()
+  async getPlanosUsuario(@Req() req: Request) {
+    const clienteId = (req as any).user?.clienteId;
+    if (!clienteId) {
+      throw new Error("Cliente não identificado");
     }
-  }
 
-  async getByIdPlanoAssinatura(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      const planoAssinatura = await this.billingService.getByIdPlanoAssinatura(
-        id
-      );
-      if (!planoAssinatura) {
-        return res
-          .status(404)
-          .json({ message: "Assinatura/Plano não encontrado." });
-      }
-      return res.status(200).json(planoAssinatura);
-    } catch (error: any) {
-      console.log("Erro ao obter assinatura/plano:", error.message);
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
-  // Busca todos os planos (com paginação opcional)
-  async getAllPlanos(req: Request, res: Response): Promise<Response> {
-    try {
-      const page = parseInt(req.query.page as string) || 1;
-      const pageSize = parseInt(req.query.pageSize as string) || 12;
-      const result = await this.billingService.getAll(page, pageSize);
-      return res.status(200).json(result);
-    } catch (error: any) {
-      console.log("Erro ao listar planos:", error.message);
-      return res.status(500).json({ message: "Erro interno do servidor." });
-    }
-  }
-
-  // Atualiza um plano existente pelo ID
-  async updatePlano(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      const data = req.body;
-      const updatedPlano = await this.billingService.update(id, data);
-      return res.status(200).json(updatedPlano);
-    } catch (error: any) {
-      console.log("Erro ao atualizar plano:", error.message);
-      return res.status(400).json({ message: error.message });
-    }
-  }
-
-  // Deleta um plano por ID
-  async deletePlano(req: Request, res: Response): Promise<Response> {
-    try {
-      const { id } = req.params;
-      await this.billingService.delete(id);
-      return res.status(204).send();
-    } catch (error: any) {
-      console.log("Erro ao deletar plano:", error.message);
-      return res.status(400).json({ message: error.message });
-    }
-  }
-
-  // Debita um uso do plano do cliente logado
-  async debitarUsoCliente(req: Request, res: Response): Promise<Response> {
-    try {
-      const clienteId = (req as any).user?.clienteId;
-      if (!clienteId) {
-        return res.status(401).json({ message: "Cliente não identificado" });
-      }
-
-      const { acao } = req.body;
-      const sucesso = await this.billingService.debitarUsoCliente(
-        clienteId,
-        acao
-      );
-
-      if (sucesso) {
-        return res.status(200).json({ message: "Uso debitado com sucesso" });
-      } else {
-        return res
-          .status(400)
-          .json({ message: "Não foi possível debitar o uso" });
-      }
-    } catch (error: any) {
-      console.log("Erro ao debitar uso:", error.message);
-      return res.status(500).json({ message: error.message });
-    }
-  }
-
-  // Busca planos do cliente logado
-  async getPlanosUsuario(req: Request, res: Response): Promise<Response> {
-    try {
-      const clienteId = (req as any).user?.clienteId;
-      if (!clienteId) {
-        return res.status(401).json({ message: "Cliente não identificado" });
-      }
-
-      const planos = await this.billingService.getPlanosUsuario(clienteId);
-      return res.status(200).json({ planos });
-    } catch (error: any) {
-      console.log("Erro ao buscar planos do usuário:", error.message);
-      return res.status(500).json({ message: error.message });
-    }
+    const planos = await this.billingService.getPlanosUsuario(clienteId);
+    return { planos };
   }
 }

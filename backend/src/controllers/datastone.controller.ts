@@ -1,6 +1,7 @@
 // src/controllers/DatastoneController.ts
 
 import axios from "axios";
+import { Controller, Get, QueryParam, Req, Res } from "routing-controllers";
 import { Request, Response } from "express";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import prisma from "../lib/prisma";
@@ -46,23 +47,22 @@ export interface Query {
   typeData: SearchType;
 }
 
+@Controller("/take-it")
 export class DatastoneController {
   constructor() {}
+  
+  @Get("/search")
   public async search(
-    req: Request<{}, {}, {}, Query>,
-    res: Response
+    @QueryParam("query", { required: false }) input: string,
+    @QueryParam("tipo", { required: false }) tipo: "persons" | "companies",
+    @QueryParam("typeData", { required: false }) typeData: SearchType,
+    @QueryParam("uf", { required: false }) uf: string = "",
+    @QueryParam("filial", { required: false }) filial: string = "",
+    @QueryParam("list", { required: false }) list: string = "",
+    @QueryParam("isDetail", { required: false }) isDetail: string = "false",
+    @Res() res: Response
   ): Promise<void> {
     try {
-      const {
-        query: input,
-        tipo,
-        typeData,
-        uf = "",
-        filial = "",
-        list = "",
-        isDetail = "false",
-      } = req.query;
-
       if (!input || !tipo) {
         res.status(400).json({
           error: true,
@@ -80,6 +80,10 @@ export class DatastoneController {
       if ("error" in result) {
         res.status(400).json(result);
         return;
+      }
+
+      if (!typeData) {
+        throw new Error("typeData é obrigatório");
       }
 
       const key = cache.buildKey({ typeData: result.tipo, input });
@@ -246,9 +250,9 @@ export class DatastoneController {
     }
   }
 
-  public listCache(req: Request, res: Response): void {
+  @Get("/cache")
+  public listCache(): CacheEntryPayload {
     const cacheEntries = cache.listCachedEntries();
-
-    res.json(cacheEntries);
+    return cacheEntries as any;
   }
 }

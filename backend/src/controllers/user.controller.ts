@@ -1,23 +1,23 @@
-import { Request, Response } from "express";
 import { getAuth } from "firebase-admin/auth";
+import { Body, Controller, Delete, Get, HttpError, Param, Post, Put } from "routing-controllers";
+import { Authorized } from "../decorators/Authorized";
 import { firestoreDB } from "../lib/firebaseAdmin";
 
+@Controller("/users")
 export default class UserController {
-  private checkFirebaseAvailable(res: Response): boolean {
+  private checkFirebaseAvailable(): void {
     if (!firestoreDB) {
-      res.status(503).json({
-        error: "Firebase não está configurado. Configure o arquivo de credenciais no root do backend.",
-      });
-      return false;
+      throw new HttpError(503, "Firebase não está configurado. Configure o arquivo de credenciais no root do backend.");
     }
-    return true;
   }
 
-  async create(req: Request, res: Response) {
-    if (!this.checkFirebaseAvailable(res)) return;
+  @Post("/")
+  @Authorized()
+  async create(@Body() body: { email: string; password: string; name: string; role: string }) {
+    this.checkFirebaseAvailable();
 
     try {
-      const { email, password, name, role } = req.body;
+      const { email, password, name, role } = body;
 
       const userRecord = await getAuth().createUser({
         email,
@@ -29,61 +29,73 @@ export default class UserController {
         .doc(userRecord.uid)
         .set({ email, name, role });
 
-      res.status(201).json({ uid: userRecord.uid });
+      return { uid: userRecord.uid };
     } catch (error) {
-      res.status(500).json({ error: "Erro ao criar usuário", details: error });
+      throw new HttpError(500, "Erro ao criar usuário");
     }
   }
 
-  async getAll(req: Request, res: Response) {
-    if (!this.checkFirebaseAvailable(res)) return;
+  @Get("/")
+  @Authorized()
+  async getAll() {
+    this.checkFirebaseAvailable();
 
     try {
       const snapshot = await firestoreDB!.collection("users").get();
       const users = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-      res.json(users);
+      return users;
     } catch (error) {
-      res.status(500).json({ error: "Erro ao buscar usuários" });
+      throw new HttpError(500, "Erro ao buscar usuários");
     }
   }
 
-  async getOne(req: Request, res: Response) {
-    if (!this.checkFirebaseAvailable(res)) return;
+  @Get("/:id")
+  @Authorized()
+  async getOne(@Param("id") id: string) {
+    this.checkFirebaseAvailable();
 
     try {
       const doc = await firestoreDB!
         .collection("users")
-        .doc(req.params.id)
+        .doc(id)
         .get();
-      if (!doc.exists)
-        return res.status(404).json({ error: "Usuário não encontrado" });
+      if (!doc.exists) {
+        throw new HttpError(404, "Usuário não encontrado");
+      }
 
-      res.json({ id: doc.id, ...doc.data() });
+      return { id: doc.id, ...doc.data() };
     } catch (error) {
-      res.status(500).json({ error: "Erro ao buscar usuário" });
+      if (error instanceof HttpError) {
+        throw error;
+      }
+      throw new HttpError(500, "Erro ao buscar usuário");
     }
   }
 
-  async update(req: Request, res: Response) {
-    if (!this.checkFirebaseAvailable(res)) return;
+  @Put("/:id")
+  @Authorized()
+  async update(@Param("id") id: string, @Body() body: any) {
+    this.checkFirebaseAvailable();
 
     try {
-      await firestoreDB!.collection("users").doc(req.params.id).update(req.body);
-      res.json({ message: "Usuário atualizado com sucesso" });
+      await firestoreDB!.collection("users").doc(id).update(body);
+      return { message: "Usuário atualizado com sucesso" };
     } catch (error) {
-      res.status(500).json({ error: "Erro ao atualizar usuário" });
+      throw new HttpError(500, "Erro ao atualizar usuário");
     }
   }
 
-  async delete(req: Request, res: Response) {
-    if (!this.checkFirebaseAvailable(res)) return;
+  @Delete("/:id")
+  @Authorized()
+  async delete(@Param("id") id: string) {
+    this.checkFirebaseAvailable();
 
     try {
-      await getAuth().deleteUser(req.params.id);
-      await firestoreDB!.collection("users").doc(req.params.id).delete();
-      res.json({ message: "Usuário deletado" });
+      await getAuth().deleteUser(id);
+      await firestoreDB!.collection("users").doc(id).delete();
+      return { message: "Usuário deletado" };
     } catch (error) {
-      res.status(500).json({ error: "Erro ao deletar usuário" });
+      throw new HttpError(500, "Erro ao deletar usuário");
     }
   }
 }

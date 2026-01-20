@@ -20,6 +20,7 @@ model Cliente {
 
     emails    String[]
     telefones String[]
+    vinculos  VinculoCard[]
 
     @@index([empresaId])
 }

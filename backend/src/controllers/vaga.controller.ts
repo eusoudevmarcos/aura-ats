@@ -1,230 +1,213 @@
 // src/controllers/VagaController.ts
-import { Request, Response } from "express";
+import { Request } from "express";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  QueryParam,
+  Req,
+} from "routing-controllers";
 import { inject, injectable } from "tsyringe";
+import { Authorized } from "../decorators/Authorized";
 import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import paginationBuild from "../helper/buildNested/paginationBuild";
 import { VagaService } from "../services/vaga.service";
 import { VagaGetAllQuery } from "../types/vaga.type";
 
 @injectable()
+@Controller("/vaga")
 export class VagaController {
   constructor(@inject(VagaService) private service: VagaService) {}
 
-  async save(req: Request, res: Response): Promise<Response> {
-    try {
-      const vagaData = req.body;
-      let token = "";
-      const authHeader = req.headers.authorization;
-      if (
-        authHeader &&
-        typeof authHeader === "string" &&
-        authHeader.startsWith("Bearer ")
-      ) {
-        token = authHeader.replace(/^Bearer\s+/i, "");
-      } else if (authHeader && typeof authHeader === "string") {
-        // fallback: just use the string if no Bearer prefix
-        token = authHeader;
+  /**
+   * Normaliza parâmetros de busca vindos da query string.
+   */
+  private normalizeSearch(search: any): any {
+    if (search === undefined || search === null) return undefined;
+    if (typeof search !== "string") return search;
+
+    const trimmed = search.trim();
+    if (!trimmed) return undefined;
+
+    if (
+      (trimmed.startsWith("{") && trimmed.endsWith("}")) ||
+      (trimmed.startsWith("[") && trimmed.endsWith("]"))
+    ) {
+      try {
+        return JSON.parse(trimmed);
+      } catch {
+        return trimmed;
       }
-      const newVaga = await this.service.save(
-        nonEmptyAndConvertDataDTO(vagaData),
-        token
-      );
-      return res.status(201).json(newVaga);
-    } catch (error: any) {
-      console.log("Error creating vaga:", error);
-      return res.status(500).json({ message: error.message, error: error });
     }
+
+    return trimmed;
   }
 
-  // Tipagem para os parâmetros de query aceitos
+  @Post("/")
+  @Authorized()
+  async save(@Body() vagaData: any, @Req() req: Request) {
+    let token = "";
+    const authHeader = req.headers.authorization;
+    if (
+      authHeader &&
+      typeof authHeader === "string" &&
+      authHeader.startsWith("Bearer ")
+    ) {
+      token = authHeader.replace(/^Bearer\s+/i, "");
+    } else if (authHeader && typeof authHeader === "string") {
+      token = authHeader;
+    }
+    const newVaga = await this.service.save(
+      nonEmptyAndConvertDataDTO(vagaData),
+      token
+    );
+    return newVaga;
+  }
 
+  @Get("/")
+  @Authorized()
   async getAll(
-    req: Request<{}, {}, {}, VagaGetAllQuery>,
-    res: Response
-  ): Promise<Response> {
-    try {
-      const serviceQuery = paginationBuild(req.query);
-      const tipoUsuario = (req as any).user?.tipo;
+    @QueryParam("page", { required: false }) page: any,
+    @QueryParam("pageSize", { required: false }) pageSize: any,
+    @Req() req: Request
+  ) {
+    const serviceQuery = paginationBuild({
+      page,
+      pageSize,
+      ...req.query,
+    } as VagaGetAllQuery);
+    const tipoUsuario = (req as any).user?.tipo;
 
-      if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
-        const vagas = await this.service.getAllByUsuario({
-          ...serviceQuery,
-          usuarioId: (req as any).user?.uid,
-        });
-
-        return res.status(200).json(vagas);
-      }
-
-      const vagas = await this.service.getAll(serviceQuery);
-
-      return res.status(200).json(vagas);
-    } catch (error: any) {
-      console.log("Error fetching vagas:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+    if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
+      const vagas = await this.service.getAllByUsuario({
+        ...serviceQuery,
+        usuarioId: (req as any).user?.uid,
+      });
+      return vagas;
     }
+
+    const vagas = await this.service.getAll(serviceQuery);
+    return vagas;
   }
 
+  @Get("/kanban")
+  @Authorized()
   async getAllKanban(
-    req: Request<{}, {}, {}, VagaGetAllQuery>,
-    res: Response
-  ): Promise<Response> {
-    try {
-      const serviceQuery = paginationBuild(req.query);
-      const tipoUsuario = (req as any).user?.tipo;
+    @QueryParam("page", { required: false }) page: any,
+    @QueryParam("pageSize", { required: false }) pageSize: any,
+    @Req() req: Request
+  ) {
+    const serviceQuery = paginationBuild({
+      page,
+      pageSize,
+      ...req.query,
+    } as VagaGetAllQuery);
+    const tipoUsuario = (req as any).user?.tipo;
 
-      // TODO: Precisa ser ajustado para visualização do cliente
-      if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
-        const vagas = await this.service.getAllByUsuario({
-          ...serviceQuery,
-          usuarioId: (req as any).user?.uid,
-        });
-
-        return res.status(200).json(vagas);
-      }
-
-      const vagas = await this.service.getAll(serviceQuery);
-
-      return res.status(200).json(vagas);
-    } catch (error: any) {
-      console.log("Error fetching vagas:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
-  }
-
-  async getAllByClienteId(req: Request, res: Response): Promise<Response> {
-    try {
-      const clienteId = req.params.clienteId;
-      if (!clienteId) throw "ID do cliente é obrigatorio";
-
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-      const pageSize = req.query.pageSize
-        ? parseInt(req.query.pageSize as string, 10)
-        : 10;
-      const search = req.query.search as string;
-
-      const vagas = await this.service.getAllByCliente(clienteId, {
-        page,
-        pageSize,
-        search,
+    if (tipoUsuario === "CLIENTE_ATS" && (req as any).user?.uid) {
+      const vagas = await this.service.getAllByUsuario({
+        ...serviceQuery,
+        usuarioId: (req as any).user?.uid,
       });
-      return res.status(200).json(nonEmptyAndConvertDataDTO(vagas));
-    } catch (error: any) {
-      console.log("Error fetching vagas:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
+      return vagas;
     }
+
+    const vagas = await this.service.getAll(serviceQuery);
+    return vagas;
   }
 
-  async getAllByCandidatoId(req: Request, res: Response): Promise<Response> {
-    try {
-      const candidatoId = req.params.candidatoId;
-      if (!candidatoId) throw "ID do cliente é obrigatorio";
+  @Get("/cliente/:clienteId")
+  @Authorized()
+  async getAllByClienteId(
+    @Param("clienteId") clienteId: string,
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10,
+    @QueryParam("search", { required: false }) search?: string
+  ) {
+    if (!clienteId) throw new Error("ID do cliente é obrigatorio");
 
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-      const pageSize = req.query.pageSize
-        ? parseInt(req.query.pageSize as string, 10)
-        : 10;
-      const search = req.query.search as string;
+    const normalizedSearch = this.normalizeSearch(search);
 
-      const vagas = await this.service.getAllByCandidato(candidatoId, {
-        page,
-        pageSize,
-        search,
-      });
-      return res.status(200).json(nonEmptyAndConvertDataDTO(vagas));
-    } catch (error: any) {
-      console.log("Error fetching vagas:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+    const vagas = await this.service.getAllByCliente(clienteId, {
+      page,
+      pageSize,
+      search: normalizedSearch,
+    });
+    return nonEmptyAndConvertDataDTO(vagas);
   }
 
-  async getById(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    try {
-      const vaga = await this.service.getById(id);
-      return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
-    } catch (error: any) {
-      console.log("Error fetching vaga by ID:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
-  }
-  async vincularCandidato(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    try {
-      const vaga = await this.service.vincularCandidatos(
-        id,
-        req.body.candidatos
-      );
-      return res.status(200).json(nonEmptyAndConvertDataDTO(vaga));
-    } catch (error: any) {
-      console.log("Error fetching vaga by ID:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+  @Get("/candidato/:candidatoId")
+  @Authorized()
+  async getAllByCandidatoId(
+    @Param("candidatoId") candidatoId: string,
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10,
+    @QueryParam("search", { required: false }) search?: string
+  ) {
+    if (!candidatoId) throw new Error("ID do candidato é obrigatorio");
+
+    const normalizedSearch = this.normalizeSearch(search);
+
+    const vagas = await this.service.getAllByCandidato(candidatoId, {
+      page,
+      pageSize,
+      search: normalizedSearch,
+    });
+    return nonEmptyAndConvertDataDTO(vagas);
   }
 
-  async delete(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    try {
-      await this.service.delete(id);
-      return res.status(204).send();
-    } catch (error: any) {
-      console.log("Error deleting vaga:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+  @Get("/:id/historico")
+  @Authorized()
+  async getHistoricoByVagaId(
+    @Param("id") id: string,
+    @QueryParam("page", { required: false }) page: number = 1,
+    @QueryParam("pageSize", { required: false }) pageSize: number = 10
+  ) {
+    const [historico, vaga] = await Promise.all([
+      this.service.getHistoricoByVagaId(id, { page, pageSize }),
+      this.service.getById(id),
+    ]);
+
+    return {
+      vaga: nonEmptyAndConvertDataDTO(vaga),
+      historico: nonEmptyAndConvertDataDTO(historico),
+    };
   }
 
-  async getHistoricoByVagaId(req: Request, res: Response): Promise<Response> {
-    const { id } = req.params;
-    try {
-      const page = req.query.page ? parseInt(req.query.page as string, 10) : 1;
-      const pageSize = req.query.pageSize
-        ? parseInt(req.query.pageSize as string, 10)
-        : 10;
-
-      // Busca o histórico e a vaga
-      const [historico, vaga] = await Promise.all([
-        this.service.getHistoricoByVagaId(id, { page, pageSize }),
-        this.service.getById(id),
-      ]);
-
-      return res.status(200).json({
-        vaga: nonEmptyAndConvertDataDTO(vaga),
-        historico: nonEmptyAndConvertDataDTO(historico),
-      });
-    } catch (error: any) {
-      console.log("Error fetching historico by vaga ID:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+  @Get("/:id")
+  async getById(@Param("id") id: string) {
+    const vaga = await this.service.getById(id);
+    return nonEmptyAndConvertDataDTO(vaga);
   }
 
-  async updateStatus(req: Request, res: Response): Promise<Response> {
-    try {
-      const { status, id } = req.body;
-      if (!status || !id) throw new Error("id e status são obrigatorio");
+  @Post("/vincular-candidatos/:id")
+  @Authorized()
+  async vincularCandidato(
+    @Param("id") id: string,
+    @Body() body: { candidatos: any[] }
+  ) {
+    const vaga = await this.service.vincularCandidatos(id, body.candidatos);
+    return nonEmptyAndConvertDataDTO(vaga);
+  }
 
-      const statusAtualizado = await this.service.updateStatus(id, status);
+  @Delete("/:id")
+  @Authorized()
+  async delete(@Param("id") id: string) {
+    await this.service.delete(id);
+    return { message: "Vaga deletada com sucesso" };
+  }
 
-      return res.status(200).json(statusAtualizado);
-    } catch (error: any) {
-      console.log("Error fetching historico by vaga ID:", error);
-      return res
-        .status(500)
-        .json({ message: "Internal server error", error: error.message });
-    }
+  @Patch("/status")
+  @Authorized()
+  async updateStatus(@Body() body: { status: string; id: string }) {
+    const { status, id } = body;
+    if (!status || !id) throw new Error("id e status são obrigatorio");
+
+    const statusAtualizado = await this.service.updateStatus(id, status as any);
+    return statusAtualizado;
   }
 }

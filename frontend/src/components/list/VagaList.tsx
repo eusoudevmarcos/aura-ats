@@ -7,7 +7,7 @@ import {
 } from '@/schemas/vaga.schema';
 import { UF_MODEL } from '@/utils/UF';
 import { useRouter } from 'next/router';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import Table, { TableColumn } from '../Table';
 import { PrimaryButton } from '../button/PrimaryButton';
 import { FormInput } from '../input/FormInput';
@@ -82,7 +82,7 @@ const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
     setPage(1);
   };
 
-  const fetchVagas = async () => {
+  const fetchVagas = useCallback(async () => {
     setLoading(true);
     try {
       const params = {
@@ -106,14 +106,14 @@ const VagaList: React.FC<VagaListProps> = ({ initialValues }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [tituloInput, statusInput, categoriaQuery, ufInput, cidadeInput, uuid, page, pageSize]);
 
   useEffect(() => {
     if (initialValues) return;
     fetchVagas();
-  }, [page, pageSize]);
+  }, [initialValues, fetchVagas]);
 
-  const tableData = vagas;
+  const tableData = useMemo(() => vagas, [vagas]);
 
   return (
     <Card noShadow>

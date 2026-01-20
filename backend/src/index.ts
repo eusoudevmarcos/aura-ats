@@ -1,29 +1,42 @@
-import cors from "cors";
 import dotenv from "dotenv";
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import path from "path";
 import "reflect-metadata";
+import {
+  createExpressServer,
+  useContainer as rcUseContainer,
+} from "routing-controllers";
 
 dotenv.config();
 
-import { ambienteMiddleware } from "./middleware/ambienteMiddleware";
-import agendaRoute from "./routes/agenda.routes";
-import authenticationRoutes from "./routes/authentication.routes";
-import billingRoutes from "./routes/billing.routes";
-import candidatoRoutes from "./routes/candidato.routes";
-import clienteRoutes from "./routes/cliente.routes";
-import datastoneRoutes from "./routes/datastone.routes";
-import emailRoutes from "./routes/email.routes";
-import funcionarioRoutes from "./routes/funcionario.routes";
-import sessaoRoutes from "./routes/sessao.routes";
-import tarefaRoutes from "./routes/tarefa.routes";
-import triagemRoutes from "./routes/triagem.routes";
-import userRoutes from "./routes/user.routes";
-import vagaRoutes from "./routes/vaga.routes";
+// Importar todas as controllers
+import { AgendaController } from "./controllers/agenda.controller";
+import AuthenticationController from "./controllers/authentication.controller";
+import { BillingController } from "./controllers/billings.contoller";
+import { CandidatoController } from "./controllers/candidato.controller";
+import { ClienteController } from "./controllers/cliente.controller";
+import { DatastoneController } from "./controllers/datastone.controller";
+import { EmailController } from "./controllers/email.controller";
+import { EspecialidadeController } from "./controllers/especilidade.controller";
+import { FuncionarioController } from "./controllers/funcionario.controller";
+import { KanbanController } from "./controllers/kanban.controller";
+import { SessaoController } from "./controllers/sessao.controller";
+import { TarefaController } from "./controllers/tarefa.controller";
+import { TriagemController } from "./controllers/triagem.controller";
+import UserController from "./controllers/user.controller";
+import { VagaController } from "./controllers/vaga.controller";
 
-const PORT = process.env.PORT;
+// Importar container adapter e error handler
+import { container } from "./lib/container";
+import { BodyParserMiddleware } from "./middleware/bodyParser.middleware";
+import { ErrorHandler } from "./middleware/errorHandler";
 
-const allowedOrigins = [
+// Make routing-controllers use typedi as its IoC container (remove "container:" from createExpressServer below)
+rcUseContainer(container);
+
+const PORT = process.env.PORT || 3001;
+
+const allowedOrigins: string[] = [
   "http://localhost:3000", // frontend local
   "https://takeitapi-1.onrender.com", // produção
   "https://aura-ats-frontend.vercel.app", // produção
@@ -32,13 +45,33 @@ const allowedOrigins = [
 ];
 
 async function startServer() {
-  await ambienteMiddleware();
-
-  const app = express();
-
-  app.use(
-    cors({
-      origin: (origin, callback) => {
+  // Criar servidor Express usando routing-controllers
+  const app = createExpressServer({
+    routePrefix: "/api",
+    controllers: [
+      AuthenticationController,
+      UserController,
+      CandidatoController,
+      DatastoneController,
+      FuncionarioController,
+      ClienteController,
+      VagaController,
+      AgendaController,
+      TriagemController,
+      BillingController,
+      TarefaController,
+      SessaoController,
+      EmailController,
+      EspecialidadeController,
+      KanbanController,
+    ],
+    middlewares: [BodyParserMiddleware, ErrorHandler],
+    defaultErrorHandler: false,
+    cors: {
+      origin: (
+        origin: string | undefined,
+        callback: (err: Error | null, allow?: boolean) => void
+      ) => {
         // Permitir requests sem origin (como do Postman)
         if (!origin) return callback(null, true);
 
@@ -49,18 +82,22 @@ async function startServer() {
         }
       },
       credentials: true,
-    })
-  );
+    },
+    defaults: {
+      paramOptions: {
+        required: false, // Tornar parâmetros opcionais por padrão
+      },
+    },
+    validation: {
+      whitelist: true,
+      forbidNonWhitelisted: false,
+      skipMissingProperties: true,
+    },
+  });
 
-  // Aumentar limite do body parser para suportar uploads de arquivos (50MB)
-  app.use(express.json({ limit: "50mb" }));
-  app.use(express.urlencoded({ extended: true, limit: "50mb" }));
-
-  // Criar um middleware que verifica se o ambiente e de desenvolvimento ou de produção e caso seja de produção exija uma senha
-
+  // Middleware de logging em desenvolvimento
   if (process.env.NODE_ENV === "development") {
-    app.use((req, res, next) => {
-      // console.clear();
+    app.use((req: Request, res: Response, next: NextFunction) => {
       const { method, url, headers, body, query, params } = req;
       const timestamp = new Date().toISOString();
 
@@ -77,42 +114,30 @@ async function startServer() {
         console.log(`${red}${headers.authorization || headers.cookie}${reset}`);
       }
 
-      if (Object.keys(query).length > 0) {
+      if (query && Object.keys(query).length > 0) {
         console.log(`  Query: ${cyan}${JSON.stringify(query)}`);
       }
-      if (Object.keys(body).length > 0) {
+      if (body && Object.keys(body).length > 0) {
         console.log(`  Body: ${cyan}${JSON.stringify(body)}`);
       }
-      if (Object.keys(params).length > 0) {
+      if (params && Object.keys(params).length > 0) {
         console.log(`  Params: ${cyan}${JSON.stringify(params)}`);
       }
       console.log(
         "-----------------------------------------------------------"
       );
-      next(); // Continua para a próxima middleware ou rota
+      next();
     });
   }
 
-  app.get("/api/ping", (req, res) => res.status(200).send("ok"));
+  // Rota de ping
+  app.get("/api/ping", (req: Request, res: Response) =>
+    res.status(200).send("ok")
+  );
 
+  // Servir arquivos estáticos
   const publicPath = path.resolve(__dirname, "public");
-
   app.use("/files", express.static(path.join(publicPath, "files")));
-
-  app.use("/api/auth", authenticationRoutes);
-  app.use("/api/users", userRoutes);
-  app.use("/api/candidates", candidatoRoutes);
-  app.use("/api/take-it", datastoneRoutes);
-  app.use("/api/funcionario", funcionarioRoutes);
-  app.use("/api/cliente", clienteRoutes);
-  app.use("/api/candidato", candidatoRoutes);
-  app.use("/api/vaga", vagaRoutes);
-  app.use("/api/agenda", agendaRoute);
-  app.use("/api/triagem", triagemRoutes);
-  app.use("/api/planos", billingRoutes);
-  app.use("/api/tarefa", tarefaRoutes);
-  app.use("/api/sessao", sessaoRoutes);
-  app.use("/api/email", emailRoutes);
 
   app.listen(PORT, () => {
     console.log(`🚀 Servidor rodando em http://localhost:${PORT}`);
