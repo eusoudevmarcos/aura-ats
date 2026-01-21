@@ -1,5 +1,4 @@
 // pages/api/externalWithAuth/[...path].ts (Ajuste AQUI)
-import redis from '@/lib/redis';
 import axios from 'axios';
 import { parse } from 'cookie';
 import { NextApiRequest, NextApiResponse } from 'next';
@@ -9,23 +8,6 @@ const externalBackendApi = axios.create({
   maxContentLength: 50 * 1024 * 1024, // 50MB
   maxBodyLength: 50 * 1024 * 1024, // 50MB
 });
-
-async function invalidateGetCache(externalPath: string) {
-  let cursor = '0';
-  do {
-    const [nextCursor, keys] = await redis.scan(cursor, {
-      match: `proxy:GET:${externalPath}:*`,
-      count: 100,
-    });
-    if (keys.length > 0) {
-      await redis.del(...keys);
-      console.log(
-        `🗑️ Cache invalidado para ${externalPath}: ${keys.length} keys`
-      );
-    }
-    cursor = nextCursor;
-  } while (cursor !== '0');
-}
 
 // Configurar para aceitar body grande (desabilitar body parser padrão)
 export const config = {
