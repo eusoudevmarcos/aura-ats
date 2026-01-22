@@ -10,10 +10,11 @@ import {
 } from '@/axios/kanban.axios';
 import { useDeleteAnimation } from '@/hooks/useDeleteAnimation';
 import {
+  EspacoTrabalho,
   EspacoTrabalhoComQuadros,
   EspacoTrabalhoInput,
   QuadroKanban,
-  QuadroKanbanInput,
+  QuadroKanbanInput
 } from '@/schemas/kanban.schema';
 import React, {
   createContext,
@@ -25,7 +26,7 @@ import React, {
 
 interface EspacoTrabalhoContextType {
   // Estado
-  espacosTrabalho: EspacoTrabalhoComQuadros[];
+  espacosTrabalho: EspacoTrabalho[];
   espacoTrabalhoAtual: EspacoTrabalhoComQuadros | null;
   loading: boolean;
   error: string | null;
@@ -63,7 +64,7 @@ export const EspacoTrabalhoProvider: React.FC<
   EspacoTrabalhoProviderProps
 > = ({ children, espacoId }) => {
   const [espacosTrabalho, setEspacosTrabalho] = useState<
-    EspacoTrabalhoComQuadros[]
+  EspacoTrabalho[]
   >([]);
   const [espacoTrabalhoAtual, setEspacoTrabalhoAtual] =
     useState<EspacoTrabalhoComQuadros | null>(null);
@@ -81,7 +82,8 @@ export const EspacoTrabalhoProvider: React.FC<
       setLoading(true);
       setError(null);
       const espacos = await listarEspacosTrabalho();
-      setEspacosTrabalho(espacos as EspacoTrabalhoComQuadros[]);
+      console.log('Espaços de trabalho:', espacos);
+      setEspacosTrabalho(espacos as EspacoTrabalho[]);
     } catch (err: any) {
       console.log('Erro ao buscar espaços de trabalho:', err);
       setError(err.message || 'Erro ao carregar espaços de trabalho');
@@ -97,10 +99,9 @@ export const EspacoTrabalhoProvider: React.FC<
       setError(null);
       const espaco = await obterEspacoTrabalhoPorId(id);
       setEspacoTrabalhoAtual(espaco);
-      // Atualizar também na lista se existir
-      setEspacosTrabalho(prev =>
-        prev.map(e => (e.id === id ? espaco : e))
-      );
+      // setEspacosTrabalho(prev =>
+      //   prev.map(e => (e.id === id ? espaco : e))
+      // );
     } catch (err: any) {
       console.log('Erro ao buscar espaço de trabalho:', err);
       setError(err.message || 'Erro ao carregar espaço de trabalho');

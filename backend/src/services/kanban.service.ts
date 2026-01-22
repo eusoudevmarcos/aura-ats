@@ -23,15 +23,23 @@ import { SessaoService } from "./sessao.service";
 // Tipos de retorno usando Prisma.GetPayload
 type EspacoTrabalhoWithQuadros = Prisma.EspacoTrabalhoGetPayload<{
   include: {
-    quadros: {
+    _count: true,
+    usuarioSistema: {
       select: {
-        _count: {
-          select: {
-            colunas: true;
-          };
-        };
-      };
-    };
+        id: true,
+        email: true,
+        funcionario: {
+          include: {
+            pessoa: {
+              select: {
+                nome: true,
+              },
+            },
+          },
+        },
+      },
+    },
+
   };
 }>;
 
@@ -212,7 +220,7 @@ type VinculoCardWithRelations = Prisma.VinculoCardGetPayload<{
 
 @injectable()
 export class KanbanService {
-  constructor(@inject(SessaoService) private sessaoService: SessaoService) {}
+  constructor(@inject(SessaoService) private sessaoService: SessaoService) { }
 
   /**
    * Extrai o token do request (headers ou cookies)
@@ -303,6 +311,7 @@ export class KanbanService {
   async listarEspacosTrabalho(): Promise<EspacoTrabalhoWithQuadros[]> {
     return await prisma.espacoTrabalho.findMany({
       include: {
+        _count: true,
         usuarioSistema: {
           select: {
             id: true,
@@ -328,16 +337,8 @@ export class KanbanService {
             },
           },
         },
-        quadros: {
-          select: {
-            _count: {
-              select: {
-                colunas: true,
-              },
-            },
-          },
-        },
       },
+
       orderBy: {
         criadoEm: "desc",
       },

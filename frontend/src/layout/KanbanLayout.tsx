@@ -32,15 +32,13 @@ const KanbanLayout: React.FC<KanbanLayoutProps> = ({ children }) => {
               : 'md:pl-65 min-[1940px]:pl-0'
           } pt-4 md:pr-0`}
       >
-        <main className="p-2 rounded-lg mt-18">
-          <div className="max-w-7xl mx-auto">
+        <main className="p-2 rounded-lg mt-18 px-6">
             <KanbanBreadcrumbs />
             {typeof children === 'function'
               ? (children as (props: { activeSection: string }) => React.ReactNode)({ activeSection }) ?? null
               : React.isValidElement(children)
               ? children
               : null}
-          </div>
         </main>
       </div>
     </div>

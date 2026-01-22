@@ -3,7 +3,7 @@ import { PlusIcon } from '@/components/icons';
 import { EspacoTrabalhoModal } from '@/components/kanban/EspacoTrabalhoModal';
 import ModalDelete from '@/components/modal/ModalDelete';
 import { useEspacoTrabalho } from '@/context/EspacoTrabalhoContext';
-import { EspacoTrabalhoComQuadros } from '@/schemas/kanban.schema';
+import { EspacoTrabalho } from '@/schemas/kanban.schema';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { FiEdit } from 'react-icons/fi';
@@ -22,7 +22,7 @@ export const EspacoTrabalhoList: React.FC = () => {
   const [showEspacoModal, setShowEspacoModal] = useState(false);
   const [showDeleteEspacoModal, setShowDeleteEspacoModal] = useState(false);
   const [selectedEspaco, setSelectedEspaco] =
-    useState<EspacoTrabalhoComQuadros | null>(null);
+    useState<EspacoTrabalho | null>(null);
   const [isSavingEspaco, setIsSavingEspaco] = useState(false);
   const [isDeletingEspaco, setIsDeletingEspaco] = useState(false);
 
@@ -35,7 +35,7 @@ export const EspacoTrabalhoList: React.FC = () => {
     setShowEspacoModal(true);
   };
 
-  const handleEditEspaco = (espaco: EspacoTrabalhoComQuadros) => {
+  const handleEditEspaco = (espaco: EspacoTrabalho) => {
     setSelectedEspaco(espaco);
     setShowEspacoModal(true);
   };
@@ -120,9 +120,8 @@ export const EspacoTrabalhoList: React.FC = () => {
               return (
                 <div
                   key={espaco.id}
-                  className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-2000 ease-out relative ${
-                    isAnimating ? 'delete-animating' : ''
-                  }`}
+                  className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-2000 ease-out relative ${isAnimating ? 'delete-animating' : ''
+                    }`}
                 >
                   <div
                     className="cursor-pointer"
@@ -132,9 +131,10 @@ export const EspacoTrabalhoList: React.FC = () => {
                       {espaco.nome}
                     </h2>
                     <p className="text-sm text-gray-500">
-                      {espaco.quadros?.length || 0} quadro
-                      {espaco.quadros?.length !== 1 ? 's' : ''}
+                      {espaco._count?.quadros} quadro
+                      {espaco._count?.quadros !== 1 ? 's' : ''}
                     </p>
+                    <p className="text-sm text-gray-500">{espaco.criadoEm}</p>
                   </div>
                   <button
                     onClick={e => {
