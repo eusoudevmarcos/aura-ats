@@ -78,7 +78,7 @@ export const EspacoTrabalhoModal: React.FC<EspacoTrabalhoModalProps> = ({
               type="button"
               onClick={handleDelete}
               disabled={isDeleting || isSubmitting}
-              className="bg-red-500 hover:bg-red-600 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-red-500! hover:bg-red-600! text-white disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <FiTrash2 className="inline-block mr-2" />
               {isDeleting ? 'Excluindo...' : 'Excluir'}

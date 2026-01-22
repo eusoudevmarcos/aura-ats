@@ -1,49 +1,47 @@
 import {
   CandidatoAutocomplete,
-  candidatoAutocompleteSchema,
   CardKanban,
   CardKanbanInput,
-  cardKanbanDataSchema,
-  cardKanbanSchema,
-  cardEtiquetaSchema,
-  checklistCardSchema,
-  checklistItemSchema,
   ChecklistCard,
   ChecklistItem,
   ClienteAutocomplete,
-  clienteAutocompleteSchema,
   ColunaKanban,
   ColunaKanbanInput,
-  colunaKanbanSchema,
   ComentarioCard,
   ComentarioCardInput,
-  comentarioCardInputSchema,
-  comentarioCardSchema,
   CompromissoAutocomplete,
-  compromissoAutocompleteSchema,
   EspacoTrabalho,
   EspacoTrabalhoComQuadros,
-  espacoTrabalhoComQuadrosSchema,
   EspacoTrabalhoInput,
-  espacoTrabalhoSchema,
-  etiquetaQuadroSchema,
   EtiquetaQuadro,
   MoverCardInput,
   QuadroCompleto,
-  quadroCompletoSchema,
   QuadroKanban,
   QuadroKanbanInput,
-  quadroKanbanSchema,
   TipoEntidadeEnum,
   UsuarioSistema,
-  usuarioSistemaSchema,
   VagaAutocomplete,
-  vagaAutocompleteSchema,
   VincularEntidadeInput,
   VinculoCard,
-  vinculoCardSchema,
+  candidatoAutocompleteSchema,
+  cardEtiquetaSchema,
+  cardKanbanDataSchema,
+  cardKanbanSchema,
+  checklistCardSchema,
+  checklistItemSchema,
+  clienteAutocompleteSchema,
+  colunaKanbanSchema,
+  comentarioCardSchema,
+  compromissoAutocompleteSchema,
+  espacoTrabalhoComQuadrosSchema,
+  espacoTrabalhoSchema,
+  etiquetaQuadroSchema,
+  quadroCompletoSchema,
+  quadroKanbanSchema,
+  vagaAutocompleteSchema,
+  vinculoCardSchema
 } from '@/schemas/kanban.schema';
-import { createKanbanError, KanbanErrorCode } from '@/types/kanban.type';
+import { KanbanErrorCode, createKanbanError } from '@/types/kanban.type';
 import { z } from 'zod';
 import api from '.';
 
@@ -85,7 +83,7 @@ function validateResponse<T>(
 // ===================== ESPAÇO DE TRABALHO =====================
 export const criarEspacoTrabalho = async (
   data: EspacoTrabalhoInput
-): Promise<EspacoTrabalho> => {
+): Promise<EspacoTrabalhoInput> => {
   try {
     const response = await api.post(
       '/api/externalWithAuth/kanban/espaco-trabalho',
@@ -138,7 +136,7 @@ export const obterEspacoTrabalhoPorId = async (
 export const atualizarEspacoTrabalho = async (
   id: string,
   data: Partial<EspacoTrabalhoInput>
-): Promise<EspacoTrabalho> => {
+): Promise<EspacoTrabalhoInput> => {
   const response = await api.put(
     `/api/externalWithAuth/kanban/espaco-trabalho/${id}`,
     data

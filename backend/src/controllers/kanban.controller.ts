@@ -2,6 +2,7 @@ import { Request } from "express";
 import { Body, Controller, Delete, Get, Param, Post, Put, QueryParam, Req } from "routing-controllers";
 import { inject, injectable } from "tsyringe";
 import { Authorized } from "../decorators/Authorized";
+import nonEmptyAndConvertDataDTO from "../dto/nonEmptyAndConvertDataDTO";
 import { KanbanService } from "../services/kanban.service";
 import {
   CardEtiquetasInput,
@@ -23,7 +24,7 @@ import {
 @injectable()
 @Controller("/kanban")
 export class KanbanController {
-  constructor(@inject(KanbanService) private service: KanbanService) {}
+  constructor(@inject(KanbanService) private service: KanbanService) { }
 
   /**
    * Normaliza parâmetros de busca vindos da query string.
@@ -92,7 +93,7 @@ export class KanbanController {
   @Authorized()
   async listarEspacosTrabalho() {
     const espacosTrabalho = await this.service.listarEspacosTrabalho();
-    return espacosTrabalho;
+    return nonEmptyAndConvertDataDTO(espacosTrabalho);
   }
 
   @Get("/espaco-trabalho/:id")

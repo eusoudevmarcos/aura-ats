@@ -11,7 +11,7 @@ export const KanbanBreadcrumbs: React.FC = () => {
   const breadcrumbs = (): BreadcrumbItem[] => {
     const items: BreadcrumbItem[] = [
       {
-        label: 'Kanban',
+        label: 'Espaço de Trabalho',
         href: '/kanban',
       },
     ];
@@ -83,7 +83,7 @@ export const KanbanBreadcrumbs: React.FC = () => {
                 {item.label}
               </button>
             ) : (
-              <span className={isLast ? 'text-gray-900 font-semibold' : ''}>
+              <span className={isLast ? 'text-gray-900 font-semibold border-b border-gray-400 text-primary ' : ''}>
                 {item.label}
               </span>
             )}
