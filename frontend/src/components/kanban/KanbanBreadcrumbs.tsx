@@ -68,13 +68,13 @@ export const KanbanBreadcrumbs: React.FC = () => {
   }
 
   return (
-    <nav className="flex items-center space-x-2 text-sm text-gray-600 mb-4">
+    <nav className="flex items-center space-x-2 text-sm text-white rounded-xl px-4 py-2 mb-2">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         const isClickable = item.href && !isLast;
 
         return (
-          <div key={index} className="flex items-center">
+          <div key={index} className="flex items-center cursor-pointer">
             {isClickable ? (
               <button
                 onClick={() => handleBreadcrumbClick(item.href)}
@@ -83,11 +83,11 @@ export const KanbanBreadcrumbs: React.FC = () => {
                 {item.label}
               </button>
             ) : (
-              <span className={isLast ? 'text-gray-900 font-semibold border-b border-gray-400 text-primary ' : ''}>
+              <span className={isLast ? 'font-semibold border-b border-white text-white ' : ''}>
                 {item.label}
               </span>
             )}
-            {!isLast && <span className="mx-2 text-gray-400">/</span>}
+            {!isLast && <span className="mx-2 text-white">/</span>}
           </div>
         );
       })}

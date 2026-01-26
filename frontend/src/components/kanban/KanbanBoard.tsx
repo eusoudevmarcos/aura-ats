@@ -1,7 +1,9 @@
+import { useKanban } from '@/context/KanbanContext';
 import { CardKanban, ColunaKanban, VinculoCard } from '@/schemas/kanban.schema';
 import {
   DndContext,
   DragEndEvent,
+  DragOverEvent,
   DragOverlay,
   DragStartEvent,
   PointerSensor,
@@ -9,15 +11,63 @@ import {
   useSensors,
 } from '@dnd-kit/core';
 import {
-  arrayMove,
   SortableContext,
+  arrayMove,
   horizontalListSortingStrategy,
+  useSortable,
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useKanban } from '@/context/KanbanContext';
-import { KanbanColumn } from './KanbanColumn';
 import { KanbanCard } from './KanbanCard';
+import { KanbanColumn } from './KanbanColumn';
+
+// Wrapper para coluna
+const ColumnWrapper: React.FC<{
+  columnId: string;
+  cardIds: string[];
+  children: React.ReactNode;
+  column: ColunaKanban;
+}> = ({ columnId, cardIds, children, column }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: columnId,
+    data: {
+      type: 'column',
+      column,
+    },
+  });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0 : 1,
+    pointerEvents: isDragging ? 'none' : undefined,
+  } as React.CSSProperties;
+
+  return (
+    <SortableContext
+      id={columnId}
+      items={cardIds}
+      strategy={verticalListSortingStrategy}
+    >
+      <div
+        ref={setNodeRef}
+        style={style}
+        {...attributes}
+        {...listeners}
+      >
+        {children}
+      </div>
+    </SortableContext>
+  );
+};
 
 interface KanbanBoardProps {
   quadroId: string;
@@ -32,6 +82,9 @@ interface KanbanBoardProps {
   onRefresh?: () => void;
   animatingItemId?: string | null;
   isItemAnimating?: (itemId: string) => boolean;
+  creatingCardColumnId?: string | null;
+  onCardCreated?: () => void;
+  onCancelCreateCard?: () => void;
 }
 
 export const KanbanBoard: React.FC<KanbanBoardProps> = ({
@@ -47,21 +100,21 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
   onRefresh,
   animatingItemId,
   isItemAnimating,
+  creatingCardColumnId,
+  onCardCreated,
+  onCancelCreateCard,
 }) => {
   const { quadro, moveCard: moveCardContext, moveColumn: moveColumnContext } = useKanban();
   const [activeId, setActiveId] = useState<string | null>(null);
-  const [activeType, setActiveType] = useState<'card' | 'column' | null>(null);
 
-  // Configurar sensores do @dnd-kit
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        distance: 8, // Requer 8px de movimento antes de iniciar drag
+        distance: 8,
       },
     })
   );
 
-  // IDs das colunas e cards para SortableContext
   const columnIds = useMemo(
     () => quadro?.colunas.map(col => col.id) || [],
     [quadro]
@@ -75,7 +128,25 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     [quadro]
   );
 
-  // Encontrar card ativo para DragOverlay
+  // Descobrir tipo do item ativo
+  const activeType = useMemo(() => {
+    if (!activeId || !quadro) return null;
+    
+    // Verificar se é coluna
+    if (quadro.colunas.some(col => col.id === activeId)) {
+      return 'column';
+    }
+    
+    // Verificar se é card
+    for (const column of quadro.colunas) {
+      if (column.cards.some(c => c.id === activeId)) {
+        return 'card';
+      }
+    }
+    
+    return null;
+  }, [activeId, quadro]);
+
   const activeCard = useMemo(() => {
     if (activeType !== 'card' || !activeId || !quadro) return null;
     for (const column of quadro.colunas) {
@@ -85,7 +156,6 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     return null;
   }, [activeId, activeType, quadro]);
 
-  // Encontrar coluna ativa para DragOverlay
   const activeColumn = useMemo(() => {
     if (activeType !== 'column' || !activeId || !quadro) return null;
     return quadro.colunas.find(col => col.id === activeId) || null;
@@ -93,26 +163,21 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     setActiveId(event.active.id as string);
-    const data = event.active.data.current;
-    if (data?.type === 'card') {
-      setActiveType('card');
-    } else if (data?.type === 'column') {
-      setActiveType('column');
-    }
+  }, []);
+
+  const handleDragOver = useCallback((event: DragOverEvent) => {
+    // O dnd-kit gerencia automaticamente a visualização
   }, []);
 
   const handleDragEnd = useCallback(async (event: DragEndEvent) => {
     const { active, over } = event;
+    
     setActiveId(null);
-    setActiveType(null);
 
-    if (!over || !quadro) return;
+    if (!over || !quadro || active.id === over.id) return;
 
-    const activeData = active.data.current;
-    const overData = over.data.current;
-
-    // Mover card
-    if (activeData?.type === 'card') {
+    // Mover CARD
+    if (activeType === 'card') {
       const cardId = active.id as string;
       const sourceColumn = quadro.colunas.find(col =>
         col.cards.some(c => c.id === cardId)
@@ -120,145 +185,78 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
 
       if (!sourceColumn) return;
 
-      // Ordenar cards por ordem descendente (maior ordem primeiro = último adicionado no topo)
       const sortedSourceCards = [...sourceColumn.cards].sort(
         (a, b) => b.ordem - a.ordem
       );
       const sourceIndex = sortedSourceCards.findIndex(c => c.id === cardId);
 
-      // Verificar se está sobre uma coluna (por ID ou por tipo)
-      const isOverColumn =
-        overData?.type === 'column' || columnIds.includes(over.id as string);
+      // Verifica se over é coluna
+      const isOverColumn = columnIds.includes(over.id as string);
 
       if (isOverColumn) {
-        // Soltou sobre uma coluna
         const targetColumn = quadro.colunas.find(col => col.id === over.id);
-        if (!targetColumn) return;
+        if (!targetColumn || sourceColumn.id === targetColumn.id) return;
 
-        // Se é a mesma coluna, não fazer nada
-        if (sourceColumn.id === targetColumn.id) {
-          return;
-        }
+        const targetIndex = targetColumn.cards.length;
 
-        // Ordenar cards da coluna de destino
-        const sortedTargetCards = [...targetColumn.cards].sort(
-          (a, b) => b.ordem - a.ordem // Ordenação descendente
-        );
-
-        // Adicionar no final da coluna de destino
-        const targetIndex = sortedTargetCards.length;
-
-        // Chamar Context que fará o optimistic update
         try {
-          await moveCardContext(
-            cardId,
-            sourceColumn.id,
-            targetColumn.id,
-            targetIndex
-          );
+          await moveCardContext(cardId, sourceColumn.id, targetColumn.id, targetIndex);
         } catch (error) {
           console.log('Erro ao mover card:', error);
         }
-      } else if (overData?.type === 'card') {
-        // Soltou sobre outro card
+      } else {
+        // over é outro card
         const targetColumn = quadro.colunas.find(col =>
           col.cards.some(c => c.id === over.id)
         );
 
         if (!targetColumn) return;
 
-        // Ordenar cards da coluna de destino
         const sortedTargetCards = [...targetColumn.cards].sort(
-          (a, b) => b.ordem - a.ordem // Ordenação descendente
+          (a, b) => b.ordem - a.ordem
         );
-        const targetCardIndex = sortedTargetCards.findIndex(
-          c => c.id === over.id
-        );
+        const targetCardIndex = sortedTargetCards.findIndex(c => c.id === over.id);
 
         if (sourceColumn.id === targetColumn.id) {
-          // Mesma coluna - usar arrayMove para calcular posição correta
-          const newCards = arrayMove(
-            sortedSourceCards,
-            sourceIndex,
-            targetCardIndex
-          );
-          
-          // Encontrar a nova posição do card movido no array resultante
+          const newCards = arrayMove(sortedSourceCards, sourceIndex, targetCardIndex);
           const finalPosition = newCards.findIndex(c => c.id === cardId);
 
-          // Chamar Context que fará o optimistic update
           try {
-            await moveCardContext(
-              cardId,
-              sourceColumn.id,
-              targetColumn.id,
-              finalPosition
-            );
+            await moveCardContext(cardId, sourceColumn.id, targetColumn.id, finalPosition);
           } catch (error) {
             console.log('Erro ao mover card:', error);
           }
         } else {
-          // Colunas diferentes - inserir na posição do card de destino
-          // Remover o card da origem primeiro para calcular posição correta
-          const cardsWithoutSource = sortedTargetCards.filter(
-            c => c.id !== cardId
-          );
-          
-          // Inserir na posição do card de destino
-          const targetIndex = targetCardIndex;
-
-          // Chamar Context que fará o optimistic update
           try {
-            await moveCardContext(
-              cardId,
-              sourceColumn.id,
-              targetColumn.id,
-              targetIndex
-            );
+            await moveCardContext(cardId, sourceColumn.id, targetColumn.id, targetCardIndex);
           } catch (error) {
             console.log('Erro ao mover card:', error);
           }
         }
       }
     }
-    // Mover coluna
-    else if (activeData?.type === 'column') {
-      const columnId = active.id as string;
+    // Mover COLUNA
+    else if (activeType === 'column') {
+      const sortedColumns = [...quadro.colunas].sort((a, b) => a.ordem - b.ordem);
       
-      // Verificar se está sobre outra coluna
-      const isOverColumn =
-        overData?.type === 'column' || columnIds.includes(over.id as string);
+      const oldIndex = sortedColumns.findIndex(c => c.id === active.id);
+      const newIndex = sortedColumns.findIndex(c => c.id === over.id);
 
-      if (isOverColumn) {
-        // Ordenar colunas por ordem
-        const sortedColumns = [...quadro.colunas].sort(
-          (a, b) => a.ordem - b.ordem
-        );
+      if (oldIndex === -1 || newIndex === -1) return;
 
-        const sourceIndex = sortedColumns.findIndex(c => c.id === columnId);
-        const targetIndex = sortedColumns.findIndex(c => c.id === over.id);
-
-        if (sourceIndex === -1 || targetIndex === -1) return;
-        if (sourceIndex === targetIndex) return; // Mesma posição
-
-        // Chamar Context que fará o optimistic update
-        try {
-          await moveColumnContext(columnId, targetIndex);
-        } catch (error) {
-          console.log('Erro ao mover coluna:', error);
-        }
+      try {
+        await moveColumnContext(active.id as string, newIndex);
+      } catch (error) {
+        console.log('Erro ao mover coluna:', error);
       }
     }
-  }, [quadro, columnIds, moveCardContext, moveColumnContext]);
+  }, [quadro, columnIds, moveCardContext, moveColumnContext, activeType]);
 
-  // Ordenar colunas por ordem - memoizado (sempre chama o hook)
-  const sortedColumns = useMemo(
-    () =>
-      quadro?.colunas
-        ? [...quadro.colunas].sort((a, b) => a.ordem - b.ordem)
-        : [],
-    [quadro?.colunas]
-  );
+  // Colunas ordenadas
+  const sortedColumns = useMemo(() => {
+    if (!quadro) return [];
+    return [...quadro.colunas].sort((a, b) => a.ordem - b.ordem);
+  }, [quadro]);
 
   if (loading || !quadro) {
     return (
@@ -272,30 +270,24 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
     <DndContext
       sensors={sensors}
       onDragStart={handleDragStart}
+      onDragOver={handleDragOver}
       onDragEnd={handleDragEnd}
     >
-      <div className="w-full h-full">
-        <div
-          style={{
-            overflowX: 'auto',
-            minHeight: '10vh',
-            maxHeight: '70vh',
-            width: '100%',
-          }}
-          className="flex gap-4 p-4"
-        >
+      <div className="w-full h-full overflow-x-auto">
+        <div className="flex gap-4 py-4 min-w-min">
           <SortableContext
             items={columnIds}
             strategy={horizontalListSortingStrategy}
           >
-            {sortedColumns.map(column => {
+            {sortedColumns.map((column) => {
               const cardIds = getColumnCardIds(column.id);
+              
               return (
-                <SortableContext
+                <ColumnWrapper
                   key={column.id}
-                  id={column.id}
-                  items={cardIds}
-                  strategy={verticalListSortingStrategy}
+                  columnId={column.id}
+                  cardIds={cardIds}
+                  column={column}
                 >
                   <KanbanColumn
                     column={column}
@@ -308,8 +300,11 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
                     canAddCard={canAddCard}
                     isLoading={loading}
                     isItemAnimating={isItemAnimating}
+                    isCreatingCard={creatingCardColumnId === column.id}
+                    onCardCreated={onCardCreated}
+                    onCancelCreateCard={onCancelCreateCard}
                   />
-                </SortableContext>
+                </ColumnWrapper>
               );
             })}
           </SortableContext>
@@ -329,7 +324,13 @@ export const KanbanBoard: React.FC<KanbanBoardProps> = ({
           </div>
         )}
         {activeColumn && (
-          <div className="opacity-90">
+          <div 
+            className="opacity-95"
+            style={{
+              boxShadow: '0 12px 24px rgba(0, 0, 0, 0.2)',
+              transform: 'rotate(2deg)',
+            }}
+          >
             <KanbanColumn
               column={activeColumn}
               onAddCard={onAddCard}

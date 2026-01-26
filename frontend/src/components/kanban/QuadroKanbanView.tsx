@@ -79,12 +79,20 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
   const [isDeletingCard, setIsDeletingCard] = useState(false);
   const [isSavingCard, setIsSavingCard] = useState(false);
   const [isSavingColuna, setIsSavingColuna] = useState(false);
+  const [creatingCardColumnId, setCreatingCardColumnId] = useState<string | null>(null);
 
   // Handlers memoizados com useCallback
   const handleAddCard = useCallback((columnId: string) => {
-    setSelectedColumnId(columnId);
-    setSelectedCard(null);
-    setShowCardModal(true);
+    setCreatingCardColumnId(columnId);
+  }, []);
+
+  const handleCardCreated = useCallback(async () => {
+    setCreatingCardColumnId(null);
+    await refreshAfterMutation();
+  }, [refreshAfterMutation]);
+
+  const handleCancelCreateCard = useCallback(() => {
+    setCreatingCardColumnId(null);
   }, []);
 
   const handleEditCard = useCallback((card: CardKanban) => {
@@ -277,12 +285,10 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
 
   return (
     <>
-      <div className="flex justify-between items-center bg-gray-300 p-2 rounded-lg">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">{quadro?.titulo ?? 'Quadro Kanban'}</h1>
-        </div>
+      <div className="flex justify-between items-center p-2 rounded-xl">
+        <h1 className="text-5xl font-bold text-white">{quadro?.titulo ?? 'Quadro Kanban'}</h1>
         <div className="flex gap-2">
-          <PrimaryButton onClick={() => setShowColunaModal(true)}>
+          <PrimaryButton variant='white' onClick={() => setShowColunaModal(true)}>
             <PlusIcon />
             Nova Lista
           </PrimaryButton>
@@ -306,24 +312,29 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
           onRefresh={refreshAfterMutation}
           animatingItemId={animatingItemId}
           isItemAnimating={isItemAnimating}
+          creatingCardColumnId={creatingCardColumnId}
+          onCardCreated={handleCardCreated}
+          onCancelCreateCard={handleCancelCreateCard}
         />
 
-        {/* Modal criar/editar card */}
-        <CardFormModal
-          isOpen={showCardModal}
-          onClose={() => {
-            setShowCardModal(false);
-            setSelectedCard(null);
-            setSelectedColumnId('');
-          }}
-          onSubmit={handleSaveCard}
-          initialValues={selectedCard || undefined}
-          columnId={selectedColumnId}
-          title={selectedCard ? 'Editar Card' : 'Novo Card'}
-          onDelete={async () =>
-            await handleDeleteCardFromModal(selectedCard?.id || '')
-          }
-        />
+        {/* Modal editar card (apenas para edição, não para criação) */}
+        {selectedCard && (
+          <CardFormModal
+            isOpen={showCardModal}
+            onClose={() => {
+              setShowCardModal(false);
+              setSelectedCard(null);
+              setSelectedColumnId('');
+            }}
+            onSubmit={handleSaveCard}
+            initialValues={selectedCard}
+            columnId={selectedColumnId}
+            title="Editar Card"
+            onDelete={async () =>
+              await handleDeleteCardFromModal(selectedCard?.id || '')
+            }
+          />
+        )}
 
         {/* Modal deletar card */}
         {showDeleteModal && cardToDelete && (

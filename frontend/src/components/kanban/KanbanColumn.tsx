@@ -1,9 +1,8 @@
 import { CardKanban, ColunaKanban, VinculoCard } from '@/schemas/kanban.schema';
 import { useDroppable } from '@dnd-kit/core';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import React, { useMemo } from 'react';
 import { FiEdit } from 'react-icons/fi';
+import { CreateCardInline } from './CreateCardInline';
 import { KanbanCard } from './KanbanCard';
 
 interface ColunaComCards extends ColunaKanban {
@@ -21,6 +20,9 @@ interface KanbanColumnProps {
   canAddCard?: boolean;
   isLoading?: boolean;
   isItemAnimating?: (itemId: string) => boolean;
+  isCreatingCard?: boolean;
+  onCardCreated?: () => void;
+  onCancelCreateCard?: () => void;
 }
 
 const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
@@ -34,22 +36,12 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
   canAddCard = true,
   isLoading = false,
   isItemAnimating,
+  isCreatingCard = false,
+  onCardCreated,
+  onCancelCreateCard,
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef: setSortableRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({
-    id: column.id,
-    data: {
-      type: 'column',
-      column,
-    },
-  });
-
+  // Removido useSortable daqui - agora está no wrapper do KanbanBoard
+  // Mantemos apenas useDroppable para cards
   const { setNodeRef: setDroppableRef, isOver } = useDroppable({
     id: column.id,
     data: {
@@ -58,16 +50,8 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
     },
   });
 
-  // Combinar refs
-  const setNodeRef = (node: HTMLElement | null) => {
-    setSortableRef(node);
-    setDroppableRef(node);
-  };
-
   const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1,
+    opacity: 1,
     backgroundColor: isOver ? '#f3f4f6' : undefined,
   };
 
@@ -82,13 +66,13 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
 
   return (
     <div
-      ref={setNodeRef}
+      ref={setDroppableRef}
       style={style}
-      className={`bg-gray-100 rounded-xl min-w-[320px] max-w-[320px] flex flex-col h-fit transition-all duration-2000 ease-out ${isAnimating ? 'delete-animating' : ''
+      className={`bg-gray-200 rounded-xl min-w-[320px] max-w-[320px] flex flex-col h-fit transition-all duration-2000 ease-out ${isAnimating ? 'delete-animating' : ''
         }`}
     >
-      {/* Header arrastável */}
-      <div  {...listeners} {...attributes} className="flex items-center px-4 py-2 justify-between border-b border-gray-300 cursor-grab">
+      {/* Header - drag é gerenciado pelo wrapper */}
+      <div className="flex items-center px-4 py-2 justify-between border-b border-gray-300 cursor-grab">
         <div
 
           className="flex items-center justify-between flex-1  active:cursor-grabbing "
@@ -122,7 +106,7 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
 
 
       {/* Cards */}
-      <div className="flex-1 space-y-2 overflow-y-auto max-h-[70vh] px-2 py-2">
+      <div className="flex-1 space-y-2 overflow-y-auto max-h-[60vh] px-2 py-2">
         {sortedCards.map(card => (
           <KanbanCard
             key={card.id}
@@ -134,14 +118,22 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
             isItemAnimating={isItemAnimating}
           />
         ))}
+        {/* Card de criação inline */}
+        {isCreatingCard && onCardCreated && onCancelCreateCard && (
+          <CreateCardInline
+            columnId={column.id}
+            onSave={onCardCreated}
+            onCancel={onCancelCreateCard}
+          />
+        )}
       </div>
 
       {/* Botão adicionar card */}
-      {canAddCard && onAddCard && (
-        <div className="px-2 pb-2">
+      {canAddCard && onAddCard && !isCreatingCard && (
+        <div className="px-2 py-2">
           <button
             onClick={() => onAddCard(column.id)}
-            className="w-full text-black hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
+            className="w-full text-primary hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
           >
             + Adicionar Card
           </button>
@@ -161,7 +153,8 @@ export const KanbanColumn = React.memo<KanbanColumnProps>(
       prevProps.column.cards.length === nextProps.column.cards.length &&
       prevProps.column.titulo === nextProps.column.titulo &&
       prevProps.canAddCard === nextProps.canAddCard &&
-      prevProps.isLoading === nextProps.isLoading
+      prevProps.isLoading === nextProps.isLoading &&
+      prevProps.isCreatingCard === nextProps.isCreatingCard
     );
   }
 );

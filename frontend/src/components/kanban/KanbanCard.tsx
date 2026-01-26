@@ -94,6 +94,11 @@ const KanbanCardComponent: React.FC<KanbanCardProps> = ({
     }
   };
 
+  const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.preventDefault(); // impede o menu padrão do navegador
+    setShowMenu(true);
+  };
+
   const vinculos = card.vinculos || [];
   const isAnimating = isItemAnimating ? isItemAnimating(card.id) : false;
 
@@ -103,10 +108,11 @@ const KanbanCardComponent: React.FC<KanbanCardProps> = ({
       style={style}
       {...attributes}
       {...listeners}
-      className={`cursor-pointer hover:shadow-md transition-all duration-[2000ms] ease-out p-3 bg-white rounded-xl relative border border-gray-200 mb-2 ${
+      className={`cursor-pointer hover:shadow-md transition-all duration-2000 ease-out px-3 py-2 bg-white rounded-xl relative border border-gray-200 mb-2 ${
         isAnimating ? 'delete-animating' : ''
       }`}
       onClick={() => onClick?.(card)}
+      onContextMenu={handleContextMenu}
     >
       {/* Menu de ações */}
       {(onEdit || onDelete) && (

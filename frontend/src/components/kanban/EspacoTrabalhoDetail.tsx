@@ -159,26 +159,28 @@ export const EspacoTrabalhoDetail: React.FC<EspacoTrabalhoDetailProps> = ({
       <div className="p-6">
         <div className="mb-6">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-3">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-800">
+            <div className="flex flex-col gap-3">
+              <div className="flex items-center gap-3">
+                <h1 className="text-3xl font-bold text-white">
                   {espacoTrabalhoAtual.nome}
                 </h1>
-                <p className="text-sm text-gray-500 mt-1">
-                  {espacoTrabalhoAtual.quadros?.length ?? 0} quadro
-                  {espacoTrabalhoAtual.quadros?.length !== 1 ? 's' : ''}
-                </p>
+
+                <button
+                  onClick={handleEditEspaco}
+                  disabled={isSavingEspaco || isDeletingEspaco}
+                  className="p-2 text-white hover:text-gray-800 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  title="Editar espaço de trabalho"
+                >
+                  <FiEdit className="w-5 h-5" />
+                </button>
               </div>
-              <button
-                onClick={handleEditEspaco}
-                disabled={isSavingEspaco || isDeletingEspaco}
-                className="p-2 text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                title="Editar espaço de trabalho"
-              >
-                <FiEdit className="w-5 h-5" />
-              </button>
+
+              <p className="text-sm text-white mt-1">
+                {espacoTrabalhoAtual.quadros?.length ?? 0} quadro
+                {espacoTrabalhoAtual.quadros?.length !== 1 ? 's' : ''}
+              </p>
             </div>
-            <PrimaryButton onClick={handleCreateQuadro}>
+            <PrimaryButton variant='white' onClick={handleCreateQuadro}>
               <PlusIcon />
               Novo Quadro
             </PrimaryButton>
@@ -186,7 +188,7 @@ export const EspacoTrabalhoDetail: React.FC<EspacoTrabalhoDetailProps> = ({
         </div>
 
         {espacoTrabalhoAtual.quadros &&
-        espacoTrabalhoAtual.quadros.length === 0 ? (
+          espacoTrabalhoAtual.quadros.length === 0 ? (
           <div className="text-center py-12 ">
             <p className="text-gray-500 mb-4">Nenhum quadro criado ainda.</p>
             {/* <PrimaryButton onClick={handleCreateQuadro}>
@@ -201,9 +203,8 @@ export const EspacoTrabalhoDetail: React.FC<EspacoTrabalhoDetailProps> = ({
               return (
                 <div
                   key={quadro.id}
-                  className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-2000 ease-out relative ${
-                    isAnimating ? 'delete-animating' : ''
-                  }`}
+                  className={`bg-white rounded-lg shadow-md p-6 hover:shadow-lg transition-all duration-2000 ease-out relative ${isAnimating ? 'delete-animating' : ''
+                    }`}
                 >
                   <div
                     className="cursor-pointer"
