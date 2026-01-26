@@ -34,6 +34,7 @@ import {
   comentarioCardSchema,
   compromissoAutocompleteSchema,
   espacoTrabalhoComQuadrosSchema,
+  espacoTrabalhoInputSchema,
   espacoTrabalhoSchema,
   etiquetaQuadroSchema,
   quadroCompletoSchema,
@@ -143,7 +144,7 @@ export const atualizarEspacoTrabalho = async (
   );
   return validateResponse(
     response.data,
-    espacoTrabalhoSchema,
+    espacoTrabalhoInputSchema,
     'Erro ao atualizar espaço de trabalho'
   );
 };

@@ -7,7 +7,6 @@ import type { AppProps } from 'next/app';
 import Head from 'next/head';
 import { useRouter } from 'next/router';
 
-import api from '@/axios';
 import { AuthProvider } from '@/context/AuthContext';
 import { isAlwaysPublicPath } from '@/proxy';
 import '@/styles/global.css';
@@ -74,9 +73,9 @@ function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isPublic = PUBLIC_ROUTES.includes(router.pathname);
 
-  useEffect(() => {
-    api.get('/api/external/ping');
-  }, []);
+  // useEffect(() => {
+  //   api.get('/api/external/ping');
+  // }, []);
 
   if (router.pathname == '/dashboard/cliente') {
     return (

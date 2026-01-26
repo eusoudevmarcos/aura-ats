@@ -84,16 +84,14 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
     <div
       ref={setNodeRef}
       style={style}
-      className={`bg-gray-50 rounded-lg p-4 min-w-[320px] max-w-[320px] flex flex-col h-fit transition-all duration-2000 ease-out ${
-        isAnimating ? 'delete-animating' : ''
-      }`}
+      className={`bg-gray-100 rounded-xl min-w-[320px] max-w-[320px] flex flex-col h-fit transition-all duration-2000 ease-out ${isAnimating ? 'delete-animating' : ''
+        }`}
     >
       {/* Header arrastável */}
-      <div className="flex items-center justify-between mb-4">
+      <div  {...listeners} {...attributes} className="flex items-center px-4 py-2 justify-between border-b border-gray-300 cursor-grab">
         <div
-          {...attributes}
-          {...listeners}
-          className="flex items-center justify-between flex-1 cursor-grab active:cursor-grabbing"
+
+          className="flex items-center justify-between flex-1  active:cursor-grabbing "
         >
           <h2 className="font-semibold text-gray-800 text-lg">
             {column.titulo}
@@ -102,6 +100,8 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
             {sortedCards.length}
           </span>
         </div>
+
+
         {onEditColumn && (
           <button
             onClick={e => {
@@ -118,8 +118,11 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
         )}
       </div>
 
+
+
+
       {/* Cards */}
-      <div className="flex-1 space-y-2 overflow-y-auto max-h-[70vh]">
+      <div className="flex-1 space-y-2 overflow-y-auto max-h-[70vh] px-2 py-2">
         {sortedCards.map(card => (
           <KanbanCard
             key={card.id}
@@ -135,13 +138,16 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
 
       {/* Botão adicionar card */}
       {canAddCard && onAddCard && (
-        <button
-          onClick={() => onAddCard(column.id)}
-          className="mt-4 w-full py-2 text-sm text-gray-600 hover:text-gray-800 hover:bg-gray-100 rounded border-2 border-dashed border-gray-300 transition-colors"
-        >
-          + Adicionar Card
-        </button>
+        <div className="px-2 py-2">
+          <button
+            onClick={() => onAddCard(column.id)}
+            className="w-full text-black hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"
+          >
+            + Adicionar Card
+          </button>
+        </div>
       )}
+
     </div>
   );
 };

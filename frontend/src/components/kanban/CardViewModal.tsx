@@ -18,17 +18,16 @@ import {
   removerMembroDoCard,
   removerVinculo,
 } from '@/axios/kanban.axios';
+import { useKanban } from '@/context/KanbanContext';
 import {
   CardKanban,
   ChecklistCard,
-  ChecklistItem,
   ComentarioCard,
   UsuarioSistema,
-  VinculoCard,
+  VinculoCard
 } from '@/schemas/kanban.schema';
-import { useKanban } from '@/context/KanbanContext';
 import { getUsuarioNome } from '@/utils/kanban';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FiCalendar,
   FiCheckSquare,
@@ -36,9 +35,8 @@ import {
   FiLoader,
   FiTag,
   FiTrash2,
-  FiUserPlus,
   FiUsers,
-  FiX,
+  FiX
 } from 'react-icons/fi';
 import Modal from '../modal/Modal';
 
@@ -47,6 +45,7 @@ interface CardViewModalProps {
   onClose: () => void;
   card: CardKanban;
   onUpdate?: () => void;
+  columnName: string;
 }
 
 // Debounce utility
@@ -77,6 +76,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
   isOpen,
   onClose,
   card,
+  columnName,
   onUpdate,
 }) => {
   const { quadro, updateCardLabels, updateCardDates, toggleCardChecklistCompleto } =
@@ -172,30 +172,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
     card.checklistCompleto || false
   );
 
-  useEffect(() => {
-    if (isOpen && card.id) {
-      loadData();
-      // Inicializar estados locais de datas quando o card é aberto
-      if (card.datas?.dataInicio) {
-        setLocalDataInicio(
-          new Date(card.datas.dataInicio).toISOString().slice(0, 10)
-        );
-      } else {
-        setLocalDataInicio('');
-      }
-      if (card.datas?.dataEntrega) {
-        setLocalDataEntrega(
-          new Date(card.datas.dataEntrega).toISOString().slice(0, 10)
-        );
-      } else {
-        setLocalDataEntrega('');
-      }
-      // Sincronizar estado local de checklistCompleto
-      setLocalChecklistCompleto(card.checklistCompleto || false);
-    }
-  }, [isOpen, card.id, card.datas?.dataInicio, card.datas?.dataEntrega, card.checklistCompleto]);
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       const [comentariosData, vinculosData] = await Promise.all([
@@ -209,7 +186,32 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
     } finally {
       setLoading(false);
     }
-  };
+  }, [card.id]); // Corrigido: adicionar dependência card.id
+
+  useEffect(() => {
+    if (isOpen && card.id) {
+      loadData();
+      // Inicializar estados locais de datas quando o card é aberto
+      if (card.datas?.dataInicio) {
+        setLocalDataInicio(
+          card.datas.dataInicio ?? ''
+        );
+      } else {
+        setLocalDataInicio('');
+      }
+      if (card.datas?.dataEntrega) {
+        setLocalDataEntrega(
+          card.datas.dataEntrega ?? ''
+        );
+      } else {
+        setLocalDataEntrega('');
+      }
+      // Sincronizar estado local de checklistCompleto
+      setLocalChecklistCompleto(card.checklistCompleto || false);
+    }
+  }, [isOpen, card.id, card.datas?.dataInicio, card.datas?.dataEntrega, card.checklistCompleto, loadData]);
+
+
 
   const handleSaveTitle = async () => {
     try {
@@ -234,7 +236,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
   const handleAddComment = async () => {
     const commentToSend = newComment.trim();
     if (!commentToSend || commentSubmitting) return;
-    
+
     setCommentSubmitting(true);
     try {
       const comentario = await criarComentarioCard(card.id, {
@@ -372,9 +374,9 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
         prev.map(cl =>
           cl.id === checklistId
             ? {
-                ...cl,
-                itens: [...(cl.itens || []), novoItem],
-              }
+              ...cl,
+              itens: [...(cl.itens || []), novoItem],
+            }
             : cl
         )
       );
@@ -424,7 +426,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
   };
 
   // Funções para gerenciar membros
-  const buscarUsuariosDebounced = useDebouncedCallback(
+  const buscarUsuariosCallback = useCallback(
     async (search: string) => {
       const termo = search.trim();
 
@@ -454,6 +456,11 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
         setLoadingUsuarios(false);
       }
     },
+    [card.membros]
+  );
+
+  const buscarUsuariosDebounced = useDebouncedCallback(
+    buscarUsuariosCallback,
     300
   );
 
@@ -465,7 +472,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
       return;
     }
     buscarUsuariosDebounced(termo);
-  }, [searchUsuario, buscarUsuariosDebounced]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchUsuario]);
 
   const handleAdicionarMembro = async (usuarioSistemaId: string) => {
     setAddingMember(true);
@@ -540,17 +548,17 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
       setUsuariosSugeridos([]);
       setShowAutocomplete(false);
     }
-    // eslint-disable-next-line
+
   }, [isOpen]);
 
   // --- Textarea ref for focus management ---
   const commentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
+    <Modal isOpen={isOpen} onClose={onClose} title={columnName}>
       <div className="flex h-full max-h-[80vh]">
         {/* Coluna esquerda: detalhes do card */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4">
           {/* Título com checkbox */}
           <div className="mb-2 flex items-start justify-between gap-4">
             {isEditingTitle ? (
@@ -616,64 +624,6 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                     <FiEdit className="inline-block ml-2 text-gray-500 text-lg" />
                   </h2>
                 </div>
-
-                {/* Etiquetas, datas e membros em resumo no topo */}
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {(card.etiquetas || [])
-                    .map(et => {
-                      // Se a relação etiqueta estiver populada, usa ela
-                      if (et.etiqueta) {
-                        return et.etiqueta;
-                      }
-                      // Caso contrário, busca no quadro usando o etiquetaQuadroId
-                      if (et.etiquetaQuadroId && quadroEtiquetas.length > 0) {
-                        return quadroEtiquetas.find(eq => eq.id === et.etiquetaQuadroId);
-                      }
-                      return null;
-                    })
-                    .filter(Boolean)
-                    .map(etiqueta => (
-                      <span
-                        key={etiqueta!.id}
-                        className="inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold text-white"
-                        style={{ backgroundColor: (etiqueta as any).cor || '#4b5563' }}
-                      >
-                        {etiqueta!.nome}
-                      </span>
-                    ))}
-                  {card.datas?.dataInicio && (
-                    <span className="inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
-                      <FiCalendar className="text-blue-500" />
-                      Início: {new Date(card.datas.dataInicio).toLocaleDateString('pt-BR')}
-                    </span>
-                  )}
-                  {card.datas?.dataEntrega && (
-                    <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                      <FiCalendar className="text-gray-500" />
-                      Entrega: {new Date(card.datas.dataEntrega).toLocaleDateString('pt-BR')}
-                    </span>
-                  )}
-                  {card.membros && card.membros.length > 0 && (
-                    <div className="flex -space-x-2">
-                      {card.membros.slice(0, 3).map(m => (
-                        <div
-                          key={m.id}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-blue-600 text-xs font-semibold text-white"
-                          title={m.usuarioSistema?.email}
-                        >
-                          {m.usuarioSistema?.email
-                            ?.charAt(0)
-                            .toUpperCase()}
-                        </div>
-                      ))}
-                      {card.membros.length > 3 && (
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-gray-300 text-xs font-semibold text-gray-700">
-                          +{card.membros.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
           </div>
@@ -697,7 +647,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                     <h4 className="mb-2 text-sm font-semibold text-gray-800">
                       Etiquetas do quadro
                     </h4>
-                    
+
                     {/* Input de criação no topo */}
                     <div className="mb-3 space-y-2 border-b border-gray-200 pb-3">
                       <div className="flex gap-2">
@@ -733,11 +683,10 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                             key={cor}
                             type="button"
                             onClick={() => setNewEtiquetaCor(cor)}
-                            className={`h-6 w-6 rounded border-2 ${
-                              newEtiquetaCor === cor
-                                ? 'border-gray-800 scale-110'
-                                : 'border-gray-300'
-                            }`}
+                            className={`h-6 w-6 rounded border-2 ${newEtiquetaCor === cor
+                              ? 'border-gray-800 scale-110'
+                              : 'border-gray-300'
+                              }`}
                             style={{ backgroundColor: cor }}
                             title={cor}
                           />
@@ -826,7 +775,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 )}
               </div>
 
-              <div className="relative">
+              <div className="">
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
@@ -899,7 +848,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 )}
               </div>
 
-              <div className="relative">
+              {/* ADICIONAR Checklist */}
+              <div className="">
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
@@ -919,7 +869,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                     </h4>
 
                     {/* Input de criação no topo */}
-                    <div className="mb-3 border-b border-gray-200 pb-3">
+                    <div className="pb-3">
                       <div className="flex gap-2">
                         <input
                           type="text"
@@ -948,173 +898,12 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                         </button>
                       </div>
                     </div>
-
-                    {/* Lista de checklists existentes */}
-                    <div className="space-y-3">
-                      {localChecklists.length === 0 && (
-                        <p className="text-xs text-gray-500">
-                          Nenhum checklist criado ainda.
-                        </p>
-                      )}
-                      {localChecklists.map(checklist => {
-                        const isEditing = editingChecklistId === checklist.id;
-                        const totalItens = checklist.itens?.length || 0;
-                        const itensConcluidos =
-                          checklist.itens?.filter(i => i.concluido).length || 0;
-                        const progresso = totalItens > 0 ? `${itensConcluidos}/${totalItens}` : '0/0';
-
-                        return (
-                          <div
-                            key={checklist.id}
-                            className="rounded border border-gray-200 p-2"
-                          >
-                            {/* Cabeçalho do checklist */}
-                            <div className="mb-2 flex items-center gap-2">
-                              {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={editingChecklistTitulo}
-                                  onChange={e =>
-                                    setEditingChecklistTitulo(e.target.value)
-                                  }
-                                  onBlur={() =>
-                                    handleEditarChecklist(
-                                      checklist.id,
-                                      editingChecklistTitulo
-                                    )
-                                  }
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter') {
-                                      handleEditarChecklist(
-                                        checklist.id,
-                                        editingChecklistTitulo
-                                      );
-                                    }
-                                    if (e.key === 'Escape') {
-                                      setEditingChecklistId(null);
-                                    }
-                                  }}
-                                  className="flex-1 rounded border border-gray-300 px-1 py-0.5 text-xs focus:outline-none"
-                                  autoFocus
-                                />
-                              ) : (
-                                <>
-                                  <span
-                                    className="flex-1 cursor-pointer text-xs font-semibold"
-                                    onClick={() => {
-                                      setEditingChecklistId(checklist.id);
-                                      setEditingChecklistTitulo(checklist.titulo);
-                                    }}
-                                    title="Clique para editar"
-                                  >
-                                    {checklist.titulo}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {progresso}
-                                  </span>
-                                </>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => handleDeletarChecklist(checklist.id)}
-                                className="text-red-500 hover:text-red-700"
-                                title="Deletar checklist"
-                              >
-                                <FiX className="h-3 w-3" />
-                              </button>
-                            </div>
-
-                            {/* Lista de itens do checklist */}
-                            <div className="mb-2 space-y-1">
-                              {checklist.itens?.map(item => (
-                                <div
-                                  key={item.id}
-                                  className="flex items-center gap-2 rounded p-1 hover:bg-gray-50"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={item.concluido}
-                                    onChange={() =>
-                                      handleToggleChecklistItem(
-                                        item.id,
-                                        item.concluido
-                                      )
-                                    }
-                                    className="cursor-pointer"
-                                  />
-                                  <span
-                                    className={`flex-1 text-xs ${
-                                      item.concluido
-                                        ? 'line-through text-gray-400'
-                                        : 'text-gray-700'
-                                    }`}
-                                  >
-                                    {item.descricao}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleDeletarChecklistItem(item.id)
-                                    }
-                                    className="text-red-500 hover:text-red-700"
-                                    title="Deletar item"
-                                  >
-                                    <FiX className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-
-                            {/* Input para adicionar novo item */}
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={newItemDescricao[checklist.id] || ''}
-                                onChange={e =>
-                                  setNewItemDescricao(prev => ({
-                                    ...prev,
-                                    [checklist.id]: e.target.value,
-                                  }))
-                                }
-                                onKeyDown={e => {
-                                  if (
-                                    e.key === 'Enter' &&
-                                    newItemDescricao[checklist.id]?.trim()
-                                  ) {
-                                    handleCriarChecklistItem(checklist.id);
-                                  }
-                                }}
-                                placeholder="Adicionar item..."
-                                className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none"
-                                disabled={creatingItem[checklist.id]}
-                              />
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleCriarChecklistItem(checklist.id)
-                                }
-                                disabled={
-                                  !newItemDescricao[checklist.id]?.trim() ||
-                                  creatingItem[checklist.id]
-                                }
-                                className="rounded bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                              >
-                                {creatingItem[checklist.id] ? (
-                                  <FiLoader className="animate-spin" />
-                                ) : (
-                                  '+'
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
                   </div>
                 )}
               </div>
 
-              <div className="relative">
+              {/* Adicionar membros */}
+              <div>
                 <button
                   type="button"
                   className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
@@ -1249,7 +1038,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 return null;
               })
               .filter(Boolean);
-            
+
             return etiquetasDoCard.length > 0 ? (
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Etiquetas</h3>
@@ -1271,6 +1060,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
               </div>
             ) : null;
           })()}
+
+
 
           {/* Descrição */}
           <div className="mb-6">
@@ -1334,6 +1125,171 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 ))
               )}
             </div>
+          </div>
+
+          <div className="space-y-3 border border-gray-200 rounded-lg p-2">
+            {localChecklists.length === 0 && (
+              <p className="text-xs text-gray-500">
+                Nenhum checklist criado ainda.
+              </p>
+            )}
+
+            {/* Checklist */}
+            <h3 className="ttext-lg font-semibold text-gray-800 mb-3">
+              Lista de tarefas
+            </h3>
+            {localChecklists.map(checklist => {
+              const isEditing = editingChecklistId === checklist.id;
+              const totalItens = checklist.itens?.length || 0;
+              const itensConcluidos =
+                checklist.itens?.filter(i => i.concluido).length || 0;
+              const progresso = totalItens > 0 ? `${itensConcluidos}/${totalItens}` : '0/0';
+
+              return (
+                <div
+                  key={checklist.id}
+                  className="rounded  p-2"
+                >
+                  {/* Cabeçalho do checklist */}
+                  <div className="mb-2 flex items-center gap-2">
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editingChecklistTitulo}
+                        onChange={e =>
+                          setEditingChecklistTitulo(e.target.value)
+                        }
+                        onBlur={() =>
+                          handleEditarChecklist(
+                            checklist.id,
+                            editingChecklistTitulo
+                          )
+                        }
+                        onKeyDown={e => {
+                          if (e.key === 'Enter') {
+                            handleEditarChecklist(
+                              checklist.id,
+                              editingChecklistTitulo
+                            );
+                          }
+                          if (e.key === 'Escape') {
+                            setEditingChecklistId(null);
+                          }
+                        }}
+                        className="flex-1 rounded border border-gray-300 px-1 py-0.5 text-xs focus:outline-none"
+                        autoFocus
+                      />
+                    ) : (
+                      <>
+                        <span
+                          className="flex-1 cursor-pointer text-xs font-semibold"
+                          onClick={() => {
+                            setEditingChecklistId(checklist.id);
+                            setEditingChecklistTitulo(checklist.titulo);
+                          }}
+                          title="Clique para editar"
+                        >
+                          {checklist.titulo}
+                        </span>
+                        <span className="text-xs text-gray-500">
+                          {progresso}
+                        </span>
+                      </>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => handleDeletarChecklist(checklist.id)}
+                      className="text-red-500 hover:text-red-700"
+                      title="Deletar checklist"
+                    >
+                      <FiX className="h-3 w-3" />
+                    </button>
+                  </div>
+
+                  {/* Lista de itens do checklist */}
+                  <div className="space-y-1">
+                    {checklist.itens?.map(item => (
+                      <div
+                        key={item.id}
+                        className="flex items-center gap-2 rounded p-1 hover:bg-gray-50"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={item.concluido}
+                          onChange={() =>
+                            handleToggleChecklistItem(
+                              item.id,
+                              item.concluido
+                            )
+                          }
+                          className="cursor-pointer"
+                        />
+                        <span
+                          className={`flex-1 text-xs ${item.concluido
+                            ? 'line-through text-gray-400'
+                            : 'text-gray-700'
+                            }`}
+                        >
+                          {item.descricao}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() =>
+                            handleDeletarChecklistItem(item.id)
+                          }
+                          className="text-red-500 hover:text-red-700"
+                          title="Deletar item"
+                        >
+                          <FiX className="h-3 w-3" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* Input para adicionar novo item */}
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={newItemDescricao[checklist.id] || ''}
+                      onChange={e =>
+                        setNewItemDescricao(prev => ({
+                          ...prev,
+                          [checklist.id]: e.target.value,
+                        }))
+                      }
+                      onKeyDown={e => {
+                        if (
+                          e.key === 'Enter' &&
+                          newItemDescricao[checklist.id]?.trim()
+                        ) {
+                          handleCriarChecklistItem(checklist.id);
+                        }
+                      }}
+                      placeholder="Adicionar um item..."
+                      className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none"
+                      disabled={creatingItem[checklist.id]}
+                    />
+                    <button
+                      type="button"
+                      onClick={() =>
+                        handleCriarChecklistItem(checklist.id)
+                      }
+                      disabled={
+                        !newItemDescricao[checklist.id]?.trim() ||
+                        creatingItem[checklist.id]
+                      }
+                      className="rounded bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                    >
+                      {creatingItem[checklist.id] ? (
+                        <FiLoader className="animate-spin" />
+                      ) : (
+                        '+'
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
           </div>
 
         </div>

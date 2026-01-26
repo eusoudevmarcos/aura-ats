@@ -11,7 +11,7 @@ export const KanbanBreadcrumbs: React.FC = () => {
   const breadcrumbs = (): BreadcrumbItem[] => {
     const items: BreadcrumbItem[] = [
       {
-        label: 'Espaço de Trabalho',
+        label: 'Espaços de Trabalho',
         href: '/kanban',
       },
     ];
@@ -24,7 +24,7 @@ export const KanbanBreadcrumbs: React.FC = () => {
       const espacoId = router.query.espacoId;
       if (espacoId && typeof espacoId === 'string') {
         items.push({
-          label: 'Espaço',
+          label: 'Quadros',
           href: `/kanban/espaco/${espacoId}`,
         });
       }
@@ -38,7 +38,7 @@ export const KanbanBreadcrumbs: React.FC = () => {
       // Adicionar espaço (sempre presente quando estamos em um quadro)
       if (espacoId && typeof espacoId === 'string') {
         items.push({
-          label: 'Espaço',
+          label: 'Quadros',
           href: `/kanban/espaco/${espacoId}`,
         });
       }
