@@ -124,9 +124,11 @@ export const KanbanProvider: React.FC<KanbanProviderProps> = ({
         const sourceIndex = sortedSourceCards.findIndex(c => c.id === cardId);
         const newCards = arrayMove(sortedSourceCards, sourceIndex, position);
         
-        // Atualizar ordem para todos os cards
+        // Atualizar ordem para todos os cards (ordem descendente: maior ordem primeiro)
+        // O array já está ordenado em ordem descendente, então precisamos inverter
+        const totalCards = newCards.length;
         newCards.forEach((c, index) => {
-          c.ordem = index;
+          c.ordem = totalCards - 1 - index; // Inverter para manter ordem descendente
         });
 
         // Criar novo estado atualizando apenas a coluna uma vez
@@ -165,14 +167,16 @@ export const KanbanProvider: React.FC<KanbanProviderProps> = ({
       const updatedCard = { ...card, colunaKanbanId: targetColumnId };
       newTargetCards.splice(position, 0, updatedCard);
 
-      // Atualizar ordem para todos os cards na coluna de destino
+      // Atualizar ordem para todos os cards na coluna de destino (ordem descendente)
+      const totalTargetCards = newTargetCards.length;
       newTargetCards.forEach((c, index) => {
-        c.ordem = index;
+        c.ordem = totalTargetCards - 1 - index; // Inverter para manter ordem descendente
       });
 
-      // Atualizar ordem para todos os cards na coluna de origem
+      // Atualizar ordem para todos os cards na coluna de origem (ordem descendente)
+      const totalSourceCards = newSourceCards.length;
       newSourceCards.forEach((c, index) => {
-        c.ordem = index;
+        c.ordem = totalSourceCards - 1 - index; // Inverter para manter ordem descendente
       });
 
       // Criar novo estado com as colunas atualizadas

@@ -79,12 +79,20 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
   const [isDeletingCard, setIsDeletingCard] = useState(false);
   const [isSavingCard, setIsSavingCard] = useState(false);
   const [isSavingColuna, setIsSavingColuna] = useState(false);
+  const [creatingCardColumnId, setCreatingCardColumnId] = useState<string | null>(null);
 
   // Handlers memoizados com useCallback
   const handleAddCard = useCallback((columnId: string) => {
-    setSelectedColumnId(columnId);
-    setSelectedCard(null);
-    setShowCardModal(true);
+    setCreatingCardColumnId(columnId);
+  }, []);
+
+  const handleCardCreated = useCallback(async () => {
+    setCreatingCardColumnId(null);
+    await refreshAfterMutation();
+  }, [refreshAfterMutation]);
+
+  const handleCancelCreateCard = useCallback(() => {
+    setCreatingCardColumnId(null);
   }, []);
 
   const handleEditCard = useCallback((card: CardKanban) => {
@@ -266,138 +274,145 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
       const updatedCard = quadro.colunas
         .flatMap(col => col.cards)
         .find(c => c.id === cardToView.id);
-      
+
       if (updatedCard) {
         // Atualizar o cardToView com o card atualizado do contexto
         // Isso garante que mudanças no checklist sejam refletidas na modal
         setCardToView(updatedCard);
       }
     }
-  }, [quadro]);
+  }, [cardToView, quadro]);
 
   return (
-    <div className="w-full h-full p-6">
-      <div className="mb-6 flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-800">Quadro Kanban</h1>
-        </div>
+    <>
+      <div className="flex justify-between items-center p-2 rounded-xl">
+        <h1 className="text-5xl font-bold text-white">{quadro?.titulo ?? 'Quadro Kanban'}</h1>
         <div className="flex gap-2">
-          <PrimaryButton onClick={() => setShowColunaModal(true)}>
+          <PrimaryButton variant='white' onClick={() => setShowColunaModal(true)}>
             <PlusIcon />
-            Nova Coluna
+            Nova Lista
           </PrimaryButton>
         </div>
       </div>
 
-      <KanbanBoard
-        quadroId={quadroId}
-        onAddCard={handleAddCard}
-        onEditCard={handleEditCard}
-        onDeleteCard={handleDeleteCard}
-        onCardClick={handleCardClick}
-        onEditColumn={handleEditColuna}
-        renderVinculos={renderVinculos}
-        canAddCard={true}
-        loading={
-          isSavingCard || isSavingColuna || isDeletingCard || isDeletingColuna
-        }
-        onRefresh={refreshAfterMutation}
-        animatingItemId={animatingItemId}
-        isItemAnimating={isItemAnimating}
-      />
+      <div className="w-full h-full">
 
-      {/* Modal criar/editar card */}
-      <CardFormModal
-        isOpen={showCardModal}
-        onClose={() => {
-          setShowCardModal(false);
-          setSelectedCard(null);
-          setSelectedColumnId('');
-        }}
-        onSubmit={handleSaveCard}
-        initialValues={selectedCard || undefined}
-        columnId={selectedColumnId}
-        title={selectedCard ? 'Editar Card' : 'Novo Card'}
-        onDelete={async () =>
-          await handleDeleteCardFromModal(selectedCard?.id || '')
-        }
-      />
-
-      {/* Modal deletar card */}
-      {showDeleteModal && cardToDelete && (
-        <ModalDelete
-          isOpen={showDeleteModal}
-          onClose={() => {
-            setShowDeleteModal(false);
-            setCardToDelete(null);
-          }}
-          isLoading={isDeletingCard}
-          btn={{
-            next: { label: 'Tem certeza?', onClick: handleConfirmDeleteCard },
-          }}
-          message={`Tem certeza que deseja excluir o card "${cardToDelete.titulo}"?`}
-        />
-      )}
-
-      {/* Modal deletar coluna */}
-      {showDeleteColunaModal && colunaToDelete && (
-        <ModalDelete
-          isOpen={showDeleteColunaModal}
-          onClose={() => {
-            setShowDeleteColunaModal(false);
-            setColunaToDelete(null);
-          }}
-          isLoading={isDeletingColuna}
-          btn={{
-            next: { label: 'Tem certeza?', onClick: handleConfirmDeleteColuna },
-          }}
-          message={`Tem certeza que deseja excluir a coluna "${colunaToDelete.titulo}"?`}
-        />
-      )}
-
-      {/* Modal criar/editar coluna */}
-      {showColunaModal && (
-        <ColunaFormModal
-          isOpen={showColunaModal}
-          onClose={() => {
-            setShowColunaModal(false);
-            setSelectedColuna(null);
-          }}
-          onSubmit={handleCreateColuna}
-          quadroKanbanId={quadroId}
-          initialValues={selectedColuna || undefined}
-          title={selectedColuna ? 'Editar Coluna' : 'Nova Coluna'}
-          onDelete={async () =>
-            await handleDeleteColuna(selectedColuna?.id || '')
+        <KanbanBoard
+          quadroId={quadroId}
+          onAddCard={handleAddCard}
+          onEditCard={handleEditCard}
+          onDeleteCard={handleDeleteCard}
+          onCardClick={handleCardClick}
+          onEditColumn={handleEditColuna}
+          renderVinculos={renderVinculos}
+          canAddCard={true}
+          loading={
+            isSavingCard || isSavingColuna || isDeletingCard || isDeletingColuna
           }
+          onRefresh={refreshAfterMutation}
+          animatingItemId={animatingItemId}
+          isItemAnimating={isItemAnimating}
+          creatingCardColumnId={creatingCardColumnId}
+          onCardCreated={handleCardCreated}
+          onCancelCreateCard={handleCancelCreateCard}
         />
-      )}
 
-      {/* Modal editar quadro */}
-      {showQuadroModal && quadro && (
-        <QuadroModal
-          isOpen={showQuadroModal}
-          onClose={() => setShowQuadroModal(false)}
-          onSubmit={handleEditQuadro}
-          espacoTrabalhoId={quadro.espacoTrabalhoId}
-          initialValues={{
-            titulo: quadro.titulo,
-            espacoTrabalhoId: quadro.espacoTrabalhoId,
-          }}
-          title="Editar Quadro"
-        />
-      )}
+        {/* Modal editar card (apenas para edição, não para criação) */}
+        {selectedCard && (
+          <CardFormModal
+            isOpen={showCardModal}
+            onClose={() => {
+              setShowCardModal(false);
+              setSelectedCard(null);
+              setSelectedColumnId('');
+            }}
+            onSubmit={handleSaveCard}
+            initialValues={selectedCard}
+            columnId={selectedColumnId}
+            title="Editar Card"
+            onDelete={async () =>
+              await handleDeleteCardFromModal(selectedCard?.id || '')
+            }
+          />
+        )}
 
-      {/* Modal visualizar card */}
-      {cardToView && (
-        <CardViewModal
-          isOpen={!!cardToView}
-          onClose={() => setCardToView(null)}
-          card={cardToView}
-          onUpdate={refreshAfterMutation}
-        />
-      )}
-    </div>
+        {/* Modal deletar card */}
+        {showDeleteModal && cardToDelete && (
+          <ModalDelete
+            isOpen={showDeleteModal}
+            onClose={() => {
+              setShowDeleteModal(false);
+              setCardToDelete(null);
+            }}
+            isLoading={isDeletingCard}
+            btn={{
+              next: { label: 'Tem certeza?', onClick: handleConfirmDeleteCard },
+            }}
+            message={`Tem certeza que deseja excluir o card "${cardToDelete.titulo}"?`}
+          />
+        )}
+
+        {/* Modal deletar coluna */}
+        {showDeleteColunaModal && colunaToDelete && (
+          <ModalDelete
+            isOpen={showDeleteColunaModal}
+            onClose={() => {
+              setShowDeleteColunaModal(false);
+              setColunaToDelete(null);
+            }}
+            isLoading={isDeletingColuna}
+            btn={{
+              next: { label: 'Tem certeza?', onClick: handleConfirmDeleteColuna },
+            }}
+            message={`Tem certeza que deseja excluir a coluna "${colunaToDelete.titulo}"?`}
+          />
+        )}
+
+        {/* Modal criar/editar coluna */}
+        {showColunaModal && (
+          <ColunaFormModal
+            isOpen={showColunaModal}
+            onClose={() => {
+              setShowColunaModal(false);
+              setSelectedColuna(null);
+            }}
+            onSubmit={handleCreateColuna}
+            quadroKanbanId={quadroId}
+            initialValues={selectedColuna || undefined}
+            title={selectedColuna ? 'Editar Coluna' : 'Nova Coluna'}
+            onDelete={async () =>
+              await handleDeleteColuna(selectedColuna?.id || '')
+            }
+          />
+        )}
+
+        {/* Modal editar quadro */}
+        {showQuadroModal && quadro && (
+          <QuadroModal
+            isOpen={showQuadroModal}
+            onClose={() => setShowQuadroModal(false)}
+            onSubmit={handleEditQuadro}
+            espacoTrabalhoId={quadro.espacoTrabalhoId}
+            initialValues={{
+              titulo: quadro.titulo,
+              espacoTrabalhoId: quadro.espacoTrabalhoId,
+            }}
+            title="Editar Quadro"
+          />
+        )}
+
+        {/* Modal visualizar card */}
+        {cardToView && (
+          <CardViewModal
+            isOpen={!!cardToView}
+            onClose={() => setCardToView(null)}
+            card={cardToView}
+            onUpdate={refreshAfterMutation}
+            columnName={selectedColuna?.titulo || 'Card'}
+          />
+        )}
+      </div>
+    </>
   );
 };
 

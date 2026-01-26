@@ -18,27 +18,24 @@ import {
   removerMembroDoCard,
   removerVinculo,
 } from '@/axios/kanban.axios';
+import { useKanban } from '@/context/KanbanContext';
 import {
   CardKanban,
   ChecklistCard,
-  ChecklistItem,
   ComentarioCard,
   UsuarioSistema,
-  VinculoCard,
+  VinculoCard
 } from '@/schemas/kanban.schema';
-import { useKanban } from '@/context/KanbanContext';
 import { getUsuarioNome } from '@/utils/kanban';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   FiCalendar,
   FiCheckSquare,
   FiEdit,
   FiLoader,
   FiTag,
-  FiTrash2,
-  FiUserPlus,
   FiUsers,
-  FiX,
+  FiX
 } from 'react-icons/fi';
 import Modal from '../modal/Modal';
 
@@ -47,6 +44,7 @@ interface CardViewModalProps {
   onClose: () => void;
   card: CardKanban;
   onUpdate?: () => void;
+  columnName: string;
 }
 
 // Debounce utility
@@ -77,9 +75,10 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
   isOpen,
   onClose,
   card,
+  columnName,
   onUpdate,
 }) => {
-  const { quadro, updateCardLabels, updateCardDates, toggleCardChecklistCompleto } =
+  const { quadro, toggleCardChecklistCompleto, updateCardLabels, updateCardDates } =
     useKanban();
 
   const [isEditingTitle, setIsEditingTitle] = useState(false);
@@ -172,6 +171,22 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
     card.checklistCompleto || false
   );
 
+  const loadData = useCallback(async () => {
+    try {
+      setLoading(true);
+      const [comentariosData, vinculosData] = await Promise.all([
+        listarComentariosDoCard(card.id),
+        listarVinculosDoCard(card.id),
+      ]);
+      setComentarios(comentariosData);
+      setVinculos(vinculosData);
+    } catch (error) {
+      console.log('Erro ao carregar dados do card:', error);
+    } finally {
+      setLoading(false);
+    }
+  }, [card.id]); // Corrigido: adicionar dependência card.id
+
   useEffect(() => {
     if (isOpen && card.id) {
       loadData();
@@ -193,23 +208,9 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
       // Sincronizar estado local de checklistCompleto
       setLocalChecklistCompleto(card.checklistCompleto || false);
     }
-  }, [isOpen, card.id, card.datas?.dataInicio, card.datas?.dataEntrega, card.checklistCompleto]);
+  }, [isOpen, card.id, card.datas?.dataInicio, card.datas?.dataEntrega, card.checklistCompleto, loadData]);
 
-  const loadData = async () => {
-    try {
-      setLoading(true);
-      const [comentariosData, vinculosData] = await Promise.all([
-        listarComentariosDoCard(card.id),
-        listarVinculosDoCard(card.id),
-      ]);
-      setComentarios(comentariosData);
-      setVinculos(vinculosData);
-    } catch (error) {
-      console.log('Erro ao carregar dados do card:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+
 
   const handleSaveTitle = async () => {
     try {
@@ -231,10 +232,15 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
     }
   };
 
+  const handleCancelDescription = () => {
+    setDescription(card.descricao || '');
+    setIsEditingDescription(false);
+  };
+
   const handleAddComment = async () => {
     const commentToSend = newComment.trim();
     if (!commentToSend || commentSubmitting) return;
-    
+
     setCommentSubmitting(true);
     try {
       const comentario = await criarComentarioCard(card.id, {
@@ -372,9 +378,9 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
         prev.map(cl =>
           cl.id === checklistId
             ? {
-                ...cl,
-                itens: [...(cl.itens || []), novoItem],
-              }
+              ...cl,
+              itens: [...(cl.itens || []), novoItem],
+            }
             : cl
         )
       );
@@ -424,7 +430,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
   };
 
   // Funções para gerenciar membros
-  const buscarUsuariosDebounced = useDebouncedCallback(
+  const buscarUsuariosCallback = useCallback(
     async (search: string) => {
       const termo = search.trim();
 
@@ -454,6 +460,11 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
         setLoadingUsuarios(false);
       }
     },
+    [card.membros]
+  );
+
+  const buscarUsuariosDebounced = useDebouncedCallback(
+    buscarUsuariosCallback,
     300
   );
 
@@ -465,7 +476,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
       return;
     }
     buscarUsuariosDebounced(termo);
-  }, [searchUsuario, buscarUsuariosDebounced]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchUsuario]);
 
   const handleAdicionarMembro = async (usuarioSistemaId: string) => {
     setAddingMember(true);
@@ -540,17 +552,80 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
       setUsuariosSugeridos([]);
       setShowAutocomplete(false);
     }
-    // eslint-disable-next-line
+
   }, [isOpen]);
 
   // --- Textarea ref for focus management ---
   const commentTextareaRef = useRef<HTMLTextAreaElement>(null);
 
+  // Refs para os botões de ação para posicionar os pop-ups
+  const labelsButtonRef = useRef<HTMLButtonElement>(null);
+  const datesButtonRef = useRef<HTMLButtonElement>(null);
+  const checklistButtonRef = useRef<HTMLButtonElement>(null);
+  const membersButtonRef = useRef<HTMLButtonElement>(null);
+
+  // Estado para posição dos pop-ups
+  const [popupPosition, setPopupPosition] = useState<{ top: number; left: number } | null>(null);
+
+  // Calcular posição do pop-up quando activePanel muda
+  useEffect(() => {
+    if (!activePanel) {
+      setPopupPosition(null);
+      return;
+    }
+
+    let buttonElement: HTMLButtonElement | null = null;
+    if (activePanel === 'labels') buttonElement = labelsButtonRef.current;
+    else if (activePanel === 'dates') buttonElement = datesButtonRef.current;
+    else if (activePanel === 'checklist') buttonElement = checklistButtonRef.current;
+    else if (activePanel === 'members') buttonElement = membersButtonRef.current;
+
+    if (buttonElement) {
+      const rect = buttonElement.getBoundingClientRect();
+      const containerRect = buttonElement.closest('.flex-1')?.getBoundingClientRect();
+      if (containerRect) {
+        setPopupPosition({
+          top: rect.bottom - containerRect.top + 70,
+          left: rect.left - containerRect.left + 12,
+        });
+      }
+    }
+  }, [activePanel]);
+
+  // Fechar pop-up ao clicar fora
+  useEffect(() => {
+    if (!activePanel) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      let buttonElement: HTMLButtonElement | null = null;
+
+      if (activePanel === 'labels') buttonElement = labelsButtonRef.current;
+      else if (activePanel === 'dates') buttonElement = datesButtonRef.current;
+      else if (activePanel === 'checklist') buttonElement = checklistButtonRef.current;
+      else if (activePanel === 'members') buttonElement = membersButtonRef.current;
+
+      const panel = document.querySelector(`[data-panel="${activePanel}"]`);
+
+      if (
+        buttonElement &&
+        !buttonElement.contains(target) &&
+        panel &&
+        !panel.contains(target)
+      ) {
+        setActivePanel(null);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [activePanel]);
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title="">
+    <Modal isOpen={isOpen} onClose={onClose} title={columnName}>
       <div className="flex h-full max-h-[80vh]">
         {/* Coluna esquerda: detalhes do card */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-2">
           {/* Título com checkbox */}
           <div className="mb-2 flex items-start justify-between gap-4">
             {isEditingTitle ? (
@@ -616,622 +691,393 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                     <FiEdit className="inline-block ml-2 text-gray-500 text-lg" />
                   </h2>
                 </div>
-
-                {/* Etiquetas, datas e membros em resumo no topo */}
-                <div className="mt-2 flex flex-wrap items-center gap-2">
-                  {(card.etiquetas || [])
-                    .map(et => {
-                      // Se a relação etiqueta estiver populada, usa ela
-                      if (et.etiqueta) {
-                        return et.etiqueta;
-                      }
-                      // Caso contrário, busca no quadro usando o etiquetaQuadroId
-                      if (et.etiquetaQuadroId && quadroEtiquetas.length > 0) {
-                        return quadroEtiquetas.find(eq => eq.id === et.etiquetaQuadroId);
-                      }
-                      return null;
-                    })
-                    .filter(Boolean)
-                    .map(etiqueta => (
-                      <span
-                        key={etiqueta!.id}
-                        className="inline-flex items-center rounded px-2 py-0.5 text-xs font-semibold text-white"
-                        style={{ backgroundColor: (etiqueta as any).cor || '#4b5563' }}
-                      >
-                        {etiqueta!.nome}
-                      </span>
-                    ))}
-                  {card.datas?.dataInicio && (
-                    <span className="inline-flex items-center gap-1 rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">
-                      <FiCalendar className="text-blue-500" />
-                      Início: {new Date(card.datas.dataInicio).toLocaleDateString('pt-BR')}
-                    </span>
-                  )}
-                  {card.datas?.dataEntrega && (
-                    <span className="inline-flex items-center gap-1 rounded bg-gray-100 px-2 py-0.5 text-xs text-gray-700">
-                      <FiCalendar className="text-gray-500" />
-                      Entrega: {new Date(card.datas.dataEntrega).toLocaleDateString('pt-BR')}
-                    </span>
-                  )}
-                  {card.membros && card.membros.length > 0 && (
-                    <div className="flex -space-x-2">
-                      {card.membros.slice(0, 3).map(m => (
-                        <div
-                          key={m.id}
-                          className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-blue-600 text-xs font-semibold text-white"
-                          title={m.usuarioSistema?.email}
-                        >
-                          {m.usuarioSistema?.email
-                            ?.charAt(0)
-                            .toUpperCase()}
-                        </div>
-                      ))}
-                      {card.membros.length > 3 && (
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full border border-white bg-gray-300 text-xs font-semibold text-gray-700">
-                          +{card.membros.length - 3}
-                        </div>
-                      )}
-                    </div>
-                  )}
-                </div>
               </div>
             )}
           </div>
 
           {/* Barra de ações - abaixo do título */}
-          <div className="mb-4 flex flex-wrap items-center gap-3">
+          <div className="mb-4 flex flex-wrap items-center gap-3 relative">
             <div className="flex flex-wrap gap-2">
-              <div className="relative">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
-                  onClick={() =>
-                    setActivePanel(prev => (prev === 'labels' ? null : 'labels'))
-                  }
-                >
-                  <FiTag />
-                  Etiquetas
-                </button>
-                {activePanel === 'labels' && (
-                  <div className="absolute z-20 mt-2 w-72 rounded border border-gray-200 bg-white p-3 shadow-lg">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Etiquetas do quadro
-                    </h4>
-                    
-                    {/* Input de criação no topo */}
-                    <div className="mb-3 space-y-2 border-b border-gray-200 pb-3">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newEtiquetaNome}
-                          onChange={e => setNewEtiquetaNome(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && newEtiquetaNome.trim()) {
-                              handleCriarEtiqueta();
-                            }
-                          }}
-                          placeholder="Nome da etiqueta"
-                          className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          disabled={creatingEtiqueta}
-                        />
-                        <button
-                          type="button"
-                          onClick={handleCriarEtiqueta}
-                          disabled={!newEtiquetaNome.trim() || creatingEtiqueta || !quadro?.id}
-                          className="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                        >
-                          {creatingEtiqueta ? (
-                            <FiLoader className="animate-spin" />
-                          ) : (
-                            'Adicionar'
-                          )}
-                        </button>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        {coresPredefinidas.map(cor => (
-                          <button
-                            key={cor}
-                            type="button"
-                            onClick={() => setNewEtiquetaCor(cor)}
-                            className={`h-6 w-6 rounded border-2 ${
-                              newEtiquetaCor === cor
-                                ? 'border-gray-800 scale-110'
-                                : 'border-gray-300'
-                            }`}
-                            style={{ backgroundColor: cor }}
-                            title={cor}
-                          />
-                        ))}
-                      </div>
-                    </div>
+              <button
+                ref={labelsButtonRef}
+                type="button"
+                onClick={() => setActivePanel(activePanel === 'labels' ? null : 'labels')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activePanel === 'labels'
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                <FiTag className="w-4 h-4" />
+                Etiquetas
+              </button>
+              <button
+                ref={datesButtonRef}
+                type="button"
+                onClick={() => setActivePanel(activePanel === 'dates' ? null : 'dates')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activePanel === 'dates'
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                <FiCalendar className="w-4 h-4" />
+                Datas
+              </button>
+              <button
+                ref={checklistButtonRef}
+                type="button"
+                onClick={() => setActivePanel(activePanel === 'checklist' ? null : 'checklist')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activePanel === 'checklist'
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                <FiCheckSquare className="w-4 h-4" />
+                Checklist
+              </button>
+              <button
+                ref={membersButtonRef}
+                type="button"
+                onClick={() => setActivePanel(activePanel === 'members' ? null : 'members')}
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${activePanel === 'members'
+                  ? 'bg-blue-100 text-blue-700 hover:bg-blue-200'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                  }`}
+              >
+                <FiUsers className="w-4 h-4" />
+                Membros
+              </button>
+            </div>
+          </div>
 
-                    {/* Lista de etiquetas existentes */}
-                    <div className="max-h-48 space-y-2 overflow-y-auto">
-                      {quadroEtiquetas.length === 0 && (
-                        <p className="text-xs text-gray-500">
-                          Nenhuma etiqueta cadastrada para este quadro.
-                        </p>
-                      )}
-                      {quadroEtiquetas.map(etiqueta => {
-                        const checked = selectedEtiquetaIds.has(etiqueta.id);
-                        const isEditing = editingEtiquetaId === etiqueta.id;
-                        return (
-                          <div
-                            key={etiqueta.id}
-                            className="flex items-center gap-2 rounded p-1 hover:bg-gray-50"
-                          >
-                            <input
-                              type="checkbox"
-                              checked={checked}
-                              onChange={async () => {
-                                const nextIds = new Set(selectedEtiquetaIds);
-                                if (checked) {
-                                  nextIds.delete(etiqueta.id);
-                                } else {
-                                  nextIds.add(etiqueta.id);
-                                }
-                                await updateCardLabels(card.id, Array.from(nextIds));
-                                if (onUpdate) onUpdate();
-                              }}
-                              className="cursor-pointer"
-                            />
-                            <span
-                              className="inline-block h-3 w-6 rounded"
-                              style={{ backgroundColor: etiqueta.cor }}
-                            />
-                            {isEditing ? (
-                              <input
-                                type="text"
-                                value={editingEtiquetaNome}
-                                onChange={e => setEditingEtiquetaNome(e.target.value)}
-                                onBlur={() =>
-                                  handleEditarEtiqueta(etiqueta.id, editingEtiquetaNome)
-                                }
-                                onKeyDown={e => {
-                                  if (e.key === 'Enter') {
-                                    handleEditarEtiqueta(etiqueta.id, editingEtiquetaNome);
-                                  }
-                                  if (e.key === 'Escape') {
-                                    setEditingEtiquetaId(null);
-                                  }
-                                }}
-                                className="flex-1 rounded border border-gray-300 px-1 py-0.5 text-xs focus:outline-none"
-                                autoFocus
-                              />
-                            ) : (
-                              <span
-                                className="flex-1 cursor-pointer truncate text-xs"
-                                onClick={() => {
-                                  setEditingEtiquetaId(etiqueta.id);
-                                  setEditingEtiquetaNome(etiqueta.nome);
-                                }}
-                                title="Clique para editar"
-                              >
-                                {etiqueta.nome}
-                              </span>
-                            )}
-                            <button
-                              type="button"
-                              onClick={() => handleDeletarEtiqueta(etiqueta.id)}
-                              className="text-red-500 hover:text-red-700"
-                              title="Deletar etiqueta"
-                            >
-                              <FiX className="h-3 w-3" />
-                            </button>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
+          {/* Pop-ups de ações flutuantes */}
+          {activePanel === 'labels' && popupPosition && (
+            <div
+              data-panel="labels"
+              className="absolute z-50 p-2 bg-white border border-gray-200 rounded-lg shadow-xl"
+              style={{
+                top: `${popupPosition.top}px`,
+                left: `${popupPosition.left}px`,
+                minWidth: '320px',
+                maxWidth: '400px',
+              }}
+            >
+              <h3 className="text-md font-semibold text-gray-700 mb-3">Etiquetas</h3>
 
-              <div className="relative">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
-                  onClick={() =>
-                    setActivePanel(prev => (prev === 'dates' ? null : 'dates'))
-                  }
-                >
-                  <FiCalendar />
-                  Datas
-                </button>
-                {activePanel === 'dates' && (
-                  <div className="absolute z-20 mt-2 w-72 rounded border border-gray-200 bg-white p-3 shadow-lg">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Datas do card
-                    </h4>
-                    <div className="space-y-2 text-xs">
-                      <label className="flex flex-col gap-1">
-                        <span>Data de início</span>
-                        <input
-                          type="date"
-                          value={localDataInicio}
-                          onChange={e => setLocalDataInicio(e.target.value)}
-                          className="rounded border px-2 py-1 text-sm"
-                        />
-                      </label>
-                      <label className="flex flex-col gap-1">
-                        <span>Data de entrega</span>
-                        <input
-                          type="date"
-                          value={localDataEntrega}
-                          onChange={e => setLocalDataEntrega(e.target.value)}
-                          className="rounded border px-2 py-1 text-sm"
-                        />
-                      </label>
-                    </div>
-                    <div className="mt-3 flex justify-end">
+              {/* Criar nova etiqueta */}
+              <div className="mb-4">
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={newEtiquetaNome}
+                    onChange={e => setNewEtiquetaNome(e.target.value)}
+                    placeholder="Nome da etiqueta"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    onKeyDown={e => {
+                      if (e.key === 'Enter') {
+                        handleCriarEtiqueta();
+                      }
+                    }}
+                  />
+
+                  <button
+                    type="button"
+                    onClick={handleCriarEtiqueta}
+                    disabled={!newEtiquetaNome.trim() || creatingEtiqueta}
+                    className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {creatingEtiqueta ? <FiLoader className="animate-spin" /> : 'Criar'}
+                  </button>
+                </div>
+                <div className="flex gap-1 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 scrollbar-track-gray-100 py-1">
+                  <div className="flex flex-row" style={{ minWidth: 'max-content' }}>
+                    {coresPredefinidas.map(cor => (
                       <button
+                        key={cor}
                         type="button"
-                        onClick={async () => {
-                          setSavingDates(true);
-                          try {
-                            await updateCardDates(card.id, {
-                              dataInicio: localDataInicio || undefined,
-                              dataEntrega: localDataEntrega || undefined,
-                              recorrencia: card.datas?.recorrencia,
-                              lembreteMinutosAntes:
-                                card.datas?.lembreteMinutosAntes ?? null,
-                            } as any);
-                            if (onUpdate) onUpdate();
-                          } catch (error) {
-                            console.log('Erro ao salvar datas:', error);
-                          } finally {
-                            setSavingDates(false);
-                          }
-                        }}
-                        disabled={savingDates}
-                        className="rounded bg-blue-600 px-4 py-1.5 text-xs font-medium text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        onClick={() => setNewEtiquetaCor(cor)}
+                        className={`w-8 h-8 rounded border-2 ${newEtiquetaCor === cor ? 'border-gray-800' : 'border-gray-300'
+                          }`}
+                        style={{ backgroundColor: cor }}
+                        title={cor}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Lista de etiquetas do quadro */}
+              <div className="max-h-48 overflow-y-auto">
+                {quadroEtiquetas.map(etiqueta => {
+                  const isSelected = selectedEtiquetaIds.has(etiqueta.id);
+                  return (
+                    <div
+                      key={etiqueta.id}
+                      className="flex items-center gap-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                      onClick={async () => {
+                        const newIds = isSelected
+                          ? Array.from(selectedEtiquetaIds).filter(id => id !== etiqueta.id)
+                          : [...Array.from(selectedEtiquetaIds), etiqueta.id];
+                        try {
+                          await updateCardLabels(card.id, newIds);
+                          if (onUpdate) onUpdate();
+                        } catch (error) {
+                          console.log('Erro ao atualizar etiquetas:', error);
+                        }
+                      }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() => { }}
+                        className="cursor-pointer"
+                      />
+                      <span
+                        className="flex-1 inline-flex items-center gap-1 rounded px-2 py-1 text-sm font-medium text-white"
+                        style={{ backgroundColor: etiqueta.cor || '#4b5563' }}
                       >
-                        {savingDates ? (
-                          <span className="flex items-center gap-1">
-                            <FiLoader className="animate-spin" />
-                            Salvando...
-                          </span>
-                        ) : (
-                          'Salvar'
-                        )}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
-                  onClick={() =>
-                    setActivePanel(prev =>
-                      prev === 'checklist' ? null : 'checklist'
-                    )
-                  }
-                >
-                  <FiCheckSquare />
-                  Checklist
-                </button>
-                {activePanel === 'checklist' && (
-                  <div className="absolute z-20 mt-2 w-80 max-h-[500px] rounded border border-gray-200 bg-white p-3 shadow-lg overflow-y-auto">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Checklists
-                    </h4>
-
-                    {/* Input de criação no topo */}
-                    <div className="mb-3 border-b border-gray-200 pb-3">
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={newChecklistTitulo}
-                          onChange={e => setNewChecklistTitulo(e.target.value)}
-                          onKeyDown={e => {
-                            if (e.key === 'Enter' && newChecklistTitulo.trim()) {
-                              handleCriarChecklist();
-                            }
-                          }}
-                          placeholder="Nome do checklist"
-                          className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          disabled={creatingChecklist}
+                        <span
+                          className="inline-block h-2 w-2 rounded-full"
+                          style={{ backgroundColor: 'rgba(255, 255, 255, 0.3)' }}
                         />
-                        <button
-                          type="button"
-                          onClick={handleCriarChecklist}
-                          disabled={!newChecklistTitulo.trim() || creatingChecklist}
-                          className="rounded bg-blue-600 px-3 py-1 text-xs text-white hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                        >
-                          {creatingChecklist ? (
-                            <FiLoader className="animate-spin" />
-                          ) : (
-                            'Adicionar'
-                          )}
-                        </button>
-                      </div>
+                        {etiqueta.nome}
+                      </span>
                     </div>
-
-                    {/* Lista de checklists existentes */}
-                    <div className="space-y-3">
-                      {localChecklists.length === 0 && (
-                        <p className="text-xs text-gray-500">
-                          Nenhum checklist criado ainda.
-                        </p>
-                      )}
-                      {localChecklists.map(checklist => {
-                        const isEditing = editingChecklistId === checklist.id;
-                        const totalItens = checklist.itens?.length || 0;
-                        const itensConcluidos =
-                          checklist.itens?.filter(i => i.concluido).length || 0;
-                        const progresso = totalItens > 0 ? `${itensConcluidos}/${totalItens}` : '0/0';
-
-                        return (
-                          <div
-                            key={checklist.id}
-                            className="rounded border border-gray-200 p-2"
-                          >
-                            {/* Cabeçalho do checklist */}
-                            <div className="mb-2 flex items-center gap-2">
-                              {isEditing ? (
-                                <input
-                                  type="text"
-                                  value={editingChecklistTitulo}
-                                  onChange={e =>
-                                    setEditingChecklistTitulo(e.target.value)
-                                  }
-                                  onBlur={() =>
-                                    handleEditarChecklist(
-                                      checklist.id,
-                                      editingChecklistTitulo
-                                    )
-                                  }
-                                  onKeyDown={e => {
-                                    if (e.key === 'Enter') {
-                                      handleEditarChecklist(
-                                        checklist.id,
-                                        editingChecklistTitulo
-                                      );
-                                    }
-                                    if (e.key === 'Escape') {
-                                      setEditingChecklistId(null);
-                                    }
-                                  }}
-                                  className="flex-1 rounded border border-gray-300 px-1 py-0.5 text-xs focus:outline-none"
-                                  autoFocus
-                                />
-                              ) : (
-                                <>
-                                  <span
-                                    className="flex-1 cursor-pointer text-xs font-semibold"
-                                    onClick={() => {
-                                      setEditingChecklistId(checklist.id);
-                                      setEditingChecklistTitulo(checklist.titulo);
-                                    }}
-                                    title="Clique para editar"
-                                  >
-                                    {checklist.titulo}
-                                  </span>
-                                  <span className="text-xs text-gray-500">
-                                    {progresso}
-                                  </span>
-                                </>
-                              )}
-                              <button
-                                type="button"
-                                onClick={() => handleDeletarChecklist(checklist.id)}
-                                className="text-red-500 hover:text-red-700"
-                                title="Deletar checklist"
-                              >
-                                <FiX className="h-3 w-3" />
-                              </button>
-                            </div>
-
-                            {/* Lista de itens do checklist */}
-                            <div className="mb-2 space-y-1">
-                              {checklist.itens?.map(item => (
-                                <div
-                                  key={item.id}
-                                  className="flex items-center gap-2 rounded p-1 hover:bg-gray-50"
-                                >
-                                  <input
-                                    type="checkbox"
-                                    checked={item.concluido}
-                                    onChange={() =>
-                                      handleToggleChecklistItem(
-                                        item.id,
-                                        item.concluido
-                                      )
-                                    }
-                                    className="cursor-pointer"
-                                  />
-                                  <span
-                                    className={`flex-1 text-xs ${
-                                      item.concluido
-                                        ? 'line-through text-gray-400'
-                                        : 'text-gray-700'
-                                    }`}
-                                  >
-                                    {item.descricao}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() =>
-                                      handleDeletarChecklistItem(item.id)
-                                    }
-                                    className="text-red-500 hover:text-red-700"
-                                    title="Deletar item"
-                                  >
-                                    <FiX className="h-3 w-3" />
-                                  </button>
-                                </div>
-                              ))}
-                            </div>
-
-                            {/* Input para adicionar novo item */}
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={newItemDescricao[checklist.id] || ''}
-                                onChange={e =>
-                                  setNewItemDescricao(prev => ({
-                                    ...prev,
-                                    [checklist.id]: e.target.value,
-                                  }))
-                                }
-                                onKeyDown={e => {
-                                  if (
-                                    e.key === 'Enter' &&
-                                    newItemDescricao[checklist.id]?.trim()
-                                  ) {
-                                    handleCriarChecklistItem(checklist.id);
-                                  }
-                                }}
-                                placeholder="Adicionar item..."
-                                className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none"
-                                disabled={creatingItem[checklist.id]}
-                              />
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handleCriarChecklistItem(checklist.id)
-                                }
-                                disabled={
-                                  !newItemDescricao[checklist.id]?.trim() ||
-                                  creatingItem[checklist.id]
-                                }
-                                className="rounded bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
-                              >
-                                {creatingItem[checklist.id] ? (
-                                  <FiLoader className="animate-spin" />
-                                ) : (
-                                  '+'
-                                )}
-                              </button>
-                            </div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-                )}
-              </div>
-
-              <div className="relative">
-                <button
-                  type="button"
-                  className="inline-flex items-center gap-2 rounded bg-gray-100 px-3 py-1 text-sm text-gray-800 hover:bg-gray-200"
-                  onClick={() =>
-                    setActivePanel(prev =>
-                      prev === 'members' ? null : 'members'
-                    )
-                  }
-                >
-                  <FiUsers />
-                  Membros
-                </button>
-                {activePanel === 'members' && (
-                  <div className="absolute z-20 mt-2 w-80 rounded border border-gray-200 bg-white p-3 shadow-lg">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Membros do card
-                    </h4>
-
-                    {/* Input de busca com autocomplete no topo */}
-                    <div className="autocomplete-container relative mb-3 border-b border-gray-200 pb-3">
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <input
-                            type="text"
-                            value={searchUsuario}
-                            onChange={e => {
-                              setSearchUsuario(e.target.value);
-                              if (e.target.value.trim()) {
-                                setShowAutocomplete(true);
-                              }
-                            }}
-                            onFocus={() => {
-                              if (usuariosSugeridos.length > 0) {
-                                setShowAutocomplete(true);
-                              }
-                            }}
-                            placeholder="Buscar usuário..."
-                            className="w-full rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            disabled={addingMember}
-                          />
-                          {loadingUsuarios && (
-                            <div className="absolute right-2 top-1.5">
-                              <FiLoader className="h-3 w-3 animate-spin text-gray-400" />
-                            </div>
-                          )}
-                          {/* Dropdown de autocomplete */}
-                          {showAutocomplete && usuariosSugeridos.length > 0 && (
-                            <div className="absolute z-30 mt-1 max-h-40 w-full overflow-y-auto rounded border border-gray-200 bg-white shadow-lg">
-                              {usuariosSugeridos
-                                .filter((u): u is NonNullable<typeof u> => u !== null && u !== undefined)
-                                .map(usuario => (
-                                  <button
-                                    key={usuario.id}
-                                    type="button"
-                                    onClick={() => handleAdicionarMembro(usuario.id)}
-                                    className="w-full px-3 py-2 text-left text-xs hover:bg-gray-100"
-                                    disabled={addingMember}
-                                  >
-                                    <div className="font-medium">
-                                      {getUsuarioNome(usuario)}
-                                    </div>
-                                    <div className="text-gray-500">{usuario.email}</div>
-                                  </button>
-                                ))}
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Lista de membros existentes */}
-                    <div className="max-h-48 space-y-2 overflow-y-auto">
-                      {(!card.membros || card.membros.length === 0) && (
-                        <p className="text-xs text-gray-500">
-                          Nenhum membro vinculado ainda.
-                        </p>
-                      )}
-                      {card.membros?.map(membro => (
-                        <div
-                          key={membro.id}
-                          className="flex items-center justify-between rounded p-2 hover:bg-gray-50"
-                        >
-                          <div className="flex items-center gap-2">
-                            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-blue-600 text-xs font-semibold text-white">
-                              {membro.usuarioSistema?.email
-                                ?.charAt(0)
-                                .toUpperCase() || '?'}
-                            </div>
-                            <div>
-                              <div className="text-xs font-medium">
-                                {getUsuarioNome(membro.usuarioSistema)}
-                              </div>
-                              <div className="text-xs text-gray-500">
-                                {membro.usuarioSistema?.email ||
-                                  membro.usuarioSistemaId}
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleRemoverMembro(membro.usuarioSistemaId)
-                            }
-                            className="text-red-500 hover:text-red-700"
-                            title="Remover membro"
-                          >
-                            <FiX className="h-4 w-4" />
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
+                  );
+                })}
+                {quadroEtiquetas.length === 0 && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Nenhuma etiqueta criada ainda
+                  </p>
                 )}
               </div>
             </div>
+          )}
 
-          </div>
+          {activePanel === 'dates' && popupPosition && (
+            <div
+              data-panel="dates"
+              className="absolute z-50 p-4 bg-white border border-gray-200 rounded-lg shadow-xl"
+              style={{
+                top: `${popupPosition.top}px`,
+                left: `${popupPosition.left}px`,
+                minWidth: '280px',
+                maxWidth: '350px',
+              }}
+            >
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Datas</h3>
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Data de Início
+                  </label>
+                  <input
+                    type="date"
+                    value={localDataInicio}
+                    onChange={e => setLocalDataInicio(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Data de Entrega
+                  </label>
+                  <input
+                    type="date"
+                    value={localDataEntrega}
+                    onChange={e => setLocalDataEntrega(e.target.value)}
+                    className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      setSavingDates(true);
+                      try {
+                        await updateCardDates(card.id, {
+                          dataInicio: localDataInicio || undefined,
+                          dataEntrega: localDataEntrega || undefined,
+                        });
+                        if (onUpdate) onUpdate();
+                      } catch (error) {
+                        console.log('Erro ao salvar datas:', error);
+                      } finally {
+                        setSavingDates(false);
+                      }
+                    }}
+                    disabled={savingDates}
+                    className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                  >
+                    {savingDates ? <FiLoader className="animate-spin mx-auto" /> : 'Salvar'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setLocalDataInicio('');
+                      setLocalDataEntrega('');
+                    }}
+                    className="px-4 py-2 bg-gray-300 text-gray-700 rounded-md text-sm hover:bg-gray-400"
+                  >
+                    Limpar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {activePanel === 'checklist' && popupPosition && (
+            <div
+              data-panel="checklist"
+              className="absolute z-50 p-4 bg-white border border-gray-200 rounded-lg shadow-xl w-full"
+              style={{
+                top: `${popupPosition.top}px`,
+                left: `${popupPosition.left}px`,
+                minWidth: '280px',
+                maxWidth: '350px',
+              }}
+            >
+              <h3 className="text-md font-semibold text-gray-700 mb-3">Adicionar Checklist</h3>
+              <div className="flex gap-2 mb-3">
+                <input
+                  type="text"
+                  value={newChecklistTitulo}
+                  onChange={e => setNewChecklistTitulo(e.target.value)}
+                  placeholder="Título do checklist"
+                  className="flex-1 px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onKeyDown={e => {
+                    if (e.key === 'Enter') {
+                      handleCriarChecklist();
+                    }
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={handleCriarChecklist}
+                  disabled={!newChecklistTitulo.trim() || creatingChecklist}
+                  className="px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                >
+                  {creatingChecklist ? <FiLoader className="animate-spin" /> : 'Salvar'}
+                </button>
+              </div>
+              {localChecklists.length === 0 && (
+                <p className="text-[11px] text-gray-400 text-center">
+                  Nenhum checklist criado ainda
+                </p>
+              )}
+            </div>
+          )}
+
+          {activePanel === 'members' && popupPosition && (
+            <div
+              data-panel="members"
+              className="absolute z-50 p-4 bg-white border border-gray-200 rounded-lg shadow-xl"
+              style={{
+                top: `${popupPosition.top}px`,
+                left: `${popupPosition.left}px`,
+                minWidth: '280px',
+                maxWidth: '350px',
+              }}
+            >
+              <h3 className="text-sm font-semibold text-gray-700 mb-3">Membros</h3>
+              <div className="mb-3 autocomplete-container relative">
+                <input
+                  type="text"
+                  value={searchUsuario}
+                  onChange={e => setSearchUsuario(e.target.value)}
+                  placeholder="Buscar usuário..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                {showAutocomplete && usuariosSugeridos.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-48 overflow-y-auto">
+                    {usuariosSugeridos
+                      .filter((u): u is UsuarioSistema => Boolean(u))
+                      .map((usuario: UsuarioSistema) => (
+                        <button
+                          key={usuario!.id}
+                          type="button"
+                          onClick={() => handleAdicionarMembro(usuario!.id)}
+                          disabled={addingMember}
+                          className="w-full text-left px-4 py-2 hover:bg-gray-100 text-sm"
+                        >
+                          {getUsuarioNome(usuario)}
+                        </button>
+                      ))}
+                  </div>
+                )}
+                {loadingUsuarios && (
+                  <div className="absolute right-3 top-2.5">
+                    <FiLoader className="animate-spin text-gray-400" />
+                  </div>
+                )}
+              </div>
+              <div className="space-y-2">
+                {(card.membros || []).map(membro => (
+                  <div
+                    key={membro.usuarioSistemaId}
+                    className="flex items-center justify-between p-2 bg-gray-50 rounded"
+                  >
+                    <span className="text-sm text-gray-700">
+                      {getUsuarioNome(membro.usuarioSistema)}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleRemoverMembro(membro.usuarioSistemaId)}
+                      className="text-red-500 hover:text-red-700"
+                    >
+                      <FiX className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+                {(!card.membros || card.membros.length === 0) && (
+                  <p className="text-sm text-gray-500 text-center py-4">
+                    Nenhum membro adicionado
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Apresentação das datas de início e fim abaixo dos membros */}
+          {(() => {
+            // Parse the end date string and get today at 00:00 for comparison
+            const entregaDefined = !!localDataEntrega;
+            let isEntregaAfterToday = false;
+            if (entregaDefined) {
+              const dataEntrega = new Date(localDataEntrega);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              dataEntrega.setHours(0, 0, 0, 0);
+              isEntregaAfterToday = dataEntrega > today;
+            }
+            return (
+              <div className="my-4">
+                <div className="flex items-center gap-8">
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500">
+                      Data de Início
+                    </label>
+                    <span className="block text-sm text-gray-800 bg-gray-100 px-2 py-0.5 rounded">
+                      {localDataInicio
+                        ? new Date(localDataInicio).toLocaleDateString('pt-BR')
+                        : <span className="text-gray-400">Não definida</span>
+                      }
+                    </span>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500">
+                      Data de Entrega
+                    </label>
+                    <span className={`block text-sm text-gray-800 px-2 py-0.5 rounded ${entregaDefined ? (isEntregaAfterToday ? 'bg-red-200' : 'bg-gray-100') : 'bg-gray-100'}`}>
+                      {localDataEntrega
+                        ? new Date(localDataEntrega).toLocaleDateString('pt-BR')
+                        : <span className="text-gray-400">Não definida</span>
+                      }
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Seção de Etiquetas - abaixo dos botões de ações */}
           {(() => {
@@ -1249,7 +1095,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 return null;
               })
               .filter(Boolean);
-            
+
             return etiquetasDoCard.length > 0 ? (
               <div className="mb-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-2">Etiquetas</h3>
@@ -1273,39 +1119,64 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
           })()}
 
           {/* Descrição */}
-          <div className="mb-6">
-            {isEditingDescription ? (
-              <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                onBlur={handleSaveDescription}
-                onKeyDown={e => {
-                  if (e.key === 'Escape') {
-                    setDescription(card.descricao || '');
-                    setIsEditingDescription(false);
-                  }
-                }}
-                className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none resize-none"
-                rows={4}
-                autoFocus
-              />
-            ) : (
-              <div
-                className="text-gray-700 cursor-pointer hover:bg-gray-100 rounded px-2 py-1 -mx-2 -my-1 min-h-[60px]"
-                onClick={() => setIsEditingDescription(true)}
-              >
-                {description || (
-                  <span className="text-gray-400 italic">
-                    Clique para adicionar uma descrição...
-                  </span>
-                )}
-                <FiEdit className="inline-block ml-2 text-gray-500" />
-              </div>
-            )}
+          <div className="mb-2">
+            <div className="text-lg font-semibold text-gray-800">
+              <span className="material-icons text-gray-500 mr-1 align-middle">list</span>
+              Descrição
+            </div>
+            <div className="ml-6">
+              {isEditingDescription ? (
+                <>
+                  <textarea
+                    value={description}
+                    onChange={e => setDescription(e.target.value)}
+                    // Remover onBlur automático e só sair dos botões
+                    // onBlur={handleSaveDescription}
+                    onKeyDown={e => {
+                      if (e.key === 'Escape') {
+                        handleCancelDescription();
+                      }
+                    }}
+                    className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none resize-none"
+                    rows={4}
+                    autoFocus
+                  />
+                  {/* Botões de ação para salvar e cancelar */}
+                  <div className="mt-2 flex gap-2">
+                    <button
+                      type="button"
+                      onClick={handleSaveDescription}
+                      className="rounded bg-blue-600 text-white px-4 py-1.5 hover:bg-blue-700 transition-colors"
+                    >
+                      Salvar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelDescription}
+                      className="rounded bg-gray-300 text-gray-800 px-4 py-1.5 hover:bg-gray-400 transition-colors"
+                    >
+                      Cancelar
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div
+                  className="text-gray-700 cursor-pointer hover:bg-gray-100 rounded px-2 py-1 -mx-2 -my-1 min-h-[60px]"
+                  onClick={() => setIsEditingDescription(true)}
+                >
+                  {description || (
+                    <span className="text-gray-400 italic">
+                      Clique para adicionar uma descrição...
+                    </span>
+                  )}
+                  <FiEdit className="inline-block ml-2 text-gray-500" />
+                </div>
+              )}
+            </div>
           </div>
 
+          {/* Vínculos */}
           <div className="space-y-6 mb-4">
-            {/* Vínculos */}
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Vínculos
             </h3>
@@ -1335,6 +1206,168 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
               )}
             </div>
           </div>
+
+          {/* Checklist */}
+          {localChecklists.length !== 0 &&
+            <div className="space-y-4">
+              <h3 className="text-lg font-semibold text-gray-800 mb-3">
+                Lista de tarefas
+              </h3>
+
+              {localChecklists.map(checklist => {
+                const isEditing = editingChecklistId === checklist.id;
+                const totalItens = checklist.itens?.length || 0;
+                const itensConcluidos =
+                  checklist.itens?.filter(i => i.concluido).length || 0;
+                const progresso = totalItens > 0 ? `${itensConcluidos}/${totalItens}` : '0/0';
+
+                return (
+                  <div
+                    key={checklist.id}
+                    className="rounded ml-4"
+                  >
+                    {/* Cabeçalho do checklist */}
+                    <div className="mb-2 flex items-center gap-2 group">
+                      {isEditing ? (
+                        <input
+                          type="text"
+                          value={editingChecklistTitulo}
+                          onChange={e =>
+                            setEditingChecklistTitulo(e.target.value)
+                          }
+                          onBlur={() =>
+                            handleEditarChecklist(
+                              checklist.id,
+                              editingChecklistTitulo
+                            )
+                          }
+                          onKeyDown={e => {
+                            if (e.key === 'Enter') {
+                              handleEditarChecklist(
+                                checklist.id,
+                                editingChecklistTitulo
+                              );
+                            }
+                            if (e.key === 'Escape') {
+                              setEditingChecklistId(null);
+                            }
+                          }}
+                          className="flex-1 rounded border border-gray-300 px-1 py-0.5 text-xs focus:outline-none"
+                          autoFocus
+                        />
+                      ) : (
+                        <>
+                          <span
+                            className="flex-1 cursor-pointer text-md font-semibold"
+                            onClick={() => {
+                              setEditingChecklistId(checklist.id);
+                              setEditingChecklistTitulo(checklist.titulo);
+                            }}
+                            title="Clique para editar"
+                          >
+                            {checklist.titulo}
+                          </span>
+                          <span className="text-xs text-gray-500">
+                            {progresso}
+                          </span>
+                        </>
+                      )}
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeletarChecklist(checklist.id)}
+                        className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100"
+                        title="Deletar checklist"
+                      >
+                        <FiX className="h-3 w-3" />
+                      </button>
+                    </div>
+
+                    {/* Lista de itens do checklist */}
+                    <div className="space-y-1 ml-4">
+                      {checklist.itens?.map(item => (
+                        <div
+                          key={item.id}
+                          className="flex items-center gap-2 rounded p-1 hover:bg-gray-50 group"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={item.concluido}
+                            onChange={() =>
+                              handleToggleChecklistItem(
+                                item.id,
+                                item.concluido
+                              )
+                            }
+                            className="cursor-pointer"
+                          />
+                          <span
+                            className={`flex-1 text-md ${item.concluido
+                              ? 'line-through text-gray-400'
+                              : 'text-gray-700'
+                              }`}
+                          >
+                            {item.descricao}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              handleDeletarChecklistItem(item.id)
+                            }
+                            className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
+                            title="Deletar item"
+                          >
+                            <FiX className="h-3 w-3" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* Input para adicionar novo item */}
+                    <div className="flex gap-2">
+                      <input
+                        type="text"
+                        value={newItemDescricao[checklist.id] || ''}
+                        onChange={e =>
+                          setNewItemDescricao(prev => ({
+                            ...prev,
+                            [checklist.id]: e.target.value,
+                          }))
+                        }
+                        onKeyDown={e => {
+                          if (
+                            e.key === 'Enter' &&
+                            newItemDescricao[checklist.id]?.trim()
+                          ) {
+                            handleCriarChecklistItem(checklist.id);
+                          }
+                        }}
+                        placeholder="Adicionar um item..."
+                        className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none"
+                        disabled={creatingItem[checklist.id]}
+                      />
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleCriarChecklistItem(checklist.id)
+                        }
+                        disabled={
+                          !newItemDescricao[checklist.id]?.trim() ||
+                          creatingItem[checklist.id]
+                        }
+                        className="rounded bg-gray-600 px-2 py-1 text-xs text-white hover:bg-gray-700 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                      >
+                        {creatingItem[checklist.id] ? (
+                          <FiLoader className="animate-spin" />
+                        ) : (
+                          '+'
+                        )}
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
+            </div>}
 
         </div>
 
@@ -1381,34 +1414,38 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 space-y-3 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto">
             {comentarios.map(comentario => (
-              <div key={comentario.id} className="rounded-lg bg-white p-3 shadow-sm">
-                <div className="mb-2 flex items-start justify-between">
+              <div key={comentario.id} className="rounded-lg p-2">
+                <div className="mb-1 flex items-start justify-between">
                   <div>
                     <p className="font-medium text-gray-800">
                       {getUsuarioNome(comentario.usuarioSistema)}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {formatDate(comentario.criadoEm)}
-                    </p>
+
                   </div>
-                  <button
-                    onClick={() => handleDeleteComment(comentario.id)}
-                    className="text-red-500 hover:text-red-700"
-                    title="Deletar comentário"
-                  >
-                    <FiTrash2 className="h-4 w-4" />
-                  </button>
                 </div>
-                <p className="whitespace-pre-wrap text-gray-700">
+                <p className="whitespace-pre-wrap text-gray-700 bg-gray-200 px-2 py-1 rounded-lg">
                   {comentario.conteudo}
                 </p>
+                <div className="flex items-center gap-2 justify-between">
+
+                  <p className="text-xs text-gray-500">
+                    {formatDate(comentario.criadoEm)}
+                  </p>
+                  <button
+                    onClick={() => handleDeleteComment(comentario.id)}
+                    className=" hover:text-red-700 text-sm underline"
+                    title="Deletar comentário"
+                  >
+                    excluir
+                  </button>
+                </div>
               </div>
             ))}
           </div>
         </div>
       </div>
-    </Modal>
+    </Modal >
   );
 };

@@ -2,7 +2,7 @@ import React, { ButtonHTMLAttributes, useEffect, useState } from 'react';
 
 export type SimpleButtonProps = ButtonHTMLAttributes<HTMLButtonElement> & {
   loading?: boolean;
-  variant?: 'primary' | 'secondary' | 'negative' | 'positive';
+  variant?: 'primary' | 'secondary' | 'negative' | 'positive' | 'white';
 };
 
 const PrimaryButton: React.FC<SimpleButtonProps> = ({
@@ -16,8 +16,9 @@ const PrimaryButton: React.FC<SimpleButtonProps> = ({
   ...rest
 }) => {
   const [loading, setLoading] = useState<boolean>(loadingProp);
-  const bg = `bg-${variant}`;
-  const newClass = `${bg} hover:bg-${bg} hover:opacity-90 text-white py-2 px-3 rounded-md text-sm flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed min-h-[38px] ${className}`;
+  const bg = variant === 'white' ? 'bg-white' : `bg-${variant}`;
+  const text = variant === 'white' ? 'text-primary' : 'text-white';
+  const newClass = `${bg} hover:bg-${bg} hover:opacity-90 text-${text} py-2 px-3 rounded-md text-sm flex gap-2 border-none cursor-pointer transition-all duration-200 shadow-[0_4px_6px_-1px_rgba(0,0,0,0.1),0_2px_4px_-1px_rgba(0,0,0,0.06)] items-center justify-center hover:bg-secondary disabled:opacity-50 disabled:cursor-not-allowed min-h-[38px] ${className}`;
 
   // Sincroniza loading externo com interno
   useEffect(() => {

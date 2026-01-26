@@ -82,12 +82,12 @@ export const EspacoTrabalhoList: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-6xl mx-auto p-6">
+      <div className="p-6">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-800">
+          <h1 className="text-3xl font-bold text-white">
             Espaços de Trabalho
           </h1>
-          <PrimaryButton onClick={handleCreateEspaco} disabled={loading}>
+          <PrimaryButton variant='white' onClick={handleCreateEspaco} disabled={loading}>
             {loading ? (
               <>
                 <span
@@ -114,7 +114,7 @@ export const EspacoTrabalhoList: React.FC = () => {
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 xl:grid-cols-6 gap-4">
             {espacosTrabalho.map(espaco => {
               const isAnimating = isItemAnimating(espaco.id);
               return (
