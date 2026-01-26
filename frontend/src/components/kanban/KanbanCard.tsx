@@ -1,5 +1,5 @@
-import { CardKanban, VinculoCard } from '@/schemas/kanban.schema';
 import { useKanban } from '@/context/KanbanContext';
+import { CardKanban, VinculoCard } from '@/schemas/kanban.schema';
 import { getUsuarioNome } from '@/utils/kanban';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
@@ -103,7 +103,7 @@ const KanbanCardComponent: React.FC<KanbanCardProps> = ({
       style={style}
       {...attributes}
       {...listeners}
-      className={`cursor-pointer hover:shadow-md transition-all duration-[2000ms] ease-out p-3 bg-white rounded-md relative border border-gray-200 mb-2 ${
+      className={`cursor-pointer hover:shadow-md transition-all duration-[2000ms] ease-out p-3 bg-white rounded-xl relative border border-gray-200 mb-2 ${
         isAnimating ? 'delete-animating' : ''
       }`}
       onClick={() => onClick?.(card)}

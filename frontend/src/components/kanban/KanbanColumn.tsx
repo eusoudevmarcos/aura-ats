@@ -138,7 +138,7 @@ const KanbanColumnComponent: React.FC<KanbanColumnProps> = ({
 
       {/* Botão adicionar card */}
       {canAddCard && onAddCard && (
-        <div className="px-2 py-2">
+        <div className="px-2 pb-2">
           <button
             onClick={() => onAddCard(column.id)}
             className="w-full text-black hover:text-gray-800 hover:bg-gray-100 transition-colors cursor-pointer"

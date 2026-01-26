@@ -273,7 +273,7 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
         setCardToView(updatedCard);
       }
     }
-  }, [quadro]);
+  }, [cardToView, quadro]);
 
   return (
     <>
@@ -284,7 +284,7 @@ const QuadroKanbanViewContent: React.FC<{ quadroId: string }> = ({
         <div className="flex gap-2">
           <PrimaryButton onClick={() => setShowColunaModal(true)}>
             <PlusIcon />
-            Nova Coluna
+            Nova Lista
           </PrimaryButton>
         </div>
       </div>

@@ -34,7 +34,6 @@ import {
   FiEdit,
   FiLoader,
   FiTag,
-  FiTrash2,
   FiUsers,
   FiX
 } from 'react-icons/fi';
@@ -194,14 +193,14 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
       // Inicializar estados locais de datas quando o card é aberto
       if (card.datas?.dataInicio) {
         setLocalDataInicio(
-          card.datas.dataInicio ?? ''
+          new Date(card.datas.dataInicio).toISOString().slice(0, 10)
         );
       } else {
         setLocalDataInicio('');
       }
       if (card.datas?.dataEntrega) {
         setLocalDataEntrega(
-          card.datas.dataEntrega ?? ''
+          new Date(card.datas.dataEntrega).toISOString().slice(0, 10)
         );
       } else {
         setLocalDataEntrega('');
@@ -558,7 +557,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
     <Modal isOpen={isOpen} onClose={onClose} title={columnName}>
       <div className="flex h-full max-h-[80vh]">
         {/* Coluna esquerda: detalhes do card */}
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto p-2">
           {/* Título com checkbox */}
           <div className="mb-2 flex items-start justify-between gap-4">
             {isEditingTitle ? (
@@ -644,7 +643,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 </button>
                 {activePanel === 'labels' && (
                   <div className="absolute z-20 mt-2 w-72 rounded border border-gray-200 bg-white p-3 shadow-lg">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
+                    <h4 className="mb-2 text-sm font-semibold text-gray-800 text-center">
                       Etiquetas do quadro
                     </h4>
 
@@ -788,8 +787,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 </button>
                 {activePanel === 'dates' && (
                   <div className="absolute z-20 mt-2 w-72 rounded border border-gray-200 bg-white p-3 shadow-lg">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Datas do card
+                    <h4 className="mb-2 text-sm font-semibold text-gray-800 text-center">
+                      Datas
                     </h4>
                     <div className="space-y-2 text-xs">
                       <label className="flex flex-col gap-1">
@@ -864,8 +863,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 </button>
                 {activePanel === 'checklist' && (
                   <div className="absolute z-20 mt-2 w-80 max-h-[500px] rounded border border-gray-200 bg-white p-3 shadow-lg overflow-y-auto">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Checklists
+                    <h4 className="mb-2 text-sm font-semibold text-gray-800 text-center ">
+                      Adicionar Checklist
                     </h4>
 
                     {/* Input de criação no topo */}
@@ -881,7 +880,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                             }
                           }}
                           placeholder="Nome do checklist"
-                          className="flex-1 rounded border border-gray-300 px-2 py-1 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
+                          className="flex-1 rounded border border-gray-300 px-2 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500"
                           disabled={creatingChecklist}
                         />
                         <button
@@ -918,8 +917,8 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                 </button>
                 {activePanel === 'members' && (
                   <div className="absolute z-20 mt-2 w-80 rounded border border-gray-200 bg-white p-3 shadow-lg">
-                    <h4 className="mb-2 text-sm font-semibold text-gray-800">
-                      Membros do card
+                    <h4 className="mb-2 text-sm font-semibold text-gray-800 text-center">
+                      Adicionar Membros
                     </h4>
 
                     {/* Input de busca com autocomplete no topo */}
@@ -1061,42 +1060,48 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
             ) : null;
           })()}
 
-
-
           {/* Descrição */}
-          <div className="mb-6">
-            {isEditingDescription ? (
-              <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                onBlur={handleSaveDescription}
-                onKeyDown={e => {
-                  if (e.key === 'Escape') {
-                    setDescription(card.descricao || '');
-                    setIsEditingDescription(false);
-                  }
-                }}
-                className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none resize-none"
-                rows={4}
-                autoFocus
-              />
-            ) : (
-              <div
-                className="text-gray-700 cursor-pointer hover:bg-gray-100 rounded px-2 py-1 -mx-2 -my-1 min-h-[60px]"
-                onClick={() => setIsEditingDescription(true)}
-              >
-                {description || (
-                  <span className="text-gray-400 italic">
-                    Clique para adicionar uma descrição...
-                  </span>
-                )}
-                <FiEdit className="inline-block ml-2 text-gray-500" />
-              </div>
-            )}
+          <div className="mb-2">
+            <div className="text-lg font-semibold text-gray-800">
+              <span className="material-icons text-gray-500 mr-1 align-middle">list</span>
+              Descrição
+            </div>
+            <div className="ml-6">
+
+              {isEditingDescription ? (
+                <textarea
+                  value={description}
+                  onChange={e => setDescription(e.target.value)}
+                  onBlur={handleSaveDescription}
+                  onKeyDown={e => {
+                    if (e.key === 'Escape') {
+                      setDescription(card.descricao || '');
+                      setIsEditingDescription(false);
+                    }
+                  }}
+                  className="w-full border-2 border-blue-500 rounded px-3 py-2 focus:outline-none resize-none"
+                  rows={4}
+                  autoFocus
+                />
+              ) : (
+                <div
+                  className="text-gray-700 cursor-pointer hover:bg-gray-100 rounded px-2 py-1 -mx-2 -my-1 min-h-[60px]"
+                  onClick={() => setIsEditingDescription(true)}
+                >
+
+                  {description || (
+                    <span className="text-gray-400 italic">
+                      Clique para adicionar uma descrição...
+                    </span>
+                  )}
+                  <FiEdit className="inline-block ml-2 text-gray-500" />
+                </div>
+              )}
+            </div>
           </div>
 
+          {/* Vínculos */}
           <div className="space-y-6 mb-4">
-            {/* Vínculos */}
             <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Vínculos
             </h3>
@@ -1127,17 +1132,18 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
             </div>
           </div>
 
-          <div className="space-y-3 border border-gray-200 rounded-lg p-2">
+          {/* Checklist */}
+          <div className="space-y-4">
             {localChecklists.length === 0 && (
               <p className="text-xs text-gray-500">
                 Nenhum checklist criado ainda.
               </p>
             )}
 
-            {/* Checklist */}
-            <h3 className="ttext-lg font-semibold text-gray-800 mb-3">
+            <h3 className="text-lg font-semibold text-gray-800 mb-3">
               Lista de tarefas
             </h3>
+
             {localChecklists.map(checklist => {
               const isEditing = editingChecklistId === checklist.id;
               const totalItens = checklist.itens?.length || 0;
@@ -1148,10 +1154,10 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
               return (
                 <div
                   key={checklist.id}
-                  className="rounded  p-2"
+                  className="rounded ml-4"
                 >
                   {/* Cabeçalho do checklist */}
-                  <div className="mb-2 flex items-center gap-2">
+                  <div className="mb-2 flex items-center gap-2 group">
                     {isEditing ? (
                       <input
                         type="text"
@@ -1182,7 +1188,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                     ) : (
                       <>
                         <span
-                          className="flex-1 cursor-pointer text-xs font-semibold"
+                          className="flex-1 cursor-pointer text-md font-semibold"
                           onClick={() => {
                             setEditingChecklistId(checklist.id);
                             setEditingChecklistTitulo(checklist.titulo);
@@ -1196,10 +1202,11 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                         </span>
                       </>
                     )}
+
                     <button
                       type="button"
                       onClick={() => handleDeletarChecklist(checklist.id)}
-                      className="text-red-500 hover:text-red-700"
+                      className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100"
                       title="Deletar checklist"
                     >
                       <FiX className="h-3 w-3" />
@@ -1207,11 +1214,11 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                   </div>
 
                   {/* Lista de itens do checklist */}
-                  <div className="space-y-1">
+                  <div className="space-y-1 ml-4">
                     {checklist.itens?.map(item => (
                       <div
                         key={item.id}
-                        className="flex items-center gap-2 rounded p-1 hover:bg-gray-50"
+                        className="flex items-center gap-2 rounded p-1 hover:bg-gray-50 group"
                       >
                         <input
                           type="checkbox"
@@ -1225,7 +1232,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                           className="cursor-pointer"
                         />
                         <span
-                          className={`flex-1 text-xs ${item.concluido
+                          className={`flex-1 text-md ${item.concluido
                             ? 'line-through text-gray-400'
                             : 'text-gray-700'
                             }`}
@@ -1237,7 +1244,7 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
                           onClick={() =>
                             handleDeletarChecklistItem(item.id)
                           }
-                          className="text-red-500 hover:text-red-700"
+                          className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity"
                           title="Deletar item"
                         >
                           <FiX className="h-3 w-3" />
@@ -1337,29 +1344,33 @@ export const CardViewModal: React.FC<CardViewModalProps> = ({
             </div>
           </div>
 
-          <div className="flex-1 space-y-3 overflow-y-auto">
+          <div className="flex-1 overflow-y-auto">
             {comentarios.map(comentario => (
-              <div key={comentario.id} className="rounded-lg bg-white p-3 shadow-sm">
-                <div className="mb-2 flex items-start justify-between">
+              <div key={comentario.id} className="rounded-lg p-2">
+                <div className="mb-1 flex items-start justify-between">
                   <div>
                     <p className="font-medium text-gray-800">
                       {getUsuarioNome(comentario.usuarioSistema)}
                     </p>
-                    <p className="text-xs text-gray-500">
-                      {formatDate(comentario.criadoEm)}
-                    </p>
+
                   </div>
-                  <button
-                    onClick={() => handleDeleteComment(comentario.id)}
-                    className="text-red-500 hover:text-red-700"
-                    title="Deletar comentário"
-                  >
-                    <FiTrash2 className="h-4 w-4" />
-                  </button>
                 </div>
-                <p className="whitespace-pre-wrap text-gray-700">
+                <p className="whitespace-pre-wrap text-gray-700 bg-gray-200 px-2 py-1 rounded-lg">
                   {comentario.conteudo}
                 </p>
+                <div className="flex items-center gap-2 justify-between">
+
+                  <p className="text-xs text-gray-500">
+                    {formatDate(comentario.criadoEm)}
+                  </p>
+                  <button
+                    onClick={() => handleDeleteComment(comentario.id)}
+                    className=" hover:text-red-700 text-sm underline"
+                    title="Deletar comentário"
+                  >
+                    excluir
+                  </button>
+                </div>
               </div>
             ))}
           </div>
