@@ -11,6 +11,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { isAlwaysPublicPath } from '@/proxy';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
+import Script from 'next/script';
 import { useEffect, useState } from 'react';
 
 const PUBLIC_ROUTES = ['/login'];
@@ -38,6 +39,19 @@ function LoadingWrapper({ children }: LoadingWrapperProps) {
       router.events.off('routeChangeStart', start);
       router.events.off('routeChangeComplete', complete);
       router.events.off('routeChangeError', error);
+    };
+  }, [router.events]);
+
+  useEffect(() => {
+    const handleRouteChange = (url: string) => {
+      window.gtag("config", process.env.NEXT_PUBLIC_GA_ID!, {
+        page_path: url,
+      });
+    };
+
+    router.events.on("routeChangeComplete", handleRouteChange);
+    return () => {
+      router.events.off("routeChangeComplete", handleRouteChange);
     };
   }, [router.events]);
 
@@ -94,52 +108,73 @@ function App({ Component, pageProps }: AppProps) {
 
   return (
     <>
-        <Head>
-          <title>Aura ATS</title>
-          <link rel="icon" href="/favicon.ico" />
-          <meta
-            name="description"
-            content="Aura: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade."
-          />
-        </Head>
+      <Head>
+        {process.env.NEXT_PUBLIC_GA_ID && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
+              strategy="afterInteractive"
+            />
 
-        {router.pathname === '/' ? (
-          <>
-            <SpeedInsights />
-            <MainLayout>
-              <LoadingWrapper>
-                <Component {...pageProps} />
-              </LoadingWrapper>
-            </MainLayout>
+            <Script id="ga-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
+                  page_path: window.location.pathname,
+                });
+              `}
+            </Script>
           </>
-        ) : isPublic || isAlwaysPublicPath(router.pathname) ? (
-          <>
-            <SpeedInsights />
+        )}
+
+
+        <title>Aura ATS</title>
+        <link rel="icon" href="/favicon.ico" />
+        <meta
+          name="description"
+          content="Aura: O match perfeito para sua empresa. Especialistas em recrutamento médico, TI e vagas executivas com agilidade e efetividade."
+        />
+      </Head>
+
+      {router.pathname === '/' ? (
+        <>
+          <SpeedInsights />
+          <MainLayout>
             <LoadingWrapper>
               <Component {...pageProps} />
             </LoadingWrapper>
-          </>
-        ) : (
-          <AuthProvider>
-            {/* <ScreenshotGuard forceDev={false} durationMs={0} /> */}
-            <SpeedInsights />
-            {router.pathname.startsWith('/kanban') ? (
-              <KanbanLayout>
+          </MainLayout>
+        </>
+      ) : isPublic || isAlwaysPublicPath(router.pathname) ? (
+        <>
+          <SpeedInsights />
+          <LoadingWrapper>
+            <Component {...pageProps} />
+          </LoadingWrapper>
+        </>
+      ) : (
+        <AuthProvider>
+          {/* <ScreenshotGuard forceDev={false} durationMs={0} /> */}
+          <SpeedInsights />
+          {router.pathname.startsWith('/kanban') ? (
+            <KanbanLayout>
+              <LoadingWrapper>
+                <Component {...pageProps} />
+              </LoadingWrapper>
+            </KanbanLayout>
+          ) : (
+            <DashboardLayout>
+              {dashboardProps => (
                 <LoadingWrapper>
-                  <Component {...pageProps} />
+                  <Component {...pageProps} {...dashboardProps} />
                 </LoadingWrapper>
-              </KanbanLayout>
-            ) : (
-              <DashboardLayout>
-                {dashboardProps => (
-                  <LoadingWrapper>
-                    <Component {...pageProps} {...dashboardProps} />
-                  </LoadingWrapper>
-                )}
-              </DashboardLayout>
-            )}
-          </AuthProvider>
-        )}
+              )}
+            </DashboardLayout>
+          )}
+        </AuthProvider>
+      )}
     </>
   );
 }
