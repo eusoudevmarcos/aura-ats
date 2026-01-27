@@ -11,7 +11,7 @@ import { AuthProvider } from '@/context/AuthContext';
 import { isAlwaysPublicPath } from '@/proxy';
 import '@/styles/global.css';
 import '@/styles/landingPage.css';
-import Script from 'next/script';
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { useEffect, useState } from 'react';
 
 const PUBLIC_ROUTES = ['/login'];
@@ -87,9 +87,8 @@ function App({ Component, pageProps }: AppProps) {
   const router = useRouter();
   const isPublic = PUBLIC_ROUTES.includes(router.pathname);
 
-  // useEffect(() => {
-  //   api.get('/api/external/ping');
-  // }, []);
+
+  const GoogleAnalyticsId = () => <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ''} />
 
   if (router.pathname == '/dashboard/cliente') {
     return (
@@ -102,6 +101,7 @@ function App({ Component, pageProps }: AppProps) {
             </LoadingWrapper>
           </DashboardLayout>
         </AuthProvider>
+        <GoogleAnalyticsId />
       </>
     );
   }
@@ -109,27 +109,6 @@ function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        {process.env.NEXT_PUBLIC_GA_ID && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID}`}
-              strategy="afterInteractive"
-            />
-
-            <Script id="ga-init" strategy="afterInteractive">
-              {`
-                window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${process.env.NEXT_PUBLIC_GA_ID}', {
-                  page_path: window.location.pathname,
-                });
-              `}
-            </Script>
-          </>
-        )}
-
-
         <title>Aura ATS</title>
         <link rel="icon" href="/favicon.ico" />
         <meta
@@ -175,6 +154,8 @@ function App({ Component, pageProps }: AppProps) {
           )}
         </AuthProvider>
       )}
+
+      <GoogleAnalyticsId />
     </>
   );
 }
